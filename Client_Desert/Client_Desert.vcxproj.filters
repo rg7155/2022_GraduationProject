@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="소스 파일">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="헤더 파일">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="리소스 파일">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="소스 파일\99. Mgr">
+      <UniqueIdentifier>{bb0295e4-4545-47d2-a947-e375903e6fd5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\00. MainGame">
+      <UniqueIdentifier>{3647e2c0-ecdc-4081-9f24-456ffc1c1777}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\02. Scene">
+      <UniqueIdentifier>{eb623726-1623-417e-8378-8a6c13fa3c07}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\03. GameObject">
+      <UniqueIdentifier>{7f5de961-81c8-4890-adf7-4e7f06d3da1a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\04. Player">
+      <UniqueIdentifier>{0c986bbc-5a91-4c73-a945-7c73f19ea6a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\05. Camera">
+      <UniqueIdentifier>{691d5f4f-886c-406c-b912-2aa72f51c396}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\06. Mesh">
+      <UniqueIdentifier>{21d2fc1d-97de-4282-a216-b0b2dc404102}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\07. Shader">
+      <UniqueIdentifier>{9c97194e-b021-4389-8994-a1367fc7f77c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\01. GameFramework">
+      <UniqueIdentifier>{91cf5d44-6010-4635-8a51-d73e0c4b2e2d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\98. Header">
+      <UniqueIdentifier>{80227bc0-8ff2-4681-b8de-6d0efee4de72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\97. Timer">
+      <UniqueIdentifier>{83de7c94-be58-4f41-990a-67b5e944df4f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\96. Etc">
+      <UniqueIdentifier>{65035b55-4c99-4d42-8398-53ae4b0f076a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Client_Desert.h">
+      <Filter>소스 파일\00. MainGame</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>소스 파일\05. Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>소스 파일\03. GameObject</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>소스 파일\04. Player</Filter>
+    </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>소스 파일\02. Scene</Filter>
+    </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>소스 파일\06. Mesh</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>소스 파일\07. Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="InputDev.h">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFramework.h">
+      <Filter>소스 파일\01. GameFramework</Filter>
+    </ClInclude>
+    <ClInclude Include="Define.h">
+      <Filter>소스 파일\98. Header</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>소스 파일\98. Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>소스 파일\97. Timer</Filter>
+    </ClInclude>
+    <ClInclude Include="d3dx12.h">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="DDSTextureLoader12.h">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="DirectXTex.h">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="WICTextureLoader12.h">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClInclude>
+    <ClInclude Include="Enum.h">
+      <Filter>소스 파일\98. Header</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Client_Desert.cpp">
+      <Filter>소스 파일\00. MainGame</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>소스 파일\05. Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>소스 파일\04. Player</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>소스 파일\03. GameObject</Filter>
+    </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>소스 파일\02. Scene</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>소스 파일\06. Mesh</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>소스 파일\07. Shader</Filter>
+    </ClCompile>
+    <ClCompile Include="InputDev.cpp">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClCompile>
+    <ClCompile Include="GameFramework.cpp">
+      <Filter>소스 파일\01. GameFramework</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>소스 파일\97. Timer</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader12.cpp">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClCompile>
+    <ClCompile Include="WICTextureLoader12.cpp">
+      <Filter>소스 파일\96. Etc</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Client_Desert.rc">
+      <Filter>리소스 파일</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+    <Image Include="Client_Desert.ico">
+      <Filter>리소스 파일</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Shaders.hlsl" />
+    <FxCompile Include="Light.hlsl" />
+  </ItemGroup>
+</Project>
