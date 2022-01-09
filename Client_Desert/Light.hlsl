@@ -1,14 +1,12 @@
 //--------------------------------------------------------------------------------------
-#define MAX_LIGHTS			16 
-#define MAX_MATERIALS		16 
-
-#define POINT_LIGHT			1
-#define SPOT_LIGHT			2
-#define DIRECTIONAL_LIGHT	3
-
-#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
-#define _WITH_THETA_PHI_CONES
+//define.h와 맞추기
+#include "Define.h"
 //#define _WITH_REFLECT
+
+//MAX_LIGHTS만큼 만들 필요가 있나?
+Texture2D<float> gtxtDepthTextures[MAX_LIGHTS] : register(t14);
+//pcf필터링 위해서
+SamplerComparisonState gssComparisonPCFShadow : register(s2);
 
 struct LIGHT
 {
@@ -33,6 +31,46 @@ cbuffer cbLights : register(b4)
 	float4					gcGlobalAmbientLight;
 	int						gnLights;
 };
+
+//float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
+//{
+//	//float fPercentLit = 0.0f;
+//    float fPercentLit = gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv, fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, 0.0f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, 0.0f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
+
+//	//왼 5
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X * 2.f, +DELTA_Y * 2.f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X * 2.f, +DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X * 2.f, 0.0f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X * 2.f, -DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X * 2.f, -DELTA_Y * 2.f), fDepth).r;
+	
+//	//오 5
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X * 2.f, +DELTA_Y * 2.f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X * 2.f, +DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X * 2.f, 0.0f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X * 2.f, -DELTA_Y), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X * 2.f, -DELTA_Y * 2.f), fDepth).r;
+	
+//	//아 3
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y * 2.f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -DELTA_Y * 2.f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y * 2.f), fDepth).r;
+	
+//	//위 3
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y * 2.f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +DELTA_Y * 2.f), fDepth).r;
+//    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y * 2.f), fDepth).r;
+
+//    return (fPercentLit / 25.0f);
+//}
 
 float4 DirectionalLight(int nIndex, float3 vNormal, float3 vToCamera)
 {
@@ -132,7 +170,7 @@ float4 SpotLight(int nIndex, float3 vPosition, float3 vNormal, float3 vToCamera)
 	return(float4(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
-float4 Lighting(float3 vPosition, float3 vNormal)
+float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_LIGHTS])
 {
 	float3 vCameraPosition = float3(gvCameraPosition.x, gvCameraPosition.y, gvCameraPosition.z);
 	float3 vToCamera = normalize(vCameraPosition - vPosition);
@@ -142,18 +180,23 @@ float4 Lighting(float3 vPosition, float3 vNormal)
 	{
 		if (gLights[i].m_bEnable)
 		{
+			//그림자인지 판단하는 0~1사이 값, 1은 현재 픽셀이 그림자 아님
+            float fShadowFactor = 1.0f;
+			//pcf
+			//if (bShadow) fShadowFactor = Compute5x5ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+				
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
-				cColor += DirectionalLight(i, vNormal, vToCamera);
-			}
+                cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
+            }
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
-				cColor += PointLight(i, vPosition, vNormal, vToCamera);
-			}
+                cColor += PointLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
+            }
 			else if (gLights[i].m_nType == SPOT_LIGHT)
 			{
-				cColor += SpotLight(i, vPosition, vNormal, vToCamera);
-			}
+                cColor += SpotLight(i, vPosition, vNormal, vToCamera) * fShadowFactor;
+            }
 		}
 	}
 	cColor += (gcGlobalAmbientLight * gMaterial.m_cAmbient);

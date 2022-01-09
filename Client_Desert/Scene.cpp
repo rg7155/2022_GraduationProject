@@ -68,7 +68,10 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 {
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 76); //SuperCobra(17), Gunship(2), Player:Mi24(1), Angrybot()
+	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
+	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
+	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지..
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 7+10); //skybox-1, terrain-2, player-1, map-3
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -96,11 +99,9 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	int iIndex = 0;
 
 	CMapObjectsShader* pMapObjectsShader = new CMapObjectsShader();
-	pMapObjectsShader->CreateShader(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+	pMapObjectsShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pMapObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
 	m_ppShaders[iIndex++] = pMapObjectsShader;
-
-	//if (pEthanModel) delete pEthanModel;
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -144,22 +145,23 @@ void CScene::ReleaseObjects()
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[10];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
 	SetDescriptorRange(pd3dDescriptorRanges, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);//t6: gtxtAlbedoTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7, 0);//t7: gtxtSpecularTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 2, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 8, 0);//t8: gtxtNormalTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 3, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 9, 0);//t9: gtxtMetallicTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 4, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 10, 0);//t10: gtxtEmissionTexture
-	SetDescriptorRange(pd3dDescriptorRanges, 5, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 11, 0);//t11: gtxtEmissionTexture
-	SetDescriptorRange(pd3dDescriptorRanges, 6, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 12, 0);//t12: gtxtEmissionTexture
+	SetDescriptorRange(pd3dDescriptorRanges, 5, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 11, 0);//t11: gtxtDetailAlbedoTexture
+	SetDescriptorRange(pd3dDescriptorRanges, 6, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 12, 0);//t12: gtxtDetailNormalTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 7, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 13, 0);//t13: gtxtSkyBoxTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 8, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);//t1: gtxtTerrainBaseTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 9, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);//t2: gtxtTerrainDetailTexture
+	SetDescriptorRange(pd3dDescriptorRanges, 10, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, MAX_LIGHTS, 14, 0);//t14: gtxtDepthTextures
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[15];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[17];
 	SetRootParameterCBV(pd3dRootParameters, 0, 1, 0, D3D12_SHADER_VISIBILITY_ALL);//Camera
 	SetRootParameterConstants(pd3dRootParameters, 1, 33, 2, 0, D3D12_SHADER_VISIBILITY_ALL);//GameObject
-	SetRootParameterCBV(pd3dRootParameters, 2, 4, 0, D3D12_SHADER_VISIBILITY_ALL);//Lights
+	SetRootParameterCBV(pd3dRootParameters, 2, 4, 0, D3D12_SHADER_VISIBILITY_ALL);//b4 Lights
 	SetRootParameterDescriptorTable(pd3dRootParameters, 3, 1, &pd3dDescriptorRanges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 4, 1, &pd3dDescriptorRanges[1], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 5, 1, &pd3dDescriptorRanges[2], D3D12_SHADER_VISIBILITY_PIXEL);
@@ -172,9 +174,11 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterCBV(pd3dRootParameters, 12, 8, 0, D3D12_SHADER_VISIBILITY_VERTEX);//Skinned Bone Transforms
 	SetRootParameterDescriptorTable(pd3dRootParameters, 13, 1, &pd3dDescriptorRanges[8], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 14, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_PIXEL);
+	SetRootParameterDescriptorTable(pd3dRootParameters, 15, 1, &pd3dDescriptorRanges[10], D3D12_SHADER_VISIBILITY_PIXEL);
+	SetRootParameterCBV(pd3dRootParameters, 16, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
 
 
-	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[2];
+	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[3];
 
 	pd3dSamplerDescs[0].Filter = D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 	pd3dSamplerDescs[0].AddressU = D3D12_TEXTURE_ADDRESS_MODE_WRAP;
@@ -201,6 +205,22 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dSamplerDescs[1].ShaderRegister = 1;
 	pd3dSamplerDescs[1].RegisterSpace = 0;
 	pd3dSamplerDescs[1].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+	//비교 필터
+	pd3dSamplerDescs[2].Filter = D3D12_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT;
+	pd3dSamplerDescs[2].AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+	pd3dSamplerDescs[2].MipLODBias = 0.0f;
+	pd3dSamplerDescs[2].MaxAnisotropy = 1;
+	//텍스처 읽은색과 현재 깊이와 비교 - 깊이보다 더 작으면 성공 ->그림자가 아님
+	pd3dSamplerDescs[2].ComparisonFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL; //D3D12_COMPARISON_FUNC_LESS
+	pd3dSamplerDescs[2].BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE; // D3D12_STATIC_BORDER_COLOR_OPAQUE_BLACK;
+	pd3dSamplerDescs[2].MinLOD = 0;
+	pd3dSamplerDescs[2].MaxLOD = D3D12_FLOAT32_MAX;
+	pd3dSamplerDescs[2].ShaderRegister = 2;
+	pd3dSamplerDescs[2].RegisterSpace = 0;
+	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;

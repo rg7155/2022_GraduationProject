@@ -15,6 +15,30 @@
 
 #define ANIMATION_CALLBACK_EPSILON		0.0165f
 
+
+
+//Light.hlsl과 맞추기
+//#define MAX_LIGHTS				4 
+//#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+#define MAX_LIGHTS						4 
+#define MAX_MATERIALS					16 
+#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
+
+#define POINT_LIGHT						1
+#define SPOT_LIGHT						2
+#define DIRECTIONAL_LIGHT				3
+
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 8)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 8)
+
+#define DELTA_X					(1.0f / _DEPTH_BUFFER_WIDTH)
+#define DELTA_Y					(1.0f / _DEPTH_BUFFER_HEIGHT)
+
+#define _WITH_LOCAL_VIEWER_HIGHLIGHTING
+#define _WITH_THETA_PHI_CONES
+
+
+
 #define NO_COPY(CLASSNAME)							\
 	private:										\
 	CLASSNAME(const CLASSNAME&);					\

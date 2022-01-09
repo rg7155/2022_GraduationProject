@@ -49,6 +49,9 @@
     <Filter Include="소스 파일\96. Etc">
       <UniqueIdentifier>{65035b55-4c99-4d42-8398-53ae4b0f076a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\07. Shader\HLSL">
+      <UniqueIdentifier>{827405d4-c5cb-401e-8f3a-53285593403c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client_Desert.h">
@@ -167,7 +170,14 @@
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Shaders.hlsl" />
-    <FxCompile Include="Light.hlsl" />
+    <FxCompile Include="Light.hlsl">
+      <Filter>소스 파일\07. Shader\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders.hlsl">
+      <Filter>소스 파일\07. Shader\HLSL</Filter>
+    </FxCompile>
+    <FxCompile Include="Shader_Shadow.hlsl">
+      <Filter>소스 파일\07. Shader\HLSL</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
