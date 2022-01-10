@@ -3,17 +3,3 @@
   DDSTextureLoader12.cpp
   GameFramework.cpp
   InputDev.cpp
-  Mesh.cpp
-  Object.cpp
-  Player.cpp
-  Scene.cpp
-  Shader.cpp
-  stdafx.cpp
-  Timer.cpp
-  WICTextureLoader12.cpp
-  코드를 생성하고 있습니다...
-InputDev.obj : error LNK2019: _DirectInput8Create@20"public: long __thiscall CInputDev::Ready_InputDev(struct HINSTANCE__ *,struct HWND__ *)" (?Ready_InputDev@CInputDev@@QAEJPAUHINSTANCE__@@PAUHWND__@@@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
-InputDev.obj : error LNK2001: 확인할 수 없는 외부 기호 _c_dfDIMouse2
-InputDev.obj : error LNK2001: 확인할 수 없는 외부 기호 _c_dfDIKeyboard
-Player.obj : error LNK2019: __imp__PlaySoundW@12"public: virtual void __thiscall CSoundCallbackHandler::HandleCallback(void *,float)" (?HandleCallback@CSoundCallbackHandler@@UAEXPAXM@Z) 함수에서 참조되는 확인할 수 없는 외부 기호
-C:\Users\ysj\Desktop\Graduate_Game\2022_GraduationProject\2022_GraduationProject\Client_Desert\Debug\Client_Desert.exe : fatal error LNK1120: 4개의 확인할 수 없는 외부 참조입니다.
