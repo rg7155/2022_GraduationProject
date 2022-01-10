@@ -56,18 +56,21 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection)
-	{
-		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+	//if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+	//if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
+	else
+		return;
 
-		Move(xmf3Shift, bUpdateVelocity);
-	}
+	Move(xmf3Shift, bUpdateVelocity);
 }
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -482,8 +485,8 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_UP) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_DOWN)
-		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_LEFT) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_RIGHT)) 
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
 		m_pSkinnedAnimationController->SetTrackEnable(2, true);
@@ -514,8 +517,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		if(!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_UP) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_DOWN)
-			&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_LEFT) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_RIGHT))
+		if(!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+			&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 		{
 			m_pSkinnedAnimationController->SetTrackEnable(0, true);
 			m_pSkinnedAnimationController->SetTrackEnable(2, false);
