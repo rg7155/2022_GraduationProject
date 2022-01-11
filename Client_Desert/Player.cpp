@@ -263,8 +263,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 10, pPlayerModel);
-	for (int i = 0; i < 10; i++)
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
+	for (int i = 0; i < 9; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
@@ -430,10 +430,9 @@ bool CTerrainPlayer::Check_GetResource(float fTimeElapsed)
 	if (m_eCurAnim == ANIM::GET_RESOURCE)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
-		if (m_fAnimElapsedTime > m_fAnimMaxTime)
+		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 		{
 			Change_Animation(ANIM::IDLE_RELAXED);
-			return true;
 		}
 		return true;
 	}
@@ -458,7 +457,6 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
 		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
-		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.0f);
 
 		break;
 	case RUN:
@@ -468,8 +466,6 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
 		m_pSkinnedAnimationController->SetTrackEnable(RUN, true);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
-		m_pSkinnedAnimationController->SetTrackPosition(IDLE_RELAXED, 0.0f);
-		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.0f);
 		break;
 	case ATTACK1:
 		m_eCurAnim = ANIM::ATTACK1;
@@ -493,12 +489,14 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		break;
 	case GET_RESOURCE:
 		m_eCurAnim = ANIM::GET_RESOURCE;
-		m_fAnimMaxTime = 1.5f;
+		m_fAnimMaxTime = 1.833333f;
 		m_fAnimElapsedTime = 0.f;
 		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
 		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, true);
 		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
+		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.000f);
+	
 		break;
 	case IDLE:
 		m_eCurAnim = ANIM::IDLE;
