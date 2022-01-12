@@ -120,6 +120,7 @@ public:
 
 private:
 	bool Check_GetResource(float fTimeElapsed);
+	bool Check_Attack(float fTimeElapsed);
 	void Change_Animation(ANIM eNewAnim);
 
 	bool Check_MoveInput();
