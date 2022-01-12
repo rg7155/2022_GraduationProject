@@ -391,8 +391,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
 		return;
 
-	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+	if (Check_MoveInput())
 	{
 		Change_Animation(ANIM::RUN);
 		CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
@@ -414,14 +413,10 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		if (Check_GetResource(fTimeElapsed))
 			return;
 
-		if(!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-			&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		if(!Check_MoveInput())
 		{
 			Change_Animation(ANIM::IDLE_RELAXED);
 		}
-
-		
-
 	}
 }
 
@@ -511,4 +506,17 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 	default:
 		break;
 	}
+}
+
+bool CTerrainPlayer::Check_MoveInput()
+{
+	// 이동 중이면
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		return true;
+
+	// 이동 중이지 않으면
+	if (!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		return false;
 }
