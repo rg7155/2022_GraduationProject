@@ -120,7 +120,11 @@ public:
 
 private:
 	bool Check_GetResource(float fTimeElapsed);
+	bool Check_Attack(float fTimeElapsed);
 	void Change_Animation(ANIM eNewAnim);
+
+	bool Check_MoveInput();
+
 private:
 	ANIM	m_eCurAnim;			// 현재 애니메이션
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간

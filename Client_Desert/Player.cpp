@@ -391,8 +391,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
 		return;
 
-	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+	if (Check_MoveInput())
 	{
 		Change_Animation(ANIM::RUN);
 		CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
@@ -409,19 +408,22 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		// GET_RESOURCE, 공격 중에는 다른 동작으로 바뀌지 않음
+		if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
+			return;
+
+		// 공격키 확인
+		if (Check_Attack(fTimeElapsed))
+			return;
 
 		// 상호작용키 확인
 		if (Check_GetResource(fTimeElapsed))
 			return;
 
-		if(!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-			&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		if(!Check_MoveInput())
 		{
 			Change_Animation(ANIM::IDLE_RELAXED);
 		}
-
-		
-
 	}
 }
 
@@ -445,6 +447,32 @@ bool CTerrainPlayer::Check_GetResource(float fTimeElapsed)
 	return false;
 }
 
+bool CTerrainPlayer::Check_Attack(float fTimeElapsed)
+{
+	// 공격 4가지 처리
+
+	// attack1
+	if (m_eCurAnim == ANIM::ATTACK1)
+	{
+		m_fAnimElapsedTime += fTimeElapsed;
+		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+		{
+			Change_Animation(ANIM::IDLE);
+		}
+		return true;
+	}
+	else if (CInputDev::GetInstance()->LButtonDown())
+	{
+		Change_Animation(ANIM::ATTACK1);
+		return true;
+	}
+	// attack2
+	// skill1
+	// skill2
+
+	return false;
+}
+
 void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 {
 	switch (eNewAnim)
@@ -457,6 +485,7 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
 		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
 
 		break;
 	case RUN:
@@ -466,11 +495,17 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
 		m_pSkinnedAnimationController->SetTrackEnable(RUN, true);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
+
 		break;
 	case ATTACK1:
 		m_eCurAnim = ANIM::ATTACK1;
-		m_fAnimMaxTime = 2.5f;
+		m_fAnimMaxTime = 1.5f;
 		m_fAnimElapsedTime = 0.f;
+		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
+		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
+		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, true);
 		break;
 	case ATTACK2:
 		m_eCurAnim = ANIM::ATTACK2;
@@ -493,6 +528,7 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		m_fAnimElapsedTime = 0.f;
 		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
 		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, true);
 		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
 		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.000f);
@@ -511,4 +547,17 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 	default:
 		break;
 	}
+}
+
+bool CTerrainPlayer::Check_MoveInput()
+{
+	// 이동 중이면
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		return true;
+
+	// 이동 중이지 않으면
+	if (!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		return false;
 }
