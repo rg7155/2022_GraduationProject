@@ -238,104 +238,6 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
-CAirplanePlayer::CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
-{
-	m_pCamera = ChangeCamera(/*SPACESHIP_CAMERA*/THIRD_PERSON_CAMERA, 0.0f);
-
-	CLoadedModelInfo *pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Mi24.bin", NULL);
-	SetChild(pModel->m_pModelRootObject, true);
-
-	OnPrepareAnimate();
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	if (pModel) delete pModel;
-}
-
-CAirplanePlayer::~CAirplanePlayer()
-{
-}
-
-void CAirplanePlayer::OnPrepareAnimate()
-{
-	m_pMainRotorFrame = FindFrame("Top_Rotor");
-	m_pTailRotorFrame = FindFrame("Tail_Rotor");
-}
-
-void CAirplanePlayer::Animate(float fTimeElapsed)
-{
-	if (m_pMainRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(360.0f * 2.0f) * fTimeElapsed);
-		m_pMainRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pMainRotorFrame->m_xmf4x4ToParent);
-	}
-	if (m_pTailRotorFrame)
-	{
-		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(360.0f * 4.0f) * fTimeElapsed);
-		m_pTailRotorFrame->m_xmf4x4ToParent = Matrix4x4::Multiply(xmmtxRotate, m_pTailRotorFrame->m_xmf4x4ToParent);
-	}
-
-	CPlayer::Animate(fTimeElapsed);
-}
-
-void CAirplanePlayer::OnPrepareRender()
-{
-	CPlayer::OnPrepareRender();
-}
-
-CCamera *CAirplanePlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
-{
-	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
-	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
-	switch (nNewCameraMode)
-	{
-		case FIRST_PERSON_CAMERA:
-			SetFriction(2.0f);
-			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(2.5f);
-			SetMaxVelocityY(40.0f);
-			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		case SPACESHIP_CAMERA:
-			SetFriction(100.5f);
-			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(40.0f);
-			SetMaxVelocityY(40.0f);
-			m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		case THIRD_PERSON_CAMERA:
-			SetFriction(20.5f);
-			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(25.5f);
-			SetMaxVelocityY(20.0f);
-			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.25f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 15.0f, -30.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		default:
-			break;
-	}
-	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
-	Update(fTimeElapsed);
-
-	return(m_pCamera);
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
 #define _WITH_DEBUG_CALLBACK_DATA
 
 void CSoundCallbackHandler::HandleCallback(void *pCallbackData, float fTrackPosition)
@@ -361,8 +263,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 10, pPlayerModel);
-	for (int i = 0; i < 10; i++)
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
+	for (int i = 0; i < 9; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
@@ -485,45 +387,177 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+	// 다른 동작 중일 때는 움직이지 않음
+	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
+		return;
+
+	if (Check_MoveInput())
 	{
-		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(2, true);
+		Change_Animation(ANIM::RUN);
+		CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 	}
 
-	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
 }
 
 void CTerrainPlayer::Update(float fTimeElapsed)
 {
-	//if (CInputDev::GetInstance()->KeyDown(DIK_Z))
-	//{
-
-	//}
-
-	//if (CInputDev::GetInstance()->Get_DIKeyState(DIK_SPACE) & 0x80)
-	//{
-
-	//}
-
-	//if (CInputDev::GetInstance()->LButtonDown())
-	//{
-	//	cout << "LBD" << endl;
-	//}
 	
 	CPlayer::Update(fTimeElapsed);
+
 
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		if(!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-			&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
-		{
-			m_pSkinnedAnimationController->SetTrackEnable(0, true);
-			m_pSkinnedAnimationController->SetTrackEnable(2, false);
-			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
-		}
+		// GET_RESOURCE, 공격 중에는 다른 동작으로 바뀌지 않음
+		if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
+			return;
 
+		// 공격키 확인
+		if (Check_Attack(fTimeElapsed))
+			return;
+
+		// 상호작용키 확인
+		if (Check_GetResource(fTimeElapsed))
+			return;
+
+		if(!Check_MoveInput())
+		{
+			Change_Animation(ANIM::IDLE_RELAXED);
+		}
 	}
+}
+
+bool CTerrainPlayer::Check_GetResource(float fTimeElapsed)
+{
+	if (m_eCurAnim == ANIM::GET_RESOURCE)
+	{
+		m_fAnimElapsedTime += fTimeElapsed;
+		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+		{
+			Change_Animation(ANIM::IDLE_RELAXED);
+		}
+		return true;
+	}
+	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))
+	{
+		Change_Animation(ANIM::GET_RESOURCE);
+		return true;
+	}
+
+	return false;
+}
+
+bool CTerrainPlayer::Check_Attack(float fTimeElapsed)
+{
+	// 공격 4가지 처리
+
+	// attack1
+	if (m_eCurAnim == ANIM::ATTACK1)
+	{
+		m_fAnimElapsedTime += fTimeElapsed;
+		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+		{
+			Change_Animation(ANIM::IDLE);
+		}
+		return true;
+	}
+	else if (CInputDev::GetInstance()->LButtonDown())
+	{
+		Change_Animation(ANIM::ATTACK1);
+		return true;
+	}
+	// attack2
+	// skill1
+	// skill2
+
+	return false;
+}
+
+void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
+{
+	switch (eNewAnim)
+	{
+	case IDLE_RELAXED:
+		m_eCurAnim = ANIM::IDLE_RELAXED;
+		m_fAnimMaxTime = 0.f;
+		m_fAnimElapsedTime = 0.f;
+		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, true);
+		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
+		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
+		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
+
+		break;
+	case RUN:
+		m_eCurAnim = ANIM::RUN;
+		m_fAnimMaxTime = 2.5f;
+		m_fAnimElapsedTime = 0.f;
+		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
+		m_pSkinnedAnimationController->SetTrackEnable(RUN, true);
+		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
+
+		break;
+	case ATTACK1:
+		m_eCurAnim = ANIM::ATTACK1;
+		m_fAnimMaxTime = 1.5f;
+		m_fAnimElapsedTime = 0.f;
+		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
+		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
+		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, true);
+		break;
+	case ATTACK2:
+		m_eCurAnim = ANIM::ATTACK2;
+		m_fAnimMaxTime = 2.5f;
+		m_fAnimElapsedTime = 0.f;
+		break;
+	case SKILL1:
+		m_eCurAnim = ANIM::SKILL1;
+		m_fAnimMaxTime = 2.5f;
+		m_fAnimElapsedTime = 0.f;
+		break;
+	case SKILL2:
+		m_eCurAnim = ANIM::SKILL2;
+		m_fAnimMaxTime = 2.5f;
+		m_fAnimElapsedTime = 0.f;
+		break;
+	case GET_RESOURCE:
+		m_eCurAnim = ANIM::GET_RESOURCE;
+		m_fAnimMaxTime = 1.833333f;
+		m_fAnimElapsedTime = 0.f;
+		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
+		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
+		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
+		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, true);
+		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
+		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.000f);
+	
+		break;
+	case IDLE:
+		m_eCurAnim = ANIM::IDLE;
+		m_fAnimMaxTime = 2.5f;
+		m_fAnimElapsedTime = 0.f;
+		break;
+	case DIE:
+		m_eCurAnim = ANIM::DIE;
+		m_fAnimMaxTime = 2.5f;
+		m_fAnimElapsedTime = 0.f;
+		break;
+	default:
+		break;
+	}
+}
+
+bool CTerrainPlayer::Check_MoveInput()
+{
+	// 이동 중이면
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		return true;
+
+	// 이동 중이지 않으면
+	if (!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		return false;
 }
