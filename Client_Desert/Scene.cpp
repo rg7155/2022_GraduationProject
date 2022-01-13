@@ -71,7 +71,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
 	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지..
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 7+10); //skybox-1, terrain-2, player-1, map-3
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 11+10); //skybox-1, terrain-2, player-1, map-3, depth-4
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -103,6 +103,18 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	pMapObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
 	m_ppShaders[iIndex++] = pMapObjectsShader;
 
+	m_pDepthRenderShader = new CDepthRenderShader(pMapObjectsShader, m_pLights);
+	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
+
+	m_pShadowShader = new CShadowMapShader(pMapObjectsShader);
+	m_pShadowShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
+
+	m_pShadowMapToViewport = new CTextureToViewportShader();
+	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
+
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -127,6 +139,25 @@ void CScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+	if (m_pDepthRenderShader)
+	{
+		m_pDepthRenderShader->ReleaseShaderVariables();
+		m_pDepthRenderShader->ReleaseObjects();
+		m_pDepthRenderShader->Release();
+	}
+	if (m_pShadowShader)
+	{
+		m_pShadowShader->ReleaseShaderVariables();
+		m_pShadowShader->ReleaseObjects();
+		m_pShadowShader->Release();
+	}
+	if (m_pShadowMapToViewport)
+	{
+		m_pShadowMapToViewport->ReleaseShaderVariables();
+		m_pShadowMapToViewport->ReleaseObjects();
+		m_pShadowMapToViewport->Release();
+	}
+
 
 	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
@@ -174,8 +205,8 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterCBV(pd3dRootParameters, 12, 8, 0, D3D12_SHADER_VISIBILITY_VERTEX);//Skinned Bone Transforms
 	SetRootParameterDescriptorTable(pd3dRootParameters, 13, 1, &pd3dDescriptorRanges[8], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 14, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_PIXEL);
-	SetRootParameterDescriptorTable(pd3dRootParameters, 15, 1, &pd3dDescriptorRanges[10], D3D12_SHADER_VISIBILITY_PIXEL);
-	SetRootParameterCBV(pd3dRootParameters, 16, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
+	SetRootParameterDescriptorTable(pd3dRootParameters, RP_DEPTH_BUFFER, 1, &pd3dDescriptorRanges[10], D3D12_SHADER_VISIBILITY_PIXEL);
+	SetRootParameterCBV(pd3dRootParameters, RP_TO_LIGHT, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
 
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[3];
@@ -271,6 +302,9 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	if (m_pShadowShader) m_pShadowShader->ReleaseUploadBuffers();
+	if (m_pDepthRenderShader) m_pDepthRenderShader->ReleaseUploadBuffers();
+
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->ReleaseUploadBuffers();
 	for (int i = 0; i < m_nHierarchicalGameObjects; i++) m_ppHierarchicalGameObjects[i]->ReleaseUploadBuffers();
 }
@@ -405,10 +439,24 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	//}
 }
 
+//각 프레임마다 제일 먼저 호출됨
+void CScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//각 조명에서 쉐도우맵 만드는 역할, 
+	//m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList);
+}
+
+
 void CScene::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
 	if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
 	if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
+
+	//각 조명에서 쉐도우맵 만드는 역할, 
+	m_pDepthRenderShader->PrepareShadowMap(pd3dCommandList);
+
+	//쉐도우맵이 갖고있는 텍스쳐 정보를 set
+	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

@@ -57,6 +57,8 @@ public:
     void AnimateObjects(float fTimeElapsed);
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
+	void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList);
+
 	void ReleaseUploadBuffers();
 
 	////////////////////////////////////////////////////////////////////////
@@ -120,4 +122,11 @@ public:
 
 	ID3D12Resource						*m_pd3dcbLights = NULL;
 	LIGHTS								*m_pcbMappedLights = NULL;
+
+	//obj 그릴때 이걸 읽어서 뎁스들을 dp, sp비교해서 그림자 여부 판단
+	CDepthRenderShader					*m_pDepthRenderShader = NULL; //쉐도우맵 만들기 위해 렌더해야하니깐 ㅇ
+
+	CShadowMapShader					*m_pShadowShader = NULL;
+	//화면에 뎁스텍스쳐 그리기 위해, 디버깅 목적, 4개 다 그릴수도이씅ㅁ
+	CTextureToViewportShader			*m_pShadowMapToViewport = NULL;
 };

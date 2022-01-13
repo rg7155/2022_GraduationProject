@@ -201,3 +201,47 @@ ID3D12Resource *CreateTextureResourceFromWICFile(ID3D12Device *pd3dDevice, ID3D1
 
 	return(pd3dTexture);
 }
+
+ID3D12Resource* CreateTexture2DResource(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, UINT nElements, UINT nMipLevels, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue)
+{
+	ID3D12Resource* pd3dTexture = NULL;
+
+	D3D12_HEAP_PROPERTIES d3dHeapPropertiesDesc;
+	::ZeroMemory(&d3dHeapPropertiesDesc, sizeof(D3D12_HEAP_PROPERTIES));
+	d3dHeapPropertiesDesc.Type = D3D12_HEAP_TYPE_DEFAULT;
+	d3dHeapPropertiesDesc.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+	d3dHeapPropertiesDesc.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+	d3dHeapPropertiesDesc.CreationNodeMask = 1;
+	d3dHeapPropertiesDesc.VisibleNodeMask = 1;
+
+	D3D12_RESOURCE_DESC d3dTextureResourceDesc;
+	::ZeroMemory(&d3dTextureResourceDesc, sizeof(D3D12_RESOURCE_DESC));
+	d3dTextureResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	d3dTextureResourceDesc.Alignment = 0;
+	d3dTextureResourceDesc.Width = nWidth;
+	d3dTextureResourceDesc.Height = nHeight;
+	d3dTextureResourceDesc.DepthOrArraySize = nElements;
+	d3dTextureResourceDesc.MipLevels = nMipLevels;
+	d3dTextureResourceDesc.Format = dxgiFormat;
+	d3dTextureResourceDesc.SampleDesc.Count = 1;
+	d3dTextureResourceDesc.SampleDesc.Quality = 0;
+	d3dTextureResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	d3dTextureResourceDesc.Flags = d3dResourceFlags;
+
+	HRESULT hResult = pd3dDevice->CreateCommittedResource(&d3dHeapPropertiesDesc, D3D12_HEAP_FLAG_NONE, &d3dTextureResourceDesc, d3dResourceStates, pd3dClearValue, __uuidof(ID3D12Resource), (void**)&pd3dTexture);
+
+	return(pd3dTexture);
+}
+
+
+void SynchronizeResourceTransition(ID3D12GraphicsCommandList* pd3dCommandList, ID3D12Resource* pd3dResource, D3D12_RESOURCE_STATES d3dStateBefore, D3D12_RESOURCE_STATES d3dStateAfter)
+{
+	D3D12_RESOURCE_BARRIER d3dResourceBarrier;
+	d3dResourceBarrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	d3dResourceBarrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	d3dResourceBarrier.Transition.pResource = pd3dResource;
+	d3dResourceBarrier.Transition.StateBefore = d3dStateBefore;
+	d3dResourceBarrier.Transition.StateAfter = d3dStateAfter;
+	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+}

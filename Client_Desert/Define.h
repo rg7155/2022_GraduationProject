@@ -37,7 +37,12 @@
 #define _WITH_LOCAL_VIEWER_HIGHLIGHTING
 #define _WITH_THETA_PHI_CONES
 
+#define _PLANE_WIDTH			300
+#define _PLANE_HEIGHT			300
 
+//RootParameter
+#define RP_DEPTH_BUFFER	15
+#define RP_TO_LIGHT	16
 
 #define NO_COPY(CLASSNAME)							\
 	private:										\

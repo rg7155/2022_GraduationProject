@@ -251,3 +251,5 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 
 	return(cColor);
 }
+
+//////////////////////////

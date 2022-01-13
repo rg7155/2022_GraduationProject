@@ -1,5 +1,7 @@
+#pragma once
+
 #include "Shaders.hlsl"
-#include "Light.hlsl"
+//#include "Light.hlsl" //이미 Shaders에 있으므로 오류남
 
 
 
@@ -152,51 +154,11 @@ VS_TEXTURED_OUTPUT VSTextureToViewport(uint nVertexID : SV_VertexID)
     return (output);
 }
 
-float4 GetColorFromDepth(float fDepth)
-{
-    float4 cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-
-    if (fDepth < 0.00625f)
-        cColor = float4(1.0f, 0.0f, 0.0f, 1.0f);
-    else if (fDepth < 0.0125f)
-        cColor = float4(0.0f, 1.0f, 0.0f, 1.0f);
-    else if (fDepth < 0.025f)
-        cColor = float4(0.0f, 0.0f, 1.0f, 1.0f);
-    else if (fDepth < 0.05f)
-        cColor = float4(1.0f, 1.0f, 0.0f, 1.0f);
-    else if (fDepth < 0.075f)
-        cColor = float4(0.0f, 1.0f, 1.0f, 1.0f);
-    else if (fDepth < 0.1f)
-        cColor = float4(1.0f, 0.5f, 0.5f, 1.0f);
-    else if (fDepth < 0.4f)
-        cColor = float4(0.5f, 1.0f, 1.0f, 1.0f);
-    else if (fDepth < 0.6f)
-        cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
-    else if (fDepth < 0.8f)
-        cColor = float4(0.5f, 0.5f, 1.0f, 1.0f);
-    else if (fDepth < 0.9f)
-        cColor = float4(0.5f, 1.0f, 0.5f, 1.0f);
-    else if (fDepth < 0.95f)
-        cColor = float4(0.5f, 0.0f, 0.5f, 1.0f);
-    else if (fDepth < 0.99f)
-        cColor = float4(1.0f, 1.0f, 1.0f, 1.0f);
-    else if (fDepth < 0.999f)
-        cColor = float4(1.0f, 0.0f, 1.0f, 1.0f);
-    else if (fDepth == 1.0f)
-        cColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
-    else if (fDepth > 1.0f)
-        cColor = float4(0.0f, 0.0f, 0.5f, 1.0f);
-    else
-        cColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-
-    return (cColor);
-}
-
 //SamplerState gssBorder : register(s3);
 
 float4 PSTextureToViewport(VS_TEXTURED_OUTPUT input) : SV_Target
 {
-    float fDepthFromLight0 = gtxtDepthTextures[0 /*gfShadowMapIndex*/].SampleLevel(gssWrap /*gssBorder*/, input.uv, 0).r;
+    float fDepthFromLight0 = gtxtDepthTextures[0].SampleLevel(gssWrap /*gssBorder*/, input.uv, 0).r;
 
     return ((float4) (fDepthFromLight0 * 0.8f));
 }

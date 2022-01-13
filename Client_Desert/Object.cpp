@@ -19,6 +19,17 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers)
 		m_pRootArgumentInfos = new SRVROOTARGUMENTINFO[m_nTextures];
 		m_ppd3dTextureUploadBuffers = new ID3D12Resource*[m_nTextures];
 		m_ppd3dTextures = new ID3D12Resource*[m_nTextures];
+
+		//
+		m_pnResourceTypes = new UINT[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnResourceTypes[i] = 0;
+
+		m_pdxgiBufferFormats = new DXGI_FORMAT[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnResourceTypes[i] = DXGI_FORMAT_UNKNOWN;
+		m_pnBufferElements = new int[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferElements[i] = 0;
+		m_pnBufferStrides = new int[m_nTextures];
+		for (int i = 0; i < m_nTextures; i++) m_pnBufferStrides[i] = 0;
 	}
 
 	m_nSamplers = nSamplers;
@@ -32,6 +43,11 @@ CTexture::~CTexture()
 		for (int i = 0; i < m_nTextures; i++) if (m_ppd3dTextures[i]) m_ppd3dTextures[i]->Release();
 		delete[] m_ppd3dTextures;
 	}
+
+	//
+	if (m_pnResourceTypes) delete[] m_pnResourceTypes;
+	if (m_pdxgiBufferFormats) delete[] m_pdxgiBufferFormats;
+	if (m_pnBufferElements) delete[] m_pnBufferElements;
 
 	if (m_pRootArgumentInfos)
 	{
@@ -93,6 +109,23 @@ void CTexture::LoadTextureFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsComma
 	else
 		m_ppd3dTextures[nIndex] = ::CreateTextureResourceFromWICFile(pd3dDevice, pd3dCommandList, pszFileName, &(m_ppd3dTextureUploadBuffers[nIndex]), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 }
+
+void CTexture::LoadBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pData, UINT nElements, UINT nStride, DXGI_FORMAT ndxgiFormat, D3D12_HEAP_TYPE d3dHeapType, D3D12_RESOURCE_STATES d3dResourceStates, UINT nIndex)
+{
+	m_pnResourceTypes[nIndex] = RESOURCE_BUFFER;
+	m_pdxgiBufferFormats[nIndex] = ndxgiFormat;
+	m_pnBufferElements[nIndex] = nElements;
+	m_pnBufferStrides[nIndex] = nStride;
+	m_ppd3dTextures[nIndex] = ::CreateBufferResource(pd3dDevice, pd3dCommandList, pData, nElements * nStride, d3dHeapType, d3dResourceStates, &m_ppd3dTextureUploadBuffers[nIndex]);
+}
+
+ID3D12Resource* CTexture::CreateTexture(ID3D12Device* pd3dDevice, UINT nWidth, UINT nHeight, DXGI_FORMAT dxgiFormat, D3D12_RESOURCE_FLAGS d3dResourceFlags, D3D12_RESOURCE_STATES d3dResourceStates, D3D12_CLEAR_VALUE* pd3dClearValue, UINT nResourceType, UINT nIndex)
+{
+	m_pnResourceTypes[nIndex] = nResourceType;
+	m_ppd3dTextures[nIndex] = ::CreateTexture2DResource(pd3dDevice, nWidth, nHeight, 1, 0, dxgiFormat, d3dResourceFlags, d3dResourceStates, pd3dClearValue);
+	return(m_ppd3dTextures[nIndex]);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -203,7 +236,6 @@ void CMaterial::LoadTextureFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsComm
 			*ppTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 			(*ppTexture)->LoadTextureFromFile(pd3dDevice, pd3dCommandList, pwstrTextureName, 0, true);
 			if (*ppTexture) (*ppTexture)->AddRef();
-			//CScene::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 			//cout << "CreateTexture" << endl;
 			CScene::CreateShaderResourceViews(pd3dDevice, *ppTexture, nRootParameter, false);
 		}
@@ -1246,7 +1278,6 @@ CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 	pTerrainShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	//CScene::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 2);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture, 13, false);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTerrainDetailTexture, 14, false);
 
@@ -1279,7 +1310,6 @@ CSkyBox::CSkyBox(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dComman
 	pSkyBoxShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pSkyBoxShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	//CScene::CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 1);
 	CScene::CreateShaderResourceViews(pd3dDevice, pSkyBoxTexture, 10, false);
 
 	CMaterial *pSkyBoxMaterial = new CMaterial(1);
