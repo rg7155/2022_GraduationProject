@@ -781,6 +781,11 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 
 	m_pDepthTexture = new CTexture(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0);
 
+	//해줘야함????
+	m_pDepthTexture->AddRef();
+	//
+	
+	
 	//깊이값만 써서 r32,
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f } };
 	//화면 해상도와 같이
@@ -1056,7 +1061,7 @@ void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	m_pDepthTexture->AddRef();
 
 	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures()); //씬에서?
-	CScene::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, 0, RP_DEPTH_BUFFER);
+	CScene::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, RP_DEPTH_BUFFER, false);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
@@ -1151,9 +1156,9 @@ void CTextureToViewportShader::ReleaseObjects()
 
 void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	//f5 on/off
-	if (!m_bRender)
-		return;
+	////f5 on/off
+	//if (!m_bRender)
+	//	return;
 
 	float fSize = FRAME_BUFFER_WIDTH / 4;
 	D3D12_VIEWPORT d3dViewport = { 0.0f, 0.0f, fSize, fSize, 0.0f, 1.0f };
