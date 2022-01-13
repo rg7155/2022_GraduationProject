@@ -56,18 +56,21 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection)
-	{
-		XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
-		if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-		if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-		if (dwDirection & DIR_RIGHT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
-		if (dwDirection & DIR_LEFT) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
-		if (dwDirection & DIR_UP) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, fDistance);
-		if (dwDirection & DIR_DOWN) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Up, -fDistance);
+	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+	//if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+	//if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
+	else
+		return;
 
-		Move(xmf3Shift, bUpdateVelocity);
-	}
+	Move(xmf3Shift, bUpdateVelocity);
 }
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -149,15 +152,15 @@ void CPlayer::Update(float fTimeElapsed)
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;
 	if (fLength > m_fMaxVelocityXZ)
 	{
-		m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
-		m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+		//m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
+		//m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
 	}
 	float fMaxVelocityY = m_fMaxVelocityY;
 	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
 	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
 
-	XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
-	Move(xmf3Velocity, false);
+	//XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+	Move(m_xmf3Velocity, false);
 
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
 
@@ -427,8 +430,8 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 			break;
 		case THIRD_PERSON_CAMERA:
 			SetFriction(250.0f);
-			SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
-			SetMaxVelocityXZ(300.0f);
+			//SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
+			SetMaxVelocityXZ(10.0f);
 			SetMaxVelocityY(400.0f);
 			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 			m_pCamera->SetTimeLag(0.25f);
@@ -448,12 +451,10 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 
 void CTerrainPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 {
-	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)m_pPlayerUpdatedContext;
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
 	XMFLOAT3 xmf3PlayerPosition = GetPosition();
-	int z = (int)(xmf3PlayerPosition.z / xmf3Scale.z);
-	bool bReverseQuad = ((z % 2) != 0);
-	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z, bReverseQuad) + 0.0f;
+	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z) + 6.0f;
 	if (xmf3PlayerPosition.y < fHeight)
 	{
 		XMFLOAT3 xmf3PlayerVelocity = GetVelocity();
@@ -466,19 +467,17 @@ void CTerrainPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 
 void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 {
-	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)m_pCameraUpdatedContext;
+	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pCameraUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
 	XMFLOAT3 xmf3CameraPosition = m_pCamera->GetPosition();
-	int z = (int)(xmf3CameraPosition.z / xmf3Scale.z);
-	bool bReverseQuad = ((z % 2) != 0);
-	float fHeight = pTerrain->GetHeight(xmf3CameraPosition.x, xmf3CameraPosition.z, bReverseQuad) + 5.0f;
+	float fHeight = pTerrain->GetHeight(xmf3CameraPosition.x, xmf3CameraPosition.z) + 5.0f;
 	if (xmf3CameraPosition.y <= fHeight)
 	{
 		xmf3CameraPosition.y = fHeight;
 		m_pCamera->SetPosition(xmf3CameraPosition);
 		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA)
 		{
-			CThirdPersonCamera *p3rdPersonCamera = (CThirdPersonCamera *)m_pCamera;
+			CThirdPersonCamera* p3rdPersonCamera = (CThirdPersonCamera*)m_pCamera;
 			p3rdPersonCamera->SetLookAt(GetPosition());
 		}
 	}
@@ -486,10 +485,11 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	if (dwDirection)
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(0, false);
-		m_pSkinnedAnimationController->SetTrackEnable(1, true);
+		m_pSkinnedAnimationController->SetTrackEnable(2, true);
 	}
 
 	CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
@@ -517,11 +517,13 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		if (::IsZero(fLength))
+		if(!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+			&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 		{
 			m_pSkinnedAnimationController->SetTrackEnable(0, true);
-			m_pSkinnedAnimationController->SetTrackEnable(1, false);
+			m_pSkinnedAnimationController->SetTrackEnable(2, false);
 			m_pSkinnedAnimationController->SetTrackPosition(1, 0.0f);
 		}
+
 	}
 }

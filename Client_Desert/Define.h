@@ -9,6 +9,8 @@
 #define EPSILON					1.0e-10f
 
 
+#define PLAYER_SPEED					1.5f
+
 #define ANIMATION_TYPE_ONCE				0
 #define ANIMATION_TYPE_LOOP				1
 #define ANIMATION_TYPE_PINGPONG			2
