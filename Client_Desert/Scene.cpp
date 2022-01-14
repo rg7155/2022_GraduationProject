@@ -36,7 +36,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
 	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
-	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 
@@ -76,7 +76,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(1.16f*4.f, 1.0f, 1.16f*4.f);
+	XMFLOAT3 xmf3Scale(1.16f, 1.0f, 1.16f);
 	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
 	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
 
