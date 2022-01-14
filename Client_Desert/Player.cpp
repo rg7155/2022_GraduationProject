@@ -59,7 +59,31 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 	//if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	//if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&	
+		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// À§¿À
+	{
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * (1 / sqrtf(2)));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance*(1/sqrtf(2)));
+	}
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
+		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// ¿À¾Æ
+	{
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * (1 / sqrtf(2)));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance * (1 / sqrtf(2)));
+	}
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) &&
+		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))	// ¾Æ¿Þ
+	{
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * (1 / sqrtf(2)));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * (1 / sqrtf(2)));
+	}
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A) &&
+		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))	// ¿ÞÀ§
+	{
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * (1 / sqrtf(2)));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * (1 / sqrtf(2)));
+	}
+	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
