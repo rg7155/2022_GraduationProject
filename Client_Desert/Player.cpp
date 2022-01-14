@@ -84,13 +84,25 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * (1 / sqrtf(2)));
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+	{
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
+
+	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
+	{
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
+
+	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
+	{
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+
+	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
+	{
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
+
+	}
 	else
 		return;
 
@@ -380,7 +392,7 @@ void CTerrainPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
 	XMFLOAT3 xmf3PlayerPosition = GetPosition();
-	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z) + 6.0f;
+	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z);
 	if (xmf3PlayerPosition.y < fHeight)
 	{
 		XMFLOAT3 xmf3PlayerVelocity = GetVelocity();
@@ -396,7 +408,7 @@ void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pCameraUpdatedContext;
 	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
 	XMFLOAT3 xmf3CameraPosition = m_pCamera->GetPosition();
-	float fHeight = pTerrain->GetHeight(xmf3CameraPosition.x, xmf3CameraPosition.z) + 5.0f;
+	float fHeight = pTerrain->GetHeight(xmf3CameraPosition.x, xmf3CameraPosition.z);
 	if (xmf3CameraPosition.y <= fHeight)
 	{
 		xmf3CameraPosition.y = fHeight;
