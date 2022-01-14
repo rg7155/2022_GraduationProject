@@ -542,6 +542,8 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
 		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, true);
+		m_pSkinnedAnimationController->SetTrackPosition(ATTACK1, 0.f);
+
 		break;
 	case ATTACK2:
 		m_eCurAnim = ANIM::ATTACK2;
@@ -567,7 +569,7 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, true);
 		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
-		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.000f);
+		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.f);
 	
 		break;
 	case IDLE:
