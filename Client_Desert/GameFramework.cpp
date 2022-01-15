@@ -418,6 +418,11 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
+	/// ///////////////////
+	m_pScene->m_pDepthRenderShader->m_pPlayer = m_pPlayer;
+	m_pScene->m_pShadowShader->m_pPlayer = m_pPlayer;
+	/// ///////////////////
+
 	m_pd3dCommandList->Close();
 	ID3D12CommandList *ppd3dCommandLists[] = { m_pd3dCommandList };
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);

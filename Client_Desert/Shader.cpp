@@ -989,8 +989,8 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		}
 	}
 
-	//m_pPlayer->UpdateShaderVariables(pd3dCommandList);
-	//m_pPlayer->MeshRender(pd3dCommandList, pCamera);
+	//m_pPlayer->UpdateShaderVariable(pd3dCommandList, &m_pPlayer->m_xmf4x4World);
+	m_pPlayer->Render(pd3dCommandList, pCamera);
 
 	//m_pObjectsShader->Render(pd3dCommandList, pCamera);
 }
@@ -1087,8 +1087,9 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 		}
 	}
 
-	//m_pPlayer->UpdateShaderVariables(pd3dCommandList);
-	//m_pPlayer->Render(pd3dCommandList, pCamera); //쉐이더 렌더에서 파이프라인상태 바꾸지 않기위함
+	//m_pPlayer->UpdateShaderVariables(pd3dCommandList); // ?????
+	//m_pPlayer->UpdateShaderVariable(pd3dCommandList, &m_pPlayer->m_xmf4x4World);
+	m_pPlayer->Render(pd3dCommandList, pCamera); //쉐이더 렌더에서 파이프라인상태 바꾸지 않기위함
 	//m_pPlayer->MeshRender(pd3dCommandList, pCamera);
 }
 

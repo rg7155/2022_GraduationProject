@@ -209,6 +209,7 @@ struct TOLIGHTSPACES
 
 struct LIGHT;
 
+#define _WITH_RASTERIZER_DEPTH_BIAS
 class CDepthRenderShader : public CIlluminatedShader
 {
 public:

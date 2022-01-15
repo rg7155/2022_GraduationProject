@@ -102,10 +102,19 @@ VS_SHADOW_MAP_OUTPUT VSShadowMapShadow(VS_LIGHTING_INPUT input)
 
 float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 {
+    float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    //if (gnTexturesMask & MATERIAL_ALBEDO_MAP) 
+    //    cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, );
+    //else
+        cAlbedoColor = gMaterial.m_cDiffuse;
+    
 	//그림자면 어둡고 아니면 원래 조명 색
     float4 cIllumination = Lighting(input.positionW, normalize(input.normalW), true, input.uvs);
 
-    return (cIllumination);
+    //return (cIllumination);
+	float4 cColor = cAlbedoColor;
+	return(lerp(cColor, cIllumination, 0.5f));
+    
 }
 
 ///////////////////////////////////////////////////////////////////////////////
