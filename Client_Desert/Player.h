@@ -65,7 +65,7 @@ public:
 	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
-
+	
 	virtual void Update(float fTimeElapsed);
 
 	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
@@ -83,25 +83,11 @@ public:
 	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
-};
-
-class CAirplanePlayer : public CPlayer
-{
-public:
-	CAirplanePlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
-	virtual ~CAirplanePlayer();
-
-	CGameObject					*m_pMainRotorFrame = NULL;
-	CGameObject					*m_pTailRotorFrame = NULL;
 
 private:
-	virtual void OnPrepareAnimate();
-	virtual void Animate(float fTimeElapsed);
-
-public:
-	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
-	virtual void OnPrepareRender();
+	void RotateMesh(XMFLOAT3 xmf3Rotate);
 };
+
 
 class CSoundCallbackHandler : public CAnimationCallbackHandler
 {
@@ -115,6 +101,11 @@ public:
 
 class CTerrainPlayer : public CPlayer
 {
+private:
+	enum ANIM {
+		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
+		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8
+	};
 public:
 	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
 	virtual ~CTerrainPlayer();
@@ -128,5 +119,19 @@ public:
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
 
 	virtual void Update(float fTimeElapsed);
+
+
+private:
+	bool Check_GetResource(float fTimeElapsed);
+	bool Check_Attack(float fTimeElapsed);
+	void Change_Animation(ANIM eNewAnim);
+
+	bool Check_MoveInput();
+
+private:
+	ANIM	m_eCurAnim;			// 현재 애니메이션
+	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
+	float	m_fAnimElapsedTime;	// 현재 애니메이션의 흐른 시간
+
 };
 
