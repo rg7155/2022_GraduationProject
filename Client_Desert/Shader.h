@@ -18,7 +18,9 @@ private:
 
 public:
 	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
+	void Release() { 
+		if (--m_nReferences <= 0) 
+			delete this; }
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState);
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState);
@@ -207,6 +209,7 @@ struct TOLIGHTSPACES
 
 struct LIGHT;
 
+#define _WITH_RASTERIZER_DEPTH_BIAS
 class CDepthRenderShader : public CIlluminatedShader
 {
 public:
