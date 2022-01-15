@@ -490,7 +490,12 @@ void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 
 void CAnimationController::SetTrackPosition(int nAnimationTrack, float fPosition)
 {
-	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetPosition(fPosition);
+	if (m_pAnimationTracks)
+	{
+		m_pAnimationTracks[nAnimationTrack].SetPosition(fPosition);
+		m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[nAnimationTrack].m_nAnimationSet]->m_fPosition = fPosition;
+
+	}
 }
 
 void CAnimationController::SetTrackSpeed(int nAnimationTrack, float fSpeed)
