@@ -659,54 +659,6 @@ void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList *pd3dComma
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-CIlluminatedShader::CIlluminatedShader()
-{
-}
-
-CIlluminatedShader::~CIlluminatedShader()
-{
-}
-
-D3D12_INPUT_LAYOUT_DESC CIlluminatedShader::CreateInputLayout(int nPipelineState)
-{
-	UINT nInputElementDescs = 5;
-	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
-
-	/*pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };*/
-
-	//pd3dInputElementDescs[1] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	//pd3dInputElementDescs[2] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
-	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 1, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[2] = { "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 2, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[3] = { "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 3, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-	pd3dInputElementDescs[4] = { "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 4, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
-
-	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
-	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
-	d3dInputLayoutDesc.NumElements = nInputElementDescs;
-
-	return(d3dInputLayoutDesc);
-}
-
-D3D12_SHADER_BYTECODE CIlluminatedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
-{
-	return(CShader::CompileShaderFromFile(L"Shader_Shadow.hlsl", "VSLighting", "vs_5_1", ppd3dShaderBlob));
-}
-
-
-void CIlluminatedShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
-{
-	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
-
-	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -996,7 +948,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	}
 
 	//m_pPlayer->UpdateShaderVariable(pd3dCommandList, &m_pPlayer->m_xmf4x4World);
-	//m_pPlayer->Render(pd3dCommandList, pCamera);
+	m_pPlayer->MeshRender(pd3dCommandList, pCamera);//플레이어는 애님쉐이더, 칼은 스탠다드 쉐이더
 
 	//m_pObjectsShader->Render(pd3dCommandList, pCamera);
 }
@@ -1095,7 +1047,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 
 	//m_pPlayer->UpdateShaderVariables(pd3dCommandList); // ?????
 	//m_pPlayer->UpdateShaderVariable(pd3dCommandList, &m_pPlayer->m_xmf4x4World);
-	//m_pPlayer->Render(pd3dCommandList, pCamera); //쉐이더 렌더에서 파이프라인상태 바꾸지 않기위함
+	m_pPlayer->MeshRender(pd3dCommandList, pCamera); //쉐이더 렌더에서 파이프라인상태 바꾸지 않기위함
 	//m_pPlayer->MeshRender(pd3dCommandList, pCamera);
 }
 

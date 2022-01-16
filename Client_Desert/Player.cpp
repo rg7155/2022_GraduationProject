@@ -280,7 +280,8 @@ void CPlayer::OnPrepareRender()
 void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
-	if (nCameraMode == THIRD_PERSON_CAMERA) CGameObject::Render(pd3dCommandList, pCamera);
+	//if (nCameraMode == THIRD_PERSON_CAMERA) 
+		CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 void CPlayer::RotateMesh(XMFLOAT3 xmf3Rotate)

@@ -181,19 +181,6 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CIlluminatedShader : public CShader
-{
-public:
-	CIlluminatedShader();
-	virtual ~CIlluminatedShader();
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState) override;
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)  override;
-
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState = 0);
-};
-
 
 struct TOOBJECTSPACEINFO
 {
@@ -209,7 +196,7 @@ struct TOLIGHTSPACES
 struct LIGHT;
 
 #define _WITH_RASTERIZER_DEPTH_BIAS
-class CDepthRenderShader : public CIlluminatedShader
+class CDepthRenderShader : public CStandardShader
 {
 public:
 	CDepthRenderShader(CStandardObjectsShader* pObjectsShader, LIGHT* pLights);
@@ -270,7 +257,7 @@ protected:
 	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
 };
 
-class CShadowMapShader : public CIlluminatedShader
+class CShadowMapShader : public CStandardShader
 {
 public:
 	CShadowMapShader(CStandardObjectsShader* pObjectsShader);
