@@ -199,7 +199,8 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 
 	for (int i = 0; i < m_nTextures; i++)
 	{
-		if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariable(pd3dCommandList, 0);
+		if (m_ppTextures[i])
+			m_ppTextures[i]->UpdateShaderVariable(pd3dCommandList, 0);
 	}
 }
 
@@ -728,6 +729,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 
 	if (m_pMesh)
 	{
+		//월드
 		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 
 		if (m_nMaterials > 0)
@@ -737,6 +739,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 				if (m_ppMaterials[i])
 				{
 					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+
+					//컬러,텍스쳐
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 				}
 

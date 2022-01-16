@@ -106,8 +106,8 @@ public:
 	int									m_nGameObjects = 0;
 	CGameObject							**m_ppGameObjects = NULL;
 
-	int									m_nHierarchicalGameObjects = 0;
-	CGameObject							**m_ppHierarchicalGameObjects = NULL;
+	//int									m_nHierarchicalGameObjects = 0;
+	//CGameObject							**m_ppHierarchicalGameObjects = NULL;
 
 	int									m_nShaders = 0;
 	CShader								**m_ppShaders = NULL;
