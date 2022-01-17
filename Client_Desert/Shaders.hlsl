@@ -22,6 +22,18 @@ cbuffer cbGameObjectInfo : register(b2)
 
 #include "Light.hlsl"
 
+struct CB_TOOBJECTSPACE
+{
+	matrix mtxToTexture;
+	float4 f4Position;
+};
+
+cbuffer cbToLightSpace : register(b3)
+{
+	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //#define _WITH_VERTEX_LIGHTING
@@ -61,19 +73,29 @@ struct VS_STANDARD_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD;
+	
+    float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
 
-	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.positionW = positionW.xyz;
 	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
 	output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject);
 	output.bitangentW = mul(input.bitangent, (float3x3)gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		//0Àº Á¶¸í²û, Á¶¸í ÁÂÇ¥°è·Î ¹Ù²Ù°í ÅØ½ºÃÄ ÁÂÇ¥°è·Î ¹Ù²Þ
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f)
+			output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+	}
+	
 	return(output);
 }
 
@@ -109,8 +131,9 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	{
 		normalW = normalize(input.normalW);
 	}
-	float4 uvs[MAX_LIGHTS];
-    float4 cIllumination = Lighting(input.positionW, normalW, false, uvs);
+	//float4 uvs[MAX_LIGHTS];
+	//float4 cIllumination = Lighting(input.positionW, normalW, false, uvs);
+	float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
 	return(lerp(cColor, cIllumination, 0.5f));
 }
 
@@ -149,13 +172,21 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 	{
 		mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
 	}
-	output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
+	float4 positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
+	output.positionW = positionW.xyz;
 	output.normalW = mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.tangentW = mul(input.tangent, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.bitangentW = mul(input.bitangent, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	for (int j = 0; j < MAX_LIGHTS; j++)
+	{
+		//0Àº Á¶¸í²û, Á¶¸í ÁÂÇ¥°è·Î ¹Ù²Ù°í ÅØ½ºÃÄ ÁÂÇ¥°è·Î ¹Ù²Þ
+		if (gcbToLightSpaces[j].f4Position.w != 0.0f)
+			output.uvs[j] = mul(positionW, gcbToLightSpaces[j].mtxToTexture);
+	}
+	
 	return(output);
 }
 

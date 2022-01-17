@@ -5,16 +5,7 @@
 
 
 
-struct CB_TOOBJECTSPACE
-{
-    matrix mtxToTexture;
-    float4 f4Position;
-};
 
-cbuffer cbToLightSpace : register(b3)
-{
-    CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
-};
 
 struct PS_DEPTH_OUTPUT
 {
