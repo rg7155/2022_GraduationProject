@@ -62,56 +62,48 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&	
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// À§¿À
 	{
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * (1 / sqrtf(2)));
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance*(1/sqrtf(2)));
-		//RotateMesh(XMFLOAT3(0.f, 45.f, 0.f));
+		RotateMesh(XMFLOAT3(0.f, 45.f, 0.f));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// ¿À¾Æ
 	{
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * (1 / sqrtf(2)));
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance * (1 / sqrtf(2)));
-		//RotateMesh(XMFLOAT3(0.f, 135.f, 0.f));
-
+		RotateMesh(XMFLOAT3(0.f, 135.f, 0.f));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))	// ¾Æ¿Þ
 	{
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance * (1 / sqrtf(2)));
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * (1 / sqrtf(2)));
-		//RotateMesh(XMFLOAT3(0.f, 225.f, 0.f));
-
+		RotateMesh(XMFLOAT3(0.f, 225.f, 0.f));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))	// ¿ÞÀ§
 	{
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance * (1 / sqrtf(2)));
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance * (1 / sqrtf(2)));
-		//RotateMesh(XMFLOAT3(0.f, 315.f, 0.f));
-
+		RotateMesh(XMFLOAT3(0.f, 315.f, 0.f));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance );
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, fDistance);
-		//RotateMesh(XMFLOAT3(0.f, 90.f, 0.f));
-
+		RotateMesh(XMFLOAT3(0.f, 90.f, 0.f));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
 	{
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Right, -fDistance);
-		//RotateMesh(XMFLOAT3(0.f, 270.f, 0.f));
+		RotateMesh(XMFLOAT3(0.f, 270.f, 0.f));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
 	{
+		RotateMesh(XMFLOAT3(0.f, 360.f, 0.f));
 		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-		//RotateMesh(XMFLOAT3(0.f, 0.f, 0.f));
 
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
 	{
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-		//RotateMesh(XMFLOAT3(0.f, 180.f, 0.f));
+		RotateMesh(XMFLOAT3(0.f, 180.f, 0.f));
+		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 
 	}
 	else
@@ -159,6 +151,7 @@ void CPlayer::Rotate(float x, float y, float z)
 		m_pCamera->Rotate(x, y, z);
 		if (y != 0.0f)
 		{
+			
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
@@ -308,6 +301,10 @@ void CPlayer::RotateMesh(XMFLOAT3 xmf3Rotate)
 	}
 	if (xmf3Rotate.y != 0.0f)
 	{
+		m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+		m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+		m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(xmf3Rotate.y));
 		m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 		m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
