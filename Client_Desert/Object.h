@@ -135,6 +135,8 @@ public:
 	float							m_fMetallic = 0.0f;
 	float							m_fGlossyReflection = 0.0f;
 
+	bool							m_isAnimationShader = false;
+
 public:
 	int 							m_nTextures = 0;
 	_TCHAR							(*m_ppstrTextureNames)[64] = NULL;
@@ -149,7 +151,10 @@ public:
 	static void CMaterial::PrepareShaders(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature);
 
 	void SetStandardShader() { CMaterial::SetShader(m_pStandardShader); }
-	void SetSkinnedAnimationShader() { CMaterial::SetShader(m_pSkinnedAnimationShader); }
+	void SetSkinnedAnimationShader() { 
+		CMaterial::SetShader(m_pSkinnedAnimationShader);
+		m_isAnimationShader = true;
+	}
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -368,7 +373,7 @@ public:
 
 	virtual void OnPrepareRender() { }
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
-	void MeshRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL);
+	void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, CShader* pShader = NULL);
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList);

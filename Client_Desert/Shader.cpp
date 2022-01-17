@@ -10,6 +10,7 @@
 CShader::CShader(int nPipelineStates /*= 1*/)
 {
 	m_nPipelineStates = nPipelineStates;
+
 	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 }
 
@@ -19,7 +20,9 @@ CShader::~CShader()
 
 	if (m_ppd3dPipelineStates)
 	{
-		for (int i = 0; i < m_nPipelineStates; i++) if (m_ppd3dPipelineStates[i]) m_ppd3dPipelineStates[i]->Release();
+		for (int i = 0; i < m_nPipelineStates; i++) 
+			if (m_ppd3dPipelineStates[i]) 
+				m_ppd3dPipelineStates[i]->Release();
 		delete[] m_ppd3dPipelineStates;
 	}
 }
@@ -278,7 +281,7 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nP
 
 void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/)
 {
-	OnPrepareRender(pd3dCommandList);
+	OnPrepareRender(pd3dCommandList, nPipelineState);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -375,7 +378,7 @@ D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlo
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CStandardShader::CStandardShader()
+CStandardShader::CStandardShader(int nPipelineStates /*= 1*/) : CShader(nPipelineStates)
 {
 }
 
@@ -413,7 +416,8 @@ D3D12_SHADER_BYTECODE CStandardShader::CreatePixelShader(ID3DBlob** ppd3dShaderB
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CSkinnedAnimationStandardShader::CSkinnedAnimationStandardShader()
+CSkinnedAnimationStandardShader::CSkinnedAnimationStandardShader(int nPipelineStates /*= 1*/)
+	:CStandardShader(nPipelineStates)
 {
 }
 
@@ -663,6 +667,7 @@ void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList *pd3dComma
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CDepthRenderShader::CDepthRenderShader(CStandardObjectsShader* pObjectsShader, LIGHT* pLights)
+	: CSkinnedAnimationStandardShader(2) //파이프라인 2개 쓰겠다
 {
 	m_pObjectsShader = pObjectsShader;
 
@@ -678,9 +683,31 @@ CDepthRenderShader::~CDepthRenderShader()
 	if (m_pToLightSpaces) delete m_pToLightSpaces;
 }
 
+
+
+D3D12_SHADER_BYTECODE CDepthRenderShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	//애니메이션x
+	if(nPipelineState == 0)
+		return(CStandardShader::CreateVertexShader(ppd3dShaderBlob, nPipelineState));
+	else if(nPipelineState == 1)
+		return(CSkinnedAnimationStandardShader::CreateVertexShader(ppd3dShaderBlob, nPipelineState));
+
+}
+
+
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shader_Shadow.hlsl", "PSDepthWriteShader", "ps_5_1", ppd3dShaderBlob));
+}
+
+D3D12_INPUT_LAYOUT_DESC CDepthRenderShader::CreateInputLayout(int nPipelineState)
+{
+	//애니메이션x
+	if (nPipelineState == 0)
+		return(CStandardShader::CreateInputLayout(nPipelineState));
+	else if (nPipelineState == 1)
+		return(CSkinnedAnimationStandardShader::CreateInputLayout(nPipelineState));
 }
 
 D3D12_DEPTH_STENCIL_DESC CDepthRenderShader::CreateDepthStencilState(int nPipelineState)
@@ -724,6 +751,12 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState(int nPipelineSta
 	d3dRasterizerDesc.ConservativeRaster = D3D12_CONSERVATIVE_RASTERIZATION_MODE_OFF;
 
 	return(d3dRasterizerDesc);
+}
+
+void CDepthRenderShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+{
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);//건물
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 1);//애니메이션 모델
 }
 
 void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
@@ -954,8 +987,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	}
 
 	//m_pPlayer->UpdateShaderVariable(pd3dCommandList, &m_pPlayer->m_xmf4x4World);
-	//m_pPlayer->MeshRender(pd3dCommandList, pCamera);//플레이어는 애님쉐이더, 칼은 스탠다드 쉐이더
-	m_pPlayer->Render(pd3dCommandList, pCamera);
+	m_pPlayer->ShadowRender(pd3dCommandList, pCamera, this);//플레이어는 애님쉐이더, 칼은 스탠다드 쉐이더
 	//m_pObjectsShader->Render(pd3dCommandList, pCamera);
 }
 
@@ -970,27 +1002,6 @@ CShadowMapShader::~CShadowMapShader()
 {
 }
 
-D3D12_DEPTH_STENCIL_DESC CShadowMapShader::CreateDepthStencilState(int nPipelineState)
-{
-	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
-	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
-	d3dDepthStencilDesc.DepthEnable = TRUE;
-	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-	d3dDepthStencilDesc.StencilEnable = FALSE;
-	d3dDepthStencilDesc.StencilReadMask = 0x00;
-	d3dDepthStencilDesc.StencilWriteMask = 0x00;
-	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
-	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
-
-	return(d3dDepthStencilDesc);
-}
 
 D3D12_SHADER_BYTECODE CShadowMapShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
@@ -1102,8 +1113,8 @@ D3D12_SHADER_BYTECODE CTextureToViewportShader::CreatePixelShader(ID3DBlob** ppd
 
 void CTextureToViewportShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
 {
-	m_nPipelineStates = 1;
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+	//m_nPipelineStates = 1;
+	//m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
 }

@@ -754,8 +754,10 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
-void CGameObject::MeshRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera/*= NULL*/, CShader* pShader /*= NULL*/)
 {
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
 	if (m_pMesh)
 	{
 		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
@@ -766,7 +768,15 @@ void CGameObject::MeshRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 			{
 				if (m_ppMaterials[i])
 				{
-					//if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					if (m_ppMaterials[i]->m_pShader)
+					{
+						//pShaders는 CDepthRenderShader, 
+						//파이프라인 바꿔주기
+						if (!m_ppMaterials[i]->m_isAnimationShader)
+							pShader->OnPrepareRender(pd3dCommandList, 0);
+						else
+							pShader->OnPrepareRender(pd3dCommandList, 1);
+					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 				}
 
@@ -775,8 +785,8 @@ void CGameObject::MeshRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 		}
 	}
 
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling) m_pSibling->ShadowRender(pd3dCommandList, pCamera, pShader);
+	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, pShader);
 }
 
 
