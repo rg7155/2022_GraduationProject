@@ -22,7 +22,7 @@
 //Light.hlsl과 맞추기
 //#define MAX_LIGHTS				4 
 //#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
-#define MAX_LIGHTS						4 
+#define MAX_LIGHTS						2 
 #define MAX_MATERIALS					16 
 #define MAX_DEPTH_TEXTURES		MAX_LIGHTS
 
