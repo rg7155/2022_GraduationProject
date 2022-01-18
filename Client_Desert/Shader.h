@@ -225,8 +225,8 @@ public:
 	virtual void ReleaseObjects();
 
 	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList);
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+	void RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, int iIndex);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, int iIndex = 0);
 
 protected:
 	//깊이 저장 텍스쳐

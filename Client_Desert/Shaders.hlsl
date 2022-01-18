@@ -33,6 +33,13 @@ cbuffer cbToLightSpace : register(b3)
 	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
 };
 
+cbuffer cbFrameworkInfo : register(b5)
+{
+    float gfCurrentTime : packoffset(c0.x);
+    float gfElapsedTime : packoffset(c0.y);
+    float gfShadowMapIndex : packoffset(c0.z);
+};
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

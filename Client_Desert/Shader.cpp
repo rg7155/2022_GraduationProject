@@ -776,7 +776,8 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	//깊이값만 써서 r32,
 	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f } };
 	//화면 해상도와 같이
-	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
+	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) 
+		m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
 
 	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
 	d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
@@ -931,50 +932,69 @@ void CDepthRenderShader::ReleaseShaderVariables()
 
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//static  bool isOne = false;
-	//if (isOne)
-	//	return;
+	//1번은 정적, 한번만
+	static  bool isOne = false;
+	//if (!isOne)
+		RenderToDepthTexture(pd3dCommandList, 1);
+	isOne = true;
 
-	//isOne = true;
-
-	//각 조명에서 쉐도우맵 만드는 역할, 조명의 위치가 바뀌면 계속 해줘야함
-	for (int j = 0; j < MAX_LIGHTS; j++)
-	{
-		if (m_pLights[j].m_bEnable)
-		{
-			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(j), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-			FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
-			pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles[j], pfClearColor, 0, NULL);
-			pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
-			pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles[j], TRUE, &m_d3dDsvDescriptorCPUHandle);
-
-			//조명의 위치에서 씬을 렌더
-			Render(pd3dCommandList, m_ppDepthRenderCameras[j], /*nPipelineState*/0);
-
-			::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(j), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
-		}
-	}
+	
+	//0번은 동적, 계속
+	RenderToDepthTexture(pd3dCommandList, 0);
 }
 
-void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, int iIndex)
+{
+	::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+	FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles[iIndex], pfClearColor, 0, NULL);
+	pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
+	pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles[iIndex], TRUE, &m_d3dDsvDescriptorCPUHandle);
+
+	if (iIndex == 0)
+	{
+		//1번에 그린 깊이를 0번으로 복사?
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+		pd3dCommandList->CopyResource(m_pDepthTexture->GetTexture(0), m_pDepthTexture->GetTexture(1));
+
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
+	}
+
+	//조명의 위치에서 씬을 렌더
+	Render(pd3dCommandList, m_ppDepthRenderCameras[iIndex], 0, iIndex);
+
+	//if (iIndex == 0)
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+
+}
+
+
+void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState/*= 0*/, int iIndex /*= 0*/)
 {
 	CShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	
-	//조명의 위치에서 오브젝트 깊이값 저장, 렌더타겟에 저장
-	for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
+	if (iIndex == 1)
 	{
-		if (m_pObjectsShader->m_ppObjects[i])
+		for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
 		{
-			m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-			m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+			if (m_pObjectsShader->m_ppObjects[i])
+			{
+				m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+				m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
+			}
 		}
 	}
-
-	m_pPlayer->ShadowRender(pd3dCommandList, pCamera, this);//플레이어는 애님쉐이더, 칼은 스탠다드 쉐이더
+	else if (iIndex == 0)
+	{
+		m_pPlayer->ShadowRender(pd3dCommandList, pCamera, this);//플레이어는 애님쉐이더, 칼은 스탠다드 쉐이더
+	}
 
 }
 

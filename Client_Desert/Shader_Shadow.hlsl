@@ -129,7 +129,7 @@ VS_TEXTURED_OUTPUT VSTextureToViewport(uint nVertexID : SV_VertexID)
 
 float4 PSTextureToViewport(VS_TEXTURED_OUTPUT input) : SV_Target
 {
-    float fDepthFromLight0 = gtxtDepthTextures[0].SampleLevel(gssWrap /*gssBorder*/, input.uv, 0).r;
+    float fDepthFromLight0 = gtxtDepthTextures[gfShadowMapIndex].SampleLevel(gssWrap /*gssBorder*/, input.uv, 0).r;
 
     return ((float4) (fDepthFromLight0 * 0.8f));
 }
