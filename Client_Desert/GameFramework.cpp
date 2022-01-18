@@ -52,10 +52,11 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CoInitialize(NULL);
 
+	CreateImgui();
+
 	BuildObjects();
 
 	CInputDev::GetInstance()->Ready_InputDev(m_hInstance, m_hWnd);
-
 	return(true);
 }
 
@@ -364,6 +365,27 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 			break;
 	}
 	return(0);
+}
+
+void CGameFramework::CreateImgui()
+{
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(m_hWnd);
+	ImGui_ImplDX12_Init(m_pd3dDevice, m_nSwapChainBuffers,
+		DXGI_FORMAT_R8G8B8A8_UNORM, m_pd3dRtvDescriptorHeap,
+		m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_pd3dRtvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
 void CGameFramework::OnDestroy()

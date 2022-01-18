@@ -17,8 +17,6 @@
 
 #define ANIMATION_CALLBACK_EPSILON		0.0165f
 
-
-
 //Light.hlsl과 맞추기
 //#define MAX_LIGHTS				4 
 //#define MAX_DEPTH_TEXTURES		MAX_LIGHTS

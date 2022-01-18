@@ -42,6 +42,8 @@ public:
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
 private:
+	void CreateImgui();
+private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
 
