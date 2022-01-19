@@ -568,7 +568,7 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			if (pstrToken[iLength - 1] == ')')
 			{
 				bLoad = false;
-				pstrToken[iLength - 4] = '\0'; //01 (1)
+				pstrToken[iLength - 4] = '\0'; //01 (1) //가로안에 두자리수 들어가는거 주의
 			}
 
 			int s = mapObj.size();
