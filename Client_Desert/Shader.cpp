@@ -851,18 +851,18 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 	//조명 위치에 따른 정보 초기화
 	for (int j = 0; j < MAX_LIGHTS; j++)
 	{
-		if (m_pLights[j].m_bEnable)
-		{
-			XMFLOAT3 xmf3Position = m_pLights[j].m_xmf3Position;
-			XMFLOAT3 xmf3Look = m_pLights[j].m_xmf3Direction;
+		//if (m_pLights[j].m_bEnable)
+		//{
+			XMFLOAT3 xmf3Position = m_pLights[0].m_xmf3Position;
+			XMFLOAT3 xmf3Look = m_pLights[0].m_xmf3Direction;
 			XMFLOAT3 xmf3Up = XMFLOAT3(0.0f, +1.0f, 0.0f);
 
 			XMMATRIX xmmtxView = XMMatrixLookToLH(XMLoadFloat3(&xmf3Position), XMLoadFloat3(&xmf3Look), XMLoadFloat3(&xmf3Up));
 
-			float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights[j].m_fRange;
+			float fNearPlaneDistance = 10.0f, fFarPlaneDistance = m_pLights[0].m_fRange;
 
 			XMMATRIX xmmtxProjection = XMMatrixIdentity();
-			if (m_pLights[j].m_nType == DIRECTIONAL_LIGHT)
+			if (m_pLights[0].m_nType == DIRECTIONAL_LIGHT)
 			{
 				float fWidth = _PLANE_WIDTH, fHeight = _PLANE_HEIGHT;
 				//직교 투영
@@ -877,11 +877,11 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 			XMStoreFloat4x4(&m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4x4ToTexture, xmmtxToTexture);
 
 			m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position = XMFLOAT4(xmf3Position.x, xmf3Position.y, xmf3Position.z, 1.0f);
-		}
-		else
-		{
-			m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position.w = 0.0f;
-		}
+		//}
+		//else
+		//{
+		//	m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position.w = 0.0f;
+		//}
 	}
 }
 
@@ -934,7 +934,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 {
 	//1번은 정적, 한번만
 	static  bool isOne = false;
-	//if (!isOne)
+	if (!isOne)
 		RenderToDepthTexture(pd3dCommandList, 1);
 	isOne = true;
 
@@ -954,21 +954,22 @@ void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCom
 
 	if (iIndex == 0)
 	{
-		//1번에 그린 깊이를 0번으로 복사?
+		////1번에 그린 깊이를 0번으로 복사?
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 		pd3dCommandList->CopyResource(m_pDepthTexture->GetTexture(0), m_pDepthTexture->GetTexture(1));
 
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 	//조명의 위치에서 씬을 렌더
 	Render(pd3dCommandList, m_ppDepthRenderCameras[iIndex], 0, iIndex);
 
-	//if (iIndex == 0)
+	if (iIndex == 0)
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+	else
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
 
 }
 
