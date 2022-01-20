@@ -85,7 +85,12 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
 private:
-	void RotateMesh(XMFLOAT3 xmf3Rotate);
+	void LerpRotate(float fTimeElapsed);
+
+private:
+	XMVECTOR m_xmVecNowRotate;
+	XMVECTOR m_xmVecNewRotate;
+
 };
 
 
