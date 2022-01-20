@@ -41,7 +41,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 300.0f, (_PLANE_WIDTH * 0.5f));
 	//m_pLights[0].m_xmf3Position = XMFLOAT3((_PLANE_WIDTH * 0.5f), 150.0f, (_PLANE_WIDTH * 0.5f));
-	m_pLights[0].m_fRange = 4000.0f;
+	m_pLights[0].m_fRange = 700.0f;
 
 	m_pLights[1].m_bEnable = false;
 	m_pLights[1].m_nType = SPOT_LIGHT;

@@ -544,7 +544,7 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 {
 	FILE* pInFile = NULL;
 
-	if (::fopen_s(&pInFile, "Data/MapTransform_NonPlane.bin", "rb"))
+	if (::fopen_s(&pInFile, "Data/MapTransform.bin", "rb"))
 		return;
 	//pInFile = fopen("Data/MapTransform.txt", "r");
 	//::rewind(pInFile); //스트림 맨위로
