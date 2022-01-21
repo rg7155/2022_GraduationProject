@@ -86,6 +86,8 @@ public:
 
 private:
 	void LerpRotate(float fTimeElapsed);
+	XMFLOAT3 MoveByDir(float fAngle, float fDistance);
+
 
 private:
 	XMVECTOR m_xmVecNowRotate;

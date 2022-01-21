@@ -60,60 +60,55 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+	float fRotateAngle = 0.f;
 	//if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	//if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&	
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// 위오
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 45.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		fRotateAngle = 45.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// 오아
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 135.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		fRotateAngle = 135.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))	// 아왼
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 225.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		fRotateAngle = -135.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))	// 왼위
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 315.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance );
+		fRotateAngle = -45.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 90.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		fRotateAngle = 90.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 270.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-
+		fRotateAngle = -90.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 360.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-
+		fRotateAngle = 0.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
 	{
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, 180.f);
-		xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+		// if(nowAngle < 0) fRotateAngle = -180.f;
+		if(XMVectorGetY(m_xmVecNowRotate) < 0.f)
+			fRotateAngle = -180.f;
+		else
+			fRotateAngle = 180.f;
+
 
 	}
 	else
 		return;
 
-	Move(xmf3Shift, bUpdateVelocity);
+	Move(MoveByDir(fRotateAngle, fDistance), bUpdateVelocity);
 }
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -284,6 +279,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 
 void CPlayer::LerpRotate(float fTimeElapsed)
 {
+
 	// 2. Lerp와 행렬 적용 프레임마다 진행
 	float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
 	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed*5.f);
@@ -299,6 +295,26 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 
+}
+
+XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
+{
+	// if(nowAngle < 0) fRotateAngle = -180.f;
+	if (fAngle > 0.f && int(XMVectorGetY(m_xmVecNowRotate)) == -180)
+	{
+		m_xmVecNowRotate = XMVectorSetY(m_xmVecNowRotate, 180.f);
+	}
+	else if (fAngle < 0.f && int(XMVectorGetY(m_xmVecNowRotate)) == 180)
+	{
+		m_xmVecNowRotate = XMVectorSetY(m_xmVecNowRotate, -180.f);
+	}
+
+	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+
+	m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, fAngle);
+	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
+	
+	return xmf3Shift;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
