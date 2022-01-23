@@ -9,6 +9,11 @@
 // Windows 헤더 파일:
 #include <windows.h>
 
+// imgui
+#include "imgui.h"
+#include "imgui_impl_win32.h"
+#include "imgui_impl_dx12.h"
+
 // C의 런타임 헤더 파일입니다.
 #include <stdlib.h>
 #include <malloc.h>

@@ -1,23 +1,21 @@
 #ifndef Define_h__
 #define Define_h__
 
-#define FRAME_BUFFER_WIDTH				800/*640*/
-#define FRAME_BUFFER_HEIGHT				600/*480*/
+#define FRAME_BUFFER_WIDTH				1280//800/*640*/
+#define FRAME_BUFFER_HEIGHT				720//600/*480*/
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
 #define EPSILON					1.0e-10f
 
 
-#define PLAYER_SPEED					1.5f
+#define PLAYER_SPEED					10.f
 
 #define ANIMATION_TYPE_ONCE				0
 #define ANIMATION_TYPE_LOOP				1
 #define ANIMATION_TYPE_PINGPONG			2
 
 #define ANIMATION_CALLBACK_EPSILON		0.0165f
-
-
 
 //Light.hlsl과 맞추기
 //#define MAX_LIGHTS				4 

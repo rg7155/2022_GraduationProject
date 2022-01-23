@@ -52,6 +52,8 @@ public:
 	void UpdateShaderVariables();
 	void ReleaseShaderVariables();
 private:
+	void CreateImgui();
+private:
 	HINSTANCE					m_hInstance;
 	HWND						m_hWnd; 
 

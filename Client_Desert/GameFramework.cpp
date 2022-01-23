@@ -52,10 +52,11 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CoInitialize(NULL);
 
+	CreateImgui();
+
 	BuildObjects();
 
 	CInputDev::GetInstance()->Ready_InputDev(m_hInstance, m_hWnd);
-
 	return(true);
 }
 
@@ -366,6 +367,27 @@ LRESULT CALLBACK CGameFramework::OnProcessingWindowMessage(HWND hWnd, UINT nMess
 	return(0);
 }
 
+void CGameFramework::CreateImgui()
+{
+	// Setup Dear ImGui context
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+
+	// Setup Dear ImGui style
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsClassic();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(m_hWnd);
+	ImGui_ImplDX12_Init(m_pd3dDevice, m_nSwapChainBuffers,
+		DXGI_FORMAT_R8G8B8A8_UNORM, m_pd3dRtvDescriptorHeap,
+		m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_pd3dRtvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+}
+
 void CGameFramework::OnDestroy()
 {
     ReleaseObjects();
@@ -469,14 +491,14 @@ void CGameFramework::ProcessInput()
 		{
 			if (cxDelta || cyDelta)
 			{
-				if (pKeysBuffer[VK_RBUTTON] & 0xF0)
+				/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
 					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
 				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);
+					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);*/
 			}
 			
 		}
-		m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED, true);
+		m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * m_GameTimer.GetTimeElapsed(), true);
 	}
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
