@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "Player.h"
 #include "Scene.h"
+#include "InputDev.h"
 
 CShader::CShader(int nPipelineStates /*= 1*/)
 {
@@ -1093,9 +1094,12 @@ void CTextureToViewportShader::ReleaseObjects()
 
 void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
 {
-	////f5 on/off
-	//if (!m_bRender)
-	//	return;
+	////f7 on/off
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_F7))
+		m_bRender = !m_bRender;
+
+	if (!m_bRender)
+		return;
 
 	float fSize = FRAME_BUFFER_WIDTH / 4;
 	D3D12_VIEWPORT d3dViewport = { 0.0f, 0.0f, fSize, fSize, 0.0f, 1.0f };

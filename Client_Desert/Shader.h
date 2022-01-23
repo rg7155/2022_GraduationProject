@@ -297,7 +297,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
 
-	bool		m_bRender = true;
+	bool		m_bRender = false;
 protected:
 	CTexture* m_pDepthTexture = NULL;
 };
