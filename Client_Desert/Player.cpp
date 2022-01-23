@@ -367,10 +367,9 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	
-	SetPlayerUpdatedContext(pContext);
-	SetCameraUpdatedContext(pContext);
+	//SetPlayerUpdatedContext(pContext);
+	//SetCameraUpdatedContext(pContext);
 
-	CHeightMapTerrain *pTerrain = (CHeightMapTerrain *)pContext;
 	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
 
 	if (pPlayerModel) delete pPlayerModel;
@@ -433,36 +432,12 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 
 void CTerrainPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 {
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pPlayerUpdatedContext;
-	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
-	XMFLOAT3 xmf3PlayerPosition = GetPosition();
-	float fHeight = pTerrain->GetHeight(xmf3PlayerPosition.x, xmf3PlayerPosition.z);
-	if (xmf3PlayerPosition.y < fHeight)
-	{
-		XMFLOAT3 xmf3PlayerVelocity = GetVelocity();
-		xmf3PlayerVelocity.y = 0.0f;
-		SetVelocity(xmf3PlayerVelocity);
-		xmf3PlayerPosition.y = fHeight;
-		SetPosition(xmf3PlayerPosition);
-	}
+
 }
 
 void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 {
-	CHeightMapTerrain* pTerrain = (CHeightMapTerrain*)m_pCameraUpdatedContext;
-	XMFLOAT3 xmf3Scale = pTerrain->GetScale();
-	XMFLOAT3 xmf3CameraPosition = m_pCamera->GetPosition();
-	float fHeight = pTerrain->GetHeight(xmf3CameraPosition.x, xmf3CameraPosition.z);
-	if (xmf3CameraPosition.y <= fHeight)
-	{
-		xmf3CameraPosition.y = fHeight;
-		m_pCamera->SetPosition(xmf3CameraPosition);
-		if (m_pCamera->GetMode() == THIRD_PERSON_CAMERA)
-		{
-			CThirdPersonCamera* p3rdPersonCamera = (CThirdPersonCamera*)m_pCamera;
-			p3rdPersonCamera->SetLookAt(GetPosition());
-		}
-	}
+
 }
 
 void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)

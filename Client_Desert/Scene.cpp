@@ -73,10 +73,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	XMFLOAT3 xmf3Scale(1.16f, 1.0f, 1.16f);
-	XMFLOAT4 xmf4Color(0.0f, 0.3f, 0.0f, 0.0f);
-	m_pTerrain = new CHeightMapTerrain(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, _T("Terrain/HeightMap.raw"), 257, 257, xmf3Scale, xmf4Color);
-
 	//CLoadedModelInfo *pAngrybotModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, "Model/Angrybot.bin", NULL);
 	//m_ppHierarchicalGameObjects[0] = new CAngrybotObject(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, pAngrybotModel, 1);
 	//m_ppHierarchicalGameObjects[0]->m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
@@ -90,7 +86,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CMapObjectsShader* pMapObjectsShader = new CMapObjectsShader();
 	pMapObjectsShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pMapObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL, m_pTerrain);
+	pMapObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = pMapObjectsShader;
 
 	m_pDepthRenderShader = new CDepthRenderShader(pMapObjectsShader, m_pLights);
@@ -149,7 +145,6 @@ void CScene::ReleaseObjects()
 	}
 
 
-	if (m_pTerrain) delete m_pTerrain;
 	if (m_pSkyBox) delete m_pSkyBox;
 
 	ReleaseShaderVariables();
@@ -160,7 +155,7 @@ void CScene::ReleaseObjects()
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
 {
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
-	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[11];
+	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[9];
 	SetDescriptorRange(pd3dDescriptorRanges, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);//t6: gtxtAlbedoTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7, 0);//t7: gtxtSpecularTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 2, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 8, 0);//t8: gtxtNormalTexture
@@ -169,11 +164,9 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetDescriptorRange(pd3dDescriptorRanges, 5, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 11, 0);//t11: gtxtDetailAlbedoTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 6, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 12, 0);//t12: gtxtDetailNormalTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 7, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 13, 0);//t13: gtxtSkyBoxTexture
-	SetDescriptorRange(pd3dDescriptorRanges, 8, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 1, 0);//t1: gtxtTerrainBaseTexture
-	SetDescriptorRange(pd3dDescriptorRanges, 9, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);//t2: gtxtTerrainDetailTexture
-	SetDescriptorRange(pd3dDescriptorRanges, 10, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, MAX_LIGHTS, 14, 0);//t14: gtxtDepthTextures
+	SetDescriptorRange(pd3dDescriptorRanges, 8, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, MAX_LIGHTS, 14, 0);//t14: gtxtDepthTextures
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[18];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[16];
 	SetRootParameterCBV(pd3dRootParameters, 0, 1, 0, D3D12_SHADER_VISIBILITY_ALL);//Camera
 	SetRootParameterConstants(pd3dRootParameters, 1, 33, 2, 0, D3D12_SHADER_VISIBILITY_ALL);//GameObject
 	SetRootParameterCBV(pd3dRootParameters, 2, 4, 0, D3D12_SHADER_VISIBILITY_ALL);//b4 Lights
@@ -187,9 +180,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterDescriptorTable(pd3dRootParameters, 10, 1, &pd3dDescriptorRanges[7], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterCBV(pd3dRootParameters, 11, 7, 0, D3D12_SHADER_VISIBILITY_VERTEX);//Skinned Bone Offsets
 	SetRootParameterCBV(pd3dRootParameters, 12, 8, 0, D3D12_SHADER_VISIBILITY_VERTEX);//Skinned Bone Transforms
-	SetRootParameterDescriptorTable(pd3dRootParameters, 13, 1, &pd3dDescriptorRanges[8], D3D12_SHADER_VISIBILITY_PIXEL);
-	SetRootParameterDescriptorTable(pd3dRootParameters, 14, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_PIXEL);
-	SetRootParameterDescriptorTable(pd3dRootParameters, RP_DEPTH_BUFFER, 1, &pd3dDescriptorRanges[10], D3D12_SHADER_VISIBILITY_PIXEL);
+	SetRootParameterDescriptorTable(pd3dRootParameters, RP_DEPTH_BUFFER, 1, &pd3dDescriptorRanges[8], D3D12_SHADER_VISIBILITY_PIXEL); //t14: gtxtDepthTextures
 	SetRootParameterCBV(pd3dRootParameters, RP_TO_LIGHT, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
 	SetRootParameterCBV(pd3dRootParameters, RP_FRAMEWORK_INFO, 5, 0, D3D12_SHADER_VISIBILITY_ALL);//b5 GameInfo
 
@@ -300,7 +291,6 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pd3dCommandList->SetGraphicsRootConstantBufferView(2, d3dcbLightsGpuVirtualAddress); //Lights
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
-	if (m_pTerrain) m_pTerrain->Render(pd3dCommandList, pCamera);
 
 	for (int i = 0; i < m_nGameObjects; i++) if (m_ppGameObjects[i]) m_ppGameObjects[i]->Render(pd3dCommandList, pCamera);
 	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
@@ -347,7 +337,6 @@ void CScene::ReleaseShaderVariables()
 void CScene::ReleaseUploadBuffers()
 {
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
-	if (m_pTerrain) m_pTerrain->ReleaseUploadBuffers();
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	if (m_pShadowShader) m_pShadowShader->ReleaseUploadBuffers();

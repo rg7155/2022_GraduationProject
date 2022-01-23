@@ -69,19 +69,6 @@ protected:
 	float								m_fElapsedTime = 0.0f;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CTerrainShader : public CShader
-{
-public:
-	CTerrainShader();
-	virtual ~CTerrainShader();
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState) override;
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
-};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

@@ -43,9 +43,9 @@
 #define _PLANE_HEIGHT			300
 
 //RootParameter
-#define RP_DEPTH_BUFFER		15
-#define RP_TO_LIGHT			16
-#define RP_FRAMEWORK_INFO	17
+#define RP_DEPTH_BUFFER		13
+#define RP_TO_LIGHT			14
+#define RP_FRAMEWORK_INFO	15
 
 #define NO_COPY(CLASSNAME)							\
 	private:										\
