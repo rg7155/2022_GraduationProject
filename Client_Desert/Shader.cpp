@@ -742,7 +742,7 @@ D3D12_RASTERIZER_DESC CDepthRenderShader::CreateRasterizerState(int nPipelineSta
 	d3dRasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 	d3dRasterizerDesc.FrontCounterClockwise = FALSE;
 #ifdef _WITH_RASTERIZER_DEPTH_BIAS
-	d3dRasterizerDesc.DepthBias = 100000;
+	d3dRasterizerDesc.DepthBias = 10000;
 #endif
 	d3dRasterizerDesc.DepthBiasClamp = 0.0f;
 	d3dRasterizerDesc.SlopeScaledDepthBias = 1.0f;
@@ -934,14 +934,14 @@ void CDepthRenderShader::ReleaseShaderVariables()
 
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	//1번은 정적, 한번만
+	//1번은 정적(맵), 한번만
 	static  bool isOne = false;
 	if (!isOne)
 		RenderToDepthTexture(pd3dCommandList, 1);
 	isOne = true;
 
 	
-	//0번은 동적, 계속
+	//0번은 동적(플레이어, 몬스터 등), 계속
 	RenderToDepthTexture(pd3dCommandList, 0);
 }
 
@@ -956,7 +956,7 @@ void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCom
 
 	if (iIndex == 0)
 	{
-		////1번에 그린 깊이를 0번으로 복사?
+		////1번에 그린 깊이를 0번으로 복사
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
 
 		pd3dCommandList->CopyResource(m_pDepthTexture->GetTexture(0), m_pDepthTexture->GetTexture(1));
@@ -990,6 +990,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 			if (m_pObjectsShader->m_ppObjects[i])
 			{
 				m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
+				m_pObjectsShader->m_ppObjects[i]->UpdateTransform(NULL);
 				m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
 			}
 		}
