@@ -10,7 +10,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-CPlayer::CPlayer()
+CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	m_pCamera = NULL;
 
@@ -34,6 +34,44 @@ CPlayer::CPlayer()
 
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
+
+
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
+
+	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "../Datas/Player_Blue/Adventurer_Aland_Blue.bin", NULL);
+	SetChild(pPlayerModel->m_pModelRootObject, true);
+
+
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
+	for (int i = 0; i < 9; i++)
+	{
+		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
+	m_pSkinnedAnimationController->SetTrackEnable(0, true);
+
+
+	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
+#ifdef _WITH_SOUND_RESOURCE
+	m_pSkinnedAnimationController->SetCallbackKey(0, 0.1f, _T("Footstep01"));
+	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));
+	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
+#else
+	//m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.001f, _T("Sound/Footstep01.wav"));
+	//m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.125f, _T("Sound/Footstep02.wav"));
+//	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.39f, _T("Sound/Footstep03.wav"));
+#endif
+	CAnimationCallbackHandler* pAnimationCallbackHandler = new CSoundCallbackHandler();
+	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	//SetPlayerUpdatedContext(pContext);
+	//SetCameraUpdatedContext(pContext);
+
+	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
+
+	if (pPlayerModel) delete pPlayerModel;
 
 }
 
@@ -109,6 +147,13 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 
 	Move(MoveByDir(fRotateAngle, fDistance), bUpdateVelocity);
+
+	// 다른 동작 중일 때는 움직이지 않음
+	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
+		return;
+
+	Change_Animation(ANIM::RUN);
+
 }
 
 void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -215,6 +260,29 @@ void CPlayer::Update(float fTimeElapsed)
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
 
 	LerpRotate(fTimeElapsed);
+
+
+
+	if (m_pSkinnedAnimationController)
+	{
+		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		// GET_RESOURCE, 공격 중에는 다른 동작으로 바뀌지 않음
+		if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
+			return;
+
+		// 공격키 확인
+		if (Check_Attack(fTimeElapsed))
+			return;
+
+		// 상호작용키 확인
+		if (Check_GetResource(fTimeElapsed))
+			return;
+
+		if (!Check_MoveInput())
+		{
+			Change_Animation(ANIM::IDLE_RELAXED);
+		}
+	}
 }
 
 CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
@@ -337,51 +405,7 @@ void CSoundCallbackHandler::HandleCallback(void *pCallbackData, float fTrackPosi
 #endif
 }
 
-CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
-{
-	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
-
-	CLoadedModelInfo *pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "../Datas/Player_Blue/Adventurer_Aland_Blue.bin", NULL);
-	SetChild(pPlayerModel->m_pModelRootObject, true);
-
-
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
-	for (int i = 0; i < 9; i++)
-	{
-		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
-		m_pSkinnedAnimationController->SetTrackEnable(i, false);
-	}
-	m_pSkinnedAnimationController->SetTrackEnable(0, true);
-
-
-	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
-#ifdef _WITH_SOUND_RESOURCE
-	m_pSkinnedAnimationController->SetCallbackKey(0, 0.1f, _T("Footstep01"));
-	m_pSkinnedAnimationController->SetCallbackKey(1, 0.5f, _T("Footstep02"));
-	m_pSkinnedAnimationController->SetCallbackKey(2, 0.9f, _T("Footstep03"));
-#else
-	//m_pSkinnedAnimationController->SetCallbackKey(1, 0, 0.001f, _T("Sound/Footstep01.wav"));
-	//m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.125f, _T("Sound/Footstep02.wav"));
-//	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.39f, _T("Sound/Footstep03.wav"));
-#endif
-	CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
-	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-	
-	//SetPlayerUpdatedContext(pContext);
-	//SetCameraUpdatedContext(pContext);
-
-	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
-
-	if (pPlayerModel) delete pPlayerModel;
-}
-
-CTerrainPlayer::~CTerrainPlayer()
-{
-}
-
-CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
+CCamera *CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
 	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
@@ -432,59 +456,17 @@ CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	return(m_pCamera);
 }
 
-void CTerrainPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
+void CPlayer::OnPlayerUpdateCallback(float fTimeElapsed)
 {
 
 }
 
-void CTerrainPlayer::OnCameraUpdateCallback(float fTimeElapsed)
+void CPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 {
 
 }
 
-void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
-{
-	// 다른 동작 중일 때는 움직이지 않음
-	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
-		return;
-
-	if (Check_MoveInput())
-	{
-		Change_Animation(ANIM::RUN);
-		CPlayer::Move(dwDirection, fDistance, bUpdateVelocity);
-	}
-
-}
-
-void CTerrainPlayer::Update(float fTimeElapsed)
-{
-	
-	CPlayer::Update(fTimeElapsed);
-
-
-	if (m_pSkinnedAnimationController)
-	{
-		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		// GET_RESOURCE, 공격 중에는 다른 동작으로 바뀌지 않음
-		if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
-			return;
-
-		// 공격키 확인
-		if (Check_Attack(fTimeElapsed))
-			return;
-
-		// 상호작용키 확인
-		if (Check_GetResource(fTimeElapsed))
-			return;
-
-		if(!Check_MoveInput())
-		{
-			Change_Animation(ANIM::IDLE_RELAXED);
-		}
-	}
-}
-
-bool CTerrainPlayer::Check_GetResource(float fTimeElapsed)
+bool CPlayer::Check_GetResource(float fTimeElapsed)
 {
 	if (m_eCurAnim == ANIM::GET_RESOURCE)
 	{
@@ -504,7 +486,7 @@ bool CTerrainPlayer::Check_GetResource(float fTimeElapsed)
 	return false;
 }
 
-bool CTerrainPlayer::Check_Attack(float fTimeElapsed)
+bool CPlayer::Check_Attack(float fTimeElapsed)
 {
 	// 공격 4가지 처리
 
@@ -530,7 +512,7 @@ bool CTerrainPlayer::Check_Attack(float fTimeElapsed)
 	return false;
 }
 
-void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
+void CPlayer::Change_Animation(ANIM eNewAnim)
 {
 	switch (eNewAnim)
 	{
@@ -608,7 +590,7 @@ void CTerrainPlayer::Change_Animation(ANIM eNewAnim)
 	}
 }
 
-bool CTerrainPlayer::Check_MoveInput()
+bool CPlayer::Check_MoveInput()
 {
 	// 이동 중이면
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)

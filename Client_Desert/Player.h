@@ -1,17 +1,16 @@
 #pragma once
 
-#define DIR_FORWARD				0x01
-#define DIR_BACKWARD			0x02
-#define DIR_LEFT				0x04
-#define DIR_RIGHT				0x08
-#define DIR_UP					0x10
-#define DIR_DOWN				0x20
-
 #include "Object.h"
 #include "Camera.h"
 
 class CPlayer : public CGameObject
 {
+private:
+	enum ANIM {
+		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
+		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8
+	};
+
 protected:
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
@@ -36,8 +35,8 @@ protected:
 	CCamera						*m_pCamera = NULL;
 
 public:
-	CPlayer();
-	virtual ~CPlayer();
+	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext);
+	~CPlayer();
 
 	XMFLOAT3 GetPosition() { return(m_xmf3Position); }
 	XMFLOAT3 GetLookVector() { return(m_xmf3Look); }
@@ -68,10 +67,10 @@ public:
 	
 	virtual void Update(float fTimeElapsed);
 
-	virtual void OnPlayerUpdateCallback(float fTimeElapsed) { }
+	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
 	void SetPlayerUpdatedContext(LPVOID pContext) { m_pPlayerUpdatedContext = pContext; }
 
-	virtual void OnCameraUpdateCallback(float fTimeElapsed) { }
+	virtual void OnCameraUpdateCallback(float fTimeElapsed);
 	void SetCameraUpdatedContext(LPVOID pContext) { m_pCameraUpdatedContext = pContext; }
 
 	virtual void CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
@@ -80,7 +79,7 @@ public:
 
 	CCamera *OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode);
 
-	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed) { return(NULL); }
+	virtual CCamera* ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
 	virtual void OnPrepareRender();
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL);
 
@@ -88,10 +87,21 @@ private:
 	void LerpRotate(float fTimeElapsed);
 	XMFLOAT3 MoveByDir(float fAngle, float fDistance);
 
+private:
+	bool Check_GetResource(float fTimeElapsed);
+	bool Check_Attack(float fTimeElapsed);
+	void Change_Animation(ANIM eNewAnim);
+
+	bool Check_MoveInput();
 
 private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecNewRotate;
+
+private:
+	ANIM	m_eCurAnim;			// 현재 애니메이션
+	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
+	float	m_fAnimElapsedTime;	// 현재 애니메이션의 흐른 시간
 
 };
 
@@ -104,41 +114,5 @@ public:
 
 public:
 	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
-};
-
-class CTerrainPlayer : public CPlayer
-{
-private:
-	enum ANIM {
-		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
-		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8
-	};
-public:
-	CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext=NULL);
-	virtual ~CTerrainPlayer();
-
-public:
-	virtual CCamera *ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed);
-
-	virtual void OnPlayerUpdateCallback(float fTimeElapsed);
-	virtual void OnCameraUpdateCallback(float fTimeElapsed);
-
-	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-
-	virtual void Update(float fTimeElapsed);
-
-
-private:
-	bool Check_GetResource(float fTimeElapsed);
-	bool Check_Attack(float fTimeElapsed);
-	void Change_Animation(ANIM eNewAnim);
-
-	bool Check_MoveInput();
-
-private:
-	ANIM	m_eCurAnim;			// 현재 애니메이션
-	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
-	float	m_fAnimElapsedTime;	// 현재 애니메이션의 흐른 시간
-
 };
 
