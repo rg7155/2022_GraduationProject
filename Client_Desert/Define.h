@@ -1,8 +1,8 @@
 #ifndef Define_h__
 #define Define_h__
 
-#define FRAME_BUFFER_WIDTH				1280//800/*640*/
-#define FRAME_BUFFER_HEIGHT				720//600/*480*/
+#define FRAME_BUFFER_WIDTH				/*1280*/800/*640*/
+#define FRAME_BUFFER_HEIGHT				/*720*/600/*480*/
 
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 

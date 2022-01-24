@@ -343,7 +343,8 @@ D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlo
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CStandardShader::CStandardShader(int nPipelineStates /*= 1*/) : CShader(nPipelineStates)
+CStandardShader::CStandardShader(int nPipelineStates /*= 1*/)
+	: CShader(nPipelineStates)
 {
 }
 
@@ -456,7 +457,7 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 	{
 		if (m_ppObjects[j])
 		{
-			m_ppObjects[j]->Animate(m_fElapsedTime);
+			//m_ppObjects[j]->Animate(m_fElapsedTime);
 			m_ppObjects[j]->UpdateTransform(NULL);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
@@ -583,6 +584,20 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
+void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
+{
+	CStandardShader::AnimateObjects(fTimeElapsed);
+
+	for (int j = 0; j < m_nObjects; j++)
+	{
+		if (m_ppObjects[j])
+		{
+			m_ppObjects[j]->Animate(m_fElapsedTime);
+			m_ppObjects[j]->UpdateTransform(NULL);
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CSkinnedAnimationObjectsShader::CSkinnedAnimationObjectsShader()
@@ -624,7 +639,7 @@ void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList *pd3dComma
 	{
 		if (m_ppObjects[j])
 		{
-			m_ppObjects[j]->Animate(m_fElapsedTime);
+			//m_ppObjects[j]->Animate(m_fElapsedTime);
 			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
 		}
 	}
@@ -650,8 +665,6 @@ CDepthRenderShader::~CDepthRenderShader()
 	if (m_pToLightSpaces) delete m_pToLightSpaces;
 }
 
-
-
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	//애니메이션x
@@ -661,7 +674,6 @@ D3D12_SHADER_BYTECODE CDepthRenderShader::CreateVertexShader(ID3DBlob** ppd3dSha
 		return(CSkinnedAnimationStandardShader::CreateVertexShader(ppd3dShaderBlob, nPipelineState));
 
 }
-
 
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
@@ -968,7 +980,7 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CShadowMapShader::CShadowMapShader(CStandardObjectsShader* pObjectsShader)
 {
 	m_pObjectsShader = pObjectsShader;
@@ -1016,14 +1028,6 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 	//깊이버퍼 update
 	UpdateShaderVariables(pd3dCommandList);
 
-	//for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
-	//{
-	//	if (m_pObjectsShader->m_ppObjects[i])
-	//	{
-	//		m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-	//		m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
-	//	}
-	//}
 	m_pObjectsShader->Render(pd3dCommandList, pCamera);
 
 	m_pPlayer->Render(pd3dCommandList, pCamera);
@@ -1031,7 +1035,7 @@ void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamer
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CTextureToViewportShader::CTextureToViewportShader()
 {
 }
