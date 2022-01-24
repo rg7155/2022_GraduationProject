@@ -98,6 +98,8 @@ private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecNewRotate;
 
+	XMVECTOR m_xmVecSrc;
+
 private:
 	ANIM	m_eCurAnim;			// 현재 애니메이션
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
