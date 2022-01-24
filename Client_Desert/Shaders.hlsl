@@ -22,6 +22,25 @@ cbuffer cbGameObjectInfo : register(b2)
 
 #include "Light.hlsl"
 
+struct CB_TOOBJECTSPACE
+{
+	matrix mtxToTexture;
+	float4 f4Position;
+};
+
+cbuffer cbToLightSpace : register(b3)
+{
+	CB_TOOBJECTSPACE gcbToLightSpaces[MAX_LIGHTS];
+};
+
+cbuffer cbFrameworkInfo : register(b5)
+{
+    float gfCurrentTime : packoffset(c0.x);
+    float gfElapsedTime : packoffset(c0.y);
+    float gfShadowMapIndex : packoffset(c0.z);
+};
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //#define _WITH_VERTEX_LIGHTING
@@ -61,19 +80,29 @@ struct VS_STANDARD_OUTPUT
 	float3 tangentW : TANGENT;
 	float3 bitangentW : BITANGENT;
 	float2 uv : TEXCOORD;
+	
+    float4 uvs[MAX_LIGHTS] : TEXCOORD1;
 };
 
 VS_STANDARD_OUTPUT VSStandard(VS_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
 
-	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
+	float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+	output.positionW = positionW.xyz;
 	output.normalW = mul(input.normal, (float3x3)gmtxGameObject);
 	output.tangentW = mul(input.tangent, (float3x3)gmtxGameObject);
 	output.bitangentW = mul(input.bitangent, (float3x3)gmtxGameObject);
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	for (int i = 0; i < MAX_LIGHTS; i++)
+	{
+		//0Àº Á¶¸í²û, Á¶¸í ÁÂÇ¥°è·Î ¹Ù²Ù°í ÅØ½ºÃÄ ÁÂÇ¥°è·Î ¹Ù²Þ
+		if (gcbToLightSpaces[i].f4Position.w != 0.0f)
+			output.uvs[i] = mul(positionW, gcbToLightSpaces[i].mtxToTexture);
+	}
+	
 	return(output);
 }
 
@@ -109,8 +138,9 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	{
 		normalW = normalize(input.normalW);
 	}
-	float4 uvs[MAX_LIGHTS];
-    float4 cIllumination = Lighting(input.positionW, normalW, false, uvs);
+	//float4 uvs[MAX_LIGHTS];
+	//float4 cIllumination = Lighting(input.positionW, normalW, false, uvs);
+	float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
 	return(lerp(cColor, cIllumination, 0.5f));
 }
 
@@ -144,80 +174,30 @@ VS_STANDARD_OUTPUT VSSkinnedAnimationStandard(VS_SKINNED_STANDARD_INPUT input)
 {
 	VS_STANDARD_OUTPUT output;
 
-	//output.positionW = float3(0.0f, 0.0f, 0.0f);
-	//output.normalW = float3(0.0f, 0.0f, 0.0f);
-	//output.tangentW = float3(0.0f, 0.0f, 0.0f);
-	//output.bitangentW = float3(0.0f, 0.0f, 0.0f);
-	//matrix mtxVertexToBoneWorld;
-	//for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
-	//{
-	//	mtxVertexToBoneWorld = mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
-	//	output.positionW += input.weights[i] * mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
-	//	output.normalW += input.weights[i] * mul(input.normal, (float3x3)mtxVertexToBoneWorld);
-	//	output.tangentW += input.weights[i] * mul(input.tangent, (float3x3)mtxVertexToBoneWorld);
-	//	output.bitangentW += input.weights[i] * mul(input.bitangent, (float3x3)mtxVertexToBoneWorld);
-	//}
 	float4x4 mtxVertexToBoneWorld = (float4x4)0.0f;
 	for (int i = 0; i < MAX_VERTEX_INFLUENCES; i++)
 	{
-//		mtxVertexToBoneWorld += input.weights[i] * gpmtxBoneTransforms[input.indices[i]];
 		mtxVertexToBoneWorld += input.weights[i] * mul(gpmtxBoneOffsets[input.indices[i]], gpmtxBoneTransforms[input.indices[i]]);
 	}
-	output.positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld).xyz;
+	float4 positionW = mul(float4(input.position, 1.0f), mtxVertexToBoneWorld);
+	output.positionW = positionW.xyz;
 	output.normalW = mul(input.normal, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.tangentW = mul(input.tangent, (float3x3)mtxVertexToBoneWorld).xyz;
 	output.bitangentW = mul(input.bitangent, (float3x3)mtxVertexToBoneWorld).xyz;
-
-//	output.positionW = mul(float4(input.position, 1.0f), gmtxGameObject).xyz;
-
 	output.position = mul(mul(float4(output.positionW, 1.0f), gmtxView), gmtxProjection);
 	output.uv = input.uv;
 
+	for (int j = 0; j < MAX_LIGHTS; j++)
+	{
+		//0Àº Á¶¸í²û, Á¶¸í ÁÂÇ¥°è·Î ¹Ù²Ù°í ÅØ½ºÃÄ ÁÂÇ¥°è·Î ¹Ù²Þ
+		if (gcbToLightSpaces[j].f4Position.w != 0.0f)
+			output.uvs[j] = mul(positionW, gcbToLightSpaces[j].mtxToTexture);
+	}
+	
 	return(output);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-Texture2D gtxtTerrainBaseTexture : register(t1);
-Texture2D gtxtTerrainDetailTexture : register(t2);
 
-struct VS_TERRAIN_INPUT
-{
-	float3 position : POSITION;
-	float4 color : COLOR;
-	float2 uv0 : TEXCOORD0;
-	float2 uv1 : TEXCOORD1;
-};
-
-struct VS_TERRAIN_OUTPUT
-{
-	float4 position : SV_POSITION;
-	float4 color : COLOR;
-	float2 uv0 : TEXCOORD0;
-	float2 uv1 : TEXCOORD1;
-};
-
-VS_TERRAIN_OUTPUT VSTerrain(VS_TERRAIN_INPUT input)
-{
-	VS_TERRAIN_OUTPUT output;
-
-	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-	output.color = input.color;
-	output.uv0 = input.uv0;
-	output.uv1 = input.uv1;
-
-	return(output);
-}
-
-float4 PSTerrain(VS_TERRAIN_OUTPUT input) : SV_TARGET
-{
-	float4 cBaseTexColor = gtxtTerrainBaseTexture.Sample(gssWrap, input.uv0);
-	float4 cDetailTexColor = gtxtTerrainDetailTexture.Sample(gssWrap, input.uv1);
-//	float4 cColor = saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-	float4 cColor = input.color * saturate((cBaseTexColor * 0.5f) + (cDetailTexColor * 0.5f));
-
-	return(cColor);
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

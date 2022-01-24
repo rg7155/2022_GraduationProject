@@ -7,6 +7,13 @@
 #include "Player.h"
 #include "Scene.h"
 
+struct CB_FRAMEWORK_INFO
+{
+	float					m_fCurrentTime;
+	float					m_fElapsedTime;
+	float					m_fShadowMapIndex;
+};
+
 class CGameFramework
 {
 public:
@@ -41,6 +48,9 @@ public:
 	void OnProcessingKeyboardMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 	LRESULT CALLBACK OnProcessingWindowMessage(HWND hWnd, UINT nMessageID, WPARAM wParam, LPARAM lParam);
 
+	void CreateShaderVariables();
+	void UpdateShaderVariables();
+	void ReleaseShaderVariables();
 private:
 	void CreateImgui();
 private:
@@ -87,5 +97,10 @@ private:
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];
+
+	//shader
+	ID3D12Resource				*m_pd3dcbFrameworkInfo = NULL;
+	CB_FRAMEWORK_INFO			*m_pcbMappedFrameworkInfo = NULL;
+	float						m_fShadowMapIndex = 0;
 };
 

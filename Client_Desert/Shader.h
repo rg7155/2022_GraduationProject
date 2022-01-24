@@ -69,19 +69,6 @@ protected:
 	float								m_fElapsedTime = 0.0f;
 };
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-class CTerrainShader : public CShader
-{
-public:
-	CTerrainShader();
-	virtual ~CTerrainShader();
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState) override;
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
-};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -103,7 +90,7 @@ public:
 class CStandardShader : public CShader
 {
 public:
-	CStandardShader();
+	CStandardShader(int nPipelineStates = 1);
 	virtual ~CStandardShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState) override;
@@ -151,10 +138,11 @@ public:
 class CSkinnedAnimationStandardShader : public CStandardShader
 {
 public:
-	CSkinnedAnimationStandardShader();
+	CSkinnedAnimationStandardShader(int nPipelineStates = 1);
 	virtual ~CSkinnedAnimationStandardShader();
 
 	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState) override;
+
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
 };
 
@@ -181,20 +169,6 @@ protected:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-class CIlluminatedShader : public CShader
-{
-public:
-	CIlluminatedShader();
-	virtual ~CIlluminatedShader();
-
-	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState) override;
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)  override;
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)  override;
-
-	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState = 0);
-};
-
 
 struct TOOBJECTSPACEINFO
 {
@@ -210,7 +184,7 @@ struct TOLIGHTSPACES
 struct LIGHT;
 
 #define _WITH_RASTERIZER_DEPTH_BIAS
-class CDepthRenderShader : public CIlluminatedShader
+class CDepthRenderShader : public CSkinnedAnimationStandardShader
 {
 public:
 	CDepthRenderShader(CStandardObjectsShader* pObjectsShader, LIGHT* pLights);
@@ -221,10 +195,14 @@ public:
 	virtual DXGI_FORMAT GetRTVFormat(int nPipelineState, int nRenderTarget) { return(DXGI_FORMAT_R32_FLOAT); }
 	virtual DXGI_FORMAT GetDSVFormat(int nPipelineState) { return(DXGI_FORMAT_D32_FLOAT); }
 
+	virtual D3D12_INPUT_LAYOUT_DESC CreateInputLayout(int nPipelineState) override;
 	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState);
 
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
+
+	virtual void CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState = 0)override;
 
 	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
@@ -234,8 +212,8 @@ public:
 	virtual void ReleaseObjects();
 
 	void PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList);
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+	void RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, int iIndex);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, int iIndex = 0);
 
 protected:
 	//깊이 저장 텍스쳐
@@ -271,26 +249,20 @@ protected:
 	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
 };
 
-class CShadowMapShader : public CIlluminatedShader
+class CShadowMapShader : public CStandardShader
 {
 public:
 	CShadowMapShader(CStandardObjectsShader* pObjectsShader);
 	virtual ~CShadowMapShader();
 
-	virtual D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState);
-
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
 
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-	virtual void ReleaseShaderVariables();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed) {}
 	virtual void ReleaseObjects();
-
-	virtual void ReleaseUploadBuffers();
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
 
@@ -325,7 +297,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
 
-	bool		m_bRender = true;
+	bool		m_bRender = false;
 protected:
 	CTexture* m_pDepthTexture = NULL;
 };

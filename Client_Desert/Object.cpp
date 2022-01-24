@@ -199,7 +199,8 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 
 	for (int i = 0; i < m_nTextures; i++)
 	{
-		if (m_ppTextures[i]) m_ppTextures[i]->UpdateShaderVariable(pd3dCommandList, 0);
+		if (m_ppTextures[i])
+			m_ppTextures[i]->UpdateShaderVariable(pd3dCommandList, 0);
 	}
 }
 
@@ -728,6 +729,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 
 	if (m_pMesh)
 	{
+		//월드
 		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
 
 		if (m_nMaterials > 0)
@@ -736,7 +738,10 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 			{
 				if (m_ppMaterials[i])
 				{
-					if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					if (m_ppMaterials[i]->m_pShader) 
+						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+
+					//컬러,텍스쳐
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 				}
 
@@ -749,8 +754,10 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
 }
 
-void CGameObject::MeshRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera/*= NULL*/, CShader* pShader /*= NULL*/)
 {
+	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+
 	if (m_pMesh)
 	{
 		UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
@@ -761,7 +768,15 @@ void CGameObject::MeshRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 			{
 				if (m_ppMaterials[i])
 				{
-					//if (m_ppMaterials[i]->m_pShader) m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
+					if (m_ppMaterials[i]->m_pShader)
+					{
+						//pShaders는 CDepthRenderShader, 
+						//파이프라인 바꿔주기
+						if (!m_ppMaterials[i]->m_isAnimationShader)
+							pShader->OnPrepareRender(pd3dCommandList, 0);
+						else
+							pShader->OnPrepareRender(pd3dCommandList, 1);
+					}
 					m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 				}
 
@@ -770,8 +785,8 @@ void CGameObject::MeshRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 		}
 	}
 
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling) m_pSibling->ShadowRender(pd3dCommandList, pCamera, pShader);
+	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, pShader);
 }
 
 
@@ -1286,45 +1301,7 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-CHeightMapTerrain::CHeightMapTerrain(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, LPCTSTR pFileName, int nWidth, int nLength, XMFLOAT3 xmf3Scale, XMFLOAT4 xmf4Color) : CGameObject(1)
-{
-	m_nWidth = nWidth;
-	m_nLength = nLength;
 
-	m_xmf3Scale = xmf3Scale;
-
-	m_pHeightMapImage = new CHeightMapImage(pFileName, nWidth, nLength, xmf3Scale);
-
-	CHeightMapGridMesh *pMesh = new CHeightMapGridMesh(pd3dDevice, pd3dCommandList, 0, 0, nWidth, nLength, xmf3Scale, xmf4Color, m_pHeightMapImage);
-	SetMesh(pMesh);
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	CTexture *pTerrainBaseTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTerrainBaseTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Terrain/Base_Texture.dds", 0);
-
-	CTexture *pTerrainDetailTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTerrainDetailTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Terrain/Detail_Texture_7.dds", 0);
-
-	CTerrainShader *pTerrainShader = new CTerrainShader();
-	pTerrainShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
-	pTerrainShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
-	CScene::CreateShaderResourceViews(pd3dDevice, pTerrainBaseTexture, 13, false);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTerrainDetailTexture, 14, false);
-
-	CMaterial *pTerrainMaterial = new CMaterial(2);
-	pTerrainMaterial->SetTexture(pTerrainBaseTexture, 0);
-	pTerrainMaterial->SetTexture(pTerrainDetailTexture, 1);
-	pTerrainMaterial->SetShader(pTerrainShader);
-
-	SetMaterial(0, pTerrainMaterial);
-}
-
-CHeightMapTerrain::~CHeightMapTerrain(void)
-{
-	if (m_pHeightMapImage) delete m_pHeightMapImage;
-}
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 
