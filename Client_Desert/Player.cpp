@@ -107,22 +107,22 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&	
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// 위오
 	{
-		xmDstVec = XMVectorSet(1.f / sqrtf(2), 0.f, 1.f / sqrtf(2), 1.f);
+		xmDstVec = XMVectorSet(1.f, 0.f, 1.f, 1.f);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// 오아
 	{
-		xmDstVec = XMVectorSet(1.f / sqrtf(2), 0.f, -1.f / sqrtf(2), 1.f);
+		xmDstVec = XMVectorSet(1.f, 0.f, -1.f, 1.f);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))	// 아왼
 	{
-		xmDstVec = XMVectorSet(-1.f / sqrtf(2),0.f, -1.f / sqrtf(2), 1.f);
+		xmDstVec = XMVectorSet(-1.f, 0.f, -1.f, 1.f);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))	// 왼위
 	{
-		xmDstVec = XMVectorSet(-1.f / sqrtf(2),0.f , 1.f / sqrtf(2), 1.f);
+		xmDstVec = XMVectorSet(-1.f, 0.f, 1.f, 1.f);
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
@@ -143,21 +143,20 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	else
 		return;
 
-	XMVECTOR angleVec = XMVector3AngleBetweenNormals(m_xmVecSrc, xmDstVec);
-	float fBetAngle = XMVectorGetX(angleVec);
+	xmDstVec = XMVector3Normalize(xmDstVec);
 
-	if (int(fBetAngle) != 0)
+	float fCosTheta = XMVectorGetX(XMVector3Dot(m_xmVecSrc, xmDstVec));
+	float fAngle = XMConvertToDegrees(acos(fCosTheta));
+
+	if (int(fAngle) != 0)
 	{
-		float fRotateAngle = XMConvertToDegrees(fBetAngle);
-		cout << fRotateAngle << endl;
-		m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, fRotateAngle);
 		m_xmVecSrc = xmDstVec;
 	}
 	//XMStoreFloat3(&m_xmf3Look, xmResVec);
 
 	Move(MoveByDir(XMVectorGetY(m_xmVecNewRotate), fDistance), bUpdateVelocity);
 
-	// 다른 동작 중일 때는 움직이지 않음
+	// 다른 동작 중일 때는 움직이지 않음..
 	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
 		return;
 
