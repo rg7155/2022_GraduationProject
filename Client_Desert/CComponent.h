@@ -36,11 +36,15 @@ public:
 	bool		Isin_Frustum_ForObject(XMFLOAT3* pPos, XMFLOAT3& fRadius);
 
 private:
+	XMFLOAT4				GetPlane(XMFLOAT3& xmf3Pos1, XMFLOAT3& xmf3Pos2, XMFLOAT3& xmf3Pos3);
+
+private
 	XMFLOAT3				m_xmf3Point[8];
 	XMFLOAT4				m_xmf4Plane[6];
 
 public:
 	static CFrustum*		Create();
+	virtual CComponent*		Clone(void);
 	virtual void			Free(void);
 };
 #endif // Component_h__
