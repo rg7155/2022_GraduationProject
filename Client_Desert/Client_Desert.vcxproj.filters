@@ -58,6 +58,9 @@
     <Filter Include="소스 파일\imgui_sources">
       <UniqueIdentifier>{343e0a12-a195-4125-ba13-55d5013d5bf7}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\08. Component">
+      <UniqueIdentifier>{3d7e384f-cebd-47e8-b510-306ed61894aa}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client_Desert.h">
@@ -144,6 +147,9 @@
     <ClInclude Include="imgui\imstb_rectpack.h">
       <Filter>소스 파일\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="CComponent.h">
+      <Filter>소스 파일\08. Component</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -208,6 +214,9 @@
     </ClCompile>
     <ClCompile Include="imgui\sources\main.cpp">
       <Filter>소스 파일\imgui_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="CComponent.cpp">
+      <Filter>소스 파일\08. Component</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

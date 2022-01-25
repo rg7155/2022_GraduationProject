@@ -6,8 +6,7 @@
 
 #include "Shader.h"
 #include "Player.h"
-
-
+#include "CComponent.h"
 
 struct LIGHT
 {
