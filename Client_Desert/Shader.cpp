@@ -559,7 +559,7 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			}
 
 
-			m_ppObjects[i] = new CGameObject();
+			m_ppObjects[i] = new CMapObject();
 			m_ppObjects[i]->SetChild(pMapModel->m_pModelRootObject, true);
 
 			//크자이로 읽어옴

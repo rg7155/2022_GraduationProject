@@ -71,6 +71,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	BuildDefaultLightsAndMaterials();
 
+	CreateComponent();
+
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_nShaders = 1;
@@ -96,6 +98,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 }
 
 void CScene::ReleaseObjects()
@@ -144,6 +147,8 @@ void CScene::ReleaseObjects()
 	ReleaseShaderVariables();
 
 	if (m_pLights) delete[] m_pLights;
+
+	ReleaseComponent();
 }
 
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
@@ -245,6 +250,15 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 void CScene::CreateComponent()
 {
 	m_pComponent[COM_FRUSTUM] = CFrustum::Create();
+}
+
+void CScene::ReleaseComponent()
+{
+	for (int i = 0; i < COM_END; ++i)
+	{
+		if (m_pComponent[i])
+			m_pComponent[i]->Release();
+	}
 }
 
 void CScene::AnimateObjects(float fTimeElapsed)

@@ -5,6 +5,13 @@
 
 class CComponent
 {
+private:
+	int								m_nReferences = 0;
+
+public:
+	void AddRef() { m_nReferences++; }
+	void Release() { if (--m_nReferences <= 0) delete this; }
+
 protected:
 	explicit CComponent(void) {};
 	virtual ~CComponent(void) {};
@@ -14,9 +21,6 @@ public:
 
 public:
 	virtual CComponent* Clone(void) = 0;
-
-protected:
-	virtual void  Free(void) = 0;
 
 };
 
@@ -46,6 +50,5 @@ private:
 public:
 	static CFrustum*		Create();
 	virtual CComponent*		Clone(void);
-	virtual void			Free(void);
 };
 #endif // Component_h__

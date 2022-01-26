@@ -102,14 +102,16 @@ CFrustum* CFrustum::Create()
 {
 	CFrustum* pInstance = new CFrustum;
 	pInstance->Ready_Frustum();
+	pInstance->AddRef();
 	return pInstance;
 }
 
 CComponent* CFrustum::Clone(void)
 {
-	return new CFrustum(*this);
+	CComponent* pInstance = new CFrustum(*this);
+	pInstance->AddRef();
+	return pInstance;
 }
 
-void CFrustum::Free(void)
-{
-}
+
+

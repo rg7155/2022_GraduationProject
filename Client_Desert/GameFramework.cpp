@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "GameFramework.h"
 #include "InputDev.h"
+#include "GameMgr.h"
 
 CGameFramework::CGameFramework()
 {
@@ -428,7 +429,8 @@ void CGameFramework::BuildObjects()
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	m_pScene = new CScene();
-	if (m_pScene) m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
+	CGameMgr::GetInstance()->SetScene(m_pScene);
+	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 #ifdef _WITH_TERRAIN_PLAYER
 	CTerrainPlayer *pPlayer = new CTerrainPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature());
@@ -441,6 +443,9 @@ void CGameFramework::BuildObjects()
 	m_pCamera = m_pPlayer->GetCamera();
 
 	/// ///////////////////
+	CGameMgr::GetInstance()->SetPlayer(m_pPlayer);
+	CGameMgr::GetInstance()->SetCamera(m_pCamera); 
+	
 	m_pScene->m_pDepthRenderShader->m_pPlayer = m_pPlayer;
 	m_pScene->m_pShadowShader->m_pPlayer = m_pPlayer;
 	/// ///////////////////

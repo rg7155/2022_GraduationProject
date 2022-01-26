@@ -306,6 +306,13 @@ CGameObject::~CGameObject()
 	if (m_ppMaterials) delete[] m_ppMaterials;
 
 	if (m_pSkinnedAnimationController) delete m_pSkinnedAnimationController;
+
+	for (int i = 0; i < COM_END; i++)
+	{
+		if (m_pComponent[i]) 
+			m_pComponent[i]->Release();
+	}
+
 }
 
 void CGameObject::AddRef() 
@@ -1062,4 +1069,21 @@ CMonsterObject::CMonsterObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 
 CMonsterObject::~CMonsterObject()
 {
+
+}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CMapObject::CMapObject()
+{
+	CloneComponent();
+}
+
+CMapObject::~CMapObject()
+{
+	//GameObject 소멸자에서 컴포넌트 ref 감소
+}
+
+void CMapObject::CloneComponent()
+{
+	m_pComponent[COM_FRUSTUM] = CGameMgr::GetInstance()->GetScene()->m_pComponent[COM_FRUSTUM]->Clone();
 }

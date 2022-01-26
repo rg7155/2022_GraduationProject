@@ -7,6 +7,8 @@
 #include "Mesh.h"
 #include "Camera.h"
 #include "Animation.h"
+#include "Component.h"
+#include "GameMgr.h"
 
 #define DIR_FORWARD					0x01
 #define DIR_BACKWARD				0x02
@@ -279,6 +281,14 @@ public:
 	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, bool isBinary = true);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
+
+protected:
+	virtual void	CloneComponent() {};
+
+protected:
+	//¾À¿¡¼­ º¹Á¦ÇÑ ÄÄÆ÷³ÍÆ®¸¦ ´ã¾ÆµÒ
+	CComponent*		m_pComponent[COM_END];
+
 };
 
 
@@ -301,4 +311,15 @@ public:
 	virtual ~CMonsterObject();
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+class CMapObject : public CGameObject
+{
+public:
+	CMapObject();
+	virtual ~CMapObject();
+
+private:
+	virtual void	CloneComponent() override;
+
+};
