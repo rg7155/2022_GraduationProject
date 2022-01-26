@@ -6,6 +6,7 @@
 #include "Player.h"
 #include "Shader.h"
 #include "InputDev.h"
+#include "Animation.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
@@ -319,23 +320,6 @@ XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-#define _WITH_DEBUG_CALLBACK_DATA
-
-void CSoundCallbackHandler::HandleCallback(void *pCallbackData, float fTrackPosition)
-{
-   _TCHAR *pWavName = (_TCHAR *)pCallbackData; 
-#ifdef _WITH_DEBUG_CALLBACK_DATA
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("%s(%f)\n"), pWavName, fTrackPosition);
-	OutputDebugString(pstrDebug);
-#endif
-#ifdef _WITH_SOUND_RESOURCE
-   PlaySound(pWavName, ::ghAppInstance, SND_RESOURCE | SND_ASYNC);
-#else
-   PlaySound(pWavName, NULL, SND_FILENAME | SND_ASYNC);
-#endif
-}
 
 CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
 {
@@ -364,8 +348,8 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	//m_pSkinnedAnimationController->SetCallbackKey(1, 1, 0.125f, _T("Sound/Footstep02.wav"));
 //	m_pSkinnedAnimationController->SetCallbackKey(1, 2, 0.39f, _T("Sound/Footstep03.wav"));
 #endif
-	CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
-	m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);
+	//CAnimationCallbackHandler *pAnimationCallbackHandler = new CSoundCallbackHandler();
+	//m_pSkinnedAnimationController->SetAnimationCallbackHandler(1, pAnimationCallbackHandler);s
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 	

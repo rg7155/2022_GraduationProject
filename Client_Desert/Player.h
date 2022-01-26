@@ -9,6 +9,7 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "InputDev.h"
 
 class CPlayer : public CGameObject
 {
@@ -96,15 +97,6 @@ private:
 };
 
 
-class CSoundCallbackHandler : public CAnimationCallbackHandler
-{
-public:
-	CSoundCallbackHandler() { }
-	~CSoundCallbackHandler() { }
-
-public:
-	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
-};
 
 class CTerrainPlayer : public CPlayer
 {

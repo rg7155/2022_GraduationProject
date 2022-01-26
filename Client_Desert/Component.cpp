@@ -1,4 +1,4 @@
-#include "CComponent.h"
+#include "Component.h"
 #include "Camera.h"
 
 CFrustum::CFrustum()
