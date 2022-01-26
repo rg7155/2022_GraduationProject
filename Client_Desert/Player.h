@@ -85,7 +85,7 @@ public:
 
 private:
 	void LerpRotate(float fTimeElapsed);
-	XMFLOAT3 MoveByDir(float fAngle, float fDistance);
+	XMFLOAT3 MoveByDir(float fDistance);
 
 private:
 	bool Check_GetResource(float fTimeElapsed);

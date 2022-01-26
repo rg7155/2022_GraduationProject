@@ -143,18 +143,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	else
 		return;
 
-	xmDstVec = XMVector3Normalize(xmDstVec);
-
-	float fCosTheta = XMVectorGetX(XMVector3Dot(m_xmVecSrc, xmDstVec));
-	float fAngle = XMConvertToDegrees(acos(fCosTheta));
-
-	if (int(fAngle) != 0)
-	{
-		m_xmVecSrc = xmDstVec;
-	}
-	//XMStoreFloat3(&m_xmf3Look, xmResVec);
-
-	Move(MoveByDir(XMVectorGetY(m_xmVecNewRotate), fDistance), bUpdateVelocity);
+	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
+	Move(MoveByDir(fDistance), bUpdateVelocity);
 
 	// 다른 동작 중일 때는 움직이지 않음..
 	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
@@ -358,23 +348,29 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 {
 
 	// 2. Lerp와 행렬 적용 프레임마다 진행
-	float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
+	//float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
 	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed*5.f);
+	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
+	//XMVECTOR xmVecRight = XMVector3Cross(XMLoadFloat3(&m_xmf3Look), XMLoadFloat3(&m_xmf3Up));
+
+	//XMStoreFloat3(&m_xmf3Right, xmVecRight);
 
 	//// 보간된 회전값이 범위를 벗어날 경우
 	//if (XMVectorGetY(m_xmVecNowRotate) > 360.0f)
 	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowRotate) - 360.f);
 	//if (XMVectorGetY(m_xmVecNowRotate) < 0.0f)
 	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowdwRotate) + 360.f);
-	float fRotateAngle = XMVectorGetY(m_xmVecNowRotate) - fPrevAngle;
+	//float fRotateAngle = XMVectorGetY(m_xmVecNowRotate) - fPrevAngle;
 
-	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fRotateAngle));
-	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	//XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fRotateAngle));
+	//m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+
+
+	//m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 
 }
 
-XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
+XMFLOAT3 CPlayer::MoveByDir(float fDistance)
 {
 	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
