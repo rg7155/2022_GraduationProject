@@ -1,4 +1,5 @@
 #include "CComponent.h"
+#include "Camera.h"
 
 CFrustum::CFrustum()
 {
@@ -37,10 +38,10 @@ bool CFrustum::Isin_Frustum(XMFLOAT3* pPos)
 	//		return false;
 	//}
 
-	//return true;
+	return true;
 }
 
-bool CFrustum::Isin_Frustum(XMFLOAT3* pPos, const float& fRadius)
+bool CFrustum::Isin_Frustum(XMFLOAT3* pPos, float& fRadius)
 {
 	float	fDistance = 0.f;
 
@@ -56,23 +57,22 @@ bool CFrustum::Isin_Frustum(XMFLOAT3* pPos, const float& fRadius)
 	return true;
 }
 
-bool CFrustum::Isin_Frustum_ForObject(XMFLOAT3* pPos, XMFLOAT3& fRadius)
+bool CFrustum::Isin_Frustum_ForObject(CCamera* pCamera, XMFLOAT3* pPos, float& fRadius)
 {
-	//Ready_Frustum();
+	Ready_Frustum();
 
-	//_matrix		matProj, matView;
+	XMFLOAT4X4	xmf4x4View, xmf4x4Proj;
 
-	//m_pGraphicDev->GetTransform(D3DTS_PROJECTION, &matProj);
-	//m_pGraphicDev->GetTransform(D3DTS_VIEW, &matView);
-
-	//D3DXMatrixInverse(&matProj, NULL, &matProj);
-	//D3DXMatrixInverse(&matView, NULL, &matView);
-
-	//for (_ulong i = 0; i < 8; ++i)
-	//{
-	//	D3DXVec3TransformCoord(&m_vPoint[i], &m_vPoint[i], &matProj);
-	//	D3DXVec3TransformCoord(&m_vPoint[i], &m_vPoint[i], &matView);
-	//}
+	xmf4x4View = Matrix4x4::Inverse(pCamera->GetViewMatrix());
+	xmf4x4Proj = Matrix4x4::Inverse(pCamera->GetProjectionMatrix());
+	
+	for (int i = 0; i < 8; ++i)
+	{
+		Vector3::TransformCoord(m_xmf3Point[i], xmf4x4Proj);
+		Vector3::TransformCoord(m_xmf3Point[i], xmf4x4View);
+		//XMStoreFloat3(&m_xmf3Point[i], XMVector3TransformCoord(XMLoadFloat3(&m_xmf3Point[i]), XMLoadFloat4x4(&xmf4x4Proj)));
+		//XMStoreFloat3(&m_xmf3Point[i], XMVector3TransformCoord(XMLoadFloat3(&m_xmf3Point[i]), XMLoadFloat4x4(&xmf4x4View)));
+	}
 
 	// x+
 	m_xmf4Plane[0] = GetPlane(m_xmf3Point[1], m_xmf3Point[5], m_xmf3Point[6]);
@@ -88,7 +88,7 @@ bool CFrustum::Isin_Frustum_ForObject(XMFLOAT3* pPos, XMFLOAT3& fRadius)
 	m_xmf4Plane[5] = GetPlane(m_xmf3Point[0], m_xmf3Point[1], m_xmf3Point[2]);
 
 
-	return false;
+	return Isin_Frustum(pPos, fRadius);
 }
 
 XMFLOAT4 CFrustum::GetPlane(XMFLOAT3& xmf3Pos1, XMFLOAT3& xmf3Pos2, XMFLOAT3& xmf3Pos3)

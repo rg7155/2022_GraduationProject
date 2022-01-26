@@ -22,6 +22,7 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////////
 
+class CCamera;
 class CFrustum : public CComponent
 {
 private:
@@ -32,13 +33,13 @@ private:
 public:
 	void		Ready_Frustum(void);
 	bool		Isin_Frustum(XMFLOAT3* pPos);
-	bool		Isin_Frustum(XMFLOAT3* pPos, const float& fRadius);
-	bool		Isin_Frustum_ForObject(XMFLOAT3* pPos, XMFLOAT3& fRadius);
+	bool		Isin_Frustum(XMFLOAT3* pPos, float& fRadius);
+	bool		Isin_Frustum_ForObject(CCamera* pCamera, XMFLOAT3* pPos, float& fRadius);
 
 private:
 	XMFLOAT4				GetPlane(XMFLOAT3& xmf3Pos1, XMFLOAT3& xmf3Pos2, XMFLOAT3& xmf3Pos3);
 
-private
+private:
 	XMFLOAT3				m_xmf3Point[8];
 	XMFLOAT4				m_xmf4Plane[6];
 
