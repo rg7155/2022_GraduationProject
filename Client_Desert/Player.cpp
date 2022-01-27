@@ -29,9 +29,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
 
-	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 0.f, 1.f);
 
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
@@ -83,12 +82,12 @@ CPlayer::~CPlayer()
 	if (m_pCamera) delete m_pCamera;
 }
 
-void CPlayer::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
+void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	if (m_pCamera) m_pCamera->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
-void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
+void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 }
 
@@ -99,54 +98,51 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
+	float fRotateAngle = 0.f;
 	//if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	//if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-
-	XMVECTOR xmDstVec = m_xmVecSrc;
-
-	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&	
+	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// 위오
 	{
-		xmDstVec = XMVectorSet(1.f, 0.f, 1.f, 1.f);
+		fRotateAngle = 45.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// 오아
 	{
-		xmDstVec = XMVectorSet(1.f, 0.f, -1.f, 1.f);
+		fRotateAngle = 135.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))	// 아왼
 	{
-		xmDstVec = XMVectorSet(-1.f, 0.f, -1.f, 1.f);
+		fRotateAngle = -135.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))	// 왼위
 	{
-		xmDstVec = XMVectorSet(-1.f, 0.f, 1.f, 1.f);
+		fRotateAngle = -45.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
-		xmDstVec = XMVectorSet(1.f, 0.f, 0.f, 1.f);
+		fRotateAngle = 90.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
 	{
-		xmDstVec = XMVectorSet(-1.f, 0.f, 0.f, 1.f);
+		fRotateAngle = -90.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
 	{
-		xmDstVec = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+		fRotateAngle = 0.f;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
 	{
-		xmDstVec = XMVectorSet(0.f, 0.f, -1.f, 1.f);
+		fRotateAngle = 180.f;
 	}
 	else
 		return;
 
-	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
-	Move(MoveByDir(fDistance), bUpdateVelocity);
+	Move(MoveByDir(fRotateAngle, fDistance), bUpdateVelocity);
 
-	// 다른 동작 중일 때는 움직이지 않음..
+	// 다른 동작 중일 때는 움직이지 않음
 	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
 		return;
 
@@ -193,7 +189,7 @@ void CPlayer::Rotate(float x, float y, float z)
 		m_pCamera->Rotate(x, y, z);
 		if (y != 0.0f)
 		{
-			
+
 			XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(y));
 			m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 			m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
@@ -283,20 +279,20 @@ void CPlayer::Update(float fTimeElapsed)
 	}
 }
 
-CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
+CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
 {
-	CCamera *pNewCamera = NULL;
+	CCamera* pNewCamera = NULL;
 	switch (nNewCameraMode)
 	{
-		case FIRST_PERSON_CAMERA:
-			pNewCamera = new CFirstPersonCamera(m_pCamera);
-			break;
-		case THIRD_PERSON_CAMERA:
-			pNewCamera = new CThirdPersonCamera(m_pCamera);
-			break;
-		case SPACESHIP_CAMERA:
-			pNewCamera = new CSpaceShipCamera(m_pCamera);
-			break;
+	case FIRST_PERSON_CAMERA:
+		pNewCamera = new CFirstPersonCamera(m_pCamera);
+		break;
+	case THIRD_PERSON_CAMERA:
+		pNewCamera = new CThirdPersonCamera(m_pCamera);
+		break;
+	case SPACESHIP_CAMERA:
+		pNewCamera = new CSpaceShipCamera(m_pCamera);
+		break;
 	}
 	if (nCurrentCameraMode == SPACESHIP_CAMERA)
 	{
@@ -337,64 +333,50 @@ void CPlayer::OnPrepareRender()
 	m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
 }
 
-void CPlayer::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	//if (nCameraMode == THIRD_PERSON_CAMERA) 
-		CGameObject::Render(pd3dCommandList, pCamera);
+	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 void CPlayer::LerpRotate(float fTimeElapsed)
 {
 
 	// 2. Lerp와 행렬 적용 프레임마다 진행
-	XMVECTOR xmPrevVec = m_xmVecNowRotate;
-	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed*5.f);
-
-	// Now와 look의 사이각 계산. 방향 계산 -> right, up도 회전
-	XMVECTOR xmAngle = XMVector3AngleBetweenVectors(xmPrevVec, m_xmVecNowRotate);
-	float fAngle = XMConvertToDegrees(XMVectorGetX(xmAngle));
-	
-	// CCW: 외적벡터가 양수이면 -> angle -
-	// CW: 외적벡터가 음수이면 -> angle +
-
-	XMVECTOR xmVec1 = xmPrevVec;
-	XMVECTOR xmVec2 = m_xmVecNowRotate;
-	XMVectorSetY(xmVec1, XMVectorGetZ(xmVec1));
-	XMVectorSetY(xmVec2, XMVectorGetZ(xmVec2));
-	XMVectorSetZ(xmVec1, 0.f);
-	XMVectorSetZ(xmVec2, 0.f);
-
-	XMVECTOR xmVec3 = XMVector3Cross(xmVec1, xmVec2);
-	if (XMVectorGetZ(xmVec3) < 0.f)
-		fAngle *= -1;
-
-	cout << fAngle << endl;
-
-	//XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
-	//XMVECTOR xmVecRight = XMVector3Cross(XMLoadFloat3(&m_xmf3Look), XMLoadFloat3(&m_xmf3Up));
-
-	//XMStoreFloat3(&m_xmf3Right, xmVecRight);
+	float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
+	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 
 	//// 보간된 회전값이 범위를 벗어날 경우
 	//if (XMVectorGetY(m_xmVecNowRotate) > 360.0f)
 	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowRotate) - 360.f);
 	//if (XMVectorGetY(m_xmVecNowRotate) < 0.0f)
 	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowdwRotate) + 360.f);
-	//float fRotateAngle = XMVectorGetY(m_xmVecNowRotate) - fPrevAngle;
-	Rotate(0.f, fAngle, 0.f);
+	float fRotateAngle = XMVectorGetY(m_xmVecNowRotate) - fPrevAngle;
 
-	/*XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fAngle));
+	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fRotateAngle));
 	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);*/
+	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 
 }
 
-XMFLOAT3 CPlayer::MoveByDir(float fDistance)
+XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
 {
+	//// if(nowAngle < 0) fRotateAngle = -180.f;
+	//if (fAngle > 0.f && int(XMVectorGetY(m_xmVecNowRotate)) == -180)
+	//{
+	//	m_xmVecNowRotate = XMVectorSetY(m_xmVecNowRotate, 180.f);
+	//}
+	//else if (fAngle < 0.f && int(XMVectorGetY(m_xmVecNowRotate)) == 180)
+	//{
+	//	m_xmVecNowRotate = XMVectorSetY(m_xmVecNowRotate, -180.f);
+	//}
+
 	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
+
+	m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, fAngle);
 	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-	
+
 	return xmf3Shift;
 }
 
@@ -402,65 +384,65 @@ XMFLOAT3 CPlayer::MoveByDir(float fDistance)
 // 
 #define _WITH_DEBUG_CALLBACK_DATA
 
-void CSoundCallbackHandler::HandleCallback(void *pCallbackData, float fTrackPosition)
+void CSoundCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosition)
 {
-   _TCHAR *pWavName = (_TCHAR *)pCallbackData; 
+	_TCHAR* pWavName = (_TCHAR*)pCallbackData;
 #ifdef _WITH_DEBUG_CALLBACK_DATA
 	TCHAR pstrDebug[256] = { 0 };
 	_stprintf_s(pstrDebug, 256, _T("%s(%f)\n"), pWavName, fTrackPosition);
 	OutputDebugString(pstrDebug);
 #endif
 #ifdef _WITH_SOUND_RESOURCE
-   PlaySound(pWavName, ::ghAppInstance, SND_RESOURCE | SND_ASYNC);
+	PlaySound(pWavName, ::ghAppInstance, SND_RESOURCE | SND_ASYNC);
 #else
-   PlaySound(pWavName, NULL, SND_FILENAME | SND_ASYNC);
+	PlaySound(pWavName, NULL, SND_FILENAME | SND_ASYNC);
 #endif
 }
 
-CCamera *CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
+CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
 	if (nCurrentCameraMode == nNewCameraMode) return(m_pCamera);
 	switch (nNewCameraMode)
 	{
-		case FIRST_PERSON_CAMERA:
-			SetFriction(250.0f);
-			SetGravity(XMFLOAT3(0.0f, -400.0f, 0.0f));
-			SetMaxVelocityXZ(300.0f);
-			SetMaxVelocityY(400.0f);
-			m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		case SPACESHIP_CAMERA:
-			SetFriction(125.0f);
-			SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			SetMaxVelocityXZ(300.0f);
-			SetMaxVelocityY(400.0f);
-			m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.0f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		case THIRD_PERSON_CAMERA:
-			SetFriction(250.0f);
-			//SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
-			SetMaxVelocityXZ(10.0f);
-			SetMaxVelocityY(400.0f);
-			m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
-			m_pCamera->SetTimeLag(0.25f);
-			m_pCamera->SetOffset(XMFLOAT3(0.0f, 2.0f, -6.0f));
-			m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
-			m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
-			m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
-			break;
-		default:
-			break;
+	case FIRST_PERSON_CAMERA:
+		SetFriction(250.0f);
+		SetGravity(XMFLOAT3(0.0f, -400.0f, 0.0f));
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		m_pCamera = OnChangeCamera(FIRST_PERSON_CAMERA, nCurrentCameraMode);
+		m_pCamera->SetTimeLag(0.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 20.0f, 0.0f));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		break;
+	case SPACESHIP_CAMERA:
+		SetFriction(125.0f);
+		SetGravity(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		SetMaxVelocityXZ(300.0f);
+		SetMaxVelocityY(400.0f);
+		m_pCamera = OnChangeCamera(SPACESHIP_CAMERA, nCurrentCameraMode);
+		m_pCamera->SetTimeLag(0.0f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 0.0f, 0.0f));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		break;
+	case THIRD_PERSON_CAMERA:
+		SetFriction(250.0f);
+		//SetGravity(XMFLOAT3(0.0f, -250.0f, 0.0f));
+		SetMaxVelocityXZ(10.0f);
+		SetMaxVelocityY(400.0f);
+		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
+		m_pCamera->SetTimeLag(0.25f);
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 2.0f, -6.0f));
+		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
+		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
+		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
+		break;
+	default:
+		break;
 	}
 	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
 	Update(fTimeElapsed);
@@ -585,7 +567,7 @@ void CPlayer::Change_Animation(ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, true);
 		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
 		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.f);
-	
+
 		break;
 	case IDLE:
 		m_eCurAnim = ANIM::IDLE;
