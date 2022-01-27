@@ -29,8 +29,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
 
-	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 0.f, 1.f);
-	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 0.f, 1.f);
+	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 
 	m_pPlayerUpdatedContext = NULL;
@@ -348,9 +348,30 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 {
 
 	// 2. Lerp와 행렬 적용 프레임마다 진행
-	//float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
+	XMVECTOR xmPrevVec = m_xmVecNowRotate;
 	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed*5.f);
-	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
+
+	// Now와 look의 사이각 계산. 방향 계산 -> right, up도 회전
+	XMVECTOR xmAngle = XMVector3AngleBetweenVectors(xmPrevVec, m_xmVecNowRotate);
+	float fAngle = XMConvertToDegrees(XMVectorGetX(xmAngle));
+
+	// CCW: 외적벡터가 양수이면 -> angle -
+	// CW: 외적벡터가 음수이면 -> angle +
+
+	XMVECTOR xmVec1 = xmPrevVec;
+	XMVECTOR xmVec2 = m_xmVecNowRotate;
+	XMVectorSetY(xmVec1, XMVectorGetZ(xmVec1));
+	XMVectorSetY(xmVec2, XMVectorGetZ(xmVec2));
+	XMVectorSetZ(xmVec1, 0.f);
+	XMVectorSetZ(xmVec2, 0.f);
+
+	XMVECTOR xmVec3 = XMVector3Cross(xmVec1, xmVec2);
+	if (XMVectorGetZ(xmVec3) < 0)
+		fAngle *= -1;
+
+	cout << fAngle << endl;
+
+	//XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
 	//XMVECTOR xmVecRight = XMVector3Cross(XMLoadFloat3(&m_xmf3Look), XMLoadFloat3(&m_xmf3Up));
 
 	//XMStoreFloat3(&m_xmf3Right, xmVecRight);
@@ -362,11 +383,11 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowdwRotate) + 360.f);
 	//float fRotateAngle = XMVectorGetY(m_xmVecNowRotate) - fPrevAngle;
 
-	//XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fRotateAngle));
-	//m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
+	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fAngle));
+	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
 
 
-	//m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 
 }
 
