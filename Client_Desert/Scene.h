@@ -49,9 +49,6 @@ public:
 	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
 	ID3D12RootSignature *GetGraphicsRootSignature() { return(m_pd3dGraphicsRootSignature); }
 
-	void CreateComponent();
-	void ReleaseComponent();
-
     void AnimateObjects(float fTimeElapsed);
     void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera=NULL);
 
@@ -94,7 +91,7 @@ public:
 	CTextureToViewportShader			*m_pShadowMapToViewport = NULL;
 
 	//원본 컴포넌트, 오브젝트가 clone하여 사용
-	CComponent							*m_pComponent[COM_END] = { NULL };
+	//CComponent							*m_pComponent[COM_END] = { NULL };
 
 
 protected:

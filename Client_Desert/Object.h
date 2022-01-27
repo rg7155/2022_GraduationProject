@@ -320,6 +320,11 @@ public:
 	virtual ~CMapObject();
 
 private:
+
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
+
+
 	virtual void	CloneComponent() override;
 
 };

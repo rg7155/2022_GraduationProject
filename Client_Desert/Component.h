@@ -20,7 +20,7 @@ public:
 	virtual int	Update_Component(const float& fTimeDelta) { return 0; }
 
 public:
-	virtual CComponent* Clone(void) = 0;
+	//virtual CComponent* Clone(void) {} ;
 
 };
 
@@ -30,25 +30,19 @@ class CCamera;
 class CFrustum : public CComponent
 {
 private:
-	explicit CFrustum();
-	explicit CFrustum(const CFrustum& rhs);
+	CFrustum();
 	virtual ~CFrustum(void);
 
 public:
 	void		Ready_Frustum(void);
 	bool		Isin_Frustum(XMFLOAT3* pPos);
-	bool		Isin_Frustum(XMFLOAT3* pPos, float& fRadius);
 	bool		Isin_Frustum_ForObject(CCamera* pCamera, XMFLOAT3* pPos, float& fRadius);
 
-private:
-	XMFLOAT4				GetPlane(XMFLOAT3& xmf3Pos1, XMFLOAT3& xmf3Pos2, XMFLOAT3& xmf3Pos3);
-
-private:
-	XMFLOAT3				m_xmf3Point[8];
-	XMFLOAT4				m_xmf4Plane[6];
-
+	bool		GetIsRender() { return m_isRender; }
 public:
 	static CFrustum*		Create();
-	virtual CComponent*		Clone(void);
+
+private:
+	bool		m_isRender = true;
 };
 #endif // Component_h__

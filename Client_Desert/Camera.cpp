@@ -145,6 +145,56 @@ void CCamera::SetViewportsAndScissorRects(ID3D12GraphicsCommandList *pd3dCommand
 	pd3dCommandList->RSSetScissorRects(1, &m_d3dScissorRect);
 }
 
+void CCamera::Update(float fTimeElapsed)
+{
+	FrustumUpdate();
+}
+
+void CCamera::FrustumUpdate()
+{
+	m_xmf3Point[0] = { -1.f, 1.f, 0.f };
+	m_xmf3Point[1] = { 1.f, 1.f, 0.f };
+	m_xmf3Point[2] = { 1.f, -1.f, 0.f };
+	m_xmf3Point[3] = { -1.f, -1.f, 0.f };
+
+	m_xmf3Point[4] = { -1.f, 1.f, 1.f };
+	m_xmf3Point[5] = { 1.f, 1.f, 1.f };
+	m_xmf3Point[6] = { 1.f, -1.f, 1.f };
+	m_xmf3Point[7] = { -1.f, -1.f, 1.f }; 
+	
+	XMFLOAT4X4	xmf4x4View, xmf4x4Proj;
+
+	xmf4x4View = Matrix4x4::Inverse(GetViewMatrix());
+	xmf4x4Proj = Matrix4x4::Inverse(GetProjectionMatrix());
+
+	for (int i = 0; i < 8; ++i)
+	{
+		m_xmf3Point[i] = Vector3::TransformCoord(m_xmf3Point[i], xmf4x4Proj);
+		m_xmf3Point[i] = Vector3::TransformCoord(m_xmf3Point[i], xmf4x4View);
+	}
+
+	// x+
+	m_xmf4Plane[0] = GetPlane(m_xmf3Point[1], m_xmf3Point[5], m_xmf3Point[6]);
+	// x-
+	m_xmf4Plane[1] = GetPlane(m_xmf3Point[4], m_xmf3Point[0], m_xmf3Point[3]);
+	// y+
+	m_xmf4Plane[2] = GetPlane(m_xmf3Point[4], m_xmf3Point[5], m_xmf3Point[1]);
+	// y-
+	m_xmf4Plane[3] = GetPlane(m_xmf3Point[3], m_xmf3Point[2], m_xmf3Point[6]);
+	// z+
+	m_xmf4Plane[4] = GetPlane(m_xmf3Point[7], m_xmf3Point[6], m_xmf3Point[5]);
+	// z-
+	m_xmf4Plane[5] = GetPlane(m_xmf3Point[0], m_xmf3Point[1], m_xmf3Point[2]);
+}
+
+
+XMFLOAT4 CCamera::GetPlane(XMFLOAT3& xmf3Pos1, XMFLOAT3& xmf3Pos2, XMFLOAT3& xmf3Pos3)
+{
+	XMFLOAT4 xmf4Plane;
+	XMStoreFloat4(&xmf4Plane, (XMPlaneFromPoints(XMLoadFloat3(&xmf3Pos1), XMLoadFloat3(&xmf3Pos2), XMLoadFloat3(&xmf3Pos3))));
+	return  xmf4Plane;
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CSpaceShipCamera
 

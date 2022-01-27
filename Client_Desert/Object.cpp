@@ -280,6 +280,8 @@ CGameObject::CGameObject()
 {
 	m_xmf4x4ToParent = Matrix4x4::Identity();
 	m_xmf4x4World = Matrix4x4::Identity();
+
+	for (int i = 0; i < COM_END; i++) m_pComponent[i] = NULL;
 }
 
 CGameObject::CGameObject(int nMaterials) : CGameObject()
@@ -1085,5 +1087,22 @@ CMapObject::~CMapObject()
 
 void CMapObject::CloneComponent()
 {
-	m_pComponent[COM_FRUSTUM] = CGameMgr::GetInstance()->GetScene()->m_pComponent[COM_FRUSTUM]->Clone();
+	m_pComponent[COM_FRUSTUM] = CFrustum::Create();
+}
+
+void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	//Max extents와 스케일 곱해서 반지름 계산
+	float fRadi = 50.f;
+
+	if(static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
+		CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+void CMapObject::Animate(float fTimeElapsed)
+{
+	for (int i = 0; i < COM_END; ++i) m_pComponent[i]->Update_Component(fTimeElapsed);
+	
+	CGameObject::Animate(fTimeElapsed);
+
 }

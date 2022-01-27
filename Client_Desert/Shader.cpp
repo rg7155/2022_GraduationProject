@@ -1105,7 +1105,7 @@ void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList
 	if (!m_bRender)
 		return;
 
-	float fSize = FRAME_BUFFER_WIDTH / 4;
+	float fSize = FRAME_BUFFER_WIDTH / 4.f;
 	D3D12_VIEWPORT d3dViewport = { 0.0f, 0.0f, fSize, fSize, 0.0f, 1.0f };
 	D3D12_RECT d3dScissorRect = { 0, 0, fSize, fSize };
 	pd3dCommandList->RSSetViewports(1, &d3dViewport);
