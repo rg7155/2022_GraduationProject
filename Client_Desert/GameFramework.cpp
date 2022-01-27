@@ -500,6 +500,8 @@ void CGameFramework::ProcessInput()
 		}
 		m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * m_GameTimer.GetTimeElapsed(), true);
 	}
+
+	m_pCamera->Update(m_pPlayer->GetLook(), m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
 }
 
