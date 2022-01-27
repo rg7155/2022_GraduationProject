@@ -354,7 +354,7 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	// Now와 look의 사이각 계산. 방향 계산 -> right, up도 회전
 	XMVECTOR xmAngle = XMVector3AngleBetweenVectors(xmPrevVec, m_xmVecNowRotate);
 	float fAngle = XMConvertToDegrees(XMVectorGetX(xmAngle));
-
+	
 	// CCW: 외적벡터가 양수이면 -> angle -
 	// CW: 외적벡터가 음수이면 -> angle +
 
@@ -366,7 +366,7 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	XMVectorSetZ(xmVec2, 0.f);
 
 	XMVECTOR xmVec3 = XMVector3Cross(xmVec1, xmVec2);
-	if (XMVectorGetZ(xmVec3) < 0)
+	if (XMVectorGetZ(xmVec3) < 0.f)
 		fAngle *= -1;
 
 	cout << fAngle << endl;
@@ -382,12 +382,11 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	//if (XMVectorGetY(m_xmVecNowRotate) < 0.0f)
 	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowdwRotate) + 360.f);
 	//float fRotateAngle = XMVectorGetY(m_xmVecNowRotate) - fPrevAngle;
+	Rotate(0.f, fAngle, 0.f);
 
-	XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fAngle));
+	/*XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fAngle));
 	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-
-
-	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+	m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);*/
 
 }
 
