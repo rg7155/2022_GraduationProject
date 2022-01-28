@@ -42,7 +42,7 @@ public:
 public:
 	char							m_pstrMeshName[64] = { 0 };
 
-protected:
+public:
 	UINT							m_nType = 0x00;
 
 	XMFLOAT3						m_xmf3AABBCenter = XMFLOAT3(0.0f, 0.0f, 0.0f);

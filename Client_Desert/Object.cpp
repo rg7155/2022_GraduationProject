@@ -560,6 +560,7 @@ void CGameObject::SetPosition(XMFLOAT3 xmf3Position)
 
 void CGameObject::SetScale(float x, float y, float z)
 {
+	m_xmf3Scale = { x,y,z };
 	XMMATRIX mtxScale = XMMatrixScaling(x, y, z);
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
@@ -568,6 +569,7 @@ void CGameObject::SetScale(float x, float y, float z)
 
 void CGameObject::SetScale(XMFLOAT3& xmf3Scale)
 {
+	m_xmf3Scale = xmf3Scale;
 	XMMATRIX mtxScale = XMMatrixScaling(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
 	m_xmf4x4ToParent = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
@@ -1092,8 +1094,10 @@ void CMapObject::CloneComponent()
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	//Max extents와 스케일 곱해서 반지름 계산
-	float fRadi = 50.f;
+	XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmf3AABBExtents;
+	float fMax = max(xmf3Extents.x, max(xmf3Extents.y, xmf3Extents.z));
+	//float fRadi = m_xmf3Scale.x * fMax; //스케일 x,y,z 다를수도
+	float fRadi = 0.f; 
 
 	if(static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
 		CGameObject::Render(pd3dCommandList, pCamera);

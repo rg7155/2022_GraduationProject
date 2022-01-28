@@ -577,10 +577,6 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	}
 
-	//CLoadedModelInfo* pLoadModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/rpgpp_lt_building_01.bin", this);
-	//m_ppObjects[m_nObjects-1] = new CGameObject();
-	//m_ppObjects[m_nObjects-1]->SetChild(pLoadModel->m_pModelRootObject, true);
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
