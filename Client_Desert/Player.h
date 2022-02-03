@@ -8,7 +8,7 @@ class CPlayer : public CGameObject
 private:
 	enum ANIM {
 		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
-		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8
+		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8, END = 9,
 	};
 
 protected:
@@ -91,7 +91,6 @@ private:
 	bool Check_GetResource(float fTimeElapsed);
 	bool Check_Attack(float fTimeElapsed);
 	void Change_Animation(ANIM eNewAnim);
-
 	bool Check_MoveInput();
 
 private:

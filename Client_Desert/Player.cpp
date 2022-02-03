@@ -495,7 +495,7 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 	// 공격 4가지 처리
 
 	// attack1
-	if (m_eCurAnim == ANIM::ATTACK1)
+	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -509,6 +509,12 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 		Change_Animation(ANIM::ATTACK1);
 		return true;
 	}
+	else if (CInputDev::GetInstance()->RButtonDown())
+	{
+		Change_Animation(ANIM::ATTACK2);
+		return true;
+	}
+
 	// attack2
 	// skill1
 	// skill2
@@ -518,80 +524,19 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 
 void CPlayer::Change_Animation(ANIM eNewAnim)
 {
-	switch (eNewAnim)
+	m_eCurAnim = eNewAnim;
+	m_fAnimElapsedTime = 0.f;
+
+	// 애니메이션 진행시간 
+	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+
+	// 모든 애니메이션 false로
+	for (int i = 0; i < ANIM::END; i++)
 	{
-	case IDLE_RELAXED:
-		m_eCurAnim = ANIM::IDLE_RELAXED;
-		m_fAnimMaxTime = 0.f;
-		m_fAnimElapsedTime = 0.f;
-		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, true);
-		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
-		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
-		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
-		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
-
-		break;
-	case RUN:
-		m_eCurAnim = ANIM::RUN;
-		m_fAnimMaxTime = 2.5f;
-		m_fAnimElapsedTime = 0.f;
-		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
-		m_pSkinnedAnimationController->SetTrackEnable(RUN, true);
-		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
-		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
-
-		break;
-	case ATTACK1:
-		m_eCurAnim = ANIM::ATTACK1;
-		m_fAnimMaxTime = 1.5f;
-		m_fAnimElapsedTime = 0.f;
-		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
-		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
-		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, false);
-		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, true);
-		m_pSkinnedAnimationController->SetTrackPosition(ATTACK1, 0.f);
-
-		break;
-	case ATTACK2:
-		m_eCurAnim = ANIM::ATTACK2;
-		m_fAnimMaxTime = 2.5f;
-		m_fAnimElapsedTime = 0.f;
-		break;
-	case SKILL1:
-		m_eCurAnim = ANIM::SKILL1;
-		m_fAnimMaxTime = 2.5f;
-		m_fAnimElapsedTime = 0.f;
-		break;
-	case SKILL2:
-		m_eCurAnim = ANIM::SKILL2;
-		m_fAnimMaxTime = 2.5f;
-		m_fAnimElapsedTime = 0.f;
-		break;
-	case GET_RESOURCE:
-		m_eCurAnim = ANIM::GET_RESOURCE;
-		m_fAnimMaxTime = 1.833333f;
-		m_fAnimElapsedTime = 0.f;
-		m_pSkinnedAnimationController->SetTrackEnable(IDLE_RELAXED, false);
-		m_pSkinnedAnimationController->SetTrackEnable(RUN, false);
-		m_pSkinnedAnimationController->SetTrackEnable(ATTACK1, false);
-		m_pSkinnedAnimationController->SetTrackEnable(GET_RESOURCE, true);
-		m_pSkinnedAnimationController->SetTrackPosition(RUN, 0.0f);
-		m_pSkinnedAnimationController->SetTrackPosition(GET_RESOURCE, 0.f);
-
-		break;
-	case IDLE:
-		m_eCurAnim = ANIM::IDLE;
-		m_fAnimMaxTime = 2.5f;
-		m_fAnimElapsedTime = 0.f;
-		break;
-	case DIE:
-		m_eCurAnim = ANIM::DIE;
-		m_fAnimMaxTime = 2.5f;
-		m_fAnimElapsedTime = 0.f;
-		break;
-	default:
-		break;
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
+	//m_pSkinnedAnimationController->SetTrackPosition(eNewAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(eNewAnim, true);
 }
 
 bool CPlayer::Check_MoveInput()

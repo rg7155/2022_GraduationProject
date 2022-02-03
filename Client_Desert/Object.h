@@ -223,6 +223,10 @@ public:
 	void SetAnimationCallbackHandler(CAnimationCallbackHandler *pCallbackHandler);
 
 	void HandleCallback();
+
+public:
+	float GetLength() { return m_fLength; }
+
 };
 
 class CAnimationSets
