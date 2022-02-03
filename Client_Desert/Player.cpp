@@ -99,7 +99,11 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-
+	// 대기동작일때만 움직이기 가능
+	if (m_eCurAnim != ANIM::IDLE && m_eCurAnim != ANIM::IDLE_RELAXED && m_eCurAnim != ANIM::RUN)
+	{
+		return;
+	}
 
 	//if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 	//if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
@@ -150,11 +154,9 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 	Move(MoveByDir(fDistance), bUpdateVelocity);
 
-	// 다른 동작 중일 때는 움직이지 않음..
-	if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
-		return;
-
-	Change_Animation(ANIM::RUN);
+	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
+	if(m_eCurAnim != ANIM::RUN)
+		Change_Animation(ANIM::RUN);
 
 }
 
@@ -495,7 +497,7 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 	// 공격 4가지 처리
 
 	// attack1
-	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2)
+	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2 || m_eCurAnim == ANIM::SKILL1 || m_eCurAnim == ANIM::SKILL2 || m_eCurAnim == ANIM::DIE)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -514,7 +516,21 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 		Change_Animation(ANIM::ATTACK2);
 		return true;
 	}
-
+	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_1))
+	{
+		Change_Animation(ANIM::SKILL1);
+		return true;
+	}
+	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_2))
+	{
+		Change_Animation(ANIM::SKILL2);
+		return true;
+	}
+	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_0))
+	{
+		Change_Animation(ANIM::DIE);
+		return true;
+	}
 	// attack2
 	// skill1
 	// skill2
@@ -535,7 +551,7 @@ void CPlayer::Change_Animation(ANIM eNewAnim)
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
-	//m_pSkinnedAnimationController->SetTrackPosition(eNewAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackPosition(eNewAnim, 0.f);
 	m_pSkinnedAnimationController->SetTrackEnable(eNewAnim, true);
 }
 
