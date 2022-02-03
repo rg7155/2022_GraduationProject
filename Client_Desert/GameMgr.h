@@ -19,6 +19,7 @@ public:
 	const CPlayer*	GetPlayer() { return m_pPlayer; }
 	const CCamera*	GetCamera() { return m_pCamera; }
 
+
 	void		SetScene(CScene* pScene) { m_pScene = pScene; }
 	void		SetPlayer(CPlayer* pPlayer) { m_pPlayer = pPlayer; }
 	void		SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
@@ -27,5 +28,8 @@ private:
 	CScene* m_pScene = nullptr;
 	CPlayer* m_pPlayer = nullptr;
 	CCamera* m_pCamera = nullptr;
+
+public:
+	bool	m_isShadowMapRendering = false;
 };
 

@@ -329,4 +329,7 @@ private:
 
 	virtual void	CloneComponent() override;
 
+public:
+	bool		m_isPlane = false;
+
 };

@@ -38,7 +38,7 @@ bool CFrustum::Isin_Frustum_ForObject(CCamera* pCamera, XMFLOAT3* pPos, float& f
 	for (int i = 0; i < 6; ++i)
 	{
 		//fDistance = D3DXPlaneDotCoord(&m_xmf4Plane[i], pPos);
-		fDistance = XMVectorGetX(XMPlaneDotCoord(XMLoadFloat4(&(pCamera->m_xmf4Plane[i])), XMLoadFloat3(&pPos[i])));
+		fDistance = XMVectorGetX(XMPlaneDotCoord(XMLoadFloat4(&(pCamera->m_xmf4Plane[i])), XMLoadFloat3(pPos)));
 		if (fDistance > fRadius)
 			return false;
 	}

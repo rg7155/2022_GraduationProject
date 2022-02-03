@@ -1094,13 +1094,22 @@ void CMapObject::CloneComponent()
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmf3AABBExtents;
-	float fMax = max(xmf3Extents.x, max(xmf3Extents.y, xmf3Extents.z));
-	//float fRadi = m_xmf3Scale.x * fMax; //스케일 x,y,z 다를수도
-	float fRadi = 0.f; 
-
-	if(static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
+	//그림자맵에 쓰는거나, 평면이면 컬링 안하고 그림
+	if (CGameMgr::GetInstance()->m_isShadowMapRendering || m_isPlane)
 		CGameObject::Render(pd3dCommandList, pCamera);
+	else
+	{
+		XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmf3AABBExtents;
+		float fMax = max(xmf3Extents.x, max(xmf3Extents.y, xmf3Extents.z));
+		float fRadi = m_xmf3Scale.x * fMax; //스케일 x,y,z 다를수도
+		//float fRadi = 0.f; 
+
+		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
+			CGameObject::Render(pd3dCommandList, pCamera);
+	}
+
+	
+
 }
 
 void CMapObject::Animate(float fTimeElapsed)

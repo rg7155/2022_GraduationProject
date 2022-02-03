@@ -495,7 +495,7 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 
 
 CMapObjectsShader::CMapObjectsShader()
@@ -573,6 +573,11 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			m_ppObjects[i]->SetPosition(xmf3Position);
 
 			m_ppObjects[i]->OnPrepareAnimate();
+
+			if (i == 0)//plane
+			{
+				static_cast<CMapObject*>(m_ppObjects[0])->m_isPlane = true;
+			}
 		}
 
 	}
@@ -907,6 +912,8 @@ void CDepthRenderShader::ReleaseShaderVariables()
 
 void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	CGameMgr::GetInstance()->m_isShadowMapRendering = true;
+	
 	//1번은 정적(맵), 한번만
 	static  bool isOne = false;
 	if (!isOne)
@@ -916,6 +923,8 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 	
 	//0번은 동적(플레이어, 몬스터 등), 계속
 	RenderToDepthTexture(pd3dCommandList, 0);
+
+	CGameMgr::GetInstance()->m_isShadowMapRendering = false;
 }
 
 void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, int iIndex)
