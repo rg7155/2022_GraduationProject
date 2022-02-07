@@ -134,3 +134,6 @@ float4 PSTextureToViewport(VS_TEXTURED_OUTPUT input) : SV_Target
     return ((float4) (fDepthFromLight0 * 0.8f));
 }
 
+///////////////////////////////////////////////////////////////////////////////
+
+

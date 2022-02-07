@@ -295,7 +295,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 		m_pShadowShader->Render(pd3dCommandList, pCamera);
 	}
 
-	//화면에 뎁스 텍스쳐 그린다
+	//화면에 뎁스 텍스쳐 그린다, 디버깅 용
 	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
