@@ -192,8 +192,8 @@ void CStandardMesh::LoadMeshFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCom
 		::ReadStringFromFile(pInFile, pstrToken);
 		if (!strcmp(pstrToken, "<Bounds>:"))
 		{
-			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
-			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+			nReads = (UINT)::fread(&m_xmOOBB.Center, sizeof(XMFLOAT3), 1, pInFile);
+			nReads = (UINT)::fread(&m_xmOOBB.Extents, sizeof(XMFLOAT3), 1, pInFile);
 			//maxExtents 읽어올것
 		}
 		else if (!strcmp(pstrToken, "<Positions>:"))
@@ -435,8 +435,8 @@ void CSkinnedMesh::LoadSkinInfoFromFile(ID3D12Device *pd3dDevice, ID3D12Graphics
 		}
 		else if (!strcmp(pstrToken, "<Bounds>:"))
 		{
-			nReads = (UINT)::fread(&m_xmf3AABBCenter, sizeof(XMFLOAT3), 1, pInFile);
-			nReads = (UINT)::fread(&m_xmf3AABBExtents, sizeof(XMFLOAT3), 1, pInFile);
+			nReads = (UINT)::fread(&m_xmOOBB.Center, sizeof(XMFLOAT3), 1, pInFile);
+			nReads = (UINT)::fread(&m_xmOOBB.Extents, sizeof(XMFLOAT3), 1, pInFile);
 		}
 		else if (!strcmp(pstrToken, "<BoneNames>:"))
 		{

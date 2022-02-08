@@ -1099,7 +1099,7 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 		CGameObject::Render(pd3dCommandList, pCamera);
 	else
 	{
-		XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmf3AABBExtents;
+		XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmOOBB.Extents;
 		float fMax = max(xmf3Extents.x, max(xmf3Extents.y, xmf3Extents.z));
 		float fRadi = m_xmf3Scale.x * fMax; //스케일 x,y,z 다를수도
 		//float fRadi = 0.f; 
@@ -1114,8 +1114,24 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 void CMapObject::Animate(float fTimeElapsed)
 {
+	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
+	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	
 	for (int i = 0; i < COM_END; ++i) m_pComponent[i]->Update_Component(fTimeElapsed);
 	
 	CGameObject::Animate(fTimeElapsed);
 
 }
+
+//void CGameObject::UpdateBoundingBox()
+//{
+//	if (m_ppMeshes)
+//	{
+//		for (int i = 0; i < m_nMeshes; i++)
+//		{
+//			m_ppMeshes[i]->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
+//			XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+//		}
+//	}
+//}

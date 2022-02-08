@@ -116,7 +116,9 @@ float4 Fog(float4 cColor, float3 vPos)
     float fStart = 0.f, fEnd = 100.f;
     fFogFactor = saturate((fEnd - fDisToCamera) / (fEnd - fStart));
 	
-    float4 fFogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    //float4 fFogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
+    float4 fFogColor = float4(135 / 255.f, 116 / 255.f, 75 / 255.f, 1.0f);
+	
 	
     //return (lerp(cColor, fFogColor, fFogFactor));
 	
@@ -238,6 +240,8 @@ struct VS_SKYBOX_CUBEMAP_OUTPUT
 {
 	float3	positionL : POSITION;
 	float4	position : SV_POSITION;
+	
+    float3 positionW : POSITION1;
 };
 
 VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
@@ -247,6 +251,9 @@ VS_SKYBOX_CUBEMAP_OUTPUT VSSkyBox(VS_SKYBOX_CUBEMAP_INPUT input)
 	output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
 	output.positionL = input.position;
 
+    float4 positionW = mul(float4(input.position, 1.0f), gmtxGameObject);
+    output.positionW = positionW.xyz;
+	
 	return(output);
 }
 
@@ -257,7 +264,10 @@ float4 PSSkyBox(VS_SKYBOX_CUBEMAP_OUTPUT input) : SV_TARGET
 {
 	float4 cColor = gtxtSkyCubeTexture.Sample(gssClamp, input.positionL);
 
-	return(cColor);
+	//return(cColor);
+	
+    return Fog(cColor, input.positionW);
+	
 }
 
 //////////////////////////
