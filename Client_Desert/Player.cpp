@@ -356,8 +356,22 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 
 	// 2. Lerp와 행렬 적용 프레임마다 진행
 	//float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
-	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
-	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
+	//m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
+	XMVECTOR q1{ 0, XMVectorGetX(m_xmVecNowRotate), 
+		XMVectorGetY(m_xmVecNowRotate), 
+		XMVectorGetZ(m_xmVecNowRotate)};
+
+	XMVECTOR q2{ 0, XMVectorGetX(m_xmVecNewRotate),
+		XMVectorGetY(m_xmVecNewRotate),
+		XMVectorGetZ(m_xmVecNewRotate) };
+	XMVECTOR qRes = XMQuaternionSlerp(q1, q2, fTimeElapsed * 5.f);
+	cout << XMVectorGetX(qRes) << XMVectorGetY(qRes) << XMVectorGetZ(qRes) << endl ;
+
+	m_xmVecNewRotate = XMVectorSetX(m_xmVecNewRotate, XMVectorGetX(qRes));
+	m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, XMVectorGetY(qRes));
+	m_xmVecNewRotate = XMVectorSetZ(m_xmVecNewRotate, XMVectorGetZ(qRes));
+
+	m_xmVecNewRotate = XMVector3Normalize(m_xmVecNewRotate);
 
 	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
 
@@ -381,6 +395,7 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 
 
 	//m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
+
 
 }
 
