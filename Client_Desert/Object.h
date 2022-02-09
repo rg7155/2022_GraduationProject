@@ -215,6 +215,8 @@ public:
 
 	XMFLOAT3						m_xmf3Scale;
 
+	BoundingOrientedBox				m_xmOOBB;
+
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
 	void SetShader(int nMaterial, CShader *pShader);
@@ -239,6 +241,8 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial);
 
 	virtual void ReleaseUploadBuffers();
+
+	void		UpdateBoundingBox();
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
