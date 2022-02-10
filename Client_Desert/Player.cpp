@@ -110,10 +110,20 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 	XMVECTOR xmDstVec = m_xmVecSrc;
 
+	// 초기화
+	m_bTempOn = false;
+
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// 위오
 	{
 		xmDstVec = XMVectorSet(1.f, 0.f, 1.f, 1.f);
+		
+		if (m_eDir == DIR::LEFT_BACK)
+		{
+			m_bTempOn = true;
+			m_xmVecTempRotate = XMVectorSet(1.f, 0.f, -1.f, 1.f);
+		}
+
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// 오아
@@ -149,13 +159,14 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	else
 		return;
 
+	// 반대방향이면 temp를 추가하자!
 
 	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
 
 	Move(MoveByDir(fDistance), bUpdateVelocity);
 
 	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
-	if(m_eCurAnim != ANIM::RUN)
+	if (m_eCurAnim != ANIM::RUN)
 		Change_Animation(ANIM::RUN);
 
 }
@@ -356,22 +367,8 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 
 	// 2. Lerp와 행렬 적용 프레임마다 진행
 	//float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
-	//m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
-	XMVECTOR q1{ 0, XMVectorGetX(m_xmVecNowRotate), 
-		XMVectorGetY(m_xmVecNowRotate), 
-		XMVectorGetZ(m_xmVecNowRotate)};
-
-	XMVECTOR q2{ 0, XMVectorGetX(m_xmVecNewRotate),
-		XMVectorGetY(m_xmVecNewRotate),
-		XMVectorGetZ(m_xmVecNewRotate) };
-	XMVECTOR qRes = XMQuaternionSlerp(q1, q2, fTimeElapsed * 5.f);
-	cout << XMVectorGetX(qRes) << XMVectorGetY(qRes) << XMVectorGetZ(qRes) << endl ;
-
-	m_xmVecNewRotate = XMVectorSetX(m_xmVecNewRotate, XMVectorGetX(qRes));
-	m_xmVecNewRotate = XMVectorSetY(m_xmVecNewRotate, XMVectorGetY(qRes));
-	m_xmVecNewRotate = XMVectorSetZ(m_xmVecNewRotate, XMVectorGetZ(qRes));
-
-	m_xmVecNewRotate = XMVector3Normalize(m_xmVecNewRotate);
+	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
+	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 
 	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
 
@@ -396,7 +393,10 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 
 	//m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
 
+}
 
+void CPlayer::SetTemp(XMVECTOR xmNow, XMVECTOR xmNew)
+{  
 }
 
 XMFLOAT3 CPlayer::MoveByDir(float fDistance)
