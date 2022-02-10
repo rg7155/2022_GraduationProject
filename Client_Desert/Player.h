@@ -10,10 +10,6 @@ private:
 		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
 		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8, END = 9,
 	};
-	enum DIR {
-		FRONT, RIGHT_FRONT, RIGHT, RIGHT_BACK, BACK, LEFT_BACK, LEFT, LEFT_FRONT, END
-	};
-	
 
 protected:
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -89,7 +85,6 @@ public:
 
 private:
 	void LerpRotate(float fTimeElapsed);
-	void SetTemp(XMVECTOR xmNow, XMVECTOR xmNew);
 	XMFLOAT3 MoveByDir(float fDistance);
 
 private:
@@ -100,18 +95,15 @@ private:
 
 private:
 	XMVECTOR m_xmVecNowRotate;
-	XMVECTOR m_xmVecTempRotate;
 	XMVECTOR m_xmVecNewRotate;
 
 	XMVECTOR m_xmVecSrc;
 
-	bool m_bTempOn;
 
 private:
 	ANIM	m_eCurAnim;			// 현재 애니메이션
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
 	float	m_fAnimElapsedTime;	// 현재 애니메이션의 흐른 시간
-	DIR		m_eDir = DIR::FRONT;
 
 };
 

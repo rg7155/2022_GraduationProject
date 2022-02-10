@@ -105,25 +105,12 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 	}
 
-	//if (dwDirection & DIR_FORWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
-	//if (dwDirection & DIR_BACKWARD) xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, -fDistance);
-
 	XMVECTOR xmDstVec = m_xmVecSrc;
-
-	// 초기화
-	m_bTempOn = false;
 
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// 위오
 	{
 		xmDstVec = XMVectorSet(1.f, 0.f, 1.f, 1.f);
-		
-		if (m_eDir == DIR::LEFT_BACK)
-		{
-			m_bTempOn = true;
-			m_xmVecTempRotate = XMVectorSet(1.f, 0.f, -1.f, 1.f);
-		}
-
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// 오아
@@ -364,9 +351,6 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CPlayer::LerpRotate(float fTimeElapsed)
 {
-
-	// 2. Lerp와 행렬 적용 프레임마다 진행
-	//float fPrevAngle = XMVectorGetY(m_xmVecNowRotate);
 	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 
@@ -379,24 +363,6 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	m_xmf3Up = Vector3::Normalize(m_xmf3Up);
 	m_xmf3Right = Vector3::Normalize(m_xmf3Right);
 
-
-	//// 보간된 회전값이 범위를 벗어날 경우
-	//if (XMVectorGetY(m_xmVecNowRotate) > 360.0f)
-	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowRotate) - 360.f);
-	//if (XMVectorGetY(m_xmVecNowRotate) < 0.0f)
-	//	XMVectorSetY(m_xmVecNowRotate, XMVectorGetY(m_xmVecNowdwRotate) + 360.f);
-	//float fRotateAngle = XMVectorGetY(m_xmVecNowRotate) - fPrevAngle;
-
-	//XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fRotateAngle));
-	//m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, xmmtxRotate);
-
-
-	//m_xmf3Right = Vector3::TransformNormal(m_xmf3Right, xmmtxRotate);
-
-}
-
-void CPlayer::SetTemp(XMVECTOR xmNow, XMVECTOR xmNew)
-{  
 }
 
 XMFLOAT3 CPlayer::MoveByDir(float fDistance)
