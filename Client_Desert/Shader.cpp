@@ -287,7 +287,7 @@ void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CSkyBoxShader::CSkyBoxShader()
 {
 }
@@ -342,7 +342,7 @@ D3D12_SHADER_BYTECODE CSkyBoxShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlo
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CStandardShader::CStandardShader(int nPipelineStates /*= 1*/)
 	: CShader(nPipelineStates)
 {
@@ -381,7 +381,7 @@ D3D12_SHADER_BYTECODE CStandardShader::CreatePixelShader(ID3DBlob** ppd3dShaderB
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CSkinnedAnimationStandardShader::CSkinnedAnimationStandardShader(int nPipelineStates /*= 1*/)
 	:CStandardShader(nPipelineStates)
 {
@@ -417,7 +417,7 @@ D3D12_SHADER_BYTECODE CSkinnedAnimationStandardShader::CreateVertexShader(ID3DBl
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CStandardObjectsShader::CStandardObjectsShader()
 {
 }
@@ -465,7 +465,7 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 
 
 float Random(float fMin, float fMax)
@@ -573,11 +573,10 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			m_ppObjects[i]->SetPosition(xmf3Position);
 
 			m_ppObjects[i]->OnPrepareAnimate();
+			CMapObject* pMapObject = static_cast<CMapObject*>(m_ppObjects[i]);
 
-			if (i == 0)//plane
-			{
-				static_cast<CMapObject*>(m_ppObjects[0])->m_isPlane = true;
-			}
+			if (i == 0) pMapObject->m_isPlane = true; //plane
+			pMapObject->m_iMapIndex = i;
 		}
 
 	}

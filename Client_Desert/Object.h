@@ -335,5 +335,6 @@ private:
 
 public:
 	bool		m_isPlane = false;
+	int			m_iMapIndex = 0;
 
 };

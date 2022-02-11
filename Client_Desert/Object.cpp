@@ -1146,8 +1146,6 @@ void CMapObject::Animate(float fTimeElapsed)
 	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
 	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
-
-
 	for (int i = 0; i < COM_END; ++i) m_pComponent[i]->Update_Component(fTimeElapsed);
 	
 	CGameObject::Animate(fTimeElapsed);
@@ -1158,7 +1156,7 @@ void CMapObject::Animate(float fTimeElapsed)
 		BoundingOrientedBox xmPlayerOOBB = CGameMgr::GetInstance()->GetPlayer()->m_xmOOBB;
 		if (m_xmOOBB.Intersects(xmPlayerOOBB))
 		{
-			cout << "Col Map,Player" << endl;
+			cout << "Col Map,Player / " << m_iMapIndex << endl;
 		}
 	}
 }
