@@ -107,41 +107,47 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 	XMVECTOR xmDstVec = m_xmVecSrc;
 
+	XMVECTOR xmVecCamRight = XMLoadFloat3(&m_pCamera->GetRightVector());
+	XMVECTOR xmVecCamLook = XMLoadFloat3(&m_pCamera->GetLookVector());
+	xmVecCamRight = XMVectorSetY(xmVecCamRight, 0.f);
+	xmVecCamLook = XMVectorSetY(xmVecCamLook, 0.f);
+
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// 위오
 	{
-		xmDstVec = XMVectorSet(1.f, 0.f, 1.f, 1.f);
+		xmDstVec = xmVecCamRight + xmVecCamLook;
+		
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// 오아
 	{
-		xmDstVec = XMVectorSet(1.f, 0.f, -1.f, 1.f);
+		xmDstVec = xmVecCamRight - xmVecCamLook;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))	// 아왼
 	{
-		xmDstVec = XMVectorSet(-1.f, 0.f, -1.f, 1.f);
+		xmDstVec = -xmVecCamRight - xmVecCamLook;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))	// 왼위
 	{
-		xmDstVec = XMVectorSet(-1.f, 0.f, 1.f, 1.f);
+		xmDstVec = -xmVecCamRight + xmVecCamLook;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
-		xmDstVec = XMVectorSet(1.f, 0.f, 0.f, 1.f);
+		xmDstVec = xmVecCamRight;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
 	{
-		xmDstVec = XMVectorSet(-1.f, 0.f, 0.f, 1.f);
+		xmDstVec = -xmVecCamRight;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
 	{
-		xmDstVec = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+		xmDstVec = xmVecCamLook;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
 	{
-		xmDstVec = XMVectorSet(0.f, 0.f, -1.f, 1.f);
+		xmDstVec = -xmVecCamLook;
 	}
 	else
 		return;
@@ -155,9 +161,9 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	//m_pCamera->Update(GetLook(), )
 	// 반대방향이면 temp를 추가하자!
 
-	//m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
+	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
 
-	//Move(MoveByDir(fDistance), bUpdateVelocity);
+	Move(MoveByDir(fDistance), bUpdateVelocity);
 
 	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
 	if (m_eCurAnim != ANIM::RUN)
@@ -358,6 +364,7 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CPlayer::LerpRotate(float fTimeElapsed)
 {
+	
 	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 
