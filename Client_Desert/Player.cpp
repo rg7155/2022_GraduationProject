@@ -146,11 +146,18 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	else
 		return;
 
+	//// 현재 카메라 Look으로 축 변환
+	XMFLOAT3 xmf3Camera = m_pCamera->GetLookVector();
+	xmf3Camera.y = 0.f;
+	m_xmVecNewRotate = XMLoadFloat3(&xmf3Camera);
+	m_xmVecNewRotate = XMVector3Normalize(m_xmVecNewRotate);
+
+	//m_pCamera->Update(GetLook(), )
 	// 반대방향이면 temp를 추가하자!
 
-	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
+	//m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
 
-	Move(MoveByDir(fDistance), bUpdateVelocity);
+	//Move(MoveByDir(fDistance), bUpdateVelocity);
 
 	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
 	if (m_eCurAnim != ANIM::RUN)
@@ -359,6 +366,7 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	XMVECTOR xmVecRight = XMVector3Cross(XMLoadFloat3(&m_xmf3Up), XMLoadFloat3(&m_xmf3Look));
 	XMStoreFloat3(&m_xmf3Right, xmVecRight);
 
+	
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	m_xmf3Up = Vector3::Normalize(m_xmf3Up);
 	m_xmf3Right = Vector3::Normalize(m_xmf3Right);
