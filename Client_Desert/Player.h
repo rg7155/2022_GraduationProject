@@ -105,6 +105,10 @@ private:
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
 	float	m_fAnimElapsedTime;	// 현재 애니메이션의 흐른 시간
 
+
+private:
+	bool	m_bBattleOn;
+
 };
 
 

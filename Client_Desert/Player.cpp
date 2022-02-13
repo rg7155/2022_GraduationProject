@@ -74,6 +74,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	if (pPlayerModel) delete pPlayerModel;
 
+
+	m_bBattleOn = true;
+	//Change_Animation(ANIM::IDLE_RELAXED);
 }
 
 CPlayer::~CPlayer()
@@ -295,7 +298,10 @@ void CPlayer::Update(float fTimeElapsed)
 
 		if (!Check_MoveInput())
 		{
-			Change_Animation(ANIM::IDLE_RELAXED);
+			if (m_bBattleOn)
+				Change_Animation(ANIM::IDLE);
+			else
+				Change_Animation(ANIM::IDLE_RELAXED);
 		}
 	}
 }
@@ -475,7 +481,10 @@ bool CPlayer::Check_GetResource(float fTimeElapsed)
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 		{
-			Change_Animation(ANIM::IDLE_RELAXED);
+			if(m_bBattleOn)
+				Change_Animation(ANIM::IDLE);
+			else
+				Change_Animation(ANIM::IDLE_RELAXED);		
 		}
 		return true;
 	}
@@ -498,7 +507,11 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 		{
-			Change_Animation(ANIM::IDLE);
+			if(m_bBattleOn)
+				Change_Animation(ANIM::IDLE);
+			else
+				Change_Animation(ANIM::IDLE_RELAXED);
+
 		}
 		return true;
 	}
@@ -527,6 +540,7 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 		Change_Animation(ANIM::DIE);
 		return true;
 	}
+
 	// attack2
 	// skill1
 	// skill2
