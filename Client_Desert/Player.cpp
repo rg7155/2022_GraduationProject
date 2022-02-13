@@ -75,8 +75,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	if (pPlayerModel) delete pPlayerModel;
 
 
-	m_bBattleOn = true;
-	//Change_Animation(ANIM::IDLE_RELAXED);
+	m_bBattleOn = false;
+	m_eCurAnim = ANIM::IDLE;
+
 }
 
 CPlayer::~CPlayer()
@@ -152,6 +153,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	{
 		xmDstVec = -xmVecCamLook;
 	}
+
 	else
 		return;
 
@@ -284,20 +286,16 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		// GET_RESOURCE, 공격 중에는 다른 동작으로 바뀌지 않음
-		if (!m_eCurAnim == ANIM::IDLE && !m_eCurAnim == ANIM::IDLE_RELAXED)
-			return;
-
-		// 공격키 확인
-		if (Check_Attack(fTimeElapsed))
-			return;
-
-		// 상호작용키 확인
-		if (Check_GetResource(fTimeElapsed))
+		
+		if (Check_Input(fTimeElapsed))
 			return;
 
 		if (!Check_MoveInput())
 		{
+			// IDLE 애니메이션이 실행되도록 하기 위해
+			if (m_eCurAnim == ANIM::IDLE || m_eCurAnim == ANIM::IDLE_RELAXED)
+				return;
+
 			if (m_bBattleOn)
 				Change_Animation(ANIM::IDLE);
 			else
@@ -474,35 +472,12 @@ void CPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 }
 
-bool CPlayer::Check_GetResource(float fTimeElapsed)
-{
-	if (m_eCurAnim == ANIM::GET_RESOURCE)
-	{
-		m_fAnimElapsedTime += fTimeElapsed;
-		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
-		{
-			if(m_bBattleOn)
-				Change_Animation(ANIM::IDLE);
-			else
-				Change_Animation(ANIM::IDLE_RELAXED);		
-		}
-		return true;
-	}
-	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))
-	{
-		Change_Animation(ANIM::GET_RESOURCE);
-		return true;
-	}
-
-	return false;
-}
-
-bool CPlayer::Check_Attack(float fTimeElapsed)
+bool CPlayer::Check_Input(float fTimeElapsed)
 {
 	// 공격 4가지 처리
 
 	// attack1
-	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2 || m_eCurAnim == ANIM::SKILL1 || m_eCurAnim == ANIM::SKILL2 || m_eCurAnim == ANIM::DIE)
+	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2 || m_eCurAnim == ANIM::SKILL1 || m_eCurAnim == ANIM::SKILL2 || m_eCurAnim == ANIM::DIE || m_eCurAnim == ANIM::GET_RESOURCE)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -540,11 +515,27 @@ bool CPlayer::Check_Attack(float fTimeElapsed)
 		Change_Animation(ANIM::DIE);
 		return true;
 	}
+	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))
+	{
+		Change_Animation(ANIM::GET_RESOURCE);
+		return true;
+	}
+	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_9))
+	{
+		if (m_bBattleOn)
+		{
+			m_bBattleOn = false;
+			Change_Animation(ANIM::IDLE_RELAXED);
+		}
+		else
+		{
+			m_bBattleOn = true;
+			Change_Animation(ANIM::IDLE);
+		}
 
-	// attack2
-	// skill1
-	// skill2
 
+		return true;
+	}
 	return false;
 }
 
@@ -571,9 +562,11 @@ bool CPlayer::Check_MoveInput()
 	if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
 		|| CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) || CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 		return true;
-
-	// 이동 중이지 않으면
-	if (!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-		&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+	else
 		return false;
+
+	//// 이동 중이지 않으면
+	//if (!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
+	//	&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
+	//	return false;
 }

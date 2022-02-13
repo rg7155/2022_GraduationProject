@@ -88,8 +88,7 @@ private:
 	XMFLOAT3 MoveByDir(float fDistance);
 
 private:
-	bool Check_GetResource(float fTimeElapsed);
-	bool Check_Attack(float fTimeElapsed);
+	bool Check_Input(float fTimeElapsed);
 	void Change_Animation(ANIM eNewAnim);
 	bool Check_MoveInput();
 
