@@ -1138,9 +1138,6 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
 			CGameObject::Render(pd3dCommandList, pCamera);
 	}
-
-	
-
 }
 
 void CMapObject::Animate(float fTimeElapsed)
@@ -1148,7 +1145,9 @@ void CMapObject::Animate(float fTimeElapsed)
 	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
 	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
-	for (int i = 0; i < COM_END; ++i) m_pComponent[i]->Update_Component(fTimeElapsed);
+	for (int i = 0; i < COM_END; ++i) 
+		if(m_pComponent[i])
+			m_pComponent[i]->Update_Component(fTimeElapsed);
 	
 	CGameObject::Animate(fTimeElapsed);
 

@@ -79,10 +79,17 @@ bool CCollision::Check_Collision(BoundingOrientedBox& xmMeOOBB, BoundingOriented
 	return false;
 }
 
-bool CCollision::Check_Collision_AfterMove(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos)
+bool CCollision::Check_Collision_AfterMove(BoundingOrientedBox& xmMeLocalOOBB, BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos, XMFLOAT4X4& xmf4x4World)
 {
-	//xmMeOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
-	//XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+	BoundingOrientedBox xmMeOOBB;
+	xmf4x4World._41 = xmf3MovePos.x;
+	xmf4x4World._42 = xmf3MovePos.y;
+	xmf4x4World._43 = xmf3MovePos.z;
+	xmMeLocalOOBB.Transform(xmMeOOBB, XMLoadFloat4x4(&xmf4x4World));
+	XMStoreFloat4(&xmMeOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&xmMeOOBB.Orientation)));
+	
+	if (Check_Collision(xmMeOOBB, xmTargetOOBB))
+		return true;
 
 	return false;
 }

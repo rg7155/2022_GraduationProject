@@ -120,6 +120,9 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 
+	virtual void	CreateComponent() override;
+
+
 private:
 	bool Check_GetResource(float fTimeElapsed);
 	bool Check_Attack(float fTimeElapsed);

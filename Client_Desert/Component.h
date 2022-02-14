@@ -58,7 +58,7 @@ private:
 public:
 	virtual void	Ready_Component(void) override;
 	bool			Check_Collision(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB);
-	bool			Check_Collision_AfterMove(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos);
+	bool			Check_Collision_AfterMove(BoundingOrientedBox& xmMeLocalOOBB, BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos, XMFLOAT4X4& xmf4x4World);
 
 public:
 	static CCollision* Create();

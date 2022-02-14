@@ -367,6 +367,11 @@ CTerrainPlayer::~CTerrainPlayer()
 {
 }
 
+void CTerrainPlayer::CreateComponent()
+{
+	//m_pComponent
+}
+ 
 CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
@@ -469,6 +474,8 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 		}
 	}
 }
+
+
 
 bool CTerrainPlayer::Check_GetResource(float fTimeElapsed)
 {

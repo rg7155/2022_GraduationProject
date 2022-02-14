@@ -290,10 +290,10 @@ public:
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
 protected:
-	virtual void	CloneComponent() {};
+	virtual void	CreateComponent() {};
 
 protected:
-	//¾À¿¡¼­ º¹Á¦ÇÑ ÄÄÆ÷³ÍÆ®¸¦ ´ã¾ÆµÒ
+	//vector<CComponent*>		m_pComponent;
 	CComponent*		m_pComponent[COM_END];
 
 };
@@ -332,7 +332,7 @@ private:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
 
-	virtual void	CloneComponent() override;
+	virtual void	CreateComponent() override;
 
 public:
 	bool		m_isPlane = false;
