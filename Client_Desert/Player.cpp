@@ -29,13 +29,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
 
-	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
 
+	m_xmf4x4NowRotate = Matrix4x4::Identity();
+	m_xmf4x4NewRotate = Matrix4x4::Identity();
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -109,7 +107,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 	}
 
-	XMVECTOR xmDstVec = m_xmVecSrc;
+	XMVECTOR xmDstVec;
 
 	XMVECTOR xmVecCamRight = XMLoadFloat3(&m_pCamera->GetRightVector());
 	XMVECTOR xmVecCamLook = XMLoadFloat3(&m_pCamera->GetLookVector());
@@ -160,19 +158,24 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	//// 현재 카메라 Look으로 축 변환
 	XMFLOAT3 xmf3Camera = m_pCamera->GetLookVector();
 	xmf3Camera.y = 0.f;
-	m_xmVecNewRotate = XMLoadFloat3(&xmf3Camera);
-	m_xmVecNewRotate = XMVector3Normalize(m_xmVecNewRotate);
+	xmDstVec = XMLoadFloat3(&xmf3Camera);
+	xmDstVec = XMVector3Normalize(xmDstVec);
 
-	//m_pCamera->Update(GetLook(), )
-	// 반대방향이면 temp를 추가하자!
-
-	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
-
+	// 이동
 	Move(MoveByDir(fDistance), bUpdateVelocity);
 
 	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
 	if (m_eCurAnim != ANIM::RUN)
 		Change_Animation(ANIM::RUN);
+
+	// 행렬 회전
+	XMVECTOR xmVecAngle = XMVector3AngleBetweenNormals(XMLoadFloat3(&GetLookVector()), xmDstVec);
+	float fAngle = XMVectorGetX(xmVecAngle);
+
+	// 행렬로 만들어서 Interpolation
+
+	XMMATRIX xmf4x4Rotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Up), XMConvertToRadians(fAngle));
+	XMStoreFloat4x4(&m_xmf4x4NewRotate, xmf4x4Rotate);
 
 }
 
@@ -368,19 +371,29 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 
 void CPlayer::LerpRotate(float fTimeElapsed)
 {
-	
-	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
-	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 
-	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
+	m_xmf4x4NowRotate = Matrix4x4::Interpolate(m_xmf4x4NowRotate, m_xmf4x4NewRotate, fTimeElapsed * 5.f);
 
+	m_xmf3Look = Vector3::TransformNormal(m_xmf3Look, XMLoadFloat4x4(&m_xmf4x4NowRotate));
 	XMVECTOR xmVecRight = XMVector3Cross(XMLoadFloat3(&m_xmf3Up), XMLoadFloat3(&m_xmf3Look));
-	XMStoreFloat3(&m_xmf3Right, xmVecRight);
-
+	XMStoreFloat3(&m_xmf3Right, xmVecRight);	
 	
 	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
 	m_xmf3Up = Vector3::Normalize(m_xmf3Up);
 	m_xmf3Right = Vector3::Normalize(m_xmf3Right);
+
+	//m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
+	////m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
+
+	//XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
+
+	//XMVECTOR xmVecRight = XMVector3Cross(XMLoadFloat3(&m_xmf3Up), XMLoadFloat3(&m_xmf3Look));
+	//XMStoreFloat3(&m_xmf3Right, xmVecRight);
+
+	//
+	//m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+	//m_xmf3Up = Vector3::Normalize(m_xmf3Up);
+	//m_xmf3Right = Vector3::Normalize(m_xmf3Right);
 
 }
 
@@ -532,8 +545,6 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 			m_bBattleOn = true;
 			Change_Animation(ANIM::IDLE);
 		}
-
-
 		return true;
 	}
 	return false;
@@ -564,9 +575,4 @@ bool CPlayer::Check_MoveInput()
 		return true;
 	else
 		return false;
-
-	//// 이동 중이지 않으면
-	//if (!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-	//	&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
-	//	return false;
 }

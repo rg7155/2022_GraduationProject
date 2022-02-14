@@ -93,11 +93,8 @@ private:
 	bool Check_MoveInput();
 
 private:
-	XMVECTOR m_xmVecNowRotate;
-	XMVECTOR m_xmVecNewRotate;
-
-	XMVECTOR m_xmVecSrc;
-
+	XMFLOAT4X4 m_xmf4x4NowRotate;
+	XMFLOAT4X4 m_xmf4x4NewRotate;
 
 private:
 	ANIM	m_eCurAnim;			// 현재 애니메이션
