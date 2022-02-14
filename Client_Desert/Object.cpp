@@ -1134,7 +1134,6 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 		XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmOOBB.Extents;
 		float fMax = max(xmf3Extents.x, max(xmf3Extents.y, xmf3Extents.z));
 		float fRadi = m_xmf3Scale.x * fMax; //스케일 x,y,z 다를수도
-		//float fRadi = 0.f; 
 
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
 			CGameObject::Render(pd3dCommandList, pCamera);

@@ -17,6 +17,7 @@ protected:
 	virtual ~CComponent(void) {};
 
 public:
+	virtual void	Ready_Component(void) { return; }
 	virtual int	Update_Component(const float& fTimeDelta) { return 0; }
 
 public:
@@ -34,9 +35,9 @@ private:
 	virtual ~CFrustum(void);
 
 public:
-	void		Ready_Frustum(void);
-	bool		Isin_Frustum(XMFLOAT3* pPos);
-	bool		Isin_Frustum_ForObject(CCamera* pCamera, XMFLOAT3* pPos, float& fRadius);
+	virtual void	Ready_Component(void) override;
+	bool			Isin_Frustum(XMFLOAT3* pPos);
+	bool			Isin_Frustum_ForObject(CCamera* pCamera, XMFLOAT3* pPos, float& fRadius);
 
 	bool		GetIsRender() { return m_isRender; }
 public:
@@ -45,4 +46,25 @@ public:
 private:
 	bool		m_isRender = true;
 };
+
+///////////////////////////////////////////////////////////////////////////////
+
+class CCollision : public CComponent
+{
+private:
+	CCollision();
+	virtual ~CCollision(void);
+
+public:
+	virtual void	Ready_Component(void) override;
+	bool			Check_Collision(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB);
+	bool			Check_Collision_AfterMove(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos);
+
+public:
+	static CCollision* Create();
+
+private:
+};
+
+
 #endif // Component_h__

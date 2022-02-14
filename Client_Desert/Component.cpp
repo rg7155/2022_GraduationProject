@@ -10,7 +10,7 @@ CFrustum::~CFrustum(void)
 {
 }
 
-void CFrustum::Ready_Frustum(void)
+void CFrustum::Ready_Component(void)
 {
 }
 
@@ -50,10 +50,47 @@ bool CFrustum::Isin_Frustum_ForObject(CCamera* pCamera, XMFLOAT3* pPos, float& f
 CFrustum* CFrustum::Create()
 {
 	CFrustum* pInstance = new CFrustum();
-	pInstance->Ready_Frustum();
+	pInstance->Ready_Component();
 	pInstance->AddRef();
 	return pInstance;
 }
 
+///////////////////////////////////////////////////////////////////////////////
 
 
+CCollision::CCollision()
+{
+}
+
+
+CCollision::~CCollision(void)
+{
+}
+
+void CCollision::Ready_Component(void)
+{
+}
+
+bool CCollision::Check_Collision(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB)
+{
+	if (xmMeOOBB.Intersects(xmTargetOOBB))
+		return true;
+
+	return false;
+}
+
+bool CCollision::Check_Collision_AfterMove(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos)
+{
+	//xmMeOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
+	//XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
+
+	return false;
+}
+
+CCollision* CCollision::Create()
+{
+	CCollision* pInstance = new CCollision();
+	pInstance->Ready_Component();
+	pInstance->AddRef();
+	return pInstance;
+}
