@@ -216,6 +216,7 @@ public:
 	XMFLOAT3						m_xmf3Scale;
 
 	BoundingOrientedBox				m_xmOOBB;
+	bool							m_isRootModelObject = false;
 
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
@@ -335,6 +336,5 @@ private:
 
 public:
 	bool		m_isPlane = false;
-	int			m_iMapIndex = 0;
-
+	string		m_strName = "";
 };

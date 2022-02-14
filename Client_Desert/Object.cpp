@@ -432,7 +432,7 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 
 void CGameObject::UpdateBoundingBox()
 {
-	if (m_pChild)
+	if (m_pChild && m_pChild->m_isRootModelObject)
 	{
 		m_pChild->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
 		XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
@@ -827,7 +827,10 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 
 	CGameObject *pGameObject = new CGameObject();
 	if (isRootModelObj)
+	{
 		pRootModelObj = pGameObject;
+		pGameObject->m_isRootModelObject = true;
+	}
 
 	for ( ; ; )
 	{
@@ -1156,7 +1159,7 @@ void CMapObject::Animate(float fTimeElapsed)
 		BoundingOrientedBox xmPlayerOOBB = CGameMgr::GetInstance()->GetPlayer()->m_xmOOBB;
 		if (m_xmOOBB.Intersects(xmPlayerOOBB))
 		{
-			cout << "Col Map,Player / " << m_iMapIndex << endl;
+			cout << "Col Map,Player / " << m_strName << endl;
 		}
 	}
 }
