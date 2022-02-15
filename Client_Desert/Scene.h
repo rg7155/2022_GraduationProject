@@ -73,6 +73,8 @@ public:
 	int									m_nShaders = 0;
 	CShader								**m_ppShaders = NULL;
 
+	CMapObjectsShader					*m_pMapObjectShader = nullptr;
+
 	CSkyBox								*m_pSkyBox = NULL;
 
 	LIGHT								*m_pLights = NULL;

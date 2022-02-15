@@ -78,16 +78,16 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	int iIndex = 0;
 
-	CMapObjectsShader* pMapObjectsShader = new CMapObjectsShader();
-	pMapObjectsShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pMapObjectsShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = pMapObjectsShader;
+	m_pMapObjectShader = new CMapObjectsShader();
+	m_pMapObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = m_pMapObjectShader;
 
-	m_pDepthRenderShader = new CDepthRenderShader(pMapObjectsShader, m_pLights);
+	m_pDepthRenderShader = new CDepthRenderShader(m_pMapObjectShader, m_pLights);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
 
-	m_pShadowShader = new CShadowMapShader(pMapObjectsShader);
+	m_pShadowShader = new CShadowMapShader(m_pMapObjectShader);
 	m_pShadowShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
 

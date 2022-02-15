@@ -71,27 +71,50 @@ void CCollision::Ready_Component(void)
 {
 }
 
-bool CCollision::Check_Collision(BoundingOrientedBox& xmMeOOBB, BoundingOrientedBox& xmTargetOOBB)
+void CCollision::Update_Component(const float& fTimeDelta)
 {
-	if (xmMeOOBB.Intersects(xmTargetOOBB))
-		return true;
+	UpdateBoundingBox();
+}
 
+bool CCollision::Check_Collision(BoundingOrientedBox& xmOOBB, BoundingOrientedBox& xmTargetOOBB)
+{
+	if (xmOOBB.Intersects(xmTargetOOBB))
+	{
+		m_isCollision = true;
+		return true;
+	}
+
+	m_isCollision = false;
 	return false;
 }
 
-bool CCollision::Check_Collision_AfterMove(BoundingOrientedBox& xmMeLocalOOBB, BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos, XMFLOAT4X4& xmf4x4World)
+//Me-Player, Target-Map
+bool CCollision::Check_Collision_AfterMove(BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos, XMFLOAT4X4& xmf4x4World)
 {
 	BoundingOrientedBox xmMeOOBB;
 	xmf4x4World._41 = xmf3MovePos.x;
 	xmf4x4World._42 = xmf3MovePos.y;
 	xmf4x4World._43 = xmf3MovePos.z;
-	xmMeLocalOOBB.Transform(xmMeOOBB, XMLoadFloat4x4(&xmf4x4World));
+	m_xmLocalOOBB.Transform(xmMeOOBB, XMLoadFloat4x4(&xmf4x4World));
 	XMStoreFloat4(&xmMeOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&xmMeOOBB.Orientation)));
 	
 	if (Check_Collision(xmMeOOBB, xmTargetOOBB))
 		return true;
 
 	return false;
+}
+
+void CCollision::UpdateBoundingBox()
+{
+	if (m_isStaticOOBB)
+	{
+		if (m_isOneUpdate)
+			return;
+		m_isOneUpdate = true;
+	}
+	
+	m_xmLocalOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(m_pxmf4x4World));
+	XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
 }
 
 CCollision* CCollision::Create()

@@ -89,11 +89,14 @@ private:
 	void LerpRotate(float fTimeElapsed);
 	XMFLOAT3 MoveByDir(float fAngle, float fDistance);
 
+	bool	CheckCollision(OBJ_ID eObjId);
 
 private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecNewRotate;
 
+public:
+	CCollision* m_pComCollision = nullptr;
 };
 
 
@@ -134,6 +137,7 @@ private:
 	ANIM	m_eCurAnim;			// 현재 애니메이션
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
 	float	m_fAnimElapsedTime;	// 현재 애니메이션의 흐른 시간
+
 
 };
 

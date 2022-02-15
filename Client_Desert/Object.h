@@ -227,7 +227,7 @@ public:
 
 	virtual void BuildMaterials(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList) { }
 
-	virtual void OnPrepareAnimate() { }
+	virtual void Ready() {}
 	virtual void Animate(float fTimeElapsed);
 
 	virtual void OnPrepareRender() { }
@@ -242,8 +242,6 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial);
 
 	virtual void ReleaseUploadBuffers();
-
-	void		UpdateBoundingBox();
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
@@ -295,7 +293,6 @@ protected:
 protected:
 	//vector<CComponent*>		m_pComponent;
 	CComponent*		m_pComponent[COM_END];
-
 };
 
 
@@ -326,15 +323,17 @@ public:
 	CMapObject();
 	virtual ~CMapObject();
 
-private:
-
+public:
+	virtual void Ready() override;
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
+	virtual void CreateComponent() override;
 
-	virtual void	CreateComponent() override;
+	bool		CheckCollision(BoundingBox xmTargetOOBB);
 
 public:
 	bool		m_isPlane = false;
 	string		m_strName = "";
+	CCollision* m_pComCollision = nullptr;
 };

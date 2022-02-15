@@ -7,7 +7,7 @@
 #include "Shader.h"
 #include "InputDev.h"
 #include "Animation.h"
-
+#include "Scene.h"
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
@@ -117,6 +117,14 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+
+		//¸Ê Ãæµ¹
+		if (CheckCollision(OBJ_ID::OBJ_MAP))
+		{
+			XMFLOAT3 xmf3TempShift = xmf3Shift;
+			xmf3TempShift = Vector3::ScalarProduct(xmf3TempShift, -1, false);
+			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3TempShift);
+		}
 	}
 	else
 	{
@@ -321,6 +329,34 @@ XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
 	return xmf3Shift;
 }
 
+bool CPlayer::CheckCollision(OBJ_ID eObjId)
+{
+	switch (eObjId)
+	{
+	case OBJ_MAP:
+	{
+		CMapObjectsShader* pMapObjectShader = CGameMgr::GetInstance()->GetScene()->m_pMapObjectShader;
+
+		XMFLOAT3 xmf3TempPos = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
+
+		for (int i = 0; i < pMapObjectShader->m_nObjects; ++i)
+		{
+			CMapObject* pMapObject = static_cast<CMapObject*>(pMapObjectShader->m_ppObjects[i]);
+			if (!pMapObject->m_isPlane)
+			{
+				if (m_pComCollision->Check_Collision_AfterMove(pMapObject->m_pComCollision->m_xmOOBB, xmf3TempPos, m_xmf4x4World))
+					return true;
+			}
+		}
+		break;
+	}
+	case OBJ_END:
+		break;
+	}
+
+	return false;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
@@ -361,6 +397,9 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
 
 	if (pPlayerModel) delete pPlayerModel;
+
+	//ÄÄÆ÷³ÍÆ®
+	CreateComponent();
 }
 
 CTerrainPlayer::~CTerrainPlayer()
@@ -369,7 +408,14 @@ CTerrainPlayer::~CTerrainPlayer()
 
 void CTerrainPlayer::CreateComponent()
 {
-	//m_pComponent
+	m_pComponent[COM_COLLISION] = CCollision::Create();
+
+	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
+	m_pComCollision->m_isStaticOOBB = false;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	m_pComCollision->UpdateBoundingBox();
 }
  
 CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)

@@ -275,7 +275,7 @@ void CLoadedModelInfo::PrepareSkinning()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
 CGameObject::CGameObject()
 {
 	m_xmf4x4ToParent = Matrix4x4::Identity();
@@ -311,7 +311,7 @@ CGameObject::~CGameObject()
 
 	for (int i = 0; i < COM_END; i++)
 	{
-		if (m_pComponent[i]) 
+		if (m_pComponent[i])
 			m_pComponent[i]->Release();
 	}
 
@@ -430,22 +430,14 @@ void CGameObject::SetTrackAnimationPosition(int nAnimationTrack, float fPosition
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetTrackPosition(nAnimationTrack, fPosition);
 }
 
-void CGameObject::UpdateBoundingBox()
-{
-	if (m_pChild && m_pChild->m_isRootModelObject)
-	{
-		m_pChild->m_xmOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
-		XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
-	}
-}
+///////////////////////////////////////////////////////////////////////////
+
 
 void CGameObject::Animate(float fTimeElapsed)
 {
 	OnPrepareRender();
 
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->AdvanceTime(fTimeElapsed, this);
-
-	UpdateBoundingBox();
 
 	if (m_pSibling) m_pSibling->Animate(fTimeElapsed);
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
@@ -1111,7 +1103,6 @@ CMonsterObject::~CMonsterObject()
 
 CMapObject::CMapObject()
 {
-	CloneComponent();
 }
 
 CMapObject::~CMapObject()
@@ -1119,10 +1110,41 @@ CMapObject::~CMapObject()
 	//GameObject 소멸자에서 컴포넌트 ref 감소
 }
 
-void CMapObject::CloneComponent()
+void CMapObject::Ready()
+{
+	CreateComponent();
+
+	//UpdateBoundingBox();
+}
+
+void CMapObject::CreateComponent()
 {
 	m_pComponent[COM_FRUSTUM] = CFrustum::Create();
+
+	m_pComponent[COM_COLLISION] = CCollision::Create();
+
+	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
+	m_pComCollision->m_isStaticOOBB = true;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	m_pComCollision->UpdateBoundingBox();
 }
+
+
+void CMapObject::Animate(float fTimeElapsed)
+{
+	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
+	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+
+	for (int i = 0; i < COM_END; ++i)
+		if (m_pComponent[i])
+			m_pComponent[i]->Update_Component(fTimeElapsed);
+
+	CGameObject::Animate(fTimeElapsed);
+
+}
+
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
@@ -1140,26 +1162,17 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	}
 }
 
-void CMapObject::Animate(float fTimeElapsed)
+
+bool CMapObject::CheckCollision(BoundingBox xmTargetOOBB)
 {
-	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
-	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
+	//if (!m_isPlane)
+	//{
+	//	CGameMgr::GetInstance()->GetPlayer()->m_pComCollision;
+	//	if (m_pComCollision->Check_Collision(xmTargetOOBB))
+	//		return true;
+	//}
 
-	for (int i = 0; i < COM_END; ++i) 
-		if(m_pComponent[i])
-			m_pComponent[i]->Update_Component(fTimeElapsed);
-	
-	CGameObject::Animate(fTimeElapsed);
-
-	if (!m_isPlane)
-	{
-		//UpdateBoundingBox();
-		BoundingOrientedBox xmPlayerOOBB = CGameMgr::GetInstance()->GetPlayer()->m_xmOOBB;
-		if (m_xmOOBB.Intersects(xmPlayerOOBB))
-		{
-			cout << "Col Map,Player / " << m_strName << endl;
-		}
-	}
+	return false;
 }
 
 
