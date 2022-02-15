@@ -94,6 +94,7 @@ private:
 
 private:
 	XMVECTOR m_xmVecNowRotate;
+	XMVECTOR m_xmVecTmpRotate;
 	XMVECTOR m_xmVecNewRotate;
 
 	XMVECTOR m_xmVecSrc;

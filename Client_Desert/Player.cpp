@@ -30,6 +30,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fYaw = 0.0f;
 
 	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_xmVecTmpRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 
@@ -166,8 +167,13 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (XMConvertToDegrees(fAngle) >= 170)
 	{
 		m_xmVecNowRotate = XMVector3Normalize(m_xmVecNowRotate);
-		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, 0.5f);
+		m_xmVecTmpRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, 0.5f);
+		m_xmVecTmpRotate = XMVector3Normalize(m_xmVecTmpRotate);
+
 	}
+	else
+		m_xmVecTmpRotate = m_xmVecNewRotate;
+
 	// ¿Ãµø
 	Move(MoveByDir(fDistance), bUpdateVelocity);
 
@@ -370,7 +376,13 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 void CPlayer::LerpRotate(float fTimeElapsed)
 {
 	m_xmVecNowRotate = XMVector3Normalize(m_xmVecNowRotate);
-	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 8.f);
+	bool bNotTemp = XMVector3Equal(m_xmVecNewRotate, m_xmVecTmpRotate);
+	if(bNotTemp)
+		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 8.f);
+	else
+		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecTmpRotate, fTimeElapsed * 8.f);
+
+
 	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 
 	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
