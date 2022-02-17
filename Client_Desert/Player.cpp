@@ -122,7 +122,7 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		if (CheckCollision(OBJ_ID::OBJ_MAP))
 		{
 			XMFLOAT3 xmf3TempShift = xmf3Shift;
-			xmf3TempShift = Vector3::ScalarProduct(xmf3TempShift, -1, false);
+			xmf3TempShift = Vector3::ScalarProduct(xmf3TempShift, -1.5, false);
 			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3TempShift);
 		}
 	}

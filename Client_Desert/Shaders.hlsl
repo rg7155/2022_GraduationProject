@@ -127,6 +127,23 @@ float4 Fog(float4 cColor, float3 vPos)
     return (fFogFactor * cColor + (1.f - fFogFactor) * fFogColor);
 }
 
+//림라이트
+float4 Limlight(float3 normalW)
+{
+    float rim = 0;
+	
+    float3 cameraDirection = (gmtxView._13_23_33_11).xyz; //Look?
+    rim = 1 - saturate(dot(normalW, -cameraDirection));
+
+    rim = pow(rim, 3.0f); // 강도 조정.
+
+    float3 rimColor = float3(0.8f, 0.2f, 0.1f);
+    rimColor = rim * rimColor;
+
+    return float4(rimColor, 1);
+}
+
+
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
 	float4 cAlbedoColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
@@ -134,45 +151,22 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 		cAlbedoColor = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
 	else
         cAlbedoColor = gMaterial.m_cDiffuse;
-	//float4 cSpecularColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	//if (gnTexturesMask & MATERIAL_SPECULAR_MAP) 
-	//	cSpecularColor = gtxtSpecularTexture.Sample(gssWrap, input.uv);
-	//float4 cNormalColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	//if (gnTexturesMask & MATERIAL_NORMAL_MAP) 
-	//	cNormalColor = gtxtNormalTexture.Sample(gssWrap, input.uv);
-	//float4 cMetallicColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	//if (gnTexturesMask & MATERIAL_METALLIC_MAP) 
-	//	cMetallicColor = gtxtMetallicTexture.Sample(gssWrap, input.uv);
-	//float4 cEmissionColor = float4(0.0f, 0.0f, 0.0f, 1.0f);
-	//if (gnTexturesMask & MATERIAL_EMISSION_MAP) 
-	//	cEmissionColor = gtxtEmissionTexture.Sample(gssWrap, input.uv);
 
-	//float4 cColor = cAlbedoColor + cSpecularColor + cMetallicColor + cEmissionColor;
 	float4 cColor = cAlbedoColor;
 	
 	float3 normalW;
-	//if (gnTexturesMask & MATERIAL_NORMAL_MAP)
-	//{
-	//	float3x3 TBN = float3x3(normalize(input.tangentW), normalize(input.bitangentW), normalize(input.normalW));
-	//	float3 vNormal = normalize(cNormalColor.rgb * 2.0f - 1.0f); //[0, 1] → [-1, 1]
-	//	normalW = normalize(mul(vNormal, TBN));
-	//}
-	//else
-	//{
-	//	normalW = normalize(input.normalW);
-	//}
 	normalW = normalize(input.normalW);
-	
 	
 	float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
     float4 cColorByLight = lerp(cColor, cIllumination, 0.5f);
     
-    return Fog(cColorByLight, input.positionW);
+    float4 cColorByFog = Fog(cColorByLight, input.positionW);
+	
+    return cColorByFog;
+    //return cColorByFog + Limlight(input.normalW); //림라이트
 	
     //return (lerp(cColor, cIllumination, 0.5f));
-	
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //

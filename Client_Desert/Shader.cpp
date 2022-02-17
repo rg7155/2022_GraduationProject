@@ -532,11 +532,13 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			bool bLoad = true;
 			int iLength = strlen(pstrToken);
 
-			//공백 시작되면 사라지도록 바꾸기
-			if (pstrToken[iLength - 1] == ')')
+			for (int j = 0; j < iLength; j++)
 			{
-				bLoad = false;
-				pstrToken[iLength - 4] = '\0'; //01 (1) //가로안에 두자리수 들어가는거 주의
+				if (pstrToken[j] == ' ')
+				{
+					pstrToken[j] = '\0';
+					break;
+				}
 			}
 
 			int s = mapObj.size();
