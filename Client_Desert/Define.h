@@ -43,7 +43,7 @@
 // Ä«¸Þ¶ó
 #define CAM_OFFSET_Y			5.f
 #define CAM_OFFSET_Z			-6.f
-
+#define DPI						15.f
 
 
 //RootParameter
