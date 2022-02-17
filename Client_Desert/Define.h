@@ -40,6 +40,12 @@
 #define _PLANE_WIDTH			300
 #define _PLANE_HEIGHT			300
 
+// Ä«¸Þ¶ó
+#define CAM_OFFSET_Y			5.f
+#define CAM_OFFSET_Z			-6.f
+
+
+
 //RootParameter
 #define RP_DEPTH_BUFFER		13
 #define RP_TO_LIGHT			14

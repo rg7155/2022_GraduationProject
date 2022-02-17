@@ -264,6 +264,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	// 마우스 회전 
 
 	long dwMouseMove = 0;
+	// 좌우
 	if (dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_X))
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(dwMouseMove / 20.f));
@@ -272,13 +273,6 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		if (m_pPlayer)
 		{
 			XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
-			/*XMFLOAT3 xmf3Right = m_pPlayer->GetRightVector();
-			XMFLOAT3 xmf3Up = m_pPlayer->GetUpVector();
-			XMFLOAT3 xmf3Look = m_pPlayer->GetLookVector();
-
-			xmf4x4Rotate._11 = xmf3Right.x; xmf4x4Rotate._21 = xmf3Up.x; xmf4x4Rotate._31 = xmf3Look.x;
-			xmf4x4Rotate._12 = xmf3Right.y; xmf4x4Rotate._22 = xmf3Up.y; xmf4x4Rotate._32 = xmf3Look.y;
-			xmf4x4Rotate._13 = xmf3Right.z; xmf4x4Rotate._23 = xmf3Up.z; xmf4x4Rotate._33 = xmf3Look.z;*/
 
 			XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
 			XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset);
@@ -286,16 +280,40 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 			float fLength = Vector3::Length(xmf3Direction);
 			xmf3Direction = Vector3::Normalize(xmf3Direction);
 
-			//float fTimeLagScale = (m_fTimeLag) ? fTimeElapsed * (1.0f / m_fTimeLag) : 1.0f;
-			//float fDistance = fLength * fTimeLagScale;
-			//if (fDistance > fLength) fDistance = fLength;
-			//if (fLength < 0.01f) fDistance = fLength;
-
 			if (fLength > 0)
 			{
 				m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fLength);
 				SetLookAt(xmf3LookAt);
 
+			}
+		}
+
+	}
+
+	// 위아래
+	if (dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_Y))
+	{
+		XMMATRIX xmmtxRotate = XMMatrixRotationX(XMConvertToRadians(dwMouseMove / 20.f));
+		XMFLOAT3 xmf3NewOffSet = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
+		if (/*xmf3NewOffSet.y > 0.f && xmf3NewOffSet.y < CAM_OFFSET_Y + 2.f*/1)
+		{
+			m_xmf3Offset = xmf3NewOffSet;
+		}
+
+		if (m_pPlayer)
+		{
+			XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
+
+			XMFLOAT3 xmf3Offset = Vector3::TransformCoord(m_xmf3Offset, xmf4x4Rotate);
+			XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset);
+			XMFLOAT3 xmf3Direction = Vector3::Subtract(xmf3Position, m_xmf3Position);
+			float fLength = Vector3::Length(xmf3Direction);
+			xmf3Direction = Vector3::Normalize(xmf3Direction);
+
+			if (fLength > 0)
+			{	
+				m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fLength);
+				SetLookAt(xmf3LookAt);
 			}
 		}
 
