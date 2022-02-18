@@ -331,6 +331,7 @@ XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
 
 bool CPlayer::CheckCollision(OBJ_ID eObjId)
 {
+	//CollisionMgr에서 충돌판정을 하고 충돌 했으면 그 오브젝트의 충돌함수를 불러서 eID로 switch문 돌리기
 	switch (eObjId)
 	{
 	case OBJ_MAP:
@@ -342,7 +343,7 @@ bool CPlayer::CheckCollision(OBJ_ID eObjId)
 		for (int i = 0; i < pMapObjectShader->m_nObjects; ++i)
 		{
 			CMapObject* pMapObject = static_cast<CMapObject*>(pMapObjectShader->m_ppObjects[i]);
-			if (!pMapObject->m_isPlane)
+			if (!pMapObject->m_isCollisionIgnore)
 			{
 				if (m_pComCollision->Check_Collision_AfterMove(pMapObject->m_pComCollision->m_xmOOBB, xmf3TempPos, m_xmf4x4World))
 					return true;

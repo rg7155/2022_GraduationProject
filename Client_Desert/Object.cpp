@@ -1114,6 +1114,15 @@ void CMapObject::Ready()
 {
 	CreateComponent();
 
+	if (m_strName.find("tree") != string::npos || m_strName.find("grass") != string::npos)
+		m_isCollisionIgnore = true;
+
+	if (m_strName.find("Plane") != string::npos)
+	{
+		m_isPlane = true;
+		m_isCollisionIgnore = true;
+	}
+
 	//UpdateBoundingBox();
 }
 
@@ -1128,6 +1137,7 @@ void CMapObject::CreateComponent()
 	if (m_pChild && m_pChild->m_isRootModelObject)
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+
 	m_pComCollision->UpdateBoundingBox();
 }
 

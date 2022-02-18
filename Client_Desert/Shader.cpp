@@ -576,7 +576,6 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 			CMapObject* pMapObject = static_cast<CMapObject*>(m_ppObjects[i]);
 
-			if (i == 0) pMapObject->m_isPlane = true; //plane
 			pMapObject->m_strName = str;
 
 			pMapObject->Ready();
