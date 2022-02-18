@@ -91,6 +91,9 @@ private:
 
 	bool	CheckCollision(OBJ_ID eObjId);
 
+public:
+	virtual void	CollsionDetection(OBJ_ID eObjId) override;
+
 private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecNewRotate;

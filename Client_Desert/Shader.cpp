@@ -432,11 +432,9 @@ void CStandardObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12Graphi
 
 void CStandardObjectsShader::ReleaseObjects()
 {
-	if (m_ppObjects)
-	{
-		for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->Release();
-		delete[] m_ppObjects;
-	}
+	for (auto& iter : m_listObjects) iter->Release();
+	m_listObjects.clear();
+
 }
 
 void CStandardObjectsShader::AnimateObjects(float fTimeElapsed)
@@ -446,22 +444,19 @@ void CStandardObjectsShader::AnimateObjects(float fTimeElapsed)
 
 void CStandardObjectsShader::ReleaseUploadBuffers()
 {
-	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
+	for (auto& iter : m_listObjects) iter->ReleaseUploadBuffers();
 }
 
 void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/)
 {
 	CStandardShader::Render(pd3dCommandList, pCamera);
 
-	for (int j = 0; j < m_nObjects; j++)
+	for (auto& iter : m_listObjects)
 	{
-		if (m_ppObjects[j])
-		{
-			//m_ppObjects[j]->Animate(m_fElapsedTime);
-			m_ppObjects[j]->UpdateTransform(NULL);
-			m_ppObjects[j]->Render(pd3dCommandList, pCamera);
-		}
+		iter->UpdateTransform(NULL);
+		iter->Render(pd3dCommandList, pCamera);
 	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -519,12 +514,11 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	char pstrToken[64] = { '\0' };
 
-	m_nObjects = ReadIntegerFromFile(pInFile); 
-	//m_nObjects += 1;
-	m_ppObjects = new CGameObject * [m_nObjects];
+	int nObjects = ReadIntegerFromFile(pInFile); 
+	//m_ppObjects = new CGameObject * [m_nObjects];
 
 	map<string, CLoadedModelInfo*> mapObj; //key가 char*면 크기가 다 똑같다
-	for (int i = 0; i < m_nObjects; ++i)
+	for (int i = 0; i < nObjects; ++i)
 	{
 		if (ReadStringFromFile(pInFile, pstrToken))
 		{
@@ -560,25 +554,27 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				pMapModel = iter->second;
 			}
 
+			
 
-			m_ppObjects[i] = new CMapObject();
-			m_ppObjects[i]->SetChild(pMapModel->m_pModelRootObject, true);
+			CGameObject* pGameObject = new CMapObject();
+			pGameObject->SetChild(pMapModel->m_pModelRootObject, true);
 
 			//크자이로 읽어옴
 			XMFLOAT3 xmf3Scale = ReadVectorFromFile(pInFile, 3);
-			m_ppObjects[i]->SetScale(xmf3Scale);
+			pGameObject->SetScale(xmf3Scale);
 
 			XMFLOAT3 xmf3Rotaion = ReadVectorFromFile(pInFile, 3);
-			m_ppObjects[i]->Rotate(xmf3Rotaion.x, xmf3Rotaion.y, xmf3Rotaion.z);
+			pGameObject->Rotate(xmf3Rotaion.x, xmf3Rotaion.y, xmf3Rotaion.z);
 
 			XMFLOAT3 xmf3Position = ReadVectorFromFile(pInFile, 3);
-			m_ppObjects[i]->SetPosition(xmf3Position);
+			pGameObject->SetPosition(xmf3Position);
 
-			CMapObject* pMapObject = static_cast<CMapObject*>(m_ppObjects[i]);
+			CMapObject* pMapObject = static_cast<CMapObject*>(pGameObject);
 
 			pMapObject->m_strName = str;
 
 			pMapObject->Ready();
+			m_listObjects.emplace_back(pGameObject);
 		}
 
 	}
@@ -590,13 +586,19 @@ void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	CStandardShader::AnimateObjects(fTimeElapsed);
 
-	for (int j = 0; j < m_nObjects; j++)
+	//for (int j = 0; j < m_nObjects; j++)
+	//{
+	//	if (m_ppObjects[j])
+	//	{
+	//		m_ppObjects[j]->Animate(m_fElapsedTime);
+	//		m_ppObjects[j]->UpdateTransform(NULL);
+	//	}
+	//}
+
+	for (auto& iter : m_listObjects)
 	{
-		if (m_ppObjects[j])
-		{
-			m_ppObjects[j]->Animate(m_fElapsedTime);
-			m_ppObjects[j]->UpdateTransform(NULL);
-		}
+		iter->Animate(m_fElapsedTime);
+		iter->UpdateTransform(NULL);
 	}
 }
 
@@ -968,15 +970,14 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	
 	if (iIndex == 1)
 	{
-		for (int i = 0; i < m_pObjectsShader->m_nObjects; i++)
+		//코드 수정 필요..
+		for (auto& iter : m_pObjectsShader->m_listObjects)
 		{
-			if (m_pObjectsShader->m_ppObjects[i])
-			{
-				m_pObjectsShader->m_ppObjects[i]->UpdateShaderVariables(pd3dCommandList);
-				m_pObjectsShader->m_ppObjects[i]->UpdateTransform(NULL);
-				m_pObjectsShader->m_ppObjects[i]->Render(pd3dCommandList, pCamera);
-			}
+			iter->UpdateShaderVariables(pd3dCommandList);
+			iter->UpdateTransform(NULL);
+			iter->Render(pd3dCommandList, pCamera);
 		}
+		//m_pObjectsShader->Render(pd3dCommandList, pCamera, nPipelineState);
 	}
 	else if (iIndex == 0)
 	{

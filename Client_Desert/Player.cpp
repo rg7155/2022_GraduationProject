@@ -225,7 +225,6 @@ void CPlayer::Update(float fTimeElapsed)
 
 	LerpRotate(fTimeElapsed);
 
-	//UpdateBoundingBox();
 }
 
 CCamera *CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
@@ -331,31 +330,43 @@ XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
 
 bool CPlayer::CheckCollision(OBJ_ID eObjId)
 {
-	//CollisionMgr에서 충돌판정을 하고 충돌 했으면 그 오브젝트의 충돌함수를 불러서 eID로 switch문 돌리기
+	////CollisionMgr에서 충돌판정을 하고 충돌 했으면 그 오브젝트의 충돌함수를 불러서 eID로 switch문 돌리기
+	//switch (eObjId)
+	//{
+	//case OBJ_MAP:
+	//{
+	//	CMapObjectsShader* pMapObjectShader = CGameMgr::GetInstance()->GetScene()->m_pMapObjectShader;
+
+	//	XMFLOAT3 xmf3TempPos = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
+
+	//	for (int i = 0; i < pMapObjectShader->m_nObjects; ++i)
+	//	{
+	//		CMapObject* pMapObject = static_cast<CMapObject*>(pMapObjectShader->m_ppObjects[i]);
+	//		if (!pMapObject->m_isCollisionIgnore)
+	//		{
+	//			if (m_pComCollision->Check_Collision_AfterMove(pMapObject->m_pComCollision->m_xmOOBB, xmf3TempPos, m_xmf4x4World))
+	//				return true;
+	//		}
+	//	}
+	//	break;
+	//}
+	//case OBJ_END:
+	//	break;
+	//}
+
+	return false;
+}
+
+void CPlayer::CollsionDetection(OBJ_ID eObjId)
+{
 	switch (eObjId)
 	{
 	case OBJ_MAP:
-	{
-		CMapObjectsShader* pMapObjectShader = CGameMgr::GetInstance()->GetScene()->m_pMapObjectShader;
-
-		XMFLOAT3 xmf3TempPos = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
-
-		for (int i = 0; i < pMapObjectShader->m_nObjects; ++i)
-		{
-			CMapObject* pMapObject = static_cast<CMapObject*>(pMapObjectShader->m_ppObjects[i]);
-			if (!pMapObject->m_isCollisionIgnore)
-			{
-				if (m_pComCollision->Check_Collision_AfterMove(pMapObject->m_pComCollision->m_xmOOBB, xmf3TempPos, m_xmf4x4World))
-					return true;
-			}
-		}
+		//cout << "player-map col\n";
 		break;
-	}
 	case OBJ_END:
 		break;
 	}
-
-	return false;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -401,6 +412,7 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 
 	//컴포넌트
 	CreateComponent();
+	m_eObjId = OBJ_PLAYER;
 }
 
 CTerrainPlayer::~CTerrainPlayer()
@@ -520,6 +532,9 @@ void CTerrainPlayer::Update(float fTimeElapsed)
 			Change_Animation(ANIM::IDLE_RELAXED);
 		}
 	}
+
+	if(m_pComCollision)
+		m_pComCollision->UpdateBoundingBox();
 }
 
 

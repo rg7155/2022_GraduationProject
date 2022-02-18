@@ -59,6 +59,8 @@ public:
 	virtual void	Ready_Component(void) override;
 	virtual void	Update_Component(const float& fTimeDelta) override;
 
+	bool			Check_Collision(CCollision* pCom);
+	bool			Check_Collision(BoundingOrientedBox& xmTargetOOBB);
 	bool			Check_Collision(BoundingOrientedBox& xmOOBB, BoundingOrientedBox& xmTargetOOBB);
 	bool			Check_Collision_AfterMove(BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos, XMFLOAT4X4& xmf4x4World);
 
@@ -69,7 +71,7 @@ public:
 public:
 	//바운딩박스 업데이트 한번만
 	bool					m_isStaticOOBB = false; 
-	bool					m_isCollision = false;
+	bool					m_isCollisionIgnore = false;
 	XMFLOAT4X4*				m_pxmf4x4World = nullptr;
 	BoundingOrientedBox		m_xmLocalOOBB;
 	BoundingOrientedBox		m_xmOOBB;

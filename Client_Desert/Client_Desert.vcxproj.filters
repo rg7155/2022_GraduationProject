@@ -159,6 +159,9 @@
     <ClInclude Include="GameMgr.h">
       <Filter>소스 파일\99. Mgr</Filter>
     </ClInclude>
+    <ClInclude Include="CollsionMgr.h">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -231,6 +234,9 @@
       <Filter>소스 파일\09. Animation</Filter>
     </ClCompile>
     <ClCompile Include="GameMgr.cpp">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClCompile>
+    <ClCompile Include="CollsionMgr.cpp">
       <Filter>소스 파일\99. Mgr</Filter>
     </ClCompile>
   </ItemGroup>

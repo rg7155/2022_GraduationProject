@@ -217,6 +217,7 @@ public:
 
 	BoundingOrientedBox				m_xmOOBB;
 	bool							m_isRootModelObject = false;
+	OBJ_ID							m_eObjId = OBJ_END;
 
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
@@ -287,10 +288,13 @@ public:
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
+public:
+	virtual void	CollsionDetection(OBJ_ID eId) {};
+
 protected:
 	virtual void	CreateComponent() {};
 
-protected:
+public:
 	//vector<CComponent*>		m_pComponent;
 	CComponent*		m_pComponent[COM_END];
 };
@@ -334,7 +338,6 @@ public:
 
 public:
 	bool		m_isPlane = false;
-	bool		m_isCollisionIgnore = false;
 
 	string		m_strName = "";
 	CCollision* m_pComCollision = nullptr;

@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="CollsionMgr.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Client_Desert.h" />
     <ClInclude Include="d3dx12.h" />
@@ -179,6 +180,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="CollsionMgr.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Client_Desert.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />

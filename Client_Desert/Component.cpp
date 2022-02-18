@@ -76,21 +76,46 @@ void CCollision::Update_Component(const float& fTimeDelta)
 	UpdateBoundingBox();
 }
 
+//주로 이걸 사용할듯?
+bool CCollision::Check_Collision(CCollision* pCom)
+{
+	if (m_isCollisionIgnore || pCom->m_isCollisionIgnore)
+		return false;
+
+	if (m_xmOOBB.Intersects(pCom->m_xmOOBB))
+		return true;
+
+	return false;
+}
+
+bool CCollision::Check_Collision(BoundingOrientedBox& xmTargetOOBB)
+{
+	if (m_isCollisionIgnore)
+		return false;
+
+	if (m_xmOOBB.Intersects(xmTargetOOBB))
+		return true;
+
+	return false;
+}
+
 bool CCollision::Check_Collision(BoundingOrientedBox& xmOOBB, BoundingOrientedBox& xmTargetOOBB)
 {
+	if (m_isCollisionIgnore)
+		return false;
+		
 	if (xmOOBB.Intersects(xmTargetOOBB))
-	{
-		m_isCollision = true;
 		return true;
-	}
 
-	m_isCollision = false;
 	return false;
 }
 
 //Me-Player, Target-Map
 bool CCollision::Check_Collision_AfterMove(BoundingOrientedBox& xmTargetOOBB, XMFLOAT3& xmf3MovePos, XMFLOAT4X4& xmf4x4World)
 {
+	if (m_isCollisionIgnore)
+		return false; 
+	
 	BoundingOrientedBox xmMeOOBB;
 	xmf4x4World._41 = xmf3MovePos.x;
 	xmf4x4World._42 = xmf3MovePos.y;
@@ -106,6 +131,9 @@ bool CCollision::Check_Collision_AfterMove(BoundingOrientedBox& xmTargetOOBB, XM
 
 void CCollision::UpdateBoundingBox()
 {
+	if (m_isCollisionIgnore)
+		return;
+	
 	if (m_isStaticOOBB)
 	{
 		if (m_isOneUpdate)
