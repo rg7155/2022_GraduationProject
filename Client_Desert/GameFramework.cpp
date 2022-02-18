@@ -477,35 +477,8 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
-	static UCHAR pKeysBuffer[256];
-	bool bProcessedByScene = false;
-	//if (GetKeyboardState(pKeysBuffer) && m_pScene) bProcessedByScene = m_pScene->ProcessInput(pKeysBuffer);
-	if (!bProcessedByScene)
-	{
-		float cxDelta = 0.0f, cyDelta = 0.0f;
-		POINT ptCursorPos;
-		if (GetCapture() == m_hWnd)
-		{
-			SetCursor(NULL);
-			GetCursorPos(&ptCursorPos);
-			cxDelta = (float)(ptCursorPos.x - m_ptOldCursorPos.x) / 3.0f;
-			cyDelta = (float)(ptCursorPos.y - m_ptOldCursorPos.y) / 3.0f;
-			SetCursorPos(m_ptOldCursorPos.x, m_ptOldCursorPos.y);
-		}
 
-		if ((cxDelta != 0.0f) || (cyDelta != 0.0f))
-		{
-			if (cxDelta || cyDelta)
-			{
-				/*if (pKeysBuffer[VK_RBUTTON] & 0xF0)
-					m_pPlayer->Rotate(cyDelta, 0.0f, -cxDelta);
-				else
-					m_pPlayer->Rotate(cyDelta, cxDelta, 0.0f);*/
-			}
-
-		}
-		m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * m_GameTimer.GetTimeElapsed(), true);
-	}
+	m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * m_GameTimer.GetTimeElapsed(), true);
 
 	m_pCamera->Update(m_pPlayer->GetLook(), m_GameTimer.GetTimeElapsed());
 	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
@@ -517,9 +490,6 @@ void CGameFramework::AnimateObjects()
 
 	m_pPlayer->Animate(fTimeElapsed);
 
-	//카메라 업데이트
-	m_pPlayer->GetCamera()->Update(m_pPlayer->GetLook(), fTimeElapsed);
-
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 }
@@ -527,7 +497,7 @@ void CGameFramework::AnimateObjects()
 //#define _WITH_PLAYER_TOP
 void CGameFramework::FrameAdvance()
 {
-	m_GameTimer.Tick(0.0f);
+	m_GameTimer.Tick(60.0f);
 
 	CInputDev::GetInstance()->Set_InputDev();
 

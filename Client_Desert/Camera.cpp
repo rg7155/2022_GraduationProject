@@ -21,6 +21,8 @@ CCamera::CCamera()
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_nMode = 0x00;
 	m_pPlayer = NULL;
+
+
 }
 
 CCamera::CCamera(CCamera *pCamera)
@@ -311,6 +313,7 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 
 void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+
 	// 마우스 회전 
 	// 위아래
 	long dwMouseMove = 0;
@@ -370,7 +373,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	}
 
 	
-	
+	CCamera::Update(xmf3LookAt, fTimeElapsed);
 }
 
 void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
