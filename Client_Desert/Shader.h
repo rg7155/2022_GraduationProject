@@ -116,9 +116,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState = 0) override;
 
 public:
-//protected:
-	CGameObject						**m_ppObjects = 0;
-	int								m_nObjects = 0;
+	list<CGameObject*>					m_listObjects; //map의 list로 변경할지?
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,6 +129,9 @@ public:
 	virtual ~CMapObjectsShader();
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+
+	virtual void AnimateObjects(float fTimeElapsed) override;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

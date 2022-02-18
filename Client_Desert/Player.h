@@ -2,6 +2,7 @@
 
 #include "Object.h"
 #include "Camera.h"
+#include "InputDev.h"
 
 class CPlayer : public CGameObject
 {
@@ -92,6 +93,11 @@ private:
 	void Change_Animation(ANIM eNewAnim);
 	bool Check_MoveInput();
 
+	virtual void	CreateComponent() override;
+
+public:
+	virtual void	CollsionDetection(OBJ_ID eObjId) override;
+
 private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecTmpRotate;
@@ -109,8 +115,10 @@ private:
 private:
 	bool	m_bBattleOn;
 
-};
+public:
+	CCollision* m_pComCollision = nullptr;
 
+};
 
 class CSoundCallbackHandler : public CAnimationCallbackHandler
 {
@@ -119,6 +127,6 @@ public:
 	~CSoundCallbackHandler() { }
 
 public:
-	virtual void HandleCallback(void *pCallbackData, float fTrackPosition); 
+	virtual void HandleCallback(void* pCallbackData, float fTrackPosition);
 };
 

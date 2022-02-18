@@ -6,7 +6,8 @@
 #include "Player.h"
 #include "Shader.h"
 #include "InputDev.h"
-
+#include "Animation.h"
+#include "Scene.h"
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
@@ -36,7 +37,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
-
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
@@ -78,6 +78,13 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_bBattleOn = false;
 	m_eCurAnim = ANIM::IDLE;
+
+	///////////////////////////////////////////////
+	//컴포넌트
+	CreateComponent();
+	m_eObjId = OBJ_PLAYER;
+	///////////////////////////////////////////////
+
 
 }
 
@@ -293,7 +300,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_pSkinnedAnimationController)
 	{
 		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-		
+
 		if (Check_Input(fTimeElapsed))
 			return;
 
@@ -309,6 +316,9 @@ void CPlayer::Update(float fTimeElapsed)
 				Change_Animation(ANIM::IDLE_RELAXED);
 		}
 	}
+
+	if (m_pComCollision)
+		m_pComCollision->UpdateBoundingBox();
 }
 
 CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
@@ -378,9 +388,9 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 	m_xmVecNowRotate = XMVector3Normalize(m_xmVecNowRotate);
 	bool bNotTemp = XMVector3Equal(m_xmVecNewRotate, m_xmVecTmpRotate);
 	if(bNotTemp)
-		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 8.f);
+		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 10.f);
 	else
-		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecTmpRotate, fTimeElapsed * 8.f);
+		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecTmpRotate, fTimeElapsed * 10.f);
 
 
 	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
@@ -405,24 +415,30 @@ XMFLOAT3 CPlayer::MoveByDir(float fDistance)
 	return xmf3Shift;
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
-#define _WITH_DEBUG_CALLBACK_DATA
-
-void CSoundCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosition)
+void CPlayer::CreateComponent()
 {
-	_TCHAR* pWavName = (_TCHAR*)pCallbackData;
-#ifdef _WITH_DEBUG_CALLBACK_DATA
-	TCHAR pstrDebug[256] = { 0 };
-	_stprintf_s(pstrDebug, 256, _T("%s(%f)\n"), pWavName, fTrackPosition);
-	OutputDebugString(pstrDebug);
-#endif
-#ifdef _WITH_SOUND_RESOURCE
-	PlaySound(pWavName, ::ghAppInstance, SND_RESOURCE | SND_ASYNC);
-#else
-	PlaySound(pWavName, NULL, SND_FILENAME | SND_ASYNC);
-#endif
+	m_pComponent[COM_COLLISION] = CCollision::Create();
+
+	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
+	m_pComCollision->m_isStaticOOBB = false;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	m_pComCollision->UpdateBoundingBox();
 }
+
+void CPlayer::CollsionDetection(OBJ_ID eObjId)
+{
+	switch (eObjId)
+	{
+	case OBJ_MAP:
+		//cout << "player-map col\n";
+		break;
+	case OBJ_END:
+		break;
+	}
+}
+
 
 CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
@@ -489,13 +505,13 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 {
 	// 공격 4가지 처리
 
-	// attack1
+		// attack1
 	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2 || m_eCurAnim == ANIM::SKILL1 || m_eCurAnim == ANIM::SKILL2 || m_eCurAnim == ANIM::DIE || m_eCurAnim == ANIM::GET_RESOURCE)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 		{
-			if(m_bBattleOn)
+			if (m_bBattleOn)
 				Change_Animation(ANIM::IDLE);
 			else
 				Change_Animation(ANIM::IDLE_RELAXED);
@@ -550,7 +566,9 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 		return true;
 	}
 	return false;
+
 }
+
 
 void CPlayer::Change_Animation(ANIM eNewAnim)
 {
@@ -578,8 +596,23 @@ bool CPlayer::Check_MoveInput()
 	else
 		return false;
 
-	//// 이동 중이지 않으면
-	//if (!CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A)
-	//	&& !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) && !CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
-	//	return false;
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 
+#define _WITH_DEBUG_CALLBACK_DATA
+
+void CSoundCallbackHandler::HandleCallback(void* pCallbackData, float fTrackPosition)
+{
+	_TCHAR* pWavName = (_TCHAR*)pCallbackData;
+#ifdef _WITH_DEBUG_CALLBACK_DATA
+	TCHAR pstrDebug[256] = { 0 };
+	_stprintf_s(pstrDebug, 256, _T("%s(%f)\n"), pWavName, fTrackPosition);
+	OutputDebugString(pstrDebug);
+#endif
+#ifdef _WITH_SOUND_RESOURCE
+	PlaySound(pWavName, ::ghAppInstance, SND_RESOURCE | SND_ASYNC);
+#else
+	PlaySound(pWavName, NULL, SND_FILENAME | SND_ASYNC);
+#endif
 }

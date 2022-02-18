@@ -28,9 +28,6 @@
     <Filter Include="소스 파일\04. Player">
       <UniqueIdentifier>{0c986bbc-5a91-4c73-a945-7c73f19ea6a3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\05. Camera">
-      <UniqueIdentifier>{691d5f4f-886c-406c-b912-2aa72f51c396}</UniqueIdentifier>
-    </Filter>
     <Filter Include="소스 파일\06. Mesh">
       <UniqueIdentifier>{21d2fc1d-97de-4282-a216-b0b2dc404102}</UniqueIdentifier>
     </Filter>
@@ -57,6 +54,15 @@
     </Filter>
     <Filter Include="소스 파일\imgui_sources">
       <UniqueIdentifier>{343e0a12-a195-4125-ba13-55d5013d5bf7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\08. Component">
+      <UniqueIdentifier>{3d7e384f-cebd-47e8-b510-306ed61894aa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\09. Animation">
+      <UniqueIdentifier>{0c16a652-63a2-4364-99e2-f4f4b4f37917}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="소스 파일\05. Camera">
+      <UniqueIdentifier>{691d5f4f-886c-406c-b912-2aa72f51c396}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -144,6 +150,18 @@
     <ClInclude Include="imgui\imstb_rectpack.h">
       <Filter>소스 파일\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>소스 파일\08. Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>소스 파일\09. Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMgr.h">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClInclude>
+    <ClInclude Include="CollsionMgr.h">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -208,6 +226,18 @@
     </ClCompile>
     <ClCompile Include="imgui\sources\main.cpp">
       <Filter>소스 파일\imgui_sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>소스 파일\08. Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>소스 파일\09. Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMgr.cpp">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClCompile>
+    <ClCompile Include="CollsionMgr.cpp">
+      <Filter>소스 파일\99. Mgr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
