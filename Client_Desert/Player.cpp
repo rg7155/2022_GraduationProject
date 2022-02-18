@@ -36,6 +36,13 @@ CPlayer::CPlayer()
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
 
+
+	///////////////////////////////////////////////
+	//컴포넌트
+	CreateComponent();
+	m_eObjId = OBJ_PLAYER;
+	///////////////////////////////////////////////
+
 }
 
 CPlayer::~CPlayer()
@@ -117,14 +124,6 @@ void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
-
-		//맵 충돌
-		if (CheckCollision(OBJ_ID::OBJ_MAP))
-		{
-			XMFLOAT3 xmf3TempShift = xmf3Shift;
-			xmf3TempShift = Vector3::ScalarProduct(xmf3TempShift, -1.5, false);
-			m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3TempShift);
-		}
 	}
 	else
 	{
@@ -328,33 +327,16 @@ XMFLOAT3 CPlayer::MoveByDir(float fAngle, float fDistance)
 	return xmf3Shift;
 }
 
-bool CPlayer::CheckCollision(OBJ_ID eObjId)
+void CPlayer::CreateComponent()
 {
-	////CollisionMgr에서 충돌판정을 하고 충돌 했으면 그 오브젝트의 충돌함수를 불러서 eID로 switch문 돌리기
-	//switch (eObjId)
-	//{
-	//case OBJ_MAP:
-	//{
-	//	CMapObjectsShader* pMapObjectShader = CGameMgr::GetInstance()->GetScene()->m_pMapObjectShader;
+	m_pComponent[COM_COLLISION] = CCollision::Create();
 
-	//	XMFLOAT3 xmf3TempPos = Vector3::Add(m_xmf3Position, m_xmf3Velocity);
-
-	//	for (int i = 0; i < pMapObjectShader->m_nObjects; ++i)
-	//	{
-	//		CMapObject* pMapObject = static_cast<CMapObject*>(pMapObjectShader->m_ppObjects[i]);
-	//		if (!pMapObject->m_isCollisionIgnore)
-	//		{
-	//			if (m_pComCollision->Check_Collision_AfterMove(pMapObject->m_pComCollision->m_xmOOBB, xmf3TempPos, m_xmf4x4World))
-	//				return true;
-	//		}
-	//	}
-	//	break;
-	//}
-	//case OBJ_END:
-	//	break;
-	//}
-
-	return false;
+	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
+	m_pComCollision->m_isStaticOOBB = false;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	m_pComCollision->UpdateBoundingBox();
 }
 
 void CPlayer::CollsionDetection(OBJ_ID eObjId)
@@ -410,27 +392,12 @@ CTerrainPlayer::CTerrainPlayer(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandLi
 
 	if (pPlayerModel) delete pPlayerModel;
 
-	//컴포넌트
-	CreateComponent();
-	m_eObjId = OBJ_PLAYER;
 }
 
 CTerrainPlayer::~CTerrainPlayer()
 {
 }
 
-void CTerrainPlayer::CreateComponent()
-{
-	m_pComponent[COM_COLLISION] = CCollision::Create();
-
-	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
-	m_pComCollision->m_isStaticOOBB = false;
-	if (m_pChild && m_pChild->m_isRootModelObject)
-		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
-	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
-	m_pComCollision->UpdateBoundingBox();
-}
- 
 CCamera *CTerrainPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;
@@ -508,9 +475,7 @@ void CTerrainPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVeloci
 
 void CTerrainPlayer::Update(float fTimeElapsed)
 {
-	
 	CPlayer::Update(fTimeElapsed);
-
 
 	if (m_pSkinnedAnimationController)
 	{

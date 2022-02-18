@@ -89,7 +89,7 @@ private:
 	void LerpRotate(float fTimeElapsed);
 	XMFLOAT3 MoveByDir(float fAngle, float fDistance);
 
-	bool	CheckCollision(OBJ_ID eObjId);
+	virtual void	CreateComponent() override;
 
 public:
 	virtual void	CollsionDetection(OBJ_ID eObjId) override;
@@ -126,7 +126,6 @@ public:
 	virtual void Update(float fTimeElapsed);
 
 
-	virtual void	CreateComponent() override;
 
 
 private:
