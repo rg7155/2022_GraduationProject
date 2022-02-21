@@ -52,7 +52,7 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, XMFLOAT4X4 *pxmf4x4World) { }
 
 	virtual void OnPrepareRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState = 0);;
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true);
 
 	virtual void ReleaseUploadBuffers() { }
 
@@ -113,7 +113,7 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState = 0) override;
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
 
 public:
 	list<CGameObject*>					m_listObjects; //map의 list로 변경할지?
@@ -161,7 +161,7 @@ public:
 
 	virtual void ReleaseUploadBuffers();
 
-	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState = 0) override;
+	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
 
 protected:
 	CGameObject						**m_ppObjects = 0;
@@ -185,6 +185,9 @@ struct TOLIGHTSPACES
 struct LIGHT;
 
 #define _WITH_RASTERIZER_DEPTH_BIAS
+
+#define DYNAMIC_SHADOW 0
+#define STATIC_SHADOW 1
 class CDepthRenderShader : public CSkinnedAnimationStandardShader
 {
 public:
@@ -233,6 +236,12 @@ protected:
 	//프로젝션을 텍스쳐로 바꾸는 행렬
 	XMMATRIX						m_xmProjectionToTexture;
 
+	LIGHT* m_pLights = NULL;
+
+	TOLIGHTSPACES* m_pToLightSpaces;
+
+	ID3D12Resource* m_pd3dcbToLightSpaces = NULL;
+	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
 public:
 	CTexture* GetDepthTexture() { return(m_pDepthTexture); }
 	ID3D12Resource* GetDepthTextureResource(UINT nIndex) { return(m_pDepthTexture->GetTexture(nIndex)); }
@@ -241,40 +250,7 @@ public:
 	CStandardObjectsShader* m_pObjectsShader = NULL;
 	CPlayer* m_pPlayer = NULL;
 
-protected:
-	LIGHT* m_pLights = NULL;
-
-	TOLIGHTSPACES* m_pToLightSpaces;
-
-	ID3D12Resource* m_pd3dcbToLightSpaces = NULL;
-	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
 };
-
-class CShadowMapShader : public CStandardShader
-{
-public:
-	CShadowMapShader(CStandardObjectsShader* pObjectsShader);
-	virtual ~CShadowMapShader();
-
-	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState);
-
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
-
-	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
-	virtual void AnimateObjects(float fTimeElapsed) {}
-	virtual void ReleaseObjects();
-
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
-
-public:
-	CStandardObjectsShader* m_pObjectsShader = NULL;
-	CPlayer* m_pPlayer = NULL;
-
-	//DepthRenderShader에 있는
-	CTexture* m_pDepthTexture = NULL;
-};
-
 
 class CTextureToViewportShader : public CShader
 {
@@ -296,7 +272,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext = NULL);
 	virtual void ReleaseObjects();
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true);
 
 	bool		m_bRender = false;
 protected:

@@ -84,13 +84,8 @@ public:
 	//obj 그릴때 이걸 읽어서 뎁스들을 dp, sp비교해서 그림자 여부 판단
 	CDepthRenderShader					*m_pDepthRenderShader = NULL; //쉐도우맵 만들기 위해 렌더해야하니깐 ㅇ
 
-	CShadowMapShader					*m_pShadowShader = NULL;
 	//화면에 뎁스텍스쳐 그리기 위해, 디버깅 목적, 4개 다 그릴수도이씅ㅁ
 	CTextureToViewportShader			*m_pShadowMapToViewport = NULL;
-
-	//원본 컴포넌트, 오브젝트가 clone하여 사용
-	//CComponent							*m_pComponent[COM_END] = { NULL };
-
 
 protected:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;

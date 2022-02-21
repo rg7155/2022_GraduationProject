@@ -56,7 +56,6 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[1].m_fFalloff = 8.0f;
 	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
-
 }
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
@@ -78,7 +77,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppShaders = new CShader*[m_nShaders];
 
 	int iIndex = 0;
-
 	m_pMapObjectShader = new CMapObjectsShader();
 	m_pMapObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
@@ -88,60 +86,13 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
 
-	m_pShadowShader = new CShadowMapShader(m_pMapObjectShader);
-	m_pShadowShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pShadowShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
-
 	m_pShadowMapToViewport = new CTextureToViewportShader();
 	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pShadowMapToViewport->BuildObjects(pd3dDevice, pd3dCommandList, m_pDepthRenderShader->GetDepthTexture());
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
 }
 
-void CScene::ReleaseObjects()
-{
-	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
-	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
-
-	if (m_ppShaders)
-	{
-		for (int i = 0; i < m_nShaders; i++)
-		{
-			m_ppShaders[i]->ReleaseShaderVariables();
-			m_ppShaders[i]->ReleaseObjects();
-			m_ppShaders[i]->Release();
-		}
-		delete[] m_ppShaders;
-	}
-	if (m_pDepthRenderShader)
-	{
-		m_pDepthRenderShader->ReleaseShaderVariables();
-		m_pDepthRenderShader->ReleaseObjects();
-		m_pDepthRenderShader->Release();
-	}
-	if (m_pShadowShader)
-	{
-		m_pShadowShader->ReleaseShaderVariables();
-		m_pShadowShader->ReleaseObjects();
-		m_pShadowShader->Release();
-	}
-	if (m_pShadowMapToViewport)
-	{
-		m_pShadowMapToViewport->ReleaseShaderVariables();
-		m_pShadowMapToViewport->ReleaseObjects();
-		m_pShadowMapToViewport->Release();
-	}
-
-
-	if (m_pSkyBox) delete m_pSkyBox;
-
-	ReleaseShaderVariables();
-
-	if (m_pLights) delete[] m_pLights;
-
-}
 
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
 {
@@ -246,6 +197,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->AnimateObjects(fTimeElapsed);
 
+	//플레이어-맵 충돌
 	CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->m_listObjects);
 }
 
@@ -261,11 +213,6 @@ void CScene::OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList)
 
 void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
-	//if (m_pd3dGraphicsRootSignature) pd3dCommandList->SetGraphicsRootSignature(m_pd3dGraphicsRootSignature);
-	//if (m_pd3dCbvSrvDescriptorHeap) pd3dCommandList->SetDescriptorHeaps(1, &m_pd3dCbvSrvDescriptorHeap);
-
-	//OnPreRender(pd3dCommandList);
-
 	//쉐도우맵이 갖고있는 텍스쳐 정보를 set
 	m_pDepthRenderShader->UpdateShaderVariables(pd3dCommandList);
 
@@ -279,21 +226,52 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
-	//for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
-
-
-	/////
 	//그림자 그린다-오브젝트 그린다
-	if (m_pShadowShader)
-	{
-		m_pShadowShader->Render(pd3dCommandList, pCamera);
-	}
+	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	m_pPlayer->Render(pd3dCommandList, pCamera);
 
 	//화면에 뎁스 텍스쳐 그린다, 디버깅 용
 	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
+}
+
+void CScene::ReleaseObjects()
+{
+	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
+	if (m_pd3dCbvSrvDescriptorHeap) m_pd3dCbvSrvDescriptorHeap->Release();
+
+	if (m_ppShaders)
+	{
+		for (int i = 0; i < m_nShaders; i++)
+		{
+			m_ppShaders[i]->ReleaseShaderVariables();
+			m_ppShaders[i]->ReleaseObjects();
+			m_ppShaders[i]->Release();
+		}
+		delete[] m_ppShaders;
+	}
+	if (m_pDepthRenderShader)
+	{
+		m_pDepthRenderShader->ReleaseShaderVariables();
+		m_pDepthRenderShader->ReleaseObjects();
+		m_pDepthRenderShader->Release();
+	}
+	if (m_pShadowMapToViewport)
+	{
+		m_pShadowMapToViewport->ReleaseShaderVariables();
+		m_pShadowMapToViewport->ReleaseObjects();
+		m_pShadowMapToViewport->Release();
+	}
+
+
+	if (m_pSkyBox) delete m_pSkyBox;
+
+	ReleaseShaderVariables();
+
+	if (m_pLights) delete[] m_pLights;
+
 }
 
 void CScene::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
@@ -325,7 +303,6 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
-	if (m_pShadowShader) m_pShadowShader->ReleaseUploadBuffers();
 	if (m_pDepthRenderShader) m_pDepthRenderShader->ReleaseUploadBuffers();
 }
 
@@ -422,7 +399,6 @@ D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateShaderResourceViews(ID3D12Device *pd3d
 	}
 	return(d3dSrvGPUDescriptorHandle);
 }
-
 
 void CScene::SetDescriptorRange(D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[], int iIndex, D3D12_DESCRIPTOR_RANGE_TYPE RangeType, UINT NumDescriptors, UINT BaseShaderRegister, UINT RegisterSpace)
 {

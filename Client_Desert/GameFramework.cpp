@@ -447,7 +447,7 @@ void CGameFramework::BuildObjects()
 	CGameMgr::GetInstance()->SetCamera(m_pCamera); 
 	
 	m_pScene->m_pDepthRenderShader->m_pPlayer = m_pPlayer;
-	m_pScene->m_pShadowShader->m_pPlayer = m_pPlayer;
+	//m_pScene->m_pShadowShader->m_pPlayer = m_pPlayer;
 	/// ///////////////////
 
 	CreateShaderVariables();
@@ -497,7 +497,7 @@ void CGameFramework::AnimateObjects()
 //#define _WITH_PLAYER_TOP
 void CGameFramework::FrameAdvance()
 {
-	m_GameTimer.Tick(60.0f);
+	m_GameTimer.Tick(0.0f);
 
 	CInputDev::GetInstance()->Set_InputDev();
 

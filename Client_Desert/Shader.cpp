@@ -280,7 +280,7 @@ void CShader::OnPrepareRender(ID3D12GraphicsCommandList *pd3dCommandList, int nP
 		pd3dCommandList->SetPipelineState(m_ppd3dPipelineStates[nPipelineState]);
 }
 
-void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/)
+void CShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/, bool isChangePipeline /*= true*/)
 {
 	OnPrepareRender(pd3dCommandList, nPipelineState);
 }
@@ -447,9 +447,10 @@ void CStandardObjectsShader::ReleaseUploadBuffers()
 	for (auto& iter : m_listObjects) iter->ReleaseUploadBuffers();
 }
 
-void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/)
+void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/, bool isChangePipeline /*= true*/)
 {
-	CStandardShader::Render(pd3dCommandList, pCamera);
+	if(isChangePipeline)
+		CStandardShader::Render(pd3dCommandList, pCamera);
 
 	for (auto& iter : m_listObjects)
 	{
@@ -460,8 +461,6 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 float Random(float fMin, float fMax)
 {
@@ -488,10 +487,7 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 	return(xmf3Position);
 }
 
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
 CMapObjectsShader::CMapObjectsShader()
 {
@@ -635,7 +631,7 @@ void CSkinnedAnimationObjectsShader::ReleaseUploadBuffers()
 	for (int j = 0; j < m_nObjects; j++) if (m_ppObjects[j]) m_ppObjects[j]->ReleaseUploadBuffers();
 }
 
-void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/)
+void CSkinnedAnimationObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/, bool isChangePipeline /*= true*/)
 {
 	CSkinnedAnimationStandardShader::Render(pd3dCommandList, pCamera);
 
@@ -747,89 +743,91 @@ void CDepthRenderShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignat
 
 void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
 {
-	D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
-	::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
-	d3dDescriptorHeapDesc.NumDescriptors = MAX_DEPTH_TEXTURES; //조명마다 렌더타겟 만듬
-	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-	d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	d3dDescriptorHeapDesc.NodeMask = 0;
-	//렌더타겟을 위한 서술자힙 생성
-	HRESULT hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
-
-	m_pDepthTexture = new CTexture(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0);
-	m_pDepthTexture->AddRef();
-	
-	//깊이값만 써서 r32,
-	D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f } };
-	//화면 해상도와 같이
-	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++) 
-		m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
-
-	D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
-	d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-	d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
-	d3dRenderTargetViewDesc.Texture2D.PlaneSlice = 0;
-	d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
-
-	D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
 	{
-		ID3D12Resource* pd3dTextureResource = m_pDepthTexture->GetTexture(i);
-		pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
-		m_pd3dRtvCPUDescriptorHandles[i] = d3dRtvCPUDescriptorHandle;
-		d3dRtvCPUDescriptorHandle.ptr += ::gnRtvDescriptorIncrementSize;
-	}
+		D3D12_DESCRIPTOR_HEAP_DESC d3dDescriptorHeapDesc;
+		::ZeroMemory(&d3dDescriptorHeapDesc, sizeof(D3D12_DESCRIPTOR_HEAP_DESC));
+		d3dDescriptorHeapDesc.NumDescriptors = MAX_DEPTH_TEXTURES; //조명마다 렌더타겟 만듬
+		d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		d3dDescriptorHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		d3dDescriptorHeapDesc.NodeMask = 0;
+		//렌더타겟을 위한 서술자힙 생성
+		HRESULT hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dRtvDescriptorHeap);
 
-	d3dDescriptorHeapDesc.NumDescriptors = 1;
-	d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	//DSV 서술자힙
-	hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDsvDescriptorHeap);
+		m_pDepthTexture = new CTexture(MAX_DEPTH_TEXTURES, RESOURCE_TEXTURE2D_ARRAY, 0);
+		m_pDepthTexture->AddRef();
 
-	//버퍼 만들고
-	D3D12_RESOURCE_DESC d3dResourceDesc;
-	d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	d3dResourceDesc.Alignment = 0;
-	d3dResourceDesc.Width = _DEPTH_BUFFER_WIDTH;
-	d3dResourceDesc.Height = _DEPTH_BUFFER_HEIGHT;
-	d3dResourceDesc.DepthOrArraySize = 1;
-	d3dResourceDesc.MipLevels = 1;
-	d3dResourceDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	d3dResourceDesc.SampleDesc.Count = 1;
-	d3dResourceDesc.SampleDesc.Quality = 0;
-	d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+		//깊이값만 써서 r32,
+		D3D12_CLEAR_VALUE d3dClearValue = { DXGI_FORMAT_R32_FLOAT, { 1.0f, 1.0f, 1.0f, 1.0f } };
+		//화면 해상도와 같이
+		for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
+			m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
 
-	D3D12_HEAP_PROPERTIES d3dHeapProperties;
-	::ZeroMemory(&d3dHeapProperties, sizeof(D3D12_HEAP_PROPERTIES));
-	d3dHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
-	d3dHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
-	d3dHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
-	d3dHeapProperties.CreationNodeMask = 1;
-	d3dHeapProperties.VisibleNodeMask = 1;
+		D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
+		d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+		d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
+		d3dRenderTargetViewDesc.Texture2D.PlaneSlice = 0;
+		d3dRenderTargetViewDesc.Format = DXGI_FORMAT_R32_FLOAT;
 
-	d3dClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-	d3dClearValue.DepthStencil.Depth = 1.0f;
-	d3dClearValue.DepthStencil.Stencil = 0;
+		D3D12_CPU_DESCRIPTOR_HANDLE d3dRtvCPUDescriptorHandle = m_pd3dRtvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
+		{
+			ID3D12Resource* pd3dTextureResource = m_pDepthTexture->GetTexture(i);
+			pd3dDevice->CreateRenderTargetView(pd3dTextureResource, &d3dRenderTargetViewDesc, d3dRtvCPUDescriptorHandle);
+			m_pd3dRtvCPUDescriptorHandles[i] = d3dRtvCPUDescriptorHandle;
+			d3dRtvCPUDescriptorHandle.ptr += ::gnRtvDescriptorIncrementSize;
+		}
 
-	pd3dDevice->CreateCommittedResource(&d3dHeapProperties, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &d3dClearValue, __uuidof(ID3D12Resource), (void**)&m_pd3dDepthBuffer);
+		d3dDescriptorHeapDesc.NumDescriptors = 1;
+		d3dDescriptorHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		//DSV 서술자힙
+		hResult = pd3dDevice->CreateDescriptorHeap(&d3dDescriptorHeapDesc, __uuidof(ID3D12DescriptorHeap), (void**)&m_pd3dDsvDescriptorHeap);
 
-	//뷰를 만들고
-	D3D12_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
-	::ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D12_DEPTH_STENCIL_VIEW_DESC));
-	d3dDepthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
-	d3dDepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-	d3dDepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
+		//버퍼 만들고
+		D3D12_RESOURCE_DESC d3dResourceDesc;
+		d3dResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		d3dResourceDesc.Alignment = 0;
+		d3dResourceDesc.Width = _DEPTH_BUFFER_WIDTH;
+		d3dResourceDesc.Height = _DEPTH_BUFFER_HEIGHT;
+		d3dResourceDesc.DepthOrArraySize = 1;
+		d3dResourceDesc.MipLevels = 1;
+		d3dResourceDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		d3dResourceDesc.SampleDesc.Count = 1;
+		d3dResourceDesc.SampleDesc.Quality = 0;
+		d3dResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		d3dResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
-	m_d3dDsvDescriptorCPUHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
-	pd3dDevice->CreateDepthStencilView(m_pd3dDepthBuffer, &d3dDepthStencilViewDesc, m_d3dDsvDescriptorCPUHandle);
+		D3D12_HEAP_PROPERTIES d3dHeapProperties;
+		::ZeroMemory(&d3dHeapProperties, sizeof(D3D12_HEAP_PROPERTIES));
+		d3dHeapProperties.Type = D3D12_HEAP_TYPE_DEFAULT;
+		d3dHeapProperties.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		d3dHeapProperties.MemoryPoolPreference = D3D12_MEMORY_POOL_UNKNOWN;
+		d3dHeapProperties.CreationNodeMask = 1;
+		d3dHeapProperties.VisibleNodeMask = 1;
 
-	//카메라 생성
-	for (int i = 0; i < MAX_DEPTH_TEXTURES; i++)
-	{
-		m_ppDepthRenderCameras[i] = new CCamera();
-		m_ppDepthRenderCameras[i]->SetViewport(0, 0, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, 0.0f, 1.0f);
-		m_ppDepthRenderCameras[i]->SetScissorRect(0, 0, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT);
-		m_ppDepthRenderCameras[i]->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+		d3dClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+		d3dClearValue.DepthStencil.Depth = 1.0f;
+		d3dClearValue.DepthStencil.Stencil = 0;
+
+		pd3dDevice->CreateCommittedResource(&d3dHeapProperties, D3D12_HEAP_FLAG_NONE, &d3dResourceDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &d3dClearValue, __uuidof(ID3D12Resource), (void**)&m_pd3dDepthBuffer);
+
+		//뷰를 만들고
+		D3D12_DEPTH_STENCIL_VIEW_DESC d3dDepthStencilViewDesc;
+		::ZeroMemory(&d3dDepthStencilViewDesc, sizeof(D3D12_DEPTH_STENCIL_VIEW_DESC));
+		d3dDepthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
+		d3dDepthStencilViewDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		d3dDepthStencilViewDesc.Flags = D3D12_DSV_FLAG_NONE;
+
+		m_d3dDsvDescriptorCPUHandle = m_pd3dDsvDescriptorHeap->GetCPUDescriptorHandleForHeapStart();
+		pd3dDevice->CreateDepthStencilView(m_pd3dDepthBuffer, &d3dDepthStencilViewDesc, m_d3dDsvDescriptorCPUHandle);
+
+		//카메라 생성
+		for (int i = 0; i < MAX_DEPTH_TEXTURES; i++)
+		{
+			m_ppDepthRenderCameras[i] = new CCamera();
+			m_ppDepthRenderCameras[i]->SetViewport(0, 0, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, 0.0f, 1.0f);
+			m_ppDepthRenderCameras[i]->SetScissorRect(0, 0, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT);
+			m_ppDepthRenderCameras[i]->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+		}
 	}
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
@@ -869,6 +867,8 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		//	m_pToLightSpaces->m_pToLightSpaces[j].m_xmf4Position.w = 0.0f;
 		//}
 	}
+
+	CScene::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, RP_DEPTH_BUFFER, false);
 }
 
 void CDepthRenderShader::ReleaseObjects()
@@ -905,6 +905,8 @@ void CDepthRenderShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCo
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dcbToLightGpuVirtualAddress = m_pd3dcbToLightSpaces->GetGPUVirtualAddress();
 	pd3dCommandList->SetGraphicsRootConstantBufferView(RP_TO_LIGHT, d3dcbToLightGpuVirtualAddress); //ToLight
+
+	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
 }
 
 void CDepthRenderShader::ReleaseShaderVariables()
@@ -923,12 +925,12 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 	//1번은 정적(맵), 한번만
 	static  bool isOne = false;
 	if (!isOne)
-		RenderToDepthTexture(pd3dCommandList, 1);
+		RenderToDepthTexture(pd3dCommandList, STATIC_SHADOW);
 	isOne = true;
 
 	
 	//0번은 동적(플레이어, 몬스터 등), 계속
-	RenderToDepthTexture(pd3dCommandList, 0);
+	RenderToDepthTexture(pd3dCommandList, DYNAMIC_SHADOW);
 
 	CGameMgr::GetInstance()->m_isShadowMapRendering = false;
 }
@@ -942,7 +944,7 @@ void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCom
 	pd3dCommandList->ClearDepthStencilView(m_d3dDsvDescriptorCPUHandle, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, NULL);
 	pd3dCommandList->OMSetRenderTargets(1, &m_pd3dRtvCPUDescriptorHandles[iIndex], TRUE, &m_d3dDsvDescriptorCPUHandle);
 
-	if (iIndex == 0)
+	if (iIndex == DYNAMIC_SHADOW)
 	{
 		////1번에 그린 깊이를 0번으로 복사
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_DEST);
@@ -955,7 +957,7 @@ void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCom
 	//조명의 위치에서 씬을 렌더
 	Render(pd3dCommandList, m_ppDepthRenderCameras[iIndex], 0, iIndex);
 
-	if (iIndex == 0)
+	if (iIndex == DYNAMIC_SHADOW)
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 	else
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
@@ -971,76 +973,10 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	
-	if (iIndex == 1)
-	{
-		//코드 수정 필요..
-		for (auto& iter : m_pObjectsShader->m_listObjects)
-		{
-			iter->UpdateShaderVariables(pd3dCommandList);
-			iter->UpdateTransform(NULL);
-			iter->Render(pd3dCommandList, pCamera);
-		}
-		//m_pObjectsShader->Render(pd3dCommandList, pCamera, nPipelineState);
-	}
-	else if (iIndex == 0)
-	{
+	if (iIndex == STATIC_SHADOW)
+		m_pObjectsShader->Render(pd3dCommandList, pCamera, nPipelineState, false);
+	else if (iIndex == DYNAMIC_SHADOW)
 		m_pPlayer->ShadowRender(pd3dCommandList, pCamera, this);//플레이어는 애님쉐이더, 칼은 스탠다드 쉐이더
-	}
-
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-CShadowMapShader::CShadowMapShader(CStandardObjectsShader* pObjectsShader)
-{
-	m_pObjectsShader = pObjectsShader;
-}
-
-CShadowMapShader::~CShadowMapShader()
-{
-}
-
-D3D12_SHADER_BYTECODE CShadowMapShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
-{
-	return(CShader::CompileShaderFromFile(L"Shader_Shadow.hlsl", "VSShadowMapShadow", "vs_5_1", ppd3dShaderBlob));
-}
-
-D3D12_SHADER_BYTECODE CShadowMapShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
-{
-	return(CShader::CompileShaderFromFile(L"Shader_Shadow.hlsl", "PSShadowMapShadow", "ps_5_1", ppd3dShaderBlob));
-}
-
-void CShadowMapShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	if (m_pDepthTexture) m_pDepthTexture->UpdateShaderVariables(pd3dCommandList);
-}
-
-
-void CShadowMapShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, void* pContext)
-{
-	m_pDepthTexture = (CTexture*)pContext;
-	m_pDepthTexture->AddRef();
-
-	//CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, m_pDepthTexture->GetTextures()); //씬에서?
-	CScene::CreateShaderResourceViews(pd3dDevice, m_pDepthTexture, RP_DEPTH_BUFFER, false);
-
-}
-
-void CShadowMapShader::ReleaseObjects()
-{
-	if (m_pDepthTexture) m_pDepthTexture->Release();
-}
-
-void CShadowMapShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
-{
-	//CShader::Render(pd3dCommandList, pCamera, nPipelineState);
-
-	//깊이버퍼 update
-	UpdateShaderVariables(pd3dCommandList);
-
-	m_pObjectsShader->Render(pd3dCommandList, pCamera);
-
-	m_pPlayer->Render(pd3dCommandList, pCamera);
 
 }
 
@@ -1106,7 +1042,7 @@ void CTextureToViewportShader::ReleaseObjects()
 {
 }
 
-void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState)
+void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline /*= true*/)
 {
 	////f7 on/off
 	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_F7))
