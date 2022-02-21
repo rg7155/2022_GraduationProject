@@ -477,16 +477,29 @@ void CGameFramework::ReleaseObjects()
 
 void CGameFramework::ProcessInput()
 {
+	//마우스 커서 고정
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
+	{
+		m_isCursorFix = !m_isCursorFix;
+		ShowCursor(!m_isCursorFix);
+	}
 
-	m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * m_GameTimer.GetTimeElapsed(), true);
-
-	m_pCamera->Update(m_pPlayer->GetLook(), m_GameTimer.GetTimeElapsed());
-	m_pPlayer->Update(m_GameTimer.GetTimeElapsed());
+	if (m_isCursorFix)
+	{
+		POINT	pt = { FRAME_BUFFER_WIDTH >> 1, FRAME_BUFFER_HEIGHT >> 1 };
+		ClientToScreen(m_hWnd, &pt);
+		SetCursorPos(pt.x, pt.y);
+	}
 }
 
 void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+
+	m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
+
+	m_pCamera->Update(m_pPlayer->GetLook(), fTimeElapsed);
+	m_pPlayer->Update(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
 
@@ -576,7 +589,6 @@ void CGameFramework::FrameAdvance()
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
-
 
 
 void CGameFramework::WaitForGpuComplete()

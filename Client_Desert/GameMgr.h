@@ -13,7 +13,8 @@ class CGameMgr
 private:
 	CGameMgr();
 	virtual ~CGameMgr();
-
+public:
+	void			GameUpdate(float& fTimeElapsed);
 public:
 	const CScene*	GetScene() { return m_pScene; }
 	const CPlayer*	GetPlayer() { return m_pPlayer; }

@@ -102,5 +102,8 @@ private:
 	ID3D12Resource				*m_pd3dcbFrameworkInfo = NULL;
 	CB_FRAMEWORK_INFO			*m_pcbMappedFrameworkInfo = NULL;
 	float						m_fShadowMapIndex = 0;
+
+	bool						m_isCursorFix = false;
+
 };
 
