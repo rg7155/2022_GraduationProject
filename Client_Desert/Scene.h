@@ -64,11 +64,7 @@ public:
 
 	CPlayer								*m_pPlayer = NULL;
 
-
 	float								m_fElapsedTime = 0.0f;
-
-	int									m_nGameObjects = 0;
-	CGameObject							**m_ppGameObjects = NULL;
 
 	int									m_nShaders = 0;
 	CShader								**m_ppShaders = NULL;

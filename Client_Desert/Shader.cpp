@@ -524,7 +524,7 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		{
 			CLoadedModelInfo* pMapModel = NULL;
 			bool bLoad = true;
-			int iLength = strlen(pstrToken);
+			int iLength = (int)strlen(pstrToken);
 
 			for (int j = 0; j < iLength; j++)
 			{
@@ -535,7 +535,7 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				}
 			}
 
-			int s = mapObj.size();
+			int s = (int)mapObj.size();
 			string str(pstrToken);
 			auto iter = mapObj.find(str);
 			if (bLoad && iter == mapObj.end())
@@ -672,11 +672,12 @@ CDepthRenderShader::~CDepthRenderShader()
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	//애니메이션x
-	if(nPipelineState == 0)
+	if (nPipelineState == 0)
 		return(CStandardShader::CreateVertexShader(ppd3dShaderBlob, nPipelineState));
-	else if(nPipelineState == 1)
+	else if (nPipelineState == 1)
 		return(CSkinnedAnimationStandardShader::CreateVertexShader(ppd3dShaderBlob, nPipelineState));
-
+	else
+		return CShader::CreateVertexShader(ppd3dShaderBlob, nPipelineState);
 }
 
 D3D12_SHADER_BYTECODE CDepthRenderShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
@@ -691,6 +692,8 @@ D3D12_INPUT_LAYOUT_DESC CDepthRenderShader::CreateInputLayout(int nPipelineState
 		return(CStandardShader::CreateInputLayout(nPipelineState));
 	else if (nPipelineState == 1)
 		return(CSkinnedAnimationStandardShader::CreateInputLayout(nPipelineState));
+	else
+		return CShader::CreateInputLayout(nPipelineState);
 }
 
 D3D12_DEPTH_STENCIL_DESC CDepthRenderShader::CreateDepthStencilState(int nPipelineState)
@@ -1114,7 +1117,7 @@ void CTextureToViewportShader::Render(ID3D12GraphicsCommandList* pd3dCommandList
 
 	float fSize = FRAME_BUFFER_WIDTH / 4.f;
 	D3D12_VIEWPORT d3dViewport = { 0.0f, 0.0f, fSize, fSize, 0.0f, 1.0f };
-	D3D12_RECT d3dScissorRect = { 0, 0, fSize, fSize };
+	D3D12_RECT d3dScissorRect = { 0, 0, (LONG)fSize, (LONG)fSize };
 	pd3dCommandList->RSSetViewports(1, &d3dViewport);
 	pd3dCommandList->RSSetScissorRects(1, &d3dScissorRect);
 

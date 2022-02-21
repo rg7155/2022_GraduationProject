@@ -113,19 +113,19 @@ void CInputDev::Set_InputDev(void)
 	}
 }
 
-bool CInputDev::KeyUp(const unsigned char& cKey)
+bool CInputDev::KeyUp(const unsigned int& cKey)
 {
-	return m_KeyboardInfo[cKey].bKeyUp;
+	return m_KeyboardInfo[(const unsigned char)cKey].bKeyUp;
 }
 
-bool CInputDev::KeyDown(const unsigned char& cKey)
+bool CInputDev::KeyDown(const unsigned int& cKey)
 {
-	return m_KeyboardInfo[cKey].bKeyDown;
+	return m_KeyboardInfo[(const unsigned char)cKey].bKeyDown;
 }
 
-bool CInputDev::KeyPressing(const unsigned char& cKey)
+bool CInputDev::KeyPressing(const unsigned int& cKey)
 {
-	return m_KeyboardInfo[cKey].bKeyPressing;
+	return m_KeyboardInfo[(const unsigned char)cKey].bKeyPressing;
 }
 
 

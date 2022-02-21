@@ -43,9 +43,9 @@ public:
 
 public:
 	// 키보드
-	bool KeyUp(const unsigned char& cKey);
-	bool KeyDown(const unsigned char& cKey);
-	bool KeyPressing(const unsigned char& cKey);
+	bool KeyUp(const unsigned int& cKey);
+	bool KeyDown(const unsigned int& cKey);
+	bool KeyPressing(const unsigned int& cKey);
 
 	// 마우스
 	bool LButtonUp();

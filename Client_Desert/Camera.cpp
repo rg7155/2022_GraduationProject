@@ -21,8 +21,8 @@ CCamera::CCamera()
 	m_xmf3LookAtWorld = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	m_nMode = 0x00;
 	m_pPlayer = NULL;
-
-
+	ZeroMemory(&m_xmf3Point, sizeof(m_xmf3Point));
+	ZeroMemory(&m_xmf4Plane, sizeof(m_xmf4Plane));
 }
 
 CCamera::CCamera(CCamera *pCamera)

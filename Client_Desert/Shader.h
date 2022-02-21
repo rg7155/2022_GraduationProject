@@ -221,14 +221,14 @@ protected:
 	CTexture* m_pDepthTexture = NULL;
 
 	//조명 위치에서 깊이정보 저장하기위한 카메라 4개
-	CCamera* m_ppDepthRenderCameras[MAX_DEPTH_TEXTURES];
+	CCamera* m_ppDepthRenderCameras[MAX_DEPTH_TEXTURES] = {};
 
 	ID3D12DescriptorHeap* m_pd3dRtvDescriptorHeap = NULL;
-	D3D12_CPU_DESCRIPTOR_HANDLE		m_pd3dRtvCPUDescriptorHandles[MAX_DEPTH_TEXTURES];
+	D3D12_CPU_DESCRIPTOR_HANDLE		m_pd3dRtvCPUDescriptorHandles[MAX_DEPTH_TEXTURES] = {};
 
 	ID3D12DescriptorHeap* m_pd3dDsvDescriptorHeap = NULL;
 	ID3D12Resource* m_pd3dDepthBuffer = NULL;
-	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dDsvDescriptorCPUHandle;
+	D3D12_CPU_DESCRIPTOR_HANDLE		m_d3dDsvDescriptorCPUHandle = {};
 
 	//프로젝션을 텍스쳐로 바꾸는 행렬
 	XMMATRIX						m_xmProjectionToTexture;
