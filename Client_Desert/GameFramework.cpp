@@ -521,7 +521,6 @@ void CGameFramework::FrameAdvance()
 	HRESULT hResult = m_pd3dCommandAllocator->Reset();
 	hResult = m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
-
 	m_pScene->OnPreRender(m_pd3dCommandList);
 
 	UpdateShaderVariables();

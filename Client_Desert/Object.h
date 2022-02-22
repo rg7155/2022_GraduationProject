@@ -288,7 +288,7 @@ public:
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
 public:
-	virtual void	CollsionDetection(OBJ_ID eId) {};
+	virtual void	CollsionDetection(CGameObject* pObj) {};
 
 protected:
 	virtual void	CreateComponent() {};

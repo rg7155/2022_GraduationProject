@@ -12,7 +12,7 @@ private:
 	virtual ~CCollsionMgr();
 
 public:
-	void	CheckCollsion(CGameObject* pObj1, CGameObject* pObj2);
+	bool	CheckCollsion(CGameObject* pObj1, CGameObject* pObj2);
 	void	CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj);
 	void	CheckCollsion(list<CGameObject*> listObj1, list<CGameObject*> listObj2);
 

@@ -190,11 +190,17 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 }
 
-void CPlayer::Move(const XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
+void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)
 	{
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+		m_xmf3PreVelocity = m_xmf3Velocity;
+		//if (m_pComCollision->m_isCollision)
+		//{
+		//	XMFLOAT3 xmf3Temp = Vector3::ScalarProduct(xmf3Shift, -1.5, false);
+		//	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Temp);
+		//}
 	}
 	else
 	{
@@ -296,6 +302,11 @@ void CPlayer::Update(float fTimeElapsed)
 	LerpRotate(fTimeElapsed);
 
 
+	////////////////////////////////////////////
+	if (m_pComCollision)
+		m_pComCollision->UpdateBoundingBox();
+	////////////////////////////////////////////
+
 
 	if (m_pSkinnedAnimationController)
 	{
@@ -317,8 +328,7 @@ void CPlayer::Update(float fTimeElapsed)
 		}
 	}
 
-	if (m_pComCollision)
-		m_pComCollision->UpdateBoundingBox();
+
 }
 
 CCamera* CPlayer::OnChangeCamera(DWORD nNewCameraMode, DWORD nCurrentCameraMode)
@@ -427,12 +437,24 @@ void CPlayer::CreateComponent()
 	m_pComCollision->UpdateBoundingBox();
 }
 
-void CPlayer::CollsionDetection(OBJ_ID eObjId)
+void CPlayer::CollsionDetection(CGameObject* pObj)
 {
+	OBJ_ID eObjId = pObj->m_eObjId;
 	switch (eObjId)
 	{
 	case OBJ_MAP:
-		//cout << "player-map col\n";
+		////방법1. 이동한값 취소
+		//XMFLOAT3 xmShift = Vector3::ScalarProduct(m_xmf3PreVelocity, -2, false);
+		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmShift);
+		//m_pCamera->Move(xmShift);
+		//OnPrepareRender();
+		
+		//방법2. 오브젝트 밀어주기
+		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3Position, pObj->GetPosition(), true, true);
+		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, PLAYER_SPEED * CGameMgr::GetInstance()->m_fElapsedTime);
+		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
+		m_pCamera->Move(xmf3ToPlayer);
+		OnPrepareRender();
 		break;
 	case OBJ_END:
 		break;

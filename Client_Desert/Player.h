@@ -25,6 +25,7 @@ protected:
 	float           			m_fRoll = 0.0f;
 
 	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmf3PreVelocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3     				m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	float           			m_fMaxVelocityXZ = 0.0f;
 	float           			m_fMaxVelocityY = 0.0f;
@@ -62,7 +63,7 @@ public:
 	void SetCamera(CCamera *pCamera) { m_pCamera = pCamera; }
 
 	virtual void Move(ULONG nDirection, float fDistance, bool bVelocity = false);
-	void Move(const XMFLOAT3& xmf3Shift, bool bVelocity = false);
+	void Move(XMFLOAT3& xmf3Shift, bool bVelocity = false);
 	void Move(float fxOffset = 0.0f, float fyOffset = 0.0f, float fzOffset = 0.0f);
 	void Rotate(float x, float y, float z);
 	
@@ -96,7 +97,7 @@ private:
 	virtual void	CreateComponent() override;
 
 public:
-	virtual void	CollsionDetection(OBJ_ID eObjId) override;
+	virtual void	CollsionDetection(CGameObject* pObj) override;
 
 private:
 	XMVECTOR m_xmVecNowRotate;

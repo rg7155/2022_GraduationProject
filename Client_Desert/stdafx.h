@@ -144,10 +144,17 @@ namespace Vector3
 		return(xmf3Result);
 	}
 
-	inline XMFLOAT3 Subtract(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	inline XMFLOAT3 Subtract(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, bool bNormalize = false, bool bYZero = false)
 	{
+		if (bYZero)
+			xmf3Vector1.y = 0.f, xmf3Vector2.y = 0.f;
+
 		XMFLOAT3 xmf3Result;
-		XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) - XMLoadFloat3(&xmf3Vector2));
+		if(bNormalize)
+			XMStoreFloat3(&xmf3Result, XMVector3Normalize(XMLoadFloat3(&xmf3Vector1) - XMLoadFloat3(&xmf3Vector2)));
+		else
+			XMStoreFloat3(&xmf3Result, XMLoadFloat3(&xmf3Vector1) - XMLoadFloat3(&xmf3Vector2));
+
 		return(xmf3Result);
 	}
 

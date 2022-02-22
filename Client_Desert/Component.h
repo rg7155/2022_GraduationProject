@@ -71,6 +71,7 @@ public:
 public:
 	//바운딩박스 업데이트 한번만
 	bool					m_isStaticOOBB = false; 
+	bool					m_isCollision = false;
 	bool					m_isCollisionIgnore = false;
 	XMFLOAT4X4*				m_pxmf4x4World = nullptr;
 	BoundingOrientedBox		m_xmLocalOOBB;

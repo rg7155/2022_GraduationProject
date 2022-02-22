@@ -26,11 +26,12 @@ public:
 	void		SetCamera(CCamera* pCamera) { m_pCamera = pCamera; }
 
 private:
-	CScene* m_pScene = nullptr;
-	CPlayer* m_pPlayer = nullptr;
-	CCamera* m_pCamera = nullptr;
+	CScene*		m_pScene = nullptr;
+	CPlayer*	m_pPlayer = nullptr;
+	CCamera*	m_pCamera = nullptr;
 
 public:
-	bool	m_isShadowMapRendering = false;
+	bool		m_isShadowMapRendering = false;
+	float		m_fElapsedTime = 0.0f;
 };
 

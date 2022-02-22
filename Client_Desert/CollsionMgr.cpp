@@ -12,24 +12,33 @@ CCollsionMgr::~CCollsionMgr(void)
 {
 }
 
-void CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2)
+bool CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2)
 {
 	CCollision* pCom1 = static_cast<CCollision*>(pObj1->m_pComponent[COM_COLLISION]);
 	CCollision* pCom2 = static_cast<CCollision*>(pObj2->m_pComponent[COM_COLLISION]);
 
 	if (pCom1->Check_Collision(pCom2))
 	{
-		pObj1->CollsionDetection(pObj2->m_eObjId);
-		pObj2->CollsionDetection(pObj1->m_eObjId);
+		pObj1->CollsionDetection(pObj2);
+		pObj2->CollsionDetection(pObj1);
+
+		//pCom1->m_isCollision = true; //자기것만 체크
+		return true;
 	}
+	return false;
 }
 
 void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj)
 {
+	bool isCol = false;
 	for (auto& iter : listObj)
 	{
-		CheckCollsion(pObj, iter);
+		if (CheckCollsion(pObj, iter))
+			isCol = true;
 	}
+
+	static_cast<CCollision*>(pObj->m_pComponent[COM_COLLISION])->m_isCollision = isCol;  //일단 자기것만 체크
+
 }
 
 void CCollsionMgr::CheckCollsion(list<CGameObject*> listObj1, list<CGameObject*> listObj2)
