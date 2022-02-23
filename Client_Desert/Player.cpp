@@ -85,6 +85,10 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_eObjId = OBJ_PLAYER;
 	///////////////////////////////////////////////
 
+	//m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	//m_pSkinnedAnimationController->SetTrackWeight(0, 0.8f);
+	//m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	//m_pSkinnedAnimationController->SetTrackWeight(1, 0.2f);
 
 }
 
