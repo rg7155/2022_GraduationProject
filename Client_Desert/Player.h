@@ -86,6 +86,7 @@ public:
 
 private:
 	void LerpRotate(float fTimeElapsed);
+	void Blending_Animation(float fTimeElapsed);
 	XMFLOAT3 MoveByDir(float fDistance);
 
 private:
@@ -107,13 +108,16 @@ private:
 
 
 private:
-	ANIM	m_eCurAnim;			// 현재 애니메이션
+	ANIM	m_ePrevAnim;			// 이전 애니메이션
+	ANIM	m_eCurAnim;				// 현재 애니메이션
+	float	m_fBlendingTime;		// 블렌딩 시간
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
-	float	m_fAnimElapsedTime;	// 현재 애니메이션의 흐른 시간
+	float	m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
 
 
 private:
 	bool	m_bBattleOn;
+	bool	m_bBlendingOn;
 
 public:
 	CCollision* m_pComCollision = nullptr;

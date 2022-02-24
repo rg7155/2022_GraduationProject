@@ -57,9 +57,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
 	m_pSkinnedAnimationController->SetTrackEnable(0, true);
-	m_pSkinnedAnimationController->SetTrackEnable(1, true);
-	m_pSkinnedAnimationController->SetTrackWeight(0, 0.8f);
-	m_pSkinnedAnimationController->SetTrackWeight(1, 0.2f);
 
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
@@ -87,7 +84,13 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_bBattleOn = false;
 	m_eCurAnim = ANIM::IDLE;
+	m_ePrevAnim = ANIM::IDLE;
+	m_bBlendingOn = false;
 
+
+	m_fAnimElapsedTime = 0.f;
+	m_fAnimMaxTime = 0.f;
+	m_fBlendingTime = 0.f;
 	///////////////////////////////////////////////
 	//컴포넌트
 	CreateComponent();
@@ -305,6 +308,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 	LerpRotate(fTimeElapsed);
 
+	Blending_Animation(fTimeElapsed);
 
 
 	if (m_pSkinnedAnimationController)
@@ -496,7 +500,7 @@ CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 	}
 	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
-	Update(fTimeElapsed);
+	//Update(fTimeElapsed);
 
 	return(m_pCamera);
 }
@@ -582,26 +586,41 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 
 void CPlayer::Change_Animation(ANIM eNewAnim)
 {
+	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
+
 	m_fAnimElapsedTime = 0.f;
+	m_fBlendingTime = 0.f;
+	m_bBlendingOn = true;
 
 	// 애니메이션 진행시간 
 	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);	
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
 
-	// 모든 애니메이션 false로
-	for (int i = 0; i < ANIM::END; i++)
+}
+
+void CPlayer::Blending_Animation(float fTimeElapsed)
+{
+	if (!m_bBlendingOn)
+		return;
+
+	m_fBlendingTime += fTimeElapsed * BLENDING_SPEED;
+
+	if (m_fBlendingTime >= 1.f)
 	{
-		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+		m_bBlendingOn = false;
+		m_pSkinnedAnimationController->SetTrackEnable(m_ePrevAnim, false);
+		m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 0.f);
+		m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 1.f);
+
+		return;
 	}
 
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	//m_pSkinnedAnimationController->SetTrackWeight(0, 0.f);
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	//m_pSkinnedAnimationController->SetTrackWeight(1, 1.f);
-
-	m_pSkinnedAnimationController->SetTrackPosition(eNewAnim, 0.f);
-	m_pSkinnedAnimationController->SetTrackEnable(eNewAnim, true);
+	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f-m_fBlendingTime);
+	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
 }
+
 
 bool CPlayer::Check_MoveInput()
 {

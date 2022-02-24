@@ -10,6 +10,8 @@
 
 
 #define PLAYER_SPEED					10.f
+#define BLENDING_TIME					0.3f
+#define BLENDING_SPEED					3.f
 
 #define ANIMATION_TYPE_ONCE				0
 #define ANIMATION_TYPE_LOOP				1
