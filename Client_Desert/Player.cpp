@@ -41,16 +41,25 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "../Datas/Player_Blue/Adventurer_Aland_Blue.bin", NULL);
+	
+
+
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
+
+
+
 	for (int i = 0; i < 9; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
 	m_pSkinnedAnimationController->SetTrackEnable(0, true);
+	m_pSkinnedAnimationController->SetTrackEnable(1, true);
+	m_pSkinnedAnimationController->SetTrackWeight(0, 0.8f);
+	m_pSkinnedAnimationController->SetTrackWeight(1, 0.2f);
 
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
@@ -85,10 +94,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_eObjId = OBJ_PLAYER;
 	///////////////////////////////////////////////
 
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
-	//m_pSkinnedAnimationController->SetTrackWeight(0, 0.8f);
-	//m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
-	//m_pSkinnedAnimationController->SetTrackWeight(1, 0.2f);
+
 
 }
 
@@ -587,6 +593,12 @@ void CPlayer::Change_Animation(ANIM eNewAnim)
 	{
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
+
+	//m_pSkinnedAnimationController->SetTrackAnimationSet(0, 0);
+	//m_pSkinnedAnimationController->SetTrackWeight(0, 0.f);
+	//m_pSkinnedAnimationController->SetTrackAnimationSet(1, 1);
+	//m_pSkinnedAnimationController->SetTrackWeight(1, 1.f);
+
 	m_pSkinnedAnimationController->SetTrackPosition(eNewAnim, 0.f);
 	m_pSkinnedAnimationController->SetTrackEnable(eNewAnim, true);
 }
