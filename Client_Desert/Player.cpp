@@ -593,6 +593,14 @@ void CPlayer::Change_Animation(ANIM eNewAnim)
 	m_fBlendingTime = 0.f;
 	m_bBlendingOn = true;
 
+	// Prev, Cur 빼고 Enable
+	for (int i = 0; i < ANIM::END; i++)
+	{
+		if (i == m_ePrevAnim || i == m_eCurAnim)
+			continue;
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
+
 	// 애니메이션 진행시간 
 	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
 	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);	
