@@ -81,11 +81,11 @@ float4 PSShadowMapShadow(VS_SHADOW_MAP_OUTPUT input) : SV_TARGET
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-struct VS_TEXTURED_OUTPUT
-{
-    float4 position : SV_POSITION;
-    float2 uv : TEXCOORD;
-};
+//struct VS_TEXTURED_OUTPUT
+//{
+//    float4 position : SV_POSITION;
+//    float2 uv : TEXCOORD;
+//};
 
 VS_TEXTURED_OUTPUT VSTextureToViewport(uint nVertexID : SV_VertexID)
 {

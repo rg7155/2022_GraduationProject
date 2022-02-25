@@ -30,6 +30,8 @@
 #include <vector>
 #include <map>
 #include <list>
+#include <queue>
+#include <stack>
 
 #include <d3d12.h>
 #include <dxgi1_4.h>

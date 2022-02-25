@@ -1,6 +1,7 @@
 #include "Component.h"
 #include "Camera.h"
-
+#include "Mesh.h"
+#include "Object.h"
 CFrustum::CFrustum()
 {
 }
@@ -16,16 +17,6 @@ void CFrustum::Ready_Component(void)
 
 bool CFrustum::Isin_Frustum(XMFLOAT3* pPos)
 {
-	//float	fDistance = 0.f;
-
-	//for (int i = 0; i < 6; ++i)
-	//{
-	//	fDistance = D3DXPlaneDotCoord(&m_Plane[i], pPos);
-
-	//	if (fDistance > 0.f) //면 앞에 있다
-	//		return false;
-	//}
-
 	return true;
 }
 
@@ -152,3 +143,90 @@ CCollision* CCollision::Create()
 	pInstance->AddRef();
 	return pInstance;
 }
+
+///////////////////////////////////////////////////////////////////////////////
+
+CTrail::CTrail()
+{
+}
+
+CTrail::~CTrail(void)
+{
+	if (m_pTrailObject)
+	{
+		m_pTrailObject->ReleaseUploadBuffers();
+		delete m_pTrailObject;
+	}
+}
+
+void CTrail::Ready_Component(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_iMaxCount = 100; //사각형은 1/2개
+	m_fTime = TRAIL_CREATE_TIME + 1.f;
+
+	//컴포넌트가 오브젝트를 가져도 되나.. 
+	m_pTrailObject = new CTrailObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+}
+
+void CTrail::Update_Component(const float& fTimeDelta)
+{
+	m_fTime -= fTimeDelta;
+}
+
+void CTrail::AddTrail(XMFLOAT3& xmf3Top, XMFLOAT3& xmf3Bottom)
+{
+	if (m_fTime < 0.f)
+	{
+		m_fTime = TRAIL_CREATE_TIME;
+
+		m_listPos.emplace_back(make_pair(xmf3Top, xmf3Bottom));
+	
+		//꽉차면 제일 첫번째 사각형 지우기
+		size_t iCount = m_listPos.size();
+		if (iCount >= m_iMaxCount)
+		{
+			for (int i = 0; i < 2; ++i)
+			{
+				m_listPos.pop_front();
+			}
+		}
+
+		////사각형 못만들면
+		//if (iCount % 2 == 1)
+		//	return;
+	}
+}
+
+void CTrail::RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	size_t iCount = m_listPos.size();
+	if (iCount <= 1)
+		return;
+	
+	auto iter = m_listPos.begin();
+
+	while (iter != m_listPos.end())
+	{
+		XMFLOAT3 xmf3Pos[4];
+		xmf3Pos[0] = (*(iter)).first; //Top1
+		xmf3Pos[1] = (*(iter++)).second; //Bottom1
+
+		if (iter == m_listPos.end())
+			break;
+
+		xmf3Pos[2] = (*(iter)).second; //Bottom2
+		xmf3Pos[3] = (*(iter++)).first; //Top2
+
+		m_pTrailObject->m_pTrailMesh->SetPosition(xmf3Pos[0], xmf3Pos[1], xmf3Pos[2], xmf3Pos[3]);
+		m_pTrailObject->Render(pd3dCommandList, pCamera);
+	}
+}
+
+CTrail* CTrail::Create(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CTrail* pInstance = new CTrail();
+	pInstance->Ready_Component(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pInstance->AddRef();
+	return pInstance;
+}
+

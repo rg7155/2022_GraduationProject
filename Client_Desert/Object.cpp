@@ -1042,14 +1042,7 @@ CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd
 }
 
 
-
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-// 
 CSkyBox::CSkyBox(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature) : CGameObject(1)
 {
 	CSkyBoxMesh *pSkyBoxMesh = new CSkyBoxMesh(pd3dDevice, pd3dCommandList, 20.0f, 20.0f, 2.0f);
@@ -1118,8 +1111,6 @@ void CMapObject::Ready()
 	
 	CreateComponent();
 
-
-
 	//UpdateBoundingBox();
 }
 
@@ -1181,16 +1172,30 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 }
 
 
-bool CMapObject::CheckCollision(BoundingBox xmTargetOOBB)
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
-	//if (!m_isPlane)
-	//{
-	//	CGameMgr::GetInstance()->GetPlayer()->m_pComCollision;
-	//	if (m_pComCollision->Check_Collision(xmTargetOOBB))
-	//		return true;
-	//}
+	m_pTrailMesh = new CTrailMesh(pd3dDevice, pd3dCommandList);
+	SetMesh(m_pTrailMesh);
 
-	return false;
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail.dds", 0);
+
+	CTexturedShader* pShader = new CTexturedShader();
+	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
+	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	CMaterial* pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+	pMaterial->SetShader(pShader);
+	SetMaterial(0, pMaterial);
 }
 
+CTrailObject::~CTrailObject()
+{
+}
 

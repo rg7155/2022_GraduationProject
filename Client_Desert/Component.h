@@ -82,4 +82,39 @@ private:
 };
 
 
+
+///////////////////////////////////////////////////////////////////////////////
+#define TRAIL_CREATE_TIME 0.1f
+class CMesh;
+class CTrailObject;
+class CTrail : public CComponent
+{
+private:
+	CTrail();
+	virtual ~CTrail(void);
+
+public:
+	virtual void	Ready_Component(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void	Update_Component(const float& fTimeDelta);
+
+	void			AddTrail(XMFLOAT3& xmf3Top, XMFLOAT3& xmf3Bottom);
+	void			RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
+public:
+	static CTrail* Create(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+
+public:
+	bool			m_isOnePass = true; //초기값 로컬 좌표는 제외할지
+private:
+	int				m_iMaxCount = 0;
+	float			m_fTime = 0.f;
+	//list<XMFLOAT3>	m_listTop;
+	//list<XMFLOAT3>	m_listBottom;
+	list<pair<XMFLOAT3, XMFLOAT3>>	m_listPos; //Top,Bottom
+	CTrailObject*					m_pTrailObject = nullptr;
+};
+
+
+
+
+
 #endif // Component_h__

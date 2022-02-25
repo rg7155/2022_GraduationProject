@@ -35,7 +35,7 @@ protected:
 	LPVOID						m_pCameraUpdatedContext = NULL;
 
 	CCamera						*m_pCamera = NULL;
-
+	CGameObject					*m_pSword = NULL;
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext);
 	~CPlayer();
@@ -94,7 +94,8 @@ private:
 	void Change_Animation(ANIM eNewAnim);
 	bool Check_MoveInput();
 
-	virtual void	CreateComponent() override;
+	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void	UpdateComponent(float fTimeElapsed);
 
 public:
 	virtual void	CollsionDetection(CGameObject* pObj) override;
@@ -118,6 +119,7 @@ private:
 
 public:
 	CCollision* m_pComCollision = nullptr;
+	CTrail* m_pComTrail = nullptr;
 
 };
 

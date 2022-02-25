@@ -333,11 +333,21 @@ public:
 
 	virtual void CreateComponent() override;
 
-	bool		CheckCollision(BoundingBox xmTargetOOBB);
-
 public:
 	bool		m_isPlane = false;
 
 	string		m_strName = "";
 	CCollision* m_pComCollision = nullptr;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//재질이 쉐이더를 가지는 오브젝트 - ex)스카이박스
+class CTrailObject : public CGameObject
+{
+public:
+	CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CTrailObject();
+public:
+	CTrailMesh* m_pTrailMesh = nullptr;
 };

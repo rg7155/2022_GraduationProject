@@ -43,6 +43,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "../Datas/Player_Blue/Adventurer_Aland_Blue.bin", NULL);
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
+	m_pSword = FindFrame("Sword");
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
 	for (int i = 0; i < 9; i++)
@@ -81,7 +82,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	///////////////////////////////////////////////
 	//ÄÄÆ÷³ÍÆ®
-	CreateComponent();
+	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_eObjId = OBJ_PLAYER;
 	///////////////////////////////////////////////
 
@@ -303,8 +304,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 
 	////////////////////////////////////////////
-	if (m_pComCollision)
-		m_pComCollision->UpdateBoundingBox();
+	UpdateComponent(fTimeElapsed);
 	////////////////////////////////////////////
 
 
@@ -391,6 +391,8 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	//if (nCameraMode == THIRD_PERSON_CAMERA) 
 	CGameObject::Render(pd3dCommandList, pCamera);
+
+	m_pComTrail->RenderTrail(pd3dCommandList, pCamera);
 }
 
 void CPlayer::LerpRotate(float fTimeElapsed)
@@ -425,7 +427,7 @@ XMFLOAT3 CPlayer::MoveByDir(float fDistance)
 	return xmf3Shift;
 }
 
-void CPlayer::CreateComponent()
+void CPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	m_pComponent[COM_COLLISION] = CCollision::Create();
 
@@ -435,6 +437,30 @@ void CPlayer::CreateComponent()
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
 	m_pComCollision->UpdateBoundingBox();
+
+	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
+}
+
+void CPlayer::UpdateComponent(float fTimeElapsed)
+{
+	for (int i = 0; i < COM_END; ++i)
+		if (m_pComponent[i])
+			m_pComponent[i]->Update_Component(fTimeElapsed);
+
+	if (m_pComCollision)
+		m_pComCollision->UpdateBoundingBox();
+
+	if (m_pComTrail)
+	{
+		XMFLOAT3 xmf3Top = Vector3::Add(m_pSword->GetPosition(), m_pSword->GetUp(), -2.f);
+		m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition()); 
+	}
+
+	//if (m_pSword)
+	//{
+	//	cout << m_pSword->GetRight().x << "," << m_pSword->GetRight().y << "," << m_pSword->GetRight().z << endl;
+	//}
 }
 
 void CPlayer::CollsionDetection(CGameObject* pObj)
