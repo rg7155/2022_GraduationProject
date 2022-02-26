@@ -637,7 +637,6 @@ CTrailMesh::~CTrailMesh()
 
 void CTrailMesh::SetPosition(XMFLOAT3& xmf3Top1, XMFLOAT3& xmf3Bottom1, XMFLOAT3& xmf3Top2, XMFLOAT3& xmf3Bottom2)
 {
-	//그냥 오브젝트 하나를 매쉬는 그대로 두고 월드 바꿔서 빌보드처리?
 	CTexturedVertex pVertices[6];
 	pVertices[0] = CTexturedVertex(xmf3Bottom2, XMFLOAT2(1.0f, 0.0f));
 	pVertices[1] = CTexturedVertex(xmf3Top2, XMFLOAT2(1.0f, 1.0f));
