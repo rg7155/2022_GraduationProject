@@ -84,7 +84,7 @@ private:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define TRAIL_CREATE_TIME 0.1f
+#define TRAIL_CREATE_TIME 0.001f
 class CMesh;
 class CTrailObject;
 class CTrail : public CComponent

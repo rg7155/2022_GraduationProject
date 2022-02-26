@@ -453,7 +453,7 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 
 	if (m_pComTrail)
 	{
-		XMFLOAT3 xmf3Top = Vector3::Add(m_pSword->GetPosition(), m_pSword->GetUp(), -2.f);
+		XMFLOAT3 xmf3Top = Vector3::Add(m_pSword->GetPosition(), m_pSword->GetUp(), -1.f);
 		m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition()); 
 	}
 

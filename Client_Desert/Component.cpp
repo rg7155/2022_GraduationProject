@@ -217,7 +217,11 @@ void CTrail::RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		xmf3Pos[2] = (*(iter)).second; //Bottom2
 		xmf3Pos[3] = (*(iter++)).first; //Top2
 
-		m_pTrailObject->m_pTrailMesh->SetPosition(xmf3Pos[0], xmf3Pos[1], xmf3Pos[2], xmf3Pos[3]);
+		//m_pTrailObject->m_pTrailMesh->SetPosition(xmf3Pos[0], xmf3Pos[1], xmf3Pos[2], xmf3Pos[3]);
+		m_pTrailObject->SetPosition(xmf3Pos[0]);
+		m_pTrailObject->SetLookAt(pCamera->GetPosition());
+		XMFLOAT3 xmf3Scale = { 0.1f,0.1f, 0.1f };
+		m_pTrailObject->SetScale(xmf3Scale);
 		m_pTrailObject->Render(pd3dCommandList, pCamera);
 	}
 }

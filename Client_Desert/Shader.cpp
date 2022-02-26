@@ -582,15 +582,6 @@ void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	CStandardShader::AnimateObjects(fTimeElapsed);
 
-	//for (int j = 0; j < m_nObjects; j++)
-	//{
-	//	if (m_ppObjects[j])
-	//	{
-	//		m_ppObjects[j]->Animate(m_fElapsedTime);
-	//		m_ppObjects[j]->UpdateTransform(NULL);
-	//	}
-	//}
-
 	for (auto& iter : m_listObjects)
 	{
 		iter->Animate(m_fElapsedTime);
