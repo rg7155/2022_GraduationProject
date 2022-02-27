@@ -248,9 +248,11 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
     return (output);
 }
 
-float4 PSTextured(VS_TEXTURED_OUTPUT input, uint primitiveID : SV_PrimitiveID) : SV_TARGET
+float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
-    float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    //float4 cColor = gtxtTexture.Sample(gssWrap, input.uv); //업데이트 안해주나?
+    float4 cColor = (1.f, 1.f, 1.f, 1.f);
+	
     return (cColor);
 }
 

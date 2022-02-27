@@ -84,7 +84,6 @@ private:
 
 
 ///////////////////////////////////////////////////////////////////////////////
-#define TRAIL_CREATE_TIME 0.001f
 class CMesh;
 class CTrailObject;
 class CTrail : public CComponent
@@ -103,12 +102,11 @@ public:
 	static CTrail* Create(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
 public:
-	bool			m_isOnePass = true; //초기값 로컬 좌표는 제외할지
+	bool							m_isOnePass = true; //초기값 로컬 좌표는 제외할지
 private:
-	int				m_iMaxCount = 0;
-	float			m_fTime = 0.f;
-	//list<XMFLOAT3>	m_listTop;
-	//list<XMFLOAT3>	m_listBottom;
+	int								m_iMaxCount = 0;
+	float							m_fCreateTime = 0.f;
+	float							m_fTime = 0.f;
 	list<pair<XMFLOAT3, XMFLOAT3>>	m_listPos; //Top,Bottom
 	CTrailObject*					m_pTrailObject = nullptr;
 };

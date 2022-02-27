@@ -161,8 +161,10 @@ CTrail::~CTrail(void)
 
 void CTrail::Ready_Component(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	m_fCreateTime = 0.01f;
+
 	m_iMaxCount = 100; //사각형은 1/2개
-	m_fTime = TRAIL_CREATE_TIME + 1.f;
+	m_fTime = m_fCreateTime + 1.f;
 
 	//컴포넌트가 오브젝트를 가져도 되나.. 
 	m_pTrailObject = new CTrailObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -177,7 +179,7 @@ void CTrail::AddTrail(XMFLOAT3& xmf3Top, XMFLOAT3& xmf3Bottom)
 {
 	if (m_fTime < 0.f)
 	{
-		m_fTime = TRAIL_CREATE_TIME;
+		m_fTime = m_fCreateTime;
 
 		m_listPos.emplace_back(make_pair(xmf3Top, xmf3Bottom));
 	
@@ -205,25 +207,50 @@ void CTrail::RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	
 	auto iter = m_listPos.begin();
 
+	size_t iRectCount = iCount - 1;
+	size_t iVertexCount = iRectCount * 6;//사각형 당 정점 6개
+	CTexturedVertex* pVertices = new CTexturedVertex[iVertexCount];
+	//CTexturedVertex pVertices[iVertexCount];
+
+	int i = 0, iLineIndex = 0;
 	while (iter != m_listPos.end())
 	{
 		XMFLOAT3 xmf3Pos[4];
 		xmf3Pos[0] = (*(iter)).first; //Top1
 		xmf3Pos[1] = (*(iter++)).second; //Bottom1
 
+		//사각형 더 못그리면
 		if (iter == m_listPos.end())
 			break;
 
 		xmf3Pos[2] = (*(iter)).second; //Bottom2
-		xmf3Pos[3] = (*(iter++)).first; //Top2
+		xmf3Pos[3] = (*(iter)).first; //Top2
+
+		int iNextIineIndex = iLineIndex + 1; //u가 1인
+		XMFLOAT2 xmf2UV[4];
+		xmf2UV[0] = { ((float)iLineIndex / iRectCount), 0.f };
+		xmf2UV[1] = { ((float)iLineIndex / iRectCount), 1.f };
+		xmf2UV[2] = { ((float)iNextIineIndex / iRectCount) / 1.f, 1.f };
+		xmf2UV[3] = { ((float)iNextIineIndex / iRectCount) / 1.f, 0.f };
+
+		pVertices[i++] = CTexturedVertex(xmf3Pos[2], xmf2UV[2]);	//xmf3Bottom2,
+		pVertices[i++] = CTexturedVertex(xmf3Pos[3], xmf2UV[3]);	//xmf3Top2,	
+		pVertices[i++] = CTexturedVertex(xmf3Pos[0], xmf2UV[0]);	//xmf3Top1,	
+		pVertices[i++] = CTexturedVertex(xmf3Pos[0], xmf2UV[0]);	//xmf3Top1,	
+		pVertices[i++] = CTexturedVertex(xmf3Pos[1], xmf2UV[1]);	//xmf3Bottom1,
+		pVertices[i++] = CTexturedVertex(xmf3Pos[2], xmf2UV[2]);	//xmf3Bottom2,
+
+		iLineIndex++;
 
 		//m_pTrailObject->m_pTrailMesh->SetPosition(xmf3Pos[0], xmf3Pos[1], xmf3Pos[2], xmf3Pos[3]);
-		m_pTrailObject->SetPosition(xmf3Pos[0]);
-		m_pTrailObject->SetLookAt(pCamera->GetPosition());
-		XMFLOAT3 xmf3Scale = { 0.1f,0.1f, 0.1f };
-		m_pTrailObject->SetScale(xmf3Scale);
-		m_pTrailObject->Render(pd3dCommandList, pCamera);
+		//m_pTrailObject->Render(pd3dCommandList, pCamera); 
 	}
+
+	m_pTrailObject->m_pTrailMesh->SetVertices(pVertices, iVertexCount);
+	m_pTrailObject->Render(pd3dCommandList, pCamera); //렌더링은 한번만
+
+	//cout << i << ", " << iVertexCount << endl;
+	delete[] pVertices;
 }
 
 CTrail* CTrail::Create(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)

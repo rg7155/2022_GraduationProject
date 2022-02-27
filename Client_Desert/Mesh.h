@@ -240,7 +240,7 @@ public:
 	virtual ~CTrailMesh();
 
 	void		SetPosition(XMFLOAT3& xmf3Top1, XMFLOAT3& xmf3Bottom1, XMFLOAT3& xmf3Top2, XMFLOAT3& xmf3Bottom2);
-
+	void		SetVertices(CTexturedVertex* pVertices, size_t iVertexCount);
 private:
 	UINT8*		m_pBufferDataBegin = NULL;
 };

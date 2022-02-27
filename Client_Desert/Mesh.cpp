@@ -608,7 +608,7 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 CTrailMesh::CTrailMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
 {
-	m_nVertices = 6;
+	//m_nVertices = 1000;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 
 	CTexturedVertex pVertices[6];
@@ -618,17 +618,20 @@ CTrailMesh::CTrailMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	//pVertices[3] = CTexturedVertex(XMFLOAT3(-1.f, 0.f, -1.f), XMFLOAT2(0.0f, 1.0f));
 	//pVertices[4] = CTexturedVertex(XMFLOAT3(-1.f, 0.f, +1.f), XMFLOAT2(0.0f, 0.0f));
 	//pVertices[5] = CTexturedVertex(XMFLOAT3(+1.f, 0.f, +1.f), XMFLOAT2(1.0f, 0.0f));
-	pVertices[0] = CTexturedVertex(XMFLOAT3(+1.f, +1.f, +0.f), XMFLOAT2(1.0f, 0.0f));
-	pVertices[1] = CTexturedVertex(XMFLOAT3(-1.f, +1.f, +0.f), XMFLOAT2(0.0f, 0.0f));
-	pVertices[2] = CTexturedVertex(XMFLOAT3(-1.f, -1.f, +0.f), XMFLOAT2(0.0f, 1.0f));
-	pVertices[3] = CTexturedVertex(XMFLOAT3(-1.f, -1.f, +0.f), XMFLOAT2(0.0f, 1.0f));
-	pVertices[4] = CTexturedVertex(XMFLOAT3(+1.f, -1.f, +0.f), XMFLOAT2(1.0f, 1.0f));
-	pVertices[5] = CTexturedVertex(XMFLOAT3(+1.f, +1.f, +0.f), XMFLOAT2(1.0f, 0.0f));
-	m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, sizeof(CTexturedVertex) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
 
-	//UINT ncbElementBytes = ((sizeof(CTexturedVertex) + 255) & ~255); //256의 배수
-	//m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-	//m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pBufferDataBegin);
+	//pVertices[0] = CTexturedVertex(XMFLOAT3(+1.f, +1.f, +0.f), XMFLOAT2(1.0f, 0.0f));
+	//pVertices[1] = CTexturedVertex(XMFLOAT3(-1.f, +1.f, +0.f), XMFLOAT2(0.0f, 0.0f));
+	//pVertices[2] = CTexturedVertex(XMFLOAT3(-1.f, -1.f, +0.f), XMFLOAT2(0.0f, 1.0f));
+	//pVertices[3] = CTexturedVertex(XMFLOAT3(-1.f, -1.f, +0.f), XMFLOAT2(0.0f, 1.0f));
+	//pVertices[4] = CTexturedVertex(XMFLOAT3(+1.f, -1.f, +0.f), XMFLOAT2(1.0f, 1.0f));
+	//pVertices[5] = CTexturedVertex(XMFLOAT3(+1.f, +1.f, +0.f), XMFLOAT2(1.0f, 0.0f));
+	//m_pd3dPositionBuffer = CreateBufferResource(pd3dDevice, pd3dCommandList, pVertices, sizeof(CTexturedVertex) * m_nVertices, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, &m_pd3dPositionUploadBuffer);
+
+
+	//정점 최대갯수 곱해줘야함!!!
+	UINT ncbElementBytes = ((sizeof(CTexturedVertex) * 1000 + 255) & ~255); //256의 배수
+	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+	m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pBufferDataBegin);
 
 	m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
 	m_d3dPositionBufferView.StrideInBytes = sizeof(CTexturedVertex);
@@ -643,15 +646,30 @@ CTrailMesh::~CTrailMesh()
 
 void CTrailMesh::SetPosition(XMFLOAT3& xmf3Top1, XMFLOAT3& xmf3Bottom1, XMFLOAT3& xmf3Top2, XMFLOAT3& xmf3Bottom2)
 {
-	CTexturedVertex pVertices[6];
-	pVertices[0] = CTexturedVertex(xmf3Bottom2, XMFLOAT2(1.0f, 0.0f));
-	pVertices[1] = CTexturedVertex(xmf3Top2, XMFLOAT2(1.0f, 1.0f));
-	pVertices[2] = CTexturedVertex(xmf3Top1, XMFLOAT2(0.0f, 1.0f));
-	pVertices[3] = CTexturedVertex(xmf3Top1, XMFLOAT2(0.0f, 1.0f));
-	pVertices[4] = CTexturedVertex(xmf3Bottom1, XMFLOAT2(0.0f, 0.0f));
-	pVertices[5] = CTexturedVertex(xmf3Bottom2, XMFLOAT2(1.0f, 0.0f));
+	//CTexturedVertex* pVertices = new CTexturedVertex[6];
+	////CTexturedVertex pVertices[6];
 
-	memcpy(m_pBufferDataBegin, pVertices, sizeof(pVertices));
+	//pVertices[0] = CTexturedVertex(xmf3Bottom2, XMFLOAT2(1.0f, 0.0f));
+	//pVertices[1] = CTexturedVertex(xmf3Top2,	XMFLOAT2(1.0f, 1.0f));
+	//pVertices[2] = CTexturedVertex(xmf3Top1,	XMFLOAT2(0.0f, 1.0f));
+	//pVertices[3] = CTexturedVertex(xmf3Top1,	XMFLOAT2(0.0f, 1.0f));
+	//pVertices[4] = CTexturedVertex(xmf3Bottom1, XMFLOAT2(0.0f, 0.0f));
+	//pVertices[5] = CTexturedVertex(xmf3Bottom2, XMFLOAT2(1.0f, 0.0f));
+
+	//memcpy(m_pBufferDataBegin, pVertices, sizeof(CTexturedVertex) * 6);
+	//delete[] pVertices;
+}
+
+void CTrailMesh::SetVertices(CTexturedVertex* pVertices, size_t iVertexCount)
+{
+	//size_t iSize = sizeof(CTexturedVertex) * iVertexCount;
+	m_nVertices = (int)iVertexCount;
+
+	m_d3dPositionBufferView.SizeInBytes = sizeof(CTexturedVertex) * m_nVertices;
+	memcpy(m_pBufferDataBegin, pVertices, sizeof(CTexturedVertex) * iVertexCount);
+
+	//m_d3dPositionBufferView.BufferLocation = m_pd3dPositionBuffer->GetGPUVirtualAddress();
+	//m_d3dPositionBufferView.StrideInBytes = sizeof(CTexturedVertex);
 }
 
 
