@@ -236,7 +236,7 @@ public:
 class CTrailMesh : public CMesh
 {
 public:
-	CTrailMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	CTrailMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int iMaxVertexCount);
 	virtual ~CTrailMesh();
 
 	void		SetPosition(XMFLOAT3& xmf3Top1, XMFLOAT3& xmf3Bottom1, XMFLOAT3& xmf3Top2, XMFLOAT3& xmf3Bottom2);

@@ -348,7 +348,7 @@ public:
 class CTrailObject : public CGameObject
 {
 public:
-	CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int iVertexCount);
 	virtual ~CTrailObject();
 public:
 	CTrailMesh* m_pTrailMesh = nullptr;

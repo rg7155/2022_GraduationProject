@@ -1185,9 +1185,9 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int iVertexCount) : CGameObject(1)
 {
-	m_pTrailMesh = new CTrailMesh(pd3dDevice, pd3dCommandList);
+	m_pTrailMesh = new CTrailMesh(pd3dDevice, pd3dCommandList, iVertexCount);
 	SetMesh(m_pTrailMesh);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);

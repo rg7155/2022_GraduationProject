@@ -606,7 +606,7 @@ CTexturedRectMesh::~CTexturedRectMesh()
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CTrailMesh::CTrailMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CMesh(pd3dDevice, pd3dCommandList)
+CTrailMesh::CTrailMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, int iMaxVertexCount) : CMesh(pd3dDevice, pd3dCommandList)
 {
 	//m_nVertices = 1000;
 	m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
@@ -629,7 +629,7 @@ CTrailMesh::CTrailMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 
 	//정점 최대갯수 곱해줘야함!!!
-	UINT ncbElementBytes = ((sizeof(CTexturedVertex) * 1000 + 255) & ~255); //256의 배수
+	UINT ncbElementBytes = ((sizeof(CTexturedVertex) * iMaxVertexCount + 255) & ~255); //256의 배수
 	m_pd3dPositionBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 	m_pd3dPositionBuffer->Map(0, NULL, (void**)&m_pBufferDataBegin);
 
