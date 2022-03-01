@@ -43,8 +43,8 @@
 #define _PLANE_HEIGHT			300
 
 // Ä«¸Þ¶ó
-#define CAM_OFFSET_Y			5.f
-#define CAM_OFFSET_Z			-6.f
+#define CAM_OFFSET_Y			4.f
+#define CAM_OFFSET_Z			-5.f
 #define DPI						20.f
 
 
