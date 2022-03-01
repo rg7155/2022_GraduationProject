@@ -161,12 +161,12 @@ CTrail::~CTrail(void)
 
 void CTrail::Ready_Component(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	m_fCreateTime = 0.01f;
+	m_fCreateTime = 0.001f;
 
-	m_iMaxCount = 100; //사각형은 1/2개
+	m_iMaxCount = 50; //사각형은 1/2개
+
 	m_fTime = m_fCreateTime + 1.f;
 
-	//컴포넌트가 오브젝트를 가져도 되나.. 
 	m_pTrailObject = new CTrailObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 }
 
@@ -192,10 +192,43 @@ void CTrail::AddTrail(XMFLOAT3& xmf3Top, XMFLOAT3& xmf3Bottom)
 				m_listPos.pop_front();
 			}
 		}
+		
+		//캣멀롬 
+		//방법1 생성된 곳 한번만
+		//방법2 생성되면 전체 다시해주기
 
-		////사각형 못만들면
-		//if (iCount % 2 == 1)
-		//	return;
+		//방법1-1 
+		iCount = m_listPos.size();
+		if (iCount < 4)
+			return; 
+
+		auto iter = m_listPos.end();
+		XMFLOAT3 xmf3TopPos[4], xmf3BottomPos[4];
+		for (int i = 3; i > -1; --i)
+		{
+			xmf3TopPos[i] = (*(--iter)).first;
+			xmf3BottomPos[i] = (*(iter)).second;
+		}
+
+		if (m_listRomPos.size() == 0)
+		{
+
+		}
+		else
+		{
+			for (int i = 0; i < 4; ++i)
+			{
+				float t = (i + 1) / 4.f;
+				//그냥 넣는게 아니라 이미 있는건 수정을 해야함
+				//처음 넣고, 마지막에 넣고
+
+				XMFLOAT3 xmf3RomTopPos = Vector3::CatmullRom(xmf3TopPos[1], xmf3TopPos[2], xmf3TopPos[3], xmf3TopPos[3], t); //새로 들어온 하나만
+				XMFLOAT3 xmf3RomBottomPos = Vector3::CatmullRom(xmf3BottomPos[1], xmf3BottomPos[2], xmf3BottomPos[3], xmf3BottomPos[3], t); //새로 들어온 하나만
+
+				m_listRomPos.emplace_back(make_pair(xmf3RomTopPos, xmf3RomBottomPos));
+			}
+		}
+
 	}
 }
 
@@ -226,7 +259,7 @@ void CTrail::RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		xmf3Pos[2] = (*(iter)).second; //Bottom2
 		xmf3Pos[3] = (*(iter)).first; //Top2
 
-		int iNextIineIndex = iLineIndex + 1; //u가 1인
+		int iNextIineIndex = iLineIndex + 1; //사각형의 오른쪽?
 		XMFLOAT2 xmf2UV[4];
 		xmf2UV[0] = { ((float)iLineIndex / iRectCount), 0.f };
 		xmf2UV[1] = { ((float)iLineIndex / iRectCount), 1.f };
@@ -241,15 +274,13 @@ void CTrail::RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		pVertices[i++] = CTexturedVertex(xmf3Pos[2], xmf2UV[2]);	//xmf3Bottom2,
 
 		iLineIndex++;
-
-		//m_pTrailObject->m_pTrailMesh->SetPosition(xmf3Pos[0], xmf3Pos[1], xmf3Pos[2], xmf3Pos[3]);
-		//m_pTrailObject->Render(pd3dCommandList, pCamera); 
 	}
+
 
 	m_pTrailObject->m_pTrailMesh->SetVertices(pVertices, iVertexCount);
 	m_pTrailObject->Render(pd3dCommandList, pCamera); //렌더링은 한번만
 
-	//cout << i << ", " << iVertexCount << endl;
+
 	delete[] pVertices;
 }
 

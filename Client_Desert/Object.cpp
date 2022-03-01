@@ -1192,7 +1192,7 @@ CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE_CUBE, 0);
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail.dds", 0);
 
 	CTexturedShader* pShader = new CTexturedShader();

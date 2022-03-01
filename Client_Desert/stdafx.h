@@ -227,6 +227,22 @@ namespace Vector3
 	{
 		return(TransformCoord(xmf3Vector, XMLoadFloat4x4(&xmmtx4x4Matrix)));
 	}
+
+	inline XMFLOAT3 CatmullRom(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, XMFLOAT3& xmf3Vector3, XMFLOAT3& xmf3Vector4, float t)
+	{
+		XMFLOAT3 xmf3Result;
+		XMStoreFloat3(&xmf3Result, XMVectorCatmullRom(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2),
+			XMLoadFloat3(&xmf3Vector3), XMLoadFloat3(&xmf3Vector4), t));
+		return(xmf3Result);
+	}
+
+	inline XMFLOAT3 CatmullRom(XMFLOAT3* xmf3Vector, float t)
+	{
+		XMFLOAT3 xmf3Result;
+		XMStoreFloat3(&xmf3Result, XMVectorCatmullRom(XMLoadFloat3(&xmf3Vector[0]), XMLoadFloat3(&xmf3Vector[1]),
+			XMLoadFloat3(&xmf3Vector[2]), XMLoadFloat3(&xmf3Vector[3]), t));
+		return(xmf3Result);
+	}
 }
 
 namespace Vector4
