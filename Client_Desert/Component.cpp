@@ -163,7 +163,7 @@ void CTrail::Ready_Component(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	m_fCreateTime = 0.001f;
 
-	m_iMaxCount = 30; //사각형은 1/2개
+	m_iMaxCount = 50; //사각형은 1/2개
 	m_iDivide = 8; //하나를 몇개로 나눌껀지
 
 	m_fTime = m_fCreateTime + 1.f;
@@ -265,10 +265,14 @@ void CTrail::RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 
 		int iNextIineIndex = iLineIndex + 1; //사각형의 오른쪽
 		XMFLOAT2 xmf2UV[4];
-		xmf2UV[0] = { ((float)iLineIndex / iRectCount), 0.f };
-		xmf2UV[1] = { ((float)iLineIndex / iRectCount), 1.f };
-		xmf2UV[2] = { ((float)iNextIineIndex / iRectCount) / 1.f, 1.f };
-		xmf2UV[3] = { ((float)iNextIineIndex / iRectCount) / 1.f, 0.f };
+		float fRatio = (float)iLineIndex / iRectCount;
+		float fNextRatio = (float)iNextIineIndex / iRectCount;
+		xmf2UV[0] = { fRatio,			0.f };
+		//xmf2UV[1] = { fRatio,			1.f - (fRatio / 1.f) };
+		//xmf2UV[2] = { fNextRatio / 1.f, 1.f - (fNextRatio / 1.f) };
+		xmf2UV[1] = { fRatio,			(fRatio / 1.f) };
+		xmf2UV[2] = { fNextRatio / 1.f, (fNextRatio / 1.f) };
+		xmf2UV[3] = { fNextRatio / 1.f, 0.f };
 
 		pVertices[i++] = CTexturedVertex(xmf3Pos[2], xmf2UV[2]);	//xmf3Bottom2,
 		pVertices[i++] = CTexturedVertex(xmf3Pos[3], xmf2UV[3]);	//xmf3Top2,	
