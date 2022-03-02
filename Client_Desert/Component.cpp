@@ -163,7 +163,7 @@ void CTrail::Ready_Component(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 {
 	m_fCreateTime = 0.001f;
 
-	m_iMaxCount = 50; //사각형은 1/2개
+	m_iMaxCount = 25; //사각형은 1/2개
 	m_iDivide = 8; //하나를 몇개로 나눌껀지
 
 	m_fTime = m_fCreateTime + 1.f;
@@ -268,8 +268,8 @@ void CTrail::RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 		float fRatio = (float)iLineIndex / iRectCount;
 		float fNextRatio = (float)iNextIineIndex / iRectCount;
 		xmf2UV[0] = { fRatio,			0.f };
-		//xmf2UV[1] = { fRatio,			1.f - (fRatio / 1.f) };
-		//xmf2UV[2] = { fNextRatio / 1.f, 1.f - (fNextRatio / 1.f) };
+		//xmf2UV[1] = { fRatio,			1.f };
+		//xmf2UV[2] = { fNextRatio / 1.f, 1.f };
 		xmf2UV[1] = { fRatio,			(fRatio / 1.f) };
 		xmf2UV[2] = { fNextRatio / 1.f, (fNextRatio / 1.f) };
 		xmf2UV[3] = { fNextRatio / 1.f, 0.f };
