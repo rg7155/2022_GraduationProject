@@ -1120,3 +1120,18 @@ void CTexturedShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 {
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CTrailShader::CTrailShader()
+{
+}
+
+CTrailShader::~CTrailShader()
+{
+}
+
+D3D12_SHADER_BYTECODE CTrailShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTexturedTrail", "ps_5_1", ppd3dShaderBlob));
+}

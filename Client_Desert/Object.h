@@ -98,6 +98,10 @@ public:
 #define MATERIAL_DETAIL_ALBEDO_MAP		0x20
 #define MATERIAL_DETAIL_NORMAL_MAP		0x40
 
+#define EFFECT_FOG				0x01
+#define EFFECT_LIMLIGHT			0x02
+#define EFFECT_DISSOLVE			0x04
+
 class CGameObject;
 
 class CMaterial
@@ -217,6 +221,9 @@ public:
 	BoundingOrientedBox				m_xmOOBB;
 	bool							m_isRootModelObject = false;
 	OBJ_ID							m_eObjId = OBJ_END;
+	UINT							m_nEffectsType = 0x00;
+
+	void SetEffectsType(UINT nMask, bool isOn);
 
 	void SetMesh(CMesh *pMesh);
 	void SetShader(CShader *pShader);
@@ -285,7 +292,7 @@ public:
 	static void LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoadedModel);
 	static CGameObject* LoadFrameHierarchyFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CGameObject* pParent, FILE* pInFile, CShader* pShader, int* pnSkinnedMeshes, bool isRootModelObj, CGameObject* pRootModelObj = nullptr);
 
-	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader, bool isBinary = true);
+	static CLoadedModelInfo* LoadGeometryAndAnimationFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, char* pstrFileName, CShader* pShader);
 
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
@@ -334,6 +341,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
 	virtual void CreateComponent() override;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	bool		m_isPlane = false;

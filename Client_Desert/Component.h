@@ -109,7 +109,7 @@ private:
 	float							m_fCreateTime = 0.f;
 	float							m_fTime = 0.f;
 	list<pair<XMFLOAT3, XMFLOAT3>>	m_listPos; //Top,Bottom
-	list<pair<XMFLOAT3, XMFLOAT3>>	m_listRomPos; //Top,Bottom
+	list<pair<XMFLOAT3, XMFLOAT3>>	m_listRomPos; 
 	CTrailObject*					m_pTrailObject = nullptr;
 };
 

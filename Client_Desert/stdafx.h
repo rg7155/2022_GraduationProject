@@ -191,6 +191,12 @@ namespace Vector3
 		return(xmf3Result.x);
 	}
 
+	inline float Distance(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2)
+	{
+		float fDistance = Length(Subtract(xmf3Vector1, xmf3Vector2));
+		return(fDistance);
+	}
+
 	inline bool IsZero(XMFLOAT3& xmf3Vector)
 	{
 		XMFLOAT3 xmf3Result;

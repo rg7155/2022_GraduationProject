@@ -223,8 +223,8 @@ void CTrail::AddTrail(XMFLOAT3& xmf3Top, XMFLOAT3& xmf3Bottom)
 		for (int i = 0; i < m_iDivide; ++i)
 		{
 			float t = (i + 1) / (float)m_iDivide;
-			XMFLOAT3 xmf3RomTopPos = Vector3::CatmullRom(xmf3TopPos[1], xmf3TopPos[2], xmf3TopPos[3], xmf3TopPos[3], t); //새로 들어온 하나만
-			XMFLOAT3 xmf3RomBottomPos = Vector3::CatmullRom(xmf3BottomPos[1], xmf3BottomPos[2], xmf3BottomPos[3], xmf3BottomPos[3], t); //새로 들어온 하나만
+			XMFLOAT3 xmf3RomTopPos = Vector3::CatmullRom(xmf3TopPos[1], xmf3TopPos[2], xmf3TopPos[3], xmf3TopPos[3], t); 
+			XMFLOAT3 xmf3RomBottomPos = Vector3::CatmullRom(xmf3BottomPos[1], xmf3BottomPos[2], xmf3BottomPos[3], xmf3BottomPos[3], t); 
 
 			m_listRomPos.emplace_back(make_pair(xmf3RomTopPos, xmf3RomBottomPos));
 		}

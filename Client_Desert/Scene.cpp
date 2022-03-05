@@ -110,7 +110,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[17];
 	SetRootParameterCBV(pd3dRootParameters, 0, 1, 0, D3D12_SHADER_VISIBILITY_ALL);//Camera
-	SetRootParameterConstants(pd3dRootParameters, 1, 33, 2, 0, D3D12_SHADER_VISIBILITY_ALL);//GameObject
+	SetRootParameterConstants(pd3dRootParameters, 1, 34, 2, 0, D3D12_SHADER_VISIBILITY_ALL);//b2 GameObject, 34°³ ¾¸
 	SetRootParameterCBV(pd3dRootParameters, 2, 4, 0, D3D12_SHADER_VISIBILITY_ALL);//b4 Lights
 	SetRootParameterDescriptorTable(pd3dRootParameters, 3, 1, &pd3dDescriptorRanges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 4, 1, &pd3dDescriptorRanges[1], D3D12_SHADER_VISIBILITY_PIXEL);

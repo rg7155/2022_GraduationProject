@@ -17,7 +17,8 @@ cbuffer cbGameObjectInfo : register(b2)
 {
 	matrix					gmtxGameObject : packoffset(c0);
 	MATERIAL				gMaterial : packoffset(c4);
-	uint					gnTexturesMask : packoffset(c8);
+	uint					gnTexturesMask : packoffset(c8.x);
+	uint					gnEffectsMask : packoffset(c8.y);
 };
 
 #include "Light.hlsl"
@@ -45,6 +46,7 @@ cbuffer cbFrameworkInfo : register(b5)
 //
 //#define _WITH_VERTEX_LIGHTING
 
+//gnTexturesMask
 #define MATERIAL_ALBEDO_MAP			0x01
 #define MATERIAL_SPECULAR_MAP		0x02
 #define MATERIAL_NORMAL_MAP			0x04
@@ -52,6 +54,11 @@ cbuffer cbFrameworkInfo : register(b5)
 #define MATERIAL_EMISSION_MAP		0x10
 #define MATERIAL_DETAIL_ALBEDO_MAP	0x20
 #define MATERIAL_DETAIL_NORMAL_MAP	0x40
+
+//gnEffectsMask
+#define EFFECT_FOG					0x01
+#define EFFECT_LIMLIGHT				0x02
+#define EFFECT_DISSOLVE				0x04
 
 Texture2D gtxtTexture : register(t0);
 
@@ -121,11 +128,8 @@ float4 Fog(float4 cColor, float3 vPos)
     //float4 fFogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
     float4 fFogColor = float4(135 / 255.f, 116 / 255.f, 75 / 255.f, 1.0f);
 	
-	
     //return (lerp(cColor, fFogColor, fFogFactor));
-	
     //return (lerp(fFogColor, cColor, fFogFactor));
-	
     return (fFogFactor * cColor + (1.f - fFogFactor) * fFogColor);
 }
 
@@ -135,11 +139,13 @@ float4 Limlight(float3 normalW)
     float rim = 0;
 	
     float3 cameraDirection = (gmtxView._13_23_33_11).xyz; //Look?
+    //float3 cameraDirection = (gmtxView._31_32_33_11).xyz; //Look?
+	
     rim = 1 - saturate(dot(normalW, -cameraDirection));
 
     rim = pow(rim, 3.0f); // 강도 조정.
 
-    float3 rimColor = float3(0.8f, 0.2f, 0.1f);
+    float3 rimColor = float3(0.8f, 0.8f, 0.8f);
     rimColor = rim * rimColor;
 
     return float4(rimColor, 1);
@@ -161,10 +167,13 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 	
 	float4 cIllumination = Lighting(input.positionW, normalW, true, input.uvs);
     float4 cColorByLight = lerp(cColor, cIllumination, 0.5f);
-    
-    float4 cColorByFog = Fog(cColorByLight, input.positionW);
 	
-    return cColorByFog;
+    float4 cColorByFog = cColorByLight;
+    if (gnEffectsMask & EFFECT_FOG)			cColorByFog = Fog(cColorByLight, input.positionW);
+    float4 cColorByLim = float4(0.0f, 0.0f, 0.0f, 1.0f);
+    if (gnEffectsMask & EFFECT_LIMLIGHT)	cColorByLim = Limlight(input.normalW);
+	
+    return cColorByFog + cColorByLim;
     //return cColorByFog + Limlight(input.normalW); //림라이트
 	
     //return (lerp(cColor, cIllumination, 0.5f));
@@ -251,10 +260,13 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
-    //float4 cColor = (1.f, 1.f, 1.f, 1.f);
+    return (cColor);
+}
 
-	cColor.a = input.uv.y;
-	//cColor.a = 1.f - cColor.r;
+float4 PSTexturedTrail(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+    float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    cColor.a = input.uv.y;
 	
     float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };
     cColor += cMulColor;

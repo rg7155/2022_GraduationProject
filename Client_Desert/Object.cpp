@@ -8,9 +8,9 @@
 #include "Shader.h"
 #include "Scene.h"
 #include "Animation.h"
+//#include "Player.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers)
 {
 	m_nTextureType = nTextureType;
@@ -199,6 +199,8 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
 
+
+
 	for (int i = 0; i < m_nTextures; i++)
 	{
 		if (m_ppTextures[i])
@@ -351,6 +353,14 @@ void CGameObject::SetChild(CGameObject *pChild, bool bReferenceUpdate)
 	{
 		m_pChild = pChild;
 	}
+}
+
+void CGameObject::SetEffectsType(UINT nMask, bool isOn)
+{
+	if (isOn) m_nEffectsType |= nMask;
+	else m_nEffectsType &= ~nMask;
+
+	//토글은 ^= ->XOR연산
 }
 
 void CGameObject::SetMesh(CMesh *pMesh)
@@ -526,6 +536,8 @@ void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandLis
 	XMFLOAT4X4 xmf4x4World;
 	XMStoreFloat4x4(&xmf4x4World, XMMatrixTranspose(XMLoadFloat4x4(pxmf4x4World)));
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &xmf4x4World, 0);
+
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectType, 33);
 }
 
 void CGameObject::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial)
@@ -1003,14 +1015,10 @@ void CGameObject::LoadAnimationFromFile(FILE *pInFile, CLoadedModelInfo *pLoaded
 	}
 }
 
-CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader, bool isBinary /*= true*/)
+CLoadedModelInfo *CGameObject::LoadGeometryAndAnimationFromFile(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, char *pstrFileName, CShader *pShader)
 {
 	FILE *pInFile = NULL;
-	if(isBinary)
-		::fopen_s(&pInFile, pstrFileName, "rb");
-	else
-		::fopen_s(&pInFile, pstrFileName, "rt");
-
+	::fopen_s(&pInFile, pstrFileName, "rb");
 	::rewind(pInFile);
 
 	CLoadedModelInfo *pLoadedModel = new CLoadedModelInfo();
@@ -1123,7 +1131,7 @@ void CMapObject::Ready()
 	
 	CreateComponent();
 
-	//UpdateBoundingBox();
+	SetEffectsType(EFFECT_FOG, true);
 }
 
 void CMapObject::CreateComponent()
@@ -1152,6 +1160,11 @@ void CMapObject::CreateComponent()
 	m_pComCollision->UpdateBoundingBox();
 }
 
+void CMapObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
+}
+
 
 void CMapObject::Animate(float fTimeElapsed)
 {
@@ -1163,12 +1176,17 @@ void CMapObject::Animate(float fTimeElapsed)
 			m_pComponent[i]->Update_Component(fTimeElapsed);
 
 	CGameObject::Animate(fTimeElapsed);
-
+	
+	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
+	if(fDistance > 30.f) SetEffectsType(EFFECT_LIMLIGHT, false);
+	else SetEffectsType(EFFECT_LIMLIGHT, true);
 }
 
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	UpdateShaderVariables(pd3dCommandList);
+
 	//그림자맵에 쓰는거나, 평면이면 컬링 안하고 그림
 	if (CGameMgr::GetInstance()->m_isShadowMapRendering || m_isPlane)
 		CGameObject::Render(pd3dCommandList, pCamera);
@@ -1196,8 +1214,7 @@ CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail_Rot.dds", 0);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail.dds", 0);
 
-
-	CTexturedShader* pShader = new CTexturedShader();
+	CTrailShader* pShader = new CTrailShader();
 	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 

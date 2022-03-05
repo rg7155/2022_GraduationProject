@@ -289,3 +289,13 @@ public:
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CTrailShader : public CTexturedShader
+{
+public:
+	CTrailShader();
+	virtual ~CTrailShader();
+
+	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
+};

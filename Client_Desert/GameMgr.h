@@ -16,9 +16,9 @@ private:
 public:
 	void			GameUpdate(float& fTimeElapsed);
 public:
-	const CScene*	GetScene() { return m_pScene; }
-	const CPlayer*	GetPlayer() { return m_pPlayer; }
-	const CCamera*	GetCamera() { return m_pCamera; }
+	CScene*		GetScene() { return m_pScene; }
+	CPlayer*	GetPlayer() { return m_pPlayer; }
+	CCamera*	GetCamera() { return m_pCamera; }
 
 
 	void		SetScene(CScene* pScene) { m_pScene = pScene; }
