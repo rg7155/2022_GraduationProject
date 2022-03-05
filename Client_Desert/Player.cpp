@@ -40,19 +40,28 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
+	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
+
+
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "../Datas/Player_Blue/Adventurer_Aland_Blue.bin", NULL);
+	
+
+
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 	m_pSword = FindFrame("Sword");
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
-	for (int i = 0; i < 9; i++)
+
+
+
+	for (int i = 0; i < ANIM::END; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
-	}
-	m_pSkinnedAnimationController->SetTrackEnable(0, true);
 
+	}
+	m_pSkinnedAnimationController->SetTrackEnable(ANIM::IDLE_RELAXED, true);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -72,19 +81,25 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	//SetPlayerUpdatedContext(pContext);
 	//SetCameraUpdatedContext(pContext);
 
-	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
 
 	if (pPlayerModel) delete pPlayerModel;
 
 
 	m_bBattleOn = false;
-	m_eCurAnim = ANIM::IDLE;
+	m_eCurAnim = ANIM::IDLE_RELAXED;
+	m_ePrevAnim = ANIM::IDLE_RELAXED;
+	m_bBlendingOn = false;
 
+
+	m_fAnimElapsedTime = 0.f;
+	m_fAnimMaxTime = 0.f;
+	m_fBlendingTime = 0.f;
 	///////////////////////////////////////////////
 	//컴포넌트
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_eObjId = OBJ_PLAYER;
 	///////////////////////////////////////////////
+
 
 
 }
@@ -302,6 +317,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 	LerpRotate(fTimeElapsed);
 
+	Blending_Animation(fTimeElapsed);
 
 	////////////////////////////////////////////
 	UpdateComponent(fTimeElapsed);
@@ -316,7 +332,7 @@ void CPlayer::Update(float fTimeElapsed)
 			return;
 
 		if (!Check_MoveInput())
-		{
+		{   
 			// IDLE 애니메이션이 실행되도록 하기 위해
 			if (m_eCurAnim == ANIM::IDLE || m_eCurAnim == ANIM::IDLE_RELAXED)
 				return;
@@ -537,7 +553,7 @@ CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		break;
 	}
 	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
-	Update(fTimeElapsed);
+	//Update(fTimeElapsed);
 
 	return(m_pCamera);
 }
@@ -562,7 +578,10 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 		{
-			if (m_bBattleOn)
+			// 이동 중인지 확인
+			if(Check_MoveInput())
+				Change_Animation(ANIM::RUN);
+			else if (m_bBattleOn)
 				Change_Animation(ANIM::IDLE);
 			else
 				Change_Animation(ANIM::IDLE_RELAXED);
@@ -623,20 +642,54 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 
 void CPlayer::Change_Animation(ANIM eNewAnim)
 {
+	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
+
 	m_fAnimElapsedTime = 0.f;
+	m_fBlendingTime = 0.f;
+	m_bBlendingOn = true;
+
+	// Prev, Cur 빼고 Enable
+	for (int i = 0; i < ANIM::END; i++)
+	{
+		if (i == m_ePrevAnim || i == m_eCurAnim)
+			continue;
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+		m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
+	}
 
 	// 애니메이션 진행시간 
 	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
 
-	// 모든 애니메이션 false로
-	for (int i = 0; i < ANIM::END; i++)
-	{
-		m_pSkinnedAnimationController->SetTrackEnable(i, false);
-	}
-	m_pSkinnedAnimationController->SetTrackPosition(eNewAnim, 0.f);
-	m_pSkinnedAnimationController->SetTrackEnable(eNewAnim, true);
+	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f);	// 애니메이션 3개중첩 방지
+	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 0.f);
+
 }
+
+void CPlayer::Blending_Animation(float fTimeElapsed)
+{
+	if (!m_bBlendingOn)
+		return;
+
+	m_fBlendingTime += fTimeElapsed * BLENDING_SPEED;
+
+	if (m_fBlendingTime >= 1.f)
+	{
+		m_bBlendingOn = false;
+		m_pSkinnedAnimationController->SetTrackEnable(m_ePrevAnim, false);
+		m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 0.f);
+		m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 1.f);
+
+		return;
+	}
+	
+	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f-m_fBlendingTime);
+	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
+	cout << m_fBlendingTime << endl;
+}
+
 
 bool CPlayer::Check_MoveInput()
 {
