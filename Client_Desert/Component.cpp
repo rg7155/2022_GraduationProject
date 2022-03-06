@@ -168,6 +168,7 @@ void CTrail::Ready_Component(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_fTime = m_fCreateTime + 1.f;
 
+	//사각형 하나당 6개 * Divide(캣멀롬)
 	m_pTrailObject = new CTrailObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, (m_iMaxCount - 1) * m_iDivide * 6 );
 }
 

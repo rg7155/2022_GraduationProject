@@ -113,13 +113,18 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
+public:
+	HRESULT		AddObject(const wchar_t* pObjTag, CGameObject* pGameObject);
+	HRESULT		AddObjectOnlyKey(const wchar_t* pObjTag);
+	list<CGameObject*>& GetObjectList(const wchar_t* pObjTag);
+
+	virtual HRESULT		CreateObject(const wchar_t* pObjTag) { return S_OK; }
 
 public:
-	list<CGameObject*>					m_listObjects; //map의 list로 변경할지?
+	map<const wchar_t*, list<CGameObject*>>		m_mapObject;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 
 class CMapObjectsShader : public CStandardObjectsShader
 {
@@ -127,13 +132,26 @@ public:
 	CMapObjectsShader();
 	virtual ~CMapObjectsShader();
 
+public:
+	HRESULT		CreateObject(const wchar_t* pObjTag) override;
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
-
 	virtual void AnimateObjects(float fTimeElapsed) override;
+private:
+	map<const wchar_t*, CGameObject*>			m_mapModelObject; //런타임중 로드 위해 사용
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
+
+class CMonsterObjectsShader : public CStandardObjectsShader
+{
+public:
+	CMonsterObjectsShader();
+	virtual ~CMonsterObjectsShader();
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+};
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 class CSkinnedAnimationStandardShader : public CStandardShader
 {
 public:
@@ -146,7 +164,6 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//
 class CSkinnedAnimationObjectsShader : public CSkinnedAnimationStandardShader
 {
 public:
@@ -273,7 +290,7 @@ protected:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class CTexturedShader : public CShader
+class CTexturedShader : public CStandardObjectsShader/*CShader*/
 {
 public:
 	CTexturedShader();
@@ -298,4 +315,24 @@ public:
 	virtual ~CTrailShader();
 
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CMultiSpriteObjectsShader : public CTexturedShader
+{
+public:
+	CMultiSpriteObjectsShader();
+	virtual ~CMultiSpriteObjectsShader();
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
+
+	HRESULT		CreateObject(const wchar_t* pObjTag) override;
+
+public:
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
+
+protected:
+	map<const wchar_t*, pair<CMesh*, CMaterial*>>	m_mapObjectInfo; 
+
 };

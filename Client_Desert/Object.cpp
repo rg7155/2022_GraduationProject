@@ -11,7 +11,7 @@
 //#include "Player.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers)
+CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers, int nRows /*= 1*/, int nCols /*= 1*/)
 {
 	m_nTextureType = nTextureType;
 	m_nTextures = nTextures;
@@ -36,6 +36,9 @@ CTexture::CTexture(int nTextures, UINT nTextureType, int nSamplers)
 
 	m_nSamplers = nSamplers;
 	if (m_nSamplers > 0) m_pd3dSamplerGpuDescriptorHandles = new D3D12_GPU_DESCRIPTOR_HANDLE[m_nSamplers];
+
+	m_nRows = nRows;
+	m_nCols = nCols;
 }
 
 CTexture::~CTexture()
@@ -198,7 +201,6 @@ void CMaterial::UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList)
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 4, &m_xmf4EmissiveColor, 28);
 
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nType, 32);
-
 
 
 	for (int i = 0; i < m_nTextures; i++)
@@ -1203,7 +1205,8 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int iVertexCount) : CGameObject(1)
+CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int iVertexCount)
+	: CGameObject(1)
 {
 	m_pTrailMesh = new CTrailMesh(pd3dDevice, pd3dCommandList, iVertexCount);
 	SetMesh(m_pTrailMesh);
@@ -1230,3 +1233,56 @@ CTrailObject::~CTrailObject()
 {
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CMultiSpriteObject::CMultiSpriteObject() : CGameObject(1)
+{
+	//m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
+
+	m_xmf4x4Texture = Matrix4x4::Identity();
+	m_fSpeed = 0.5f;
+}
+
+
+CMultiSpriteObject::~CMultiSpriteObject()
+{
+}
+
+void CMultiSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &m_xmf4x4Texture, 34);
+}
+
+void CMultiSpriteObject::Animate(float fTimeElapsed)
+{
+	m_fTime += fTimeElapsed * 0.5f;
+	if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
+	AnimateRowColumn(m_fTime);
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	UpdateShaderVariables(pd3dCommandList);
+
+	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+void CMultiSpriteObject::AnimateRowColumn(float fTime)
+{
+	//	m_xmf4x4Texture = Matrix4x4::Identity();
+	int nRows = m_ppMaterials[0]->m_ppTextures[0]->m_nRows;
+	int nCols = m_ppMaterials[0]->m_ppTextures[0]->m_nCols;
+
+	m_xmf4x4Texture._11 = 1.0f / float(nRows);
+	m_xmf4x4Texture._22 = 1.0f / float(nCols);
+	m_xmf4x4Texture._31 = float(m_nRow) / float(nRows);
+	m_xmf4x4Texture._32 = float(m_nCol) / float(nCols);
+	if (fTime == 0.0f)
+	{
+		if (++m_nCol == nCols) { m_nRow++; m_nCol = 0; }
+		if (m_nRow == nRows)
+			m_nRow = 0;
+	}
+}

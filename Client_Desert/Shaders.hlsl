@@ -19,6 +19,8 @@ cbuffer cbGameObjectInfo : register(b2)
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8.x);
 	uint					gnEffectsMask : packoffset(c8.y);
+    matrix					gmtxTextureAnim : packoffset(c9);
+	
 };
 
 #include "Light.hlsl"
@@ -260,6 +262,7 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    //float4 cColor = { 1.f, 1.f, 1.f, 1.f };
     return (cColor);
 }
 
@@ -271,6 +274,18 @@ float4 PSTexturedTrail(VS_TEXTURED_OUTPUT input) : SV_TARGET
     float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };
     cColor += cMulColor;
     return (cColor);
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
+{
+    VS_TEXTURED_OUTPUT output;
+
+    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.uv = mul(float3(input.uv, 1.0f), (float3x3) (gmtxTextureAnim)).xy;
+
+    return (output);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

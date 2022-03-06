@@ -432,19 +432,33 @@ void CStandardObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12Graphi
 
 void CStandardObjectsShader::ReleaseObjects()
 {
-	for (auto& iter : m_listObjects) iter->Release();
-	m_listObjects.clear();
+	for (auto& iter : m_mapObject)
+		for (auto& iterSec : iter.second)
+			iterSec->Release();
+	//m_listObjects.clear();
 
 }
 
 void CStandardObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
+
+	for (auto& iter : m_mapObject)
+	{
+		for (auto& iterSec : iter.second)
+		{
+			iterSec->Animate(m_fElapsedTime);
+			iterSec->UpdateTransform(NULL);
+		}
+	}
+
 }
 
 void CStandardObjectsShader::ReleaseUploadBuffers()
 {
-	for (auto& iter : m_listObjects) iter->ReleaseUploadBuffers();
+	for (auto& iter : m_mapObject) 
+		for (auto& iterSec : iter.second)
+			iterSec->ReleaseUploadBuffers();
 }
 
 void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/, bool isChangePipeline /*= true*/)
@@ -452,41 +466,51 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 	if(isChangePipeline)
 		CStandardShader::Render(pd3dCommandList, pCamera);
 
-	for (auto& iter : m_listObjects)
+	for (auto& iter : m_mapObject)
 	{
-		iter->UpdateTransform(NULL);
-		iter->Render(pd3dCommandList, pCamera);
+		for (auto& iterSec : iter.second)
+		{
+			iterSec->UpdateTransform(NULL);
+			iterSec->Render(pd3dCommandList, pCamera);
+		}
 	}
 
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-float Random(float fMin, float fMax)
+HRESULT CStandardObjectsShader::AddObject(const wchar_t* pObjTag, CGameObject* pGameObject)
 {
-	float fRandomValue = (float)rand();
-	if (fRandomValue < fMin) fRandomValue = fMin;
-	if (fRandomValue > fMax) fRandomValue = fMax;
-	return(fRandomValue);
+	if (nullptr == pGameObject)
+		return E_FAIL;
+
+	auto iter = m_mapObject.find(pObjTag);
+	if (iter == m_mapObject.end())
+	{
+		list<CGameObject*> ListObj;
+		ListObj.emplace_back(pGameObject);
+		m_mapObject.emplace(pObjTag, ListObj);
+	}
+	else
+		iter->second.emplace_back(pGameObject);
+
+	//pGameObject->Ready();
+
+	return S_OK;
 }
 
-float Random()
+
+HRESULT CStandardObjectsShader::AddObjectOnlyKey(const wchar_t* pObjTag)
 {
-	return(rand() / float(RAND_MAX));
+	//충돌위해 find할때 못찾을 상황 방지
+	list<CGameObject*> ListObj;
+	m_mapObject.emplace(pObjTag, ListObj);
+
+	return S_OK;
 }
 
-XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace)
+list<CGameObject*>& CStandardObjectsShader::GetObjectList(const wchar_t* pObjTag)
 {
-    float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
-
-	XMFLOAT3 xmf3Position;
-    xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
-    xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
-    xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
-
-	return(xmf3Position);
+	return m_mapObject.find(pObjTag)->second;
 }
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CMapObjectsShader::CMapObjectsShader()
@@ -495,6 +519,11 @@ CMapObjectsShader::CMapObjectsShader()
 
 CMapObjectsShader::~CMapObjectsShader()
 {
+}
+
+HRESULT CMapObjectsShader::CreateObject(const wchar_t* pObjTag)
+{
+	return S_OK;
 }
 
 void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
@@ -570,7 +599,8 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			pMapObject->m_strName = str;
 
 			pMapObject->Ready();
-			m_listObjects.emplace_back(pGameObject);
+			//m_listObjects.emplace_back(pGameObject);
+			AddObject(L"Map", pGameObject);
 		}
 
 	}
@@ -580,13 +610,7 @@ void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
 {
-	CStandardShader::AnimateObjects(fTimeElapsed);
-
-	for (auto& iter : m_listObjects)
-	{
-		iter->Animate(m_fElapsedTime);
-		iter->UpdateTransform(NULL);
-	}
+	CStandardObjectsShader::AnimateObjects(fTimeElapsed);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1134,4 +1158,89 @@ CTrailShader::~CTrailShader()
 D3D12_SHADER_BYTECODE CTrailShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTexturedTrail", "ps_5_1", ppd3dShaderBlob));
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CMultiSpriteObjectsShader::CMultiSpriteObjectsShader()
+{
+}
+
+CMultiSpriteObjectsShader::~CMultiSpriteObjectsShader()
+{
+}
+
+D3D12_SHADER_BYTECODE CMultiSpriteObjectsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", ppd3dShaderBlob));
+}
+
+HRESULT CMultiSpriteObjectsShader::CreateObject(const wchar_t* pObjTag)
+{
+	CMesh* pMesh = m_mapObjectInfo.find(pObjTag)->second.first;
+	CMaterial* pMaterial = m_mapObjectInfo.find(pObjTag)->second.second;
+
+	CMultiSpriteObject* pObject = new CMultiSpriteObject();
+	pObject->SetMesh(pMesh);
+	pObject->SetMaterial(0, pMaterial);
+
+	AddObject(pObjTag, pObject);
+
+	return S_OK;
+}
+
+void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
+{
+	//방법1-오브젝트를 미리 만들어둔다-오브젝트풀링
+	//방법2-텍스쳐와 매쉬만 미리 만들고, 오브젝트는 런타임중에 만든다
+
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,10.f, 10.f, 0.f);
+	//SetMesh(pMesh);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 8, 8);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Explode_8x8.dds", 0);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	CMaterial* pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	m_mapObjectInfo.emplace(L"Explosion", make_pair(pMesh, pMaterial));
+
+	CreateObject(L"Explosion");
+}
+
+void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
+{
+	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
+}
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+float Random(float fMin, float fMax)
+{
+	float fRandomValue = (float)rand();
+	if (fRandomValue < fMin) fRandomValue = fMin;
+	if (fRandomValue > fMax) fRandomValue = fMax;
+	return(fRandomValue);
+}
+
+float Random()
+{
+	return(rand() / float(RAND_MAX));
+}
+
+XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn, int nColumnSpace)
+{
+	float fAngle = Random() * 360.0f * (2.0f * 3.14159f / 360.0f);
+
+	XMFLOAT3 xmf3Position;
+	xmf3Position.x = xmf3Center.x + fRadius * sin(fAngle);
+	xmf3Position.y = xmf3Center.y - (nColumn * float(nColumnSpace) / 2.0f) + (nColumn * nColumnSpace) + Random();
+	xmf3Position.z = xmf3Center.z + fRadius * cos(fAngle);
+
+	return(xmf3Position);
 }

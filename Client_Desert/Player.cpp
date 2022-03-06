@@ -687,7 +687,7 @@ void CPlayer::Blending_Animation(float fTimeElapsed)
 	
 	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f-m_fBlendingTime);
 	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
-	cout << m_fBlendingTime << endl;
+	//cout << m_fBlendingTime << endl;
 }
 
 

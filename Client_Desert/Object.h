@@ -37,7 +37,7 @@ struct SRVROOTARGUMENTINFO
 class CTexture
 {
 public:
-	CTexture(int nTextureResources = 1, UINT nResourceType = RESOURCE_TEXTURE2D, int nSamplers = 0);
+	CTexture(int nTextureResources = 1, UINT nResourceType = RESOURCE_TEXTURE2D, int nSamplers = 0, int nRows = 1, int nCols = 1);
 	virtual ~CTexture();
 
 private:
@@ -58,9 +58,11 @@ private:
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE		*m_pd3dSamplerGpuDescriptorHandles = NULL;
 
+
 public:
 	SRVROOTARGUMENTINFO				*m_pRootArgumentInfos = NULL;
-
+	int 							m_nRows = 1; //몇곱몇인지, 이건 텍스쳐에
+	int 							m_nCols = 1;
 public:
 	//만들자마자 해줘야함
 	void AddRef() { 
@@ -360,4 +362,27 @@ public:
 	virtual ~CTrailObject();
 public:
 	CTrailMesh* m_pTrailMesh = nullptr;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CMultiSpriteObject : public CGameObject
+{
+public:
+	CMultiSpriteObject();
+	virtual ~CMultiSpriteObject();
+public:
+
+	void		AnimateRowColumn(float fTime);
+
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
+
+	int 							m_nRow = 0; //시간에 의해 바뀌는
+	int 							m_nCol = 0;
+
+	XMFLOAT4X4						m_xmf4x4Texture;
+
+	float m_fSpeed = 0.1f;
+	float m_fTime = 0.0f;
 };

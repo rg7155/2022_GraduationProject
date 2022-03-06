@@ -64,8 +64,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
-	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지..
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 12+10); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1
+	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+10); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -73,7 +73,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_nShaders = 1;
+	m_nShaders = 2;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	int iIndex = 0;
@@ -81,6 +81,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pMapObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pMapObjectShader;
+
+	CShader* pShader = new CMultiSpriteObjectsShader();
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = pShader;
+
 
 	m_pDepthRenderShader = new CDepthRenderShader(m_pMapObjectShader, m_pLights);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
@@ -124,7 +130,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterCBV(pd3dRootParameters, 12, 8, 0, D3D12_SHADER_VISIBILITY_VERTEX);//Skinned Bone Transforms
 	SetRootParameterDescriptorTable(pd3dRootParameters, RP_DEPTH_BUFFER, 1, &pd3dDescriptorRanges[8], D3D12_SHADER_VISIBILITY_PIXEL); //t14: gtxtDepthTextures
 	SetRootParameterCBV(pd3dRootParameters, RP_TO_LIGHT, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
-	SetRootParameterCBV(pd3dRootParameters, RP_FRAMEWORK_INFO, 5, 0, D3D12_SHADER_VISIBILITY_ALL);//b5 GameInfo
+	SetRootParameterCBV(pd3dRootParameters, RP_FRAMEWORK_INFO, 5, 0, D3D12_SHADER_VISIBILITY_ALL);//b5 FRAMEWORKInfo
 	SetRootParameterDescriptorTable(pd3dRootParameters, RP_TEXTURE, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_PIXEL);
 
 
@@ -201,7 +207,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	///////////////////////////////////////////////////////////////////////////////////
 	//플레이어-맵 충돌
-	CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->m_listObjects, true);
+	CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
 	///////////////////////////////////////////////////////////////////////////////////
 
 }
