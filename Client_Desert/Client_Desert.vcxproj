@@ -167,6 +167,7 @@
     <ClInclude Include="imgui\sources\imgui_impl_win32.h" />
     <ClInclude Include="InputDev.h" />
     <ClInclude Include="Mesh.h" />
+    <ClInclude Include="Monster.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Resource.h" />
@@ -201,6 +202,7 @@
     </ClCompile>
     <ClCompile Include="InputDev.cpp" />
     <ClCompile Include="Mesh.cpp" />
+    <ClCompile Include="Monster.cpp" />
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Player.cpp" />
     <ClCompile Include="Scene.cpp" />

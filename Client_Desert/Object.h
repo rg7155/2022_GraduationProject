@@ -225,6 +225,8 @@ public:
 	OBJ_ID							m_eObjId = OBJ_END;
 	UINT							m_nEffectsType = 0x00;
 
+	bool							m_isDead = false;
+
 	void SetEffectsType(UINT nMask, bool isOn);
 
 	void SetMesh(CMesh *pMesh);
@@ -318,15 +320,6 @@ public:
 	virtual ~CSkyBox();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera = NULL) override;
-};
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-class CMonsterObject : public CGameObject
-{
-public:
-	CMonsterObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks);
-	virtual ~CMonsterObject();
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

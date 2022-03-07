@@ -7,6 +7,7 @@
 #include "Player.h"
 #include "Scene.h"
 #include "InputDev.h"
+#include "Monster.h"
 
 CShader::CShader(int nPipelineStates /*= 1*/)
 {
@@ -426,7 +427,7 @@ CStandardObjectsShader::~CStandardObjectsShader()
 {
 }
 
-void CStandardObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, void *pContext)
+void CStandardObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
 {
 }
 
@@ -443,15 +444,37 @@ void CStandardObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 
-	for (auto& iter : m_mapObject)
-	{
-		for (auto& iterSec : iter.second)
-		{
-			iterSec->Animate(m_fElapsedTime);
-			iterSec->UpdateTransform(NULL);
-		}
-	}
+	//for (auto& iter : m_mapObject)
+	//{
+	//	for (auto& iterSec : iter.second)
+	//	{
+	//		iterSec->Animate(m_fElapsedTime);
+	//		iterSec->UpdateTransform(NULL);
+	//	}
+	//}
 
+	auto& mapiter_begin = m_mapObject.begin();//맵 이터
+	auto& mapiter_end = m_mapObject.end();
+
+	for (; mapiter_begin != mapiter_end; )
+	{
+		auto& iter_begin = mapiter_begin->second.begin();//리스트이터
+		auto& iter_end = mapiter_begin->second.end();
+
+		for (; iter_begin != iter_end; )
+		{
+			(*iter_begin)->Animate(fTimeElapsed);
+			(*iter_begin)->UpdateTransform(NULL);
+			if ((*iter_begin)->m_isDead)
+			{
+				delete (*iter_begin);
+				iter_begin = mapiter_begin->second.erase(iter_begin);
+			}
+			else
+				++iter_begin;
+		}
+		++mapiter_begin;
+	}
 }
 
 void CStandardObjectsShader::ReleaseUploadBuffers()
@@ -526,7 +549,7 @@ HRESULT CMapObjectsShader::CreateObject(const wchar_t* pObjTag)
 	return S_OK;
 }
 
-void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
+void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	FILE* pInFile = NULL;
 
@@ -615,6 +638,25 @@ void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+CMonsterObjectsShader::CMonsterObjectsShader()
+{
+}
+
+CMonsterObjectsShader::~CMonsterObjectsShader()
+{
+}
+
+void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "../Datas/Player_Blue/Adventurer_Aland_Blue.bin", NULL);
+	CMonsterObject* pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+
+	AddObject(L"Monster", pObj);
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 CSkinnedAnimationObjectsShader::CSkinnedAnimationObjectsShader()
 {
 }
@@ -623,7 +665,7 @@ CSkinnedAnimationObjectsShader::~CSkinnedAnimationObjectsShader()
 {
 }
 
-void CSkinnedAnimationObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, void *pContext)
+void CSkinnedAnimationObjectsShader::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, void *pContext)
 {
 }
 
@@ -1189,7 +1231,7 @@ HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12
 	return S_OK;
 }
 
-void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, void* pContext)
+void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	//방법1-오브젝트를 미리 만들어둔다-오브젝트풀링
 	//방법2-텍스쳐와 매쉬만 미리 만들고, 오브젝트는 런타임중에 만든다
@@ -1244,3 +1286,5 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 	return(xmf3Position);
 }
+
+

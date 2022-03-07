@@ -64,6 +64,9 @@
     <Filter Include="소스 파일\05. Camera">
       <UniqueIdentifier>{691d5f4f-886c-406c-b912-2aa72f51c396}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\03. GameObject\00. Monster">
+      <UniqueIdentifier>{4f343e48-2e86-4e23-bf7f-0943630848a2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client_Desert.h">
@@ -162,6 +165,9 @@
     <ClInclude Include="CollsionMgr.h">
       <Filter>소스 파일\99. Mgr</Filter>
     </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>소스 파일\03. GameObject\00. Monster</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -238,6 +244,9 @@
     </ClCompile>
     <ClCompile Include="CollsionMgr.cpp">
       <Filter>소스 파일\99. Mgr</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>소스 파일\03. GameObject\00. Monster</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

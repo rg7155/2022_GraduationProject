@@ -8,6 +8,7 @@
 #include "Shader.h"
 #include "Scene.h"
 #include "Animation.h"
+#include "Monster.h"
 //#include "Player.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1103,21 +1104,6 @@ void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamer
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMonsterObject::CMonsterObject(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList, ID3D12RootSignature *pd3dGraphicsRootSignature, CLoadedModelInfo *pModel, int nAnimationTracks)
-{
-	//CLoadedModelInfo *pMonsterModel = pModel;
-	//if (!pMonsterModel) pMonsterModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Monster.bin", NULL);
-
-	//SetChild(pMonsterModel->m_pModelRootObject, true);
-	//m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, nAnimationTracks, pMonsterModel);
-}
-
-CMonsterObject::~CMonsterObject()
-{
-
-}
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
 CMapObject::CMapObject()
 {
 }
@@ -1318,9 +1304,11 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 			m_nCol++;
 			m_nRow = 0;
 		}
-		if (m_nRow == nRows)
+		if (m_nCol == nCols)
 		{
-			m_nRow = 0;
+			//cout << "end" << endl;
+			m_isDead = true;
+			m_nCol = 0;
 		}
 	}
 }
