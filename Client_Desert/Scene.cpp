@@ -208,7 +208,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	///////////////////////////////////////////////////////////////////////////////////
 	//플레이어-맵 충돌
-	//CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
+	CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
 	///////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -239,6 +239,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
 	//그림자 그린다-오브젝트 그린다
+	//1.맵 2.이펙트 3.플레이어
 	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 	m_pPlayer->Render(pd3dCommandList, pCamera);
 

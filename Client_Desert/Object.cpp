@@ -1242,7 +1242,7 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_xmf4x4Texture = Matrix4x4::Identity();
-	m_fSpeed = 0.5f;
+	m_fSpeed = 0.01f;
 }
 
 
@@ -1280,8 +1280,9 @@ void CMultiSpriteObject::ReleaseShaderVariables()
 
 void CMultiSpriteObject::Animate(float fTimeElapsed)
 {
-	m_fTime += fTimeElapsed * 0.5f;
-	if (m_fTime >= m_fSpeed) m_fTime = 0.0f;
+	m_fTime += fTimeElapsed;
+	if (m_fTime >= m_fSpeed) 
+		m_fTime = 0.0f;
 	AnimateRowColumn(m_fTime);
 
 	CGameObject::Animate(fTimeElapsed);
@@ -1306,8 +1307,20 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 	m_xmf4x4Texture._32 = float(m_nCol) / float(nCols);
 	if (fTime == 0.0f)
 	{
-		if (++m_nCol == nCols) { m_nRow++; m_nCol = 0; }
-		if (m_nRow == nRows)
+		cout << m_nRow << ", " << m_nCol << endl;
+		//if (++m_nCol == nCols)
+		//{
+		//	m_nRow++;
+		//	m_nCol = 0;
+		//}
+		if (++m_nRow == nRows)
+		{
+			m_nCol++;
 			m_nRow = 0;
+		}
+		if (m_nRow == nRows)
+		{
+			m_nRow = 0;
+		}
 	}
 }
