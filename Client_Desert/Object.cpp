@@ -1235,9 +1235,11 @@ CTrailObject::~CTrailObject()
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMultiSpriteObject::CMultiSpriteObject() : CGameObject(1)
+CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CGameObject(1)
 {
 	//m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_xmf4x4Texture = Matrix4x4::Identity();
 	m_fSpeed = 0.5f;
@@ -1246,11 +1248,34 @@ CMultiSpriteObject::CMultiSpriteObject() : CGameObject(1)
 
 CMultiSpriteObject::~CMultiSpriteObject()
 {
+	ReleaseShaderVariables();
+}
+
+void CMultiSpriteObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_TEXTURE_INFO) + 255) & ~255); 
+	m_pd3dcbTexture = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbTexture->Map(0, NULL, (void**)&m_pcbMappedTexture);
 }
 
 void CMultiSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &m_xmf4x4Texture, 34);
+
+	XMStoreFloat4x4(&m_pcbMappedTexture->m_xmf4x4TextureAnim, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTexture->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(RP_TEXTUREANIM, d3dGpuVirtualAddress);
+}
+
+void CMultiSpriteObject::ReleaseShaderVariables()
+{
+	if (m_pd3dcbTexture)
+	{
+		m_pd3dcbTexture->Unmap(0, NULL);
+		m_pd3dcbTexture->Release();
+	}
 }
 
 void CMultiSpriteObject::Animate(float fTimeElapsed)

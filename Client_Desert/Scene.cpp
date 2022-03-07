@@ -114,7 +114,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetDescriptorRange(pd3dDescriptorRanges, 8, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, MAX_LIGHTS, 14, 0);//t14: gtxtDepthTextures
 	SetDescriptorRange(pd3dDescriptorRanges, 9, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0);//t0: gtxtTexture
 
-	D3D12_ROOT_PARAMETER pd3dRootParameters[17];
+	D3D12_ROOT_PARAMETER pd3dRootParameters[18];
 	SetRootParameterCBV(pd3dRootParameters, 0, 1, 0, D3D12_SHADER_VISIBILITY_ALL);//Camera
 	SetRootParameterConstants(pd3dRootParameters, 1, 34, 2, 0, D3D12_SHADER_VISIBILITY_ALL);//b2 GameObject, 34°³ ¾¸
 	SetRootParameterCBV(pd3dRootParameters, 2, 4, 0, D3D12_SHADER_VISIBILITY_ALL);//b4 Lights
@@ -132,6 +132,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterCBV(pd3dRootParameters, RP_TO_LIGHT, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
 	SetRootParameterCBV(pd3dRootParameters, RP_FRAMEWORK_INFO, 5, 0, D3D12_SHADER_VISIBILITY_ALL);//b5 FRAMEWORKInfo
 	SetRootParameterDescriptorTable(pd3dRootParameters, RP_TEXTURE, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_PIXEL);
+	SetRootParameterCBV(pd3dRootParameters, RP_TEXTUREANIM, 6, 0, D3D12_SHADER_VISIBILITY_ALL);//b6 TextureAnim
 
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[3];
@@ -207,7 +208,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	///////////////////////////////////////////////////////////////////////////////////
 	//ÇÃ·¹ÀÌ¾î-¸Ê Ãæµ¹
-	CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
+	//CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
 	///////////////////////////////////////////////////////////////////////////////////
 
 }

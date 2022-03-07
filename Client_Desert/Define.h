@@ -53,6 +53,8 @@
 #define RP_TO_LIGHT			14
 #define RP_FRAMEWORK_INFO	15
 #define RP_TEXTURE			16
+#define RP_TEXTUREANIM		17
+
 
 #define NO_COPY(CLASSNAME)							\
 	private:										\

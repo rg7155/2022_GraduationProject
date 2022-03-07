@@ -1175,12 +1175,12 @@ D3D12_SHADER_BYTECODE CMultiSpriteObjectsShader::CreateVertexShader(ID3DBlob** p
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", ppd3dShaderBlob));
 }
 
-HRESULT CMultiSpriteObjectsShader::CreateObject(const wchar_t* pObjTag)
+HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag)
 {
 	CMesh* pMesh = m_mapObjectInfo.find(pObjTag)->second.first;
 	CMaterial* pMaterial = m_mapObjectInfo.find(pObjTag)->second.second;
 
-	CMultiSpriteObject* pObject = new CMultiSpriteObject();
+	CMultiSpriteObject* pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList);
 	pObject->SetMesh(pMesh);
 	pObject->SetMaterial(0, pMaterial);
 
@@ -1207,7 +1207,7 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_mapObjectInfo.emplace(L"Explosion", make_pair(pMesh, pMaterial));
 
-	CreateObject(L"Explosion");
+	CreateObject(pd3dDevice, pd3dCommandList, L"Explosion");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)

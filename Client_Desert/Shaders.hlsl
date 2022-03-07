@@ -19,8 +19,6 @@ cbuffer cbGameObjectInfo : register(b2)
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8.x);
 	uint					gnEffectsMask : packoffset(c8.y);
-    matrix					gmtxTextureAnim : packoffset(c9);
-	
 };
 
 #include "Light.hlsl"
@@ -43,6 +41,10 @@ cbuffer cbFrameworkInfo : register(b5)
     float gfShadowMapIndex : packoffset(c0.z);
 };
 
+cbuffer cbTextureAnim : register(b6)
+{
+	matrix	gmtxTextureAnim : packoffset(c0);
+};
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
