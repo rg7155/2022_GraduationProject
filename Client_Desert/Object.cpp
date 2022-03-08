@@ -1293,7 +1293,7 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 	m_xmf4x4Texture._32 = float(m_nCol) / float(nCols);
 	if (fTime == 0.0f)
 	{
-		cout << m_nRow << ", " << m_nCol << endl;
+		//cout << m_nRow << ", " << m_nCol << endl;
 		//if (++m_nCol == nCols)
 		//{
 		//	m_nRow++;

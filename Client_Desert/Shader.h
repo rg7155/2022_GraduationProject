@@ -133,7 +133,6 @@ public:
 	virtual ~CMapObjectsShader();
 
 public:
-	HRESULT		CreateObject(const wchar_t* pObjTag) override;
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed) override;
 
@@ -147,10 +146,13 @@ public:
 	CMonsterObjectsShader();
 	virtual ~CMonsterObjectsShader();
 
+	HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag);
+
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
 
 private:
-	map<const wchar_t*, CGameObject*>			m_mapModelObject; //런타임중 로드 위해 사용
+	map<const wchar_t*, CLoadedModelInfo*>			m_mapModelInfo; //런타임중 로드 위해 사용
 
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

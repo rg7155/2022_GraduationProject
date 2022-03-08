@@ -544,10 +544,6 @@ CMapObjectsShader::~CMapObjectsShader()
 {
 }
 
-HRESULT CMapObjectsShader::CreateObject(const wchar_t* pObjTag)
-{
-	return S_OK;
-}
 
 void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
@@ -645,15 +641,42 @@ CMonsterObjectsShader::CMonsterObjectsShader()
 
 CMonsterObjectsShader::~CMonsterObjectsShader()
 {
+	m_mapModelInfo.clear();
+}
+
+HRESULT CMonsterObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag)
+{
+	//wchar_t* pTag = const_cast<wchar_t*>(pObjTag);
+
+	//switch (pTag)
+	//{
+	//case L"Monster":
+
+	//default:
+	//	break;
+	//}
+	return S_OK;
 }
 
 void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "../Datas/Player_Blue/Adventurer_Aland_Blue.bin", NULL);
-	CMonsterObject* pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Lion.bin", NULL);
+	m_mapModelInfo.emplace(L"Monster", pModel);
 
+	CMonsterObject* pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	AddObject(L"Monster", pObj);
+
+	pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	pObj->SetPosition(10.f, 0.f, 0.f);
 	AddObject(L"Monster", pObj);
 }
+
+void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState/* = 0*/, bool isChangePipeline /*= true*/)
+{
+	//파이프라인을 바꾸지 않음
+	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, true);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
