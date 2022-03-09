@@ -82,16 +82,17 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pMapObjectShader;
 
-	CShader* pShader = new CMultiSpriteObjectsShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = pShader;
-
+	CShader* pShader;
 	pShader = new CMonsterObjectsShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = pShader;
 
+	m_nAlphaShaderStartIndex = iIndex;
+	pShader = new CMultiSpriteObjectsShader();
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = pShader;
 	//////////////////////////////////////////////////
 	m_pDepthRenderShader = new CDepthRenderShader(m_pMapObjectShader, m_pLights);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
@@ -244,9 +245,17 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
 	//그림자 그린다-오브젝트 그린다
-	//1.맵 2.이펙트 3.플레이어
-	for (int i = 0; i < m_nShaders; i++) if (m_ppShaders[i]) m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+	//1.맵 2.이펙트 3.플레이어  / 투명은 나중에 그려야함
+
+	//1.불투명-맵, 몬스터
+	for (int i = 0; i < m_nAlphaShaderStartIndex; i++)
+		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
+
 	m_pPlayer->Render(pd3dCommandList, pCamera);
+
+	//2.투명-이펙트
+	for (int i = m_nAlphaShaderStartIndex; i < m_nShaders; i++)
+		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
 	//화면에 뎁스 텍스쳐 그린다, 디버깅 용
 	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);

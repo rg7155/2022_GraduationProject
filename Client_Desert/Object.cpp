@@ -1307,7 +1307,7 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 		if (m_nCol == nCols)
 		{
 			//cout << "end" << endl;
-			m_isDead = true;
+			//m_isDead = true;
 			m_nCol = 0;
 		}
 	}

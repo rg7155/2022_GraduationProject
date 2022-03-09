@@ -67,6 +67,8 @@ public:
 	float								m_fElapsedTime = 0.0f;
 
 	int									m_nShaders = 0;
+	int									m_nAlphaShaderStartIndex = 0;
+
 	CShader								**m_ppShaders = NULL;
 
 	CMapObjectsShader					*m_pMapObjectShader = nullptr;
