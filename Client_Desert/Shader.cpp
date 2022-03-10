@@ -1245,6 +1245,7 @@ HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12
 	CMesh* pMesh = m_mapObjectInfo.find(pObjTag)->second.first;
 	CMaterial* pMaterial = m_mapObjectInfo.find(pObjTag)->second.second;
 
+	//분기문 태우기
 	CMultiSpriteObject* pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList);
 	pObject->SetMesh(pMesh);
 	pObject->SetMaterial(0, pMaterial);

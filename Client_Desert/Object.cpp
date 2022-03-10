@@ -1269,7 +1269,15 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 	m_fTime += fTimeElapsed;
 	if (m_fTime >= m_fSpeed) 
 		m_fTime = 0.0f;
+
 	AnimateRowColumn(m_fTime);
+
+	//m_isBiliboard = true;
+	if (m_isBiliboard)
+	{
+		XMFLOAT3 xmf3Target = CGameMgr::GetInstance()->GetCamera()->GetPosition();
+		SetLookAt(xmf3Target);
+	}
 
 	CGameObject::Animate(fTimeElapsed);
 }

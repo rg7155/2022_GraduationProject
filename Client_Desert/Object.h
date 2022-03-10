@@ -378,14 +378,17 @@ public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL) override;
 
-	ID3D12Resource* m_pd3dcbTexture = NULL;
-	CB_TEXTURE_INFO* m_pcbMappedTexture = NULL;
+public:
+	ID3D12Resource*		m_pd3dcbTexture = NULL;
+	CB_TEXTURE_INFO*	m_pcbMappedTexture = NULL;
 
-	int 							m_nRow = 0; //시간에 의해 바뀌는
-	int 							m_nCol = 0;
+	int 				m_nRow = 0; //시간에 의해 바뀌는
+	int 				m_nCol = 0;
 
-	XMFLOAT4X4						m_xmf4x4Texture;
+	XMFLOAT4X4			m_xmf4x4Texture;
 
-	float m_fSpeed = 0.1f;
-	float m_fTime = 0.0f;
+	float				m_fSpeed = 0.1f;
+	float				m_fTime = 0.0f;
+
+	bool				m_isBiliboard = false;
 };
