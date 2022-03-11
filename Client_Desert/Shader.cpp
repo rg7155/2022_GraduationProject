@@ -688,10 +688,7 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 	CMonsterObject* pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
 	AddObject(L"Monster", pObj);
-
-	pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
-	pObj->SetPosition(10.f, 0.f, 0.f);
-	AddObject(L"Monster", pObj);
+	pObj->SetActiveState(true);
 }
 
 void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState/* = 0*/, bool isChangePipeline /*= true*/)

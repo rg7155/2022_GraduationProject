@@ -227,6 +227,7 @@ public:
 
 	bool							m_isActive = false;
 
+	void SetActiveState(bool isActve) { m_isActive = isActve; }
 	void SetEffectsType(UINT nMask, bool isOn);
 
 	void SetMesh(CMesh *pMesh);
