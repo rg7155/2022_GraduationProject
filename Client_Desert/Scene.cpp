@@ -82,17 +82,16 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pMapObjectShader;
 
-	CShader* pShader;
-	pShader = new CMonsterObjectsShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = pShader;
+	m_pMonsterObjectShader = new CMonsterObjectsShader();
+	m_pMonsterObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pMonsterObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = m_pMonsterObjectShader;
 
 	m_nAlphaShaderStartIndex = iIndex;
-	pShader = new CMultiSpriteObjectsShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = pShader;
+	m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader();
+	m_pMultiSpriteObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pMultiSpriteObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = m_pMultiSpriteObjectShader;
 	//////////////////////////////////////////////////
 	m_pDepthRenderShader = new CDepthRenderShader(m_pMapObjectShader, m_pLights);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
@@ -265,6 +264,12 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 }
 
+
+
+
+
+
+
 void CScene::ReleaseObjects()
 {
 	if (m_pd3dGraphicsRootSignature) m_pd3dGraphicsRootSignature->Release();
@@ -332,6 +337,18 @@ void CScene::ReleaseUploadBuffers()
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
 	if (m_pDepthRenderShader) m_pDepthRenderShader->ReleaseUploadBuffers();
+}
+
+CGameObject* CScene::SetAtiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag)
+{
+	//if (!wcscmp(pShaderTag, L"Map"))
+	//	m_pMapObjectShader->AddObjectTagToList(pObjTag);
+	if (!wcscmp(pShaderTag, L"Monster"))
+		return m_pMapObjectShader->SetActive(pObjTag);
+	else if (!wcscmp(pShaderTag, L"MultiSprite"))
+		return m_pMultiSpriteObjectShader->SetActive(pObjTag);
+	else
+		return nullptr;
 }
 
 void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)

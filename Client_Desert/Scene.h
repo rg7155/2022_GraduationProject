@@ -56,6 +56,8 @@ public:
 
 	void ReleaseUploadBuffers();
 
+	CGameObject* SetAtiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag);
+
 	////////////////////////////////////////////////////////////////////////
 	void SetDescriptorRange(D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[], int iIndex, D3D12_DESCRIPTOR_RANGE_TYPE RangeType, UINT NumDescriptors, UINT BaseShaderRegister, UINT RegisterSpace);
 	void SetRootParameterCBV(D3D12_ROOT_PARAMETER pd3dRootParameter[], int iIndex, UINT ShaderRegister, UINT RegisterSpace, D3D12_SHADER_VISIBILITY ShaderVisibility);
@@ -70,8 +72,10 @@ public:
 	int									m_nAlphaShaderStartIndex = 0;
 
 	CShader								**m_ppShaders = NULL;
-
 	CMapObjectsShader					*m_pMapObjectShader = nullptr;
+	CMonsterObjectsShader				*m_pMonsterObjectShader = nullptr;
+	CMultiSpriteObjectsShader			*m_pMultiSpriteObjectShader = nullptr;
+
 
 	CSkyBox								*m_pSkyBox = NULL;
 

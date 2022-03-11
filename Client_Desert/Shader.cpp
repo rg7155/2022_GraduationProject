@@ -444,37 +444,37 @@ void CStandardObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 
-	//for (auto& iter : m_mapObject)
-	//{
-	//	for (auto& iterSec : iter.second)
-	//	{
-	//		iterSec->Animate(m_fElapsedTime);
-	//		iterSec->UpdateTransform(NULL);
-	//	}
-	//}
-
-	auto& mapiter_begin = m_mapObject.begin();//맵 이터
-	auto& mapiter_end = m_mapObject.end();
-
-	for (; mapiter_begin != mapiter_end; )
+	for (auto& iter : m_mapObject)
 	{
-		auto& iter_begin = mapiter_begin->second.begin();//리스트이터
-		auto& iter_end = mapiter_begin->second.end();
-
-		for (; iter_begin != iter_end; )
+		for (auto& iterSec : iter.second)
 		{
-			(*iter_begin)->Animate(fTimeElapsed);
-			(*iter_begin)->UpdateTransform(NULL);
-			if ((*iter_begin)->m_isDead)
-			{
-				delete (*iter_begin);
-				iter_begin = mapiter_begin->second.erase(iter_begin);
-			}
-			else
-				++iter_begin;
+			iterSec->Animate(m_fElapsedTime);
+			iterSec->UpdateTransform(NULL);
 		}
-		++mapiter_begin;
 	}
+
+	//auto& mapiter_begin = m_mapObject.begin();//맵 이터
+	//auto& mapiter_end = m_mapObject.end();
+
+	//for (; mapiter_begin != mapiter_end; )
+	//{
+	//	auto& iter_begin = mapiter_begin->second.begin();//리스트이터
+	//	auto& iter_end = mapiter_begin->second.end();
+
+	//	for (; iter_begin != iter_end; )
+	//	{
+	//		(*iter_begin)->Animate(fTimeElapsed);
+	//		(*iter_begin)->UpdateTransform(NULL);
+	//		if ((*iter_begin)->m_isDead)
+	//		{
+	//			delete (*iter_begin);
+	//			iter_begin = mapiter_begin->second.erase(iter_begin);
+	//		}
+	//		else
+	//			++iter_begin;
+	//	}
+	//	++mapiter_begin;
+	//}
 }
 
 void CStandardObjectsShader::ReleaseUploadBuffers()
@@ -534,6 +534,29 @@ list<CGameObject*>& CStandardObjectsShader::GetObjectList(const wchar_t* pObjTag
 {
 	return m_mapObject.find(pObjTag)->second;
 }
+
+CGameObject* CStandardObjectsShader::SetActive(const wchar_t* pObjTag)
+{
+	auto& iter = m_mapObject.find(pObjTag);
+	if (iter == m_mapObject.end())
+		return nullptr;
+
+	for (auto& list_iter : iter->second)
+	{
+		if (!list_iter->m_isActive)
+		{
+			list_iter->m_isActive = true;
+			return list_iter;
+		}
+	}
+	
+	//모든 오브젝트가 활동중일때 예외처리 필요
+	cout << "All Object Actived" << endl;
+
+	return nullptr;
+}
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CMapObjectsShader::CMapObjectsShader()
@@ -1273,7 +1296,8 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_mapObjectInfo.emplace(L"Explosion", make_pair(pMesh, pMaterial));
 
-	CreateObject(pd3dDevice, pd3dCommandList, L"Explosion");
+	for(int i = 0; i < 10; ++i)
+		CreateObject(pd3dDevice, pd3dCommandList, L"Explosion");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)

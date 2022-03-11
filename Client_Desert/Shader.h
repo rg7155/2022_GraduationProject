@@ -118,8 +118,8 @@ public:
 	HRESULT		AddObjectOnlyKey(const wchar_t* pObjTag);
 	list<CGameObject*>& GetObjectList(const wchar_t* pObjTag);
 
-	virtual HRESULT		CreateObject(const wchar_t* pObjTag) { return S_OK; }
-
+	virtual HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag) { return S_OK; }
+	CGameObject*		SetActive(const wchar_t* pObjTag);
 public:
 	map<const wchar_t*, list<CGameObject*>>		m_mapObject;
 };
@@ -146,7 +146,7 @@ public:
 	CMonsterObjectsShader();
 	virtual ~CMonsterObjectsShader();
 
-	HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag);
+	HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag) override;
 
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
@@ -331,7 +331,7 @@ public:
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
 
-	HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag);
+	HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag) override;
 
 public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);

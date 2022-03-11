@@ -428,6 +428,8 @@ void CGameFramework::BuildObjects()
 {
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
+	CGameMgr::GetInstance()->SetDevice(m_pd3dDevice);
+
 	m_pScene = new CScene();
 	CGameMgr::GetInstance()->SetScene(m_pScene);
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);

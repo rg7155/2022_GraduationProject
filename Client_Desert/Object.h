@@ -225,7 +225,7 @@ public:
 	OBJ_ID							m_eObjId = OBJ_END;
 	UINT							m_nEffectsType = 0x00;
 
-	bool							m_isDead = false;
+	bool							m_isActive = false;
 
 	void SetEffectsType(UINT nMask, bool isOn);
 

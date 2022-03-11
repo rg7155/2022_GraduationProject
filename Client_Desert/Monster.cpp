@@ -14,10 +14,16 @@ CMonsterObject::~CMonsterObject()
 }
 void CMonsterObject::Animate(float fTimeElapsed)
 {
+	if (!m_isActive)
+		return; 
+
 	CGameObject::Animate(fTimeElapsed);
 }
 void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	if (!m_isActive)
+		return;
+
 	CGameObject::Render(pd3dCommandList, pCamera);
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
