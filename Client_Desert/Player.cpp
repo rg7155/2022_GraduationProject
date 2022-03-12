@@ -323,11 +323,11 @@ void CPlayer::Update(float fTimeElapsed)
 	UpdateComponent(fTimeElapsed);
 	////////////////////////////////////////////
 
-	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
-	//{
-	//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetAtiveObjectFromShader(L"MultiSprite", L"Explosion");
-	//	if(pObj) pObj->SetPosition(GetPosition());
-	//}
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Explosion");
+		if(pObj) pObj->SetPosition(GetPosition());
+	}
 
 	if (m_pSkinnedAnimationController)
 	{

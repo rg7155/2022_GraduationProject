@@ -339,10 +339,8 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pDepthRenderShader) m_pDepthRenderShader->ReleaseUploadBuffers();
 }
 
-CGameObject* CScene::SetAtiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag)
+CGameObject* CScene::SetActiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag)
 {
-	//if (!wcscmp(pShaderTag, L"Map"))
-	//	m_pMapObjectShader->AddObjectTagToList(pObjTag);
 	if (!wcscmp(pShaderTag, L"Monster"))
 		return m_pMapObjectShader->SetActive(pObjTag);
 	else if (!wcscmp(pShaderTag, L"MultiSprite"))

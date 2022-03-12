@@ -56,7 +56,7 @@ public:
 
 	void ReleaseUploadBuffers();
 
-	CGameObject* SetAtiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag);
+	CGameObject* SetActiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag);
 
 	////////////////////////////////////////////////////////////////////////
 	void SetDescriptorRange(D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[], int iIndex, D3D12_DESCRIPTOR_RANGE_TYPE RangeType, UINT NumDescriptors, UINT BaseShaderRegister, UINT RegisterSpace);
