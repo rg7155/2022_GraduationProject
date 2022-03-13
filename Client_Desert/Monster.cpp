@@ -5,7 +5,6 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	SetChild(pModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 1, pModel);
 
-	SetScale(0.1f, 0.1f, 0.1f);
 }
 
 CMonsterObject::~CMonsterObject()
