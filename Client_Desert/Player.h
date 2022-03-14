@@ -115,7 +115,8 @@ private:
 	float	m_fBlendingTime;		// 블렌딩 시간
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
 	float	m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
-
+	float	m_fLerpSpeed;
+	bool	m_bLerpSpeedOn;
 
 private:
 	bool	m_bBattleOn;
