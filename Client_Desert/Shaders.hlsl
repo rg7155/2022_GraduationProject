@@ -155,6 +155,19 @@ float4 Limlight(float3 normalW)
     return float4(rimColor, 1);
 }
 
+//µðÁ¹ºê
+float4 Dissolve(float2 uv)
+{
+	//float4 fDissolve = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
+	//float fClip = fDissolve - gfDissolve;
+	//clip(fClip);
+
+	//if (fClip < 0.2 && gfDissolve > 0.1)
+	//{
+	//	float4 fBurn = gtxtAlbedoTexture.Sample(gssWrap, float2(vDissovle.r * 4, 0));
+	//	Color *= fBurn;
+	//}
+}
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
 {
