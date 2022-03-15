@@ -19,6 +19,7 @@ cbuffer cbGameObjectInfo : register(b2)
 	MATERIAL				gMaterial : packoffset(c4);
 	uint					gnTexturesMask : packoffset(c8.x);
 	uint					gnEffectsMask : packoffset(c8.y);
+	float					gfDissolve : packoffset(c8.z);
 };
 
 #include "Light.hlsl"
@@ -156,12 +157,13 @@ float4 Limlight(float3 normalW)
 }
 
 //디졸브
-float4 Dissolve(float2 uv)
+void Dissolve(float2 uv)
 {
-	//float4 fDissolve = gtxtAlbedoTexture.Sample(gssWrap, input.uv);
-	//float fClip = fDissolve - gfDissolve;
-	//clip(fClip);
+	float4 f4Dissolve = gtxtTexture.Sample(gssWrap, uv);
+	float fClip = f4Dissolve.r - gfDissolve;
+	clip(fClip);
 
+	return;
 	//if (fClip < 0.2 && gfDissolve > 0.1)
 	//{
 	//	float4 fBurn = gtxtAlbedoTexture.Sample(gssWrap, float2(vDissovle.r * 4, 0));
@@ -189,7 +191,8 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     if (gnEffectsMask & EFFECT_FOG)			cColorByFog = Fog(cColorByLight, input.positionW);
     float4 cColorByLim = float4(0.0f, 0.0f, 0.0f, 1.0f);
     if (gnEffectsMask & EFFECT_LIMLIGHT)	cColorByLim = Limlight(input.normalW);
-	
+	if (gnEffectsMask & EFFECT_DISSOLVE)	Dissolve(input.uv);
+
     return cColorByFog + cColorByLim;
     //return cColorByFog + Limlight(input.normalW); //림라이트
 	

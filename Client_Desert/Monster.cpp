@@ -20,33 +20,63 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	//	m_ppMaterials[0]->SetTexture(pTexture);
 
 	SetEffectsType(EFFECT_DISSOLVE, true);
+	m_fDissolve = 0.f; //1에 가까울수록 사라짐
 }
 
 CMonsterObject::~CMonsterObject()
 {
 
 }
+
 void CMonsterObject::Animate(float fTimeElapsed)
 {
 	if (!m_isActive)
 		return; 
 
+	m_fDissolve = 0.1;
+	//m_fDissolve += fTimeElapsed * 0.1f;
+	//cout << m_fDissolve << endl;
+
 	CGameObject::Animate(fTimeElapsed);
 }
+
 void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
 	if (!m_isActive)
 		return;
 
+	UpdateShaderVariables(pd3dCommandList);
+
+	//디졸브 텍스쳐 업데이트
+	for (int i = 0; i < m_nMaterials; i++)
+		if (m_ppMaterials[i])	m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
 	CGameObject::Render(pd3dCommandList, pCamera);
 }
+
+void CMonsterObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fDissolve, 34);
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
-	: CGameObject(1)
+	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
 }
 
 CBossObject::~CBossObject()
 {
+}
+
+void CBossObject::Animate(float fTimeElapsed)
+{
+	CMonsterObject::Animate(fTimeElapsed);
+}
+
+void CBossObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+{
+	CMonsterObject::Render(pd3dCommandList, pCamera);
 }

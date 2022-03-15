@@ -120,6 +120,7 @@ void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
 }
 
 void CPlayer::ReleaseShaderVariables()
@@ -411,6 +412,8 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	UpdateShaderVariables(pd3dCommandList);
+	
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	//if (nCameraMode == THIRD_PERSON_CAMERA) 
 	CGameObject::Render(pd3dCommandList, pCamera);
