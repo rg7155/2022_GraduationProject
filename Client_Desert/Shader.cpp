@@ -683,11 +683,22 @@ HRESULT CMonsterObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12Grap
 
 void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ms01_Golem.bin", NULL);
+	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cacti.bin", NULL);
 	m_mapModelInfo.emplace(L"Monster", pModel);
 
 	CMonsterObject* pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//pObj->Rotate(90.f, 0.f, 0.f); // Boss 몬스터에 추가해야함
 	AddObject(L"Monster", pObj);
+	pObj->SetActiveState(true);
+
+
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cactus.bin", NULL);
+	m_mapModelInfo.emplace(L"Cactus", pModel);
+
+	pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	pObj->SetPosition(10.f, 0.f, 10.f);
+	AddObject(L"Cactus", pObj);
+
 	pObj->SetActiveState(true);
 }
 
