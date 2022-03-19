@@ -73,7 +73,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_nShaders = 3;
+	m_nShaders = 4;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	int iIndex = 0;
@@ -86,6 +86,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pMonsterObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pMonsterObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pMonsterObjectShader;
+
+	m_pNPCObjectShader = new CNPCObjectsShader();
+	m_pNPCObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pNPCObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = m_pNPCObjectShader;
 
 	m_nAlphaShaderStartIndex = iIndex;
 	m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader();

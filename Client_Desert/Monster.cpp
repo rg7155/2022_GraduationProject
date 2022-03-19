@@ -55,7 +55,7 @@ void CMonsterObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
-void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
 	if (!m_isActive)
 		return;
@@ -66,7 +66,7 @@ void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 	for (int i = 0; i < m_nMaterials; i++)
 		if (m_ppMaterials[i])	m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 
-	CGameObject::Render(pd3dCommandList, pCamera);
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
 void CMonsterObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -91,7 +91,7 @@ void CBossObject::Animate(float fTimeElapsed)
 	CMonsterObject::Animate(fTimeElapsed);
 }
 
-void CBossObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CBossObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
-	CMonsterObject::Render(pd3dCommandList, pCamera);
+	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }

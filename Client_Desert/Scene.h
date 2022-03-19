@@ -74,6 +74,7 @@ public:
 	CShader								**m_ppShaders = NULL;
 	CMapObjectsShader					*m_pMapObjectShader = nullptr;
 	CMonsterObjectsShader				*m_pMonsterObjectShader = nullptr;
+	CNPCObjectsShader					*m_pNPCObjectShader = nullptr;
 	CMultiSpriteObjectsShader			*m_pMultiSpriteObjectShader = nullptr;
 
 

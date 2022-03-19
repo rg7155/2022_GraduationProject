@@ -489,15 +489,27 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 	if(isChangePipeline)
 		CStandardShader::Render(pd3dCommandList, pCamera);
 
+	for (auto & iter : m_mapObject)
+	{
+		for (auto& iterSec : iter.second)
+		{
+			iterSec->UpdateTransform(NULL);
+			iterSec->Render(pd3dCommandList, pCamera, isChangePipeline);
+		}
+	}
+
+}
+
+void CStandardObjectsShader::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
 	for (auto& iter : m_mapObject)
 	{
 		for (auto& iterSec : iter.second)
 		{
 			iterSec->UpdateTransform(NULL);
-			iterSec->Render(pd3dCommandList, pCamera);
+			iterSec->ShadowRender(pd3dCommandList, pCamera, pShader);
 		}
 	}
-
 }
 
 HRESULT CStandardObjectsShader::AddObject(const wchar_t* pObjTag, CGameObject* pGameObject)
@@ -656,8 +668,6 @@ void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
 CMonsterObjectsShader::CMonsterObjectsShader()
 {
 }
@@ -669,15 +679,7 @@ CMonsterObjectsShader::~CMonsterObjectsShader()
 
 HRESULT CMonsterObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag)
 {
-	//wchar_t* pTag = const_cast<wchar_t*>(pObjTag);
 
-	//switch (pTag)
-	//{
-	//case L"Monster":
-
-	//default:
-	//	break;
-	//}
 	return S_OK;
 }
 
@@ -705,9 +707,37 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState/* = 0*/, bool isChangePipeline /*= true*/)
 {
 	//파이프라인을 바꾸지 않음
-	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, true);
+	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+CNPCObjectsShader::CNPCObjectsShader()
+{
+}
+
+CNPCObjectsShader::~CNPCObjectsShader()
+{
+	m_mapModelInfo.clear();
+}
+
+HRESULT CNPCObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag)
+{
+
+	return S_OK;
+}
+
+void CNPCObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Dwarf_Warrior_Orange.bin", NULL);
+	m_mapModelInfo.emplace(L"Dwarf", pModel);
+
+	CNPCObject* pObj = new CNPCObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	AddObject(L"NPC", pObj);
+	pObj->SetActiveState(true);
+	pObj->SetPosition(5.f, 0.f, 5.f);
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1069,7 +1099,7 @@ void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCom
 	Render(pd3dCommandList, m_ppDepthRenderCameras[iIndex], 0, iIndex);
 
 	if (iIndex == DYNAMIC_SHADOW)
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 	else
 		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
 
@@ -1084,10 +1114,17 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 	
+	CScene* pScene = CGameMgr::GetInstance()->GetScene();
 	if (iIndex == STATIC_SHADOW)
+	{
 		m_pObjectsShader->Render(pd3dCommandList, pCamera, nPipelineState, false);
+		pScene->m_pNPCObjectShader->Render(pd3dCommandList, pCamera, nPipelineState, false);
+	}
 	else if (iIndex == DYNAMIC_SHADOW)
+	{
 		m_pPlayer->ShadowRender(pd3dCommandList, pCamera, this);//플레이어는 애님쉐이더, 칼은 스탠다드 쉐이더
+		pScene->m_pMonsterObjectShader->ShadowRender(pd3dCommandList, pCamera, this);// ShadowRender(pd3dCommandList, pCamera, this);
+	}
 
 }
 
