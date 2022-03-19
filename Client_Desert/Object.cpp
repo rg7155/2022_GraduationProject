@@ -167,9 +167,11 @@ void CMaterial::SetShader(CShader *pShader)
 
 void CMaterial::SetTexture(CTexture *pTexture, UINT nTexture) 
 { 
-	if (m_ppTextures[nTexture]) m_ppTextures[nTexture]->Release();
+	if (m_ppTextures[nTexture]) 
+		m_ppTextures[nTexture]->Release();
 	m_ppTextures[nTexture] = pTexture; 
-	if (m_ppTextures[nTexture]) m_ppTextures[nTexture]->AddRef();  
+	if (m_ppTextures[nTexture]) 
+		m_ppTextures[nTexture]->AddRef();  
 }
 
 void CMaterial::ReleaseUploadBuffers()

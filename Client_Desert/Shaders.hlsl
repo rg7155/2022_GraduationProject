@@ -70,10 +70,11 @@ Texture2D gtxtTexture : register(t0);
 Texture2D gtxtAlbedoTexture : register(t6);
 Texture2D gtxtSpecularTexture : register(t7);
 Texture2D gtxtNormalTexture : register(t8);
-Texture2D gtxtMetallicTexture : register(t9);
+
+Texture2D gtxtMetallicTexture : register(t9); //어차피 안쓸꺼 그냥 이펙트 텍츠처 1
 Texture2D gtxtEmissionTexture : register(t10);
 Texture2D gtxtDetailAlbedoTexture : register(t11);
-Texture2D gtxtDetailNormalTexture : register(t12);
+Texture2D gtxtDetailNormalTexture : register(t12); 
 
 SamplerState gssWrap : register(s0);
 
@@ -157,18 +158,19 @@ float4 Limlight(float3 normalW)
 }
 
 //디졸브
-void Dissolve(float2 uv)
+float4 Dissolve(float2 uv)
 {
 	float4 f4Dissolve = gtxtTexture.Sample(gssWrap, uv);
-	float fClip = f4Dissolve.r - gfDissolve;
+	float fClip = f4Dissolve.r * 2.f - gfDissolve;
 	clip(fClip);
 
-	return;
-	//if (fClip < 0.2 && gfDissolve > 0.1)
-	//{
-	//	float4 fBurn = gtxtAlbedoTexture.Sample(gssWrap, float2(vDissovle.r * 4, 0));
-	//	Color *= fBurn;
-	//}
+	//return;
+    float4 fBurn = { 1.f, 1.f, 1.f, 1.f };
+	
+    if (fClip < 0.2 && gfDissolve > 0.1)
+        fBurn = gtxtMetallicTexture.Sample(gssWrap, float2(f4Dissolve.r, 0));
+	
+    return fBurn;
 }
 
 float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
@@ -191,7 +193,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     if (gnEffectsMask & EFFECT_FOG)			cColorByFog = Fog(cColorByLight, input.positionW);
     float4 cColorByLim = float4(0.0f, 0.0f, 0.0f, 1.0f);
     if (gnEffectsMask & EFFECT_LIMLIGHT)	cColorByLim = Limlight(input.normalW);
-	if (gnEffectsMask & EFFECT_DISSOLVE)	Dissolve(input.uv);
+    if (gnEffectsMask & EFFECT_DISSOLVE)    cColorByFog *= Dissolve(input.uv);
 
     return cColorByFog + cColorByLim;
     //return cColorByFog + Limlight(input.normalW); //림라이트

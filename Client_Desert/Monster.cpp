@@ -11,8 +11,15 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Dissolve.dds", 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
-	CMaterial* pMaterial = new CMaterial(1);
+	CTexture* pTexture2 = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pTexture2->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/burn_dissolve.dds", 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture2, 6, false);
+
+
+	CMaterial* pMaterial = new CMaterial(2);
 	pMaterial->SetTexture(pTexture);
+	pMaterial->SetTexture(pTexture2, 1);
+
 	//pMaterial->SetShader(nullptr/*pShader*/);
 	SetMaterial(0, pMaterial);
 
@@ -33,8 +40,16 @@ void CMonsterObject::Animate(float fTimeElapsed)
 	if (!m_isActive)
 		return; 
 
-	m_fDissolve = 0.1;
-	//m_fDissolve += fTimeElapsed * 0.1f;
+	//m_fDissolve = 0.5;
+	static bool bToggle = false;
+	if(!bToggle)
+		m_fDissolve += fTimeElapsed * 0.5f;
+	else
+		m_fDissolve -= fTimeElapsed * 0.5f;
+
+	if (m_fDissolve >= 1.f || m_fDissolve <= 0.f)
+		bToggle = !bToggle;
+
 	//cout << m_fDissolve << endl;
 
 	CGameObject::Animate(fTimeElapsed);
