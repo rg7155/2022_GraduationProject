@@ -1158,6 +1158,9 @@ void CMapObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 
 void CMapObject::Animate(float fTimeElapsed)
 {
+	if (!m_isActive)
+		return;
+
 	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
 	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
@@ -1171,6 +1174,9 @@ void CMapObject::Animate(float fTimeElapsed)
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
+	if (!m_isActive)
+		return; 
+	
 	UpdateShaderVariables(pd3dCommandList);
 
 	//그림자맵에 쓰는거나, 평면이면 컬링 안하고 그림

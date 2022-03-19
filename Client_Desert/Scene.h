@@ -57,6 +57,7 @@ public:
 	void ReleaseUploadBuffers();
 
 	CGameObject* SetActiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag);
+	void ChangeScene(SCENE eScene);
 
 	////////////////////////////////////////////////////////////////////////
 	void SetDescriptorRange(D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[], int iIndex, D3D12_DESCRIPTOR_RANGE_TYPE RangeType, UINT NumDescriptors, UINT BaseShaderRegister, UINT RegisterSpace);
@@ -93,6 +94,8 @@ public:
 
 	//화면에 뎁스텍스쳐 그리기 위해, 디버깅 목적, 4개 다 그릴수도이씅ㅁ
 	CTextureToViewportShader			*m_pShadowMapToViewport = NULL;
+
+	SCENE								m_eCurScene = SCENE_END;
 
 protected:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;

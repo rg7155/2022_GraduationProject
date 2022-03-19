@@ -138,6 +138,12 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed) override;
 
+	void LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pFileName, bool isActive);
+	void ChangeMap(SCENE eScene);
+
+private:
+	map<string, CLoadedModelInfo*> m_mapModelInfo;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -287,7 +293,7 @@ public:
 public:
 	CStandardObjectsShader* m_pObjectsShader = NULL;
 	CPlayer* m_pPlayer = NULL;
-
+	bool	m_isStaticRender = false;
 };
 
 class CTextureToViewportShader : public CShader
