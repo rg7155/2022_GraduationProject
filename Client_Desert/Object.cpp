@@ -1364,3 +1364,19 @@ void CNPCObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 {
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+{
+}
+
+CUIObject::~CUIObject()
+{
+}
+
+void CUIObject::Animate(float fTimeElapsed)
+{
+	XMMATRIX xmmtxProjection = XMMatrixIdentity();
+	xmmtxProjection = XMMatrixOrthographicLH(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, 1.f);
+
+}
