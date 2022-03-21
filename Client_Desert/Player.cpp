@@ -84,6 +84,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	//SetCameraUpdatedContext(pContext);
 
 
+
 	if (pPlayerModel) delete pPlayerModel;
 
 
@@ -130,10 +131,25 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
-	// 대기동작일때만 움직이기 가능
+	// 대기동작이나 이동중일때만 움직이기 가능
 	if (m_eCurAnim != ANIM::IDLE && m_eCurAnim != ANIM::IDLE_RELAXED && m_eCurAnim != ANIM::RUN)
 	{
 		return;
+	}
+	// 속도 보간
+	if (m_eCurAnim == ANIM::RUN)
+	{
+		m_fLerpSpeed += fDistance / PLAYER_SPEED;
+		if (m_fLerpSpeed > 1.f)
+			m_fLerpSpeed = 1.f;
+	}
+	else
+	{
+		m_fLerpSpeed -= (fDistance / PLAYER_SPEED) * 3.f;
+		if (m_fLerpSpeed < 0.f)
+			m_fLerpSpeed = 0.f;
+
+		Move(MoveByDir(fDistance * m_fLerpSpeed), bUpdateVelocity);
 	}
 
 	XMVECTOR xmDstVec = m_xmVecSrc;
@@ -180,9 +196,11 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	{
 		xmDstVec = -xmVecCamLook;
 	}
-
 	else
+	{
+			
 		return;
+	}
 
 	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
 
@@ -201,7 +219,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		m_xmVecTmpRotate = m_xmVecNewRotate;
 
 	// 이동
-	Move(MoveByDir(fDistance), bUpdateVelocity);
+	Move(MoveByDir(fDistance * m_fLerpSpeed), bUpdateVelocity);
 
 	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
 	if (m_eCurAnim != ANIM::RUN)
