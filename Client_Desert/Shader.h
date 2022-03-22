@@ -113,6 +113,8 @@ public:
 	virtual void ReleaseUploadBuffers();
 
 	virtual void Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
+	void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
+
 public:
 	HRESULT		AddObject(const wchar_t* pObjTag, CGameObject* pGameObject);
 	HRESULT		AddObjectOnlyKey(const wchar_t* pObjTag);
@@ -136,6 +138,12 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void AnimateObjects(float fTimeElapsed) override;
 
+	void LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pFileName, bool isActive);
+	void ChangeMap(SCENE eScene);
+
+private:
+	map<string, CLoadedModelInfo*> m_mapModelInfo;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -153,6 +161,22 @@ public:
 
 private:
 	map<const wchar_t*, CLoadedModelInfo*>			m_mapModelInfo; //런타임중 로드 위해 사용
+
+};
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CNPCObjectsShader : public CStandardObjectsShader
+{
+public:
+	CNPCObjectsShader();
+	virtual ~CNPCObjectsShader();
+
+	HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag) override;
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+
+private:
+	map<const wchar_t*, CLoadedModelInfo*>			m_mapModelInfo;
 
 };
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -269,7 +293,7 @@ public:
 public:
 	CStandardObjectsShader* m_pObjectsShader = NULL;
 	CPlayer* m_pPlayer = NULL;
-
+	bool	m_isStaticRender = false;
 };
 
 class CTextureToViewportShader : public CShader

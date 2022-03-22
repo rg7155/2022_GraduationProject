@@ -60,6 +60,8 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
+	m_eCurScene = SCENE_1;
+
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
@@ -73,7 +75,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_nShaders = 3;
+	m_nShaders = 4;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	int iIndex = 0;
@@ -86,6 +88,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pMonsterObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pMonsterObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pMonsterObjectShader;
+
+	m_pNPCObjectShader = new CNPCObjectsShader();
+	m_pNPCObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_pNPCObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = m_pNPCObjectShader;
 
 	m_nAlphaShaderStartIndex = iIndex;
 	m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader();
@@ -111,7 +118,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetDescriptorRange(pd3dDescriptorRanges, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);//t6: gtxtAlbedoTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7, 0);//t7: gtxtSpecularTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 2, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 8, 0);//t8: gtxtNormalTexture
-	SetDescriptorRange(pd3dDescriptorRanges, 3, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 9, 0);//t9: gtxtMetallicTexture
+	SetDescriptorRange(pd3dDescriptorRanges, 3, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 9, 0);//t9: gtxtMetallicTexture = effect2
 	SetDescriptorRange(pd3dDescriptorRanges, 4, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 10, 0);//t10: gtxtEmissionTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 5, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 11, 0);//t11: gtxtDetailAlbedoTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 6, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 12, 0);//t12: gtxtDetailNormalTexture
@@ -121,7 +128,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 	D3D12_ROOT_PARAMETER pd3dRootParameters[18];
 	SetRootParameterCBV(pd3dRootParameters, 0, 1, 0, D3D12_SHADER_VISIBILITY_ALL);//Camera
-	SetRootParameterConstants(pd3dRootParameters, 1, 34, 2, 0, D3D12_SHADER_VISIBILITY_ALL);//b2 GameObject, 34개 씀
+	SetRootParameterConstants(pd3dRootParameters, 1, 35, 2, 0, D3D12_SHADER_VISIBILITY_ALL);//b2 GameObject, 34개 씀
 	SetRootParameterCBV(pd3dRootParameters, 2, 4, 0, D3D12_SHADER_VISIBILITY_ALL);//b4 Lights
 	SetRootParameterDescriptorTable(pd3dRootParameters, 3, 1, &pd3dDescriptorRanges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 4, 1, &pd3dDescriptorRanges[1], D3D12_SHADER_VISIBILITY_PIXEL);
@@ -206,6 +213,11 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_C))
+	{
+		ChangeScene(SCENE_2);
+	}
+
 	m_fElapsedTime = fTimeElapsed;
 	CGameMgr::GetInstance()->m_fElapsedTime = fTimeElapsed;
 
@@ -213,7 +225,15 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	///////////////////////////////////////////////////////////////////////////////////
 	//플레이어-맵 충돌
-	CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
+	switch (m_eCurScene)
+	{
+	case SCENE_1:
+		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
+		break;
+	case SCENE_2:
+		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"), true);
+		break;
+	}
 	///////////////////////////////////////////////////////////////////////////////////
 
 }
@@ -267,6 +287,30 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 
 
+CGameObject* CScene::SetActiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag)
+{
+	if (!wcscmp(pShaderTag, L"Monster"))
+		return m_pMapObjectShader->SetActive(pObjTag);
+	else if (!wcscmp(pShaderTag, L"MultiSprite"))
+		return m_pMultiSpriteObjectShader->SetActive(pObjTag);
+	else
+		return nullptr;
+}
+
+void CScene::ChangeScene(SCENE eScene)
+{
+	m_eCurScene = eScene;
+
+	switch (eScene)
+	{
+	case SCENE_1:
+		break;
+	case SCENE_2:
+		m_pMapObjectShader->ChangeMap(eScene);
+		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
+		break;
+	}
+}
 
 
 
@@ -339,17 +383,6 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pDepthRenderShader) m_pDepthRenderShader->ReleaseUploadBuffers();
 }
 
-CGameObject* CScene::SetAtiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag)
-{
-	//if (!wcscmp(pShaderTag, L"Map"))
-	//	m_pMapObjectShader->AddObjectTagToList(pObjTag);
-	if (!wcscmp(pShaderTag, L"Monster"))
-		return m_pMapObjectShader->SetActive(pObjTag);
-	else if (!wcscmp(pShaderTag, L"MultiSprite"))
-		return m_pMultiSpriteObjectShader->SetActive(pObjTag);
-	else
-		return nullptr;
-}
 
 void CScene::CreateCbvSrvDescriptorHeaps(ID3D12Device *pd3dDevice, int nConstantBufferViews, int nShaderResourceViews)
 {

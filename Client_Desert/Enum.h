@@ -8,5 +8,6 @@ enum COMPONENT { COM_FRUSTUM, COM_COLLISION, COM_TRAIL, COM_END };
 
 enum OBJ_ID { OBJ_PLAYER, OBJ_MAP, OBJ_END };
 
+enum SCENE { SCENE_1, SCENE_2, SCENE_END};
 //string COM_FRUSTUM = "Frustum";
 #endif // Eunm_h__

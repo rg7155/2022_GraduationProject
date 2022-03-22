@@ -167,9 +167,11 @@ void CMaterial::SetShader(CShader *pShader)
 
 void CMaterial::SetTexture(CTexture *pTexture, UINT nTexture) 
 { 
-	if (m_ppTextures[nTexture]) m_ppTextures[nTexture]->Release();
+	if (m_ppTextures[nTexture]) 
+		m_ppTextures[nTexture]->Release();
 	m_ppTextures[nTexture] = pTexture; 
-	if (m_ppTextures[nTexture]) m_ppTextures[nTexture]->AddRef();  
+	if (m_ppTextures[nTexture]) 
+		m_ppTextures[nTexture]->AddRef();  
 }
 
 void CMaterial::ReleaseUploadBuffers()
@@ -458,7 +460,7 @@ void CGameObject::Animate(float fTimeElapsed)
 	if (m_pChild) m_pChild->Animate(fTimeElapsed);
 }
 
-void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, bool isChangePipeline /*= true*/)
 {
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
@@ -473,7 +475,7 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 			{
 				if (m_ppMaterials[i])
 				{
-					if (m_ppMaterials[i]->m_pShader) 
+					if (isChangePipeline && m_ppMaterials[i]->m_pShader)
 						m_ppMaterials[i]->m_pShader->Render(pd3dCommandList, pCamera);
 
 					//컬러,텍스쳐
@@ -485,8 +487,8 @@ void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pC
 		}
 	}
 
-	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera);
-	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera);
+	if (m_pSibling) m_pSibling->Render(pd3dCommandList, pCamera, isChangePipeline);
+	if (m_pChild) m_pChild->Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
 void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera/*= NULL*/, CShader* pShader /*= NULL*/)
@@ -1093,7 +1095,7 @@ CSkyBox::~CSkyBox()
 {
 }
 
-void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera)
+void CSkyBox::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, bool isChangePipeline /*= true*/)
 {
 	XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
 	SetPosition(xmf3CameraPos.x, xmf3CameraPos.y, xmf3CameraPos.z);
@@ -1156,6 +1158,9 @@ void CMapObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 
 void CMapObject::Animate(float fTimeElapsed)
 {
+	if (!m_isActive)
+		return;
+
 	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
 	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
@@ -1164,20 +1169,19 @@ void CMapObject::Animate(float fTimeElapsed)
 			m_pComponent[i]->Update_Component(fTimeElapsed);
 
 	CGameObject::Animate(fTimeElapsed);
-	
-	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
-	if(fDistance > 30.f) SetEffectsType(EFFECT_LIMLIGHT, false);
-	else SetEffectsType(EFFECT_LIMLIGHT, true);
 }
 
 
-void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
+	if (!m_isActive)
+		return; 
+	
 	UpdateShaderVariables(pd3dCommandList);
 
 	//그림자맵에 쓰는거나, 평면이면 컬링 안하고 그림
 	if (CGameMgr::GetInstance()->m_isShadowMapRendering || m_isPlane)
-		CGameObject::Render(pd3dCommandList, pCamera);
+		CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 	else
 	{
 		XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmOOBB.Extents;
@@ -1185,7 +1189,7 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 		float fRadi = m_xmf3Scale.x * fMax; //스케일 x,y,z 다를수도
 
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
-			CGameObject::Render(pd3dCommandList, pCamera);
+			CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 	}
 }
 
@@ -1285,7 +1289,7 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 	CGameObject::Animate(fTimeElapsed);
 }
 
-void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
 	if (!m_isActive)
 		return;
@@ -1325,4 +1329,38 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 			m_nCol = 0;
 		}
 	}
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+{
+	SetChild(pModel->m_pModelRootObject, true);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 1, pModel);
+
+}
+
+CNPCObject::~CNPCObject()
+{
+}
+
+void CNPCObject::Animate(float fTimeElapsed)
+{
+	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
+	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, false);
+	else SetEffectsType(EFFECT_LIMLIGHT, true);
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CNPCObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
+{
+	UpdateShaderVariables(pd3dCommandList);
+
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CNPCObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
 }

@@ -13,7 +13,7 @@
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	ShowCursor(false);
+	//ShowCursor(false);
 
 	m_pCamera = NULL;
 
@@ -121,6 +121,7 @@ void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 void CPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
 }
 
 void CPlayer::ReleaseShaderVariables()
@@ -349,11 +350,11 @@ void CPlayer::Update(float fTimeElapsed)
 	UpdateComponent(fTimeElapsed);
 	////////////////////////////////////////////
 
-	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
-	//{
-	//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetAtiveObjectFromShader(L"MultiSprite", L"Explosion");
-	//	if(pObj) pObj->SetPosition(GetPosition());
-	//}
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Explosion");
+		if(pObj) pObj->SetPosition(GetPosition());
+	}
 
 	if (m_pSkinnedAnimationController)
 	{
@@ -435,6 +436,8 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	UpdateShaderVariables(pd3dCommandList);
+	
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
 	//if (nCameraMode == THIRD_PERSON_CAMERA) 
 	CGameObject::Render(pd3dCommandList, pCamera);
