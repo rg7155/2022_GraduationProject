@@ -414,9 +414,11 @@ protected:
 class CUIObject : public CGameObject
 {
 public:
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CUIObject();
 
 public:
 	virtual void Animate(float fTimeElapsed) override;
+
+	void	SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY);
 };

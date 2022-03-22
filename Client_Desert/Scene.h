@@ -77,6 +77,7 @@ public:
 	CMonsterObjectsShader				*m_pMonsterObjectShader = nullptr;
 	CNPCObjectsShader					*m_pNPCObjectShader = nullptr;
 	CMultiSpriteObjectsShader			*m_pMultiSpriteObjectShader = nullptr;
+	CUIObjectsShader					*m_pUIObjectShader = nullptr;
 
 
 	CSkyBox								*m_pSkyBox = NULL;

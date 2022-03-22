@@ -365,3 +365,19 @@ protected:
 	map<const wchar_t*, pair<CMesh*, CMaterial*>>	m_mapObjectInfo; 
 
 };
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CUIObjectsShader : public CTexturedShader
+{
+public:
+	CUIObjectsShader();
+	virtual ~CUIObjectsShader();
+
+	//D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState) override;
+
+	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
+
+	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
+
+};
