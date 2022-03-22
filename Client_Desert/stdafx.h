@@ -72,9 +72,9 @@ extern HINSTANCE						ghAppInstance;
 #pragma comment(lib, "d3dcompiler.lib")
 #pragma comment(lib, "d3d12.lib")
 #pragma comment(lib, "dxgi.lib")
-
 #pragma comment(lib, "dxguid.lib")
-
+#pragma comment(lib, "dinput8.lib")
+#pragma comment(lib, "Winmm.lib")
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 

@@ -11,6 +11,7 @@ cbuffer cbCameraInfo : register(b1)
 	matrix					gmtxView : packoffset(c0);
 	matrix					gmtxProjection : packoffset(c4);
 	float3					gvCameraPosition : packoffset(c8);
+	matrix					gmtxOrthoProjection : packoffset(c12);
 };
 
 cbuffer cbGameObjectInfo : register(b2)
@@ -272,10 +273,16 @@ struct VS_TEXTURED_OUTPUT
 VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 {
     VS_TEXTURED_OUTPUT output;
-
     output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     output.uv = input.uv;
+    return (output);
+}
 
+VS_TEXTURED_OUTPUT VSOrthoTextured(VS_TEXTURED_INPUT input)
+{
+    VS_TEXTURED_OUTPUT output;
+    output.position = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxOrthoProjection);
+    output.uv = input.uv;
     return (output);
 }
 

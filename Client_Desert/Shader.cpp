@@ -1368,7 +1368,53 @@ void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandLis
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
 }
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+CUIObjectsShader::CUIObjectsShader()
+{
+}
+
+CUIObjectsShader::~CUIObjectsShader()
+{
+}
+
+//D3D12_DEPTH_STENCIL_DESC CUIObjectsShader::CreateDepthStencilState(int nPipelineState)
+//{
+//	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+//	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
+//	d3dDepthStencilDesc.DepthEnable = FALSE;
+//	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL;
+//	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+//	d3dDepthStencilDesc.StencilEnable = TRUE;
+//	d3dDepthStencilDesc.StencilReadMask = 0xff;
+//	d3dDepthStencilDesc.StencilWriteMask = 0xff;
+//	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_INCR;
+//	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+//	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_DECR;
+//	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+//	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_ALWAYS;
+//	return(d3dDepthStencilDesc);
+//}
+
+D3D12_SHADER_BYTECODE CUIObjectsShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSOrthoTextured", "vs_5_1", ppd3dShaderBlob));
+}
+
+void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CUIObject* pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pObject->SetActiveState(true);
+	AddObject(L"UI", pObject);
+}
+
+void CUIObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
+{
+	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
+}
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1397,5 +1443,4 @@ XMFLOAT3 RandomPositionInSphere(XMFLOAT3 xmf3Center, float fRadius, int nColumn,
 
 	return(xmf3Position);
 }
-
 

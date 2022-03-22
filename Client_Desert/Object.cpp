@@ -1364,3 +1364,49 @@ void CNPCObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 {
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+		: CGameObject(1)
+{
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	SetMesh(pMesh);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail.dds", 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	CMaterial* pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	//pMaterial->SetShader(nullptr/*pShader*/);
+	SetMaterial(0, pMaterial);
+
+	//m_vMouseColor = { 1.f,1.f, 1.f };
+	//m_vMousePos.x = WINCX * 0.5f;
+	//m_vMousePos.y = WINCY * 0.5f;
+	//m_vMouseSize.x = 64.f;
+	//m_vMouseSize.y = 64.f;
+
+	SetOrthoWorld(800.f, 600.f, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+
+}
+
+CUIObject::~CUIObject()
+{
+}
+
+void CUIObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY)
+{
+	//// 직교투영
+	m_xmf4x4ToParent._11 = fSizeX;
+	m_xmf4x4ToParent._22 = fSizeY;
+	m_xmf4x4ToParent._33 = 1.f;
+	m_xmf4x4ToParent._41 = fPosX - FRAME_BUFFER_WIDTH * 0.5f;
+	m_xmf4x4ToParent._42 = -fPosY + FRAME_BUFFER_HEIGHT * 0.5f;
+}

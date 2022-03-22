@@ -41,14 +41,14 @@ void CMonsterObject::Animate(float fTimeElapsed)
 		return; 
 
 	//m_fDissolve = 0.5;
-	static bool bToggle = false;
-	if(!bToggle)
-		m_fDissolve += fTimeElapsed * 0.5f;
-	else
-		m_fDissolve -= fTimeElapsed * 0.5f;
+	//static bool bToggle = false;
+	//if(!bToggle)
+	//	m_fDissolve += fTimeElapsed * 0.5f;
+	//else
+	//	m_fDissolve -= fTimeElapsed * 0.5f;
 
-	if (m_fDissolve >= 1.f || m_fDissolve <= 0.f)
-		bToggle = !bToggle;
+	//if (m_fDissolve >= 1.f || m_fDissolve <= 0.f)
+	//	bToggle = !bToggle;
 
 	//cout << m_fDissolve << endl;
 
