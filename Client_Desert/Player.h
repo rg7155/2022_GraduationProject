@@ -102,6 +102,8 @@ public:
 	virtual void	CollsionDetection(CGameObject* pObj) override;
 
 private:
+	bool IsNowAttack();
+private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecTmpRotate;
 	XMVECTOR m_xmVecNewRotate;

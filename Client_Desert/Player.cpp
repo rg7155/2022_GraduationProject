@@ -339,6 +339,12 @@ void CPlayer::Update(float fTimeElapsed)
 
 	Blending_Animation(fTimeElapsed);
 
+	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
+	if (IsNowAttack())
+		m_pComTrail->SetRenderingTrail(true);
+	else
+		m_pComTrail->SetRenderingTrail(false);
+
 	////////////////////////////////////////////
 	UpdateComponent(fTimeElapsed);
 	////////////////////////////////////////////
@@ -482,8 +488,7 @@ void CPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
 
-	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
-	m_pComTrail->SetRenderingTrail(true);
+
 }
 
 void CPlayer::UpdateComponent(float fTimeElapsed)
@@ -529,6 +534,15 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 	case OBJ_END:
 		break;
 	}
+}
+
+bool CPlayer::IsNowAttack()
+{
+	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2 ||
+		m_eCurAnim == ANIM::SKILL1 || m_eCurAnim == ANIM::SKILL2)
+		return true;
+
+	return false;
 }
 
 
