@@ -373,7 +373,7 @@ public:
 	CUIObjectsShader();
 	virtual ~CUIObjectsShader();
 
-	//D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState) override;
+	D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState) override;
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
 

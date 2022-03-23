@@ -1388,7 +1388,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	//m_vMouseSize.x = 64.f;
 	//m_vMouseSize.y = 64.f;
 
-	SetOrthoWorld(800.f, 600.f, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+	SetOrthoWorld(80.f, 60.f, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
 
 }
 

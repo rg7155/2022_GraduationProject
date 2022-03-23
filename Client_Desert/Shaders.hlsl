@@ -10,8 +10,10 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix					gmtxView : packoffset(c0);
 	matrix					gmtxProjection : packoffset(c4);
-	float3					gvCameraPosition : packoffset(c8);
-	matrix					gmtxOrthoProjection : packoffset(c12);
+    matrix					gmtxOrthoProjection : packoffset(c8);
+    float3					gvCameraPosition : packoffset(c12);
+    //float3				gvCameraPosition : packoffset(c8);
+    //matrix				gmtxOrthoProjection : packoffset(c9);
 };
 
 cbuffer cbGameObjectInfo : register(b2)
@@ -281,6 +283,7 @@ VS_TEXTURED_OUTPUT VSTextured(VS_TEXTURED_INPUT input)
 VS_TEXTURED_OUTPUT VSOrthoTextured(VS_TEXTURED_INPUT input)
 {
     VS_TEXTURED_OUTPUT output;
+    //output.position = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxOrthoProjection);
     output.position = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxOrthoProjection);
     output.uv = input.uv;
     return (output);
@@ -289,6 +292,7 @@ VS_TEXTURED_OUTPUT VSOrthoTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    //cColor.a = 0.5f;
     //float4 cColor = { 1.f, 1.f, 1.f, 1.f };
     return (cColor);
 }
