@@ -92,7 +92,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_eCurAnim = ANIM::IDLE_RELAXED;
 	m_ePrevAnim = ANIM::IDLE_RELAXED;
 	m_bBlendingOn = false;
-
+	m_bSkill1EffectOn = false;
 
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
@@ -350,11 +350,21 @@ void CPlayer::Update(float fTimeElapsed)
 	UpdateComponent(fTimeElapsed);
 	////////////////////////////////////////////
 
-	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
+	// 바닥 이펙트
+	if (m_eCurAnim == ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Explosion");
-		if(pObj) pObj->SetPosition(GetPosition());
+		if (pObj) pObj->SetPosition(GetPosition());
+		m_bSkill1EffectOn = true;
+
 	}
+	// 애니메이션이 끝나면 이펙트 끄는 것 해야함
+	
+	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
+	//{
+	//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Explosion");
+	//	if(pObj) pObj->SetPosition(GetPosition());
+	//}
 
 	if (m_pSkinnedAnimationController)
 	{
@@ -686,6 +696,9 @@ void CPlayer::Change_Animation(ANIM eNewAnim)
 {
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
+
+	if (m_eCurAnim != SKILL1)
+		m_bSkill1EffectOn = false;
 
 	m_fAnimElapsedTime = 0.f;
 	m_fBlendingTime = 0.f;

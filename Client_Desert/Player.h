@@ -123,7 +123,7 @@ private:
 private:
 	bool	m_bBattleOn;
 	bool	m_bBlendingOn;
-
+	bool	m_bSkill1EffectOn;
 public:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;

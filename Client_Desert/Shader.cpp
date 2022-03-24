@@ -1346,7 +1346,7 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	//방법1-오브젝트를 미리 만들어둔다-오브젝트풀링
 	//방법2-텍스쳐와 매쉬만 미리 만들고, 오브젝트는 런타임중에 만든다
 
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,10.f, 10.f, 0.f);
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,5.f,5.f, 0.f);
 	//SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 8, 8);
