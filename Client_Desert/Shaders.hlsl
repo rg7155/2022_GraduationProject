@@ -292,8 +292,13 @@ VS_TEXTURED_OUTPUT VSOrthoTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
-    //cColor.a = 0.5f;
-    //float4 cColor = { 1.f, 1.f, 1.f, 1.f };
+    return (cColor);
+}
+
+float4 PSAlphaTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+    float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    cColor.a = gfDissolve;
     return (cColor);
 }
 

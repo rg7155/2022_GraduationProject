@@ -414,11 +414,25 @@ protected:
 class CUIObject : public CGameObject
 {
 public:
+	enum UI_TYPE { UI_FADE, UI_END };
+
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CUIObject();
 
 public:
 	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
-	void	SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+public:
+	void		SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY);
+	void		SetFadeState(bool isIn);
+
+public:
+	UI_TYPE		m_eUIType = UI_END;
+
+private:
+	float	m_fAlpha = 0.f;
+	bool	m_isFadeIn = false;
 };

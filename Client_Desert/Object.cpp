@@ -1325,7 +1325,7 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 		if (m_nCol == nCols)
 		{
 			//cout << "end" << endl;
-			//m_isDead = true;
+			m_isActive = false;
 			m_nCol = 0;
 		}
 	}
@@ -1388,8 +1388,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	//m_vMouseSize.x = 64.f;
 	//m_vMouseSize.y = 64.f;
 
-	SetOrthoWorld(80.f, 60.f, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
-
+	SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
 }
 
 CUIObject::~CUIObject()
@@ -1398,7 +1397,53 @@ CUIObject::~CUIObject()
 
 void CUIObject::Animate(float fTimeElapsed)
 {
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_F))
+		SetFadeState(m_isFadeIn = !m_isFadeIn);
+
+	//m_Alpha = 0.8f;
+	switch (m_eUIType)
+	{
+	case CUIObject::UI_FADE:
+		if (m_isFadeIn)
+		{
+			if (m_fAlpha < 1.f) m_fAlpha += fTimeElapsed;
+		}
+		else
+		{
+			if (m_fAlpha > 0.f) m_fAlpha -= fTimeElapsed;
+		}
+		break;
+	}
+
 	CGameObject::Animate(fTimeElapsed);
+}
+
+void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	UpdateShaderVariables(pd3dCommandList);
+
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CUIObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
+}
+
+void CUIObject::SetFadeState(bool isIn)
+{
+	m_isFadeIn = isIn;
+
+	if (isIn)
+	{
+		//¹à¾ÆÁü
+		m_fAlpha = 0.f;
+	}
+	else
+	{
+		//ÆäÀÌµå ¾Æ¿ô - ¾îµÎ¿öÁü
+		m_fAlpha = 1.f;
+	}
 }
 
 void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY)
