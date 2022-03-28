@@ -10,10 +10,10 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix					gmtxView : packoffset(c0);
 	matrix					gmtxProjection : packoffset(c4);
-    matrix					gmtxOrthoProjection : packoffset(c8);
-    float3					gvCameraPosition : packoffset(c12);
-    //float3				gvCameraPosition : packoffset(c8);
-    //matrix				gmtxOrthoProjection : packoffset(c9);
+    matrix gmtxOrthoProjection : packoffset(c8);
+    float3 gvCameraPosition : packoffset(c12);
+	//float3				gvCameraPosition : packoffset(c8);
+ //   matrix				gmtxOrthoProjection : packoffset(c9);
 };
 
 cbuffer cbGameObjectInfo : register(b2)
