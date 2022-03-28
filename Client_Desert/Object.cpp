@@ -1449,3 +1449,109 @@ void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPo
 	m_xmf4x4ToParent._41 = fPosX - FRAME_BUFFER_WIDTH * 0.5f;
 	m_xmf4x4ToParent._42 = -fPosY + FRAME_BUFFER_HEIGHT * 0.5f;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+//{
+//	CParticleMesh* pMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 20.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(8.0f, 12.0f), 1.0f, MAX_PARTICLES);
+//	SetMesh(pMesh);
+//
+//	CTexture* pParticleTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 1);
+//	pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Image/RoundParticle.dds", RESOURCE_TEXTURE2D, 0);
+//
+//	CMaterial* pMaterial = new CMaterial(1);
+//	pMaterial->SetTexture(pParticleTexture);
+//
+//	/*
+//		XMFLOAT4 *pxmf4RandomValues = new XMFLOAT4[1000];
+//		random_device rd;   // non-deterministic generator
+//		mt19937 gen(rd());  // to seed mersenne twister.
+//		uniform_real_distribution<> vdist(-1.0, +1.0);
+//		uniform_real_distribution<> cdist(0.0, +1.0);
+//		for (int i = 0; i < 1000; i++) pxmf4RandomValues[i] = XMFLOAT4(float(vdist(gen)), float(vdist(gen)), float(vdist(gen)), float(cdist(gen)));
+//	*/
+//	srand((unsigned)time(NULL));
+//
+//	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1000];
+//	for (int i = 0; i < 1000; i++)
+//		pxmf4RandomValues[i] = XMFLOAT4(RandomValue(-1.0f, 1.0f), RandomValue(-1.0f, 1.0f), RandomValue(-1.0f, 1.0f), RandomValue(0.0f, 1.0f));
+//
+//	//	float *pxmf4RandomValues = new float[4000];
+//	//	for (int i = 0; i < 4000; i += 4) { pxmf4RandomValues[i] = RandomValue(-1.0f, 1.0f); pxmf4RandomValues[i+1] = RandomValue(-1.0f, 1.0f); pxmf4RandomValues[i+2] = RandomValue(-1.0f, 1.0f); pxmf4RandomValues[i+3] = RandomValue(0.0f, 1.0f); }
+//	//	pxmf4RandomValues[4] = 0.85f;
+//	//	pxmf4RandomValues[400] = 1.0f;
+//	//	pxmf4RandomValues[800] = 0.0f;
+//
+//	//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_STRUCTURED_BUFFER, 0, 1);
+//	//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_TEXTURE1D, 0, 1);
+//	m_pRandowmValueTexture = new CTexture(1, RESOURCE_BUFFER, 0, 1);
+//	m_pRandowmValueTexture->LoadBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1000, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
+//
+//	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+//
+//	CParticleShader* pShader = new CParticleShader();
+//	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
+//	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
+//	pShader->CreateCbvSrvDescriptorHeaps(pd3dDevice, 1, 2);
+//	pShader->CreateConstantBufferViews(pd3dDevice, 1, m_pd3dcbGameObject, ((sizeof(CB_PARTICLE_INFO) + 255) & ~255));
+//
+//	pShader->CreateShaderResourceViews(pd3dDevice, pParticleTexture, 0, 7);
+//	pShader->CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, 0, 8);
+//
+//	SetCbvGPUDescriptorHandle(pShader->GetGPUCbvDescriptorStartHandle());
+//
+//	pMaterial->SetShader(pShader);
+//	SetMaterial(pMaterial);
+//
+//	pd3dDevice->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), (void**)&m_pd3dCommandAllocator);
+//	pd3dDevice->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_pd3dCommandAllocator, NULL, __uuidof(ID3D12GraphicsCommandList), (void**)&m_pd3dCommandList);
+//	m_pd3dCommandList->Close();
+//
+//	pd3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, __uuidof(ID3D12Fence), (void**)&m_pd3dFence);
+//
+//	m_hFenceEvent = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+//
+//	//std::cout << std::fmodf(35.f, 1000.f) << std::endl;
+//}
+//
+//CParticleObject::~CParticleObject()
+//{
+//	if (m_pRandowmValueTexture) m_pRandowmValueTexture->Release();
+//
+//	if (m_pd3dCommandAllocator) m_pd3dCommandAllocator->Release();
+//	if (m_pd3dCommandList) m_pd3dCommandList->Release();
+//
+//	if (m_pd3dFence) m_pd3dFence->Release();
+//
+//	::CloseHandle(m_hFenceEvent);
+//
+//	ReleaseShaderVariables();
+//
+//}
+//
+//void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
+//{
+//	OnPrepareRender();
+//
+//	if (m_pMaterial)
+//	{
+//		if (m_pMaterial->m_pShader) m_pMaterial->m_pShader->OnPrepareRender(pd3dCommandList, 0);
+//		if (m_pMaterial->m_pTexture) m_pMaterial->m_pTexture->UpdateShaderVariables(pd3dCommandList);
+//
+//		if (m_pRandowmValueTexture) m_pRandowmValueTexture->UpdateShaderVariables(pd3dCommandList);
+//	}
+//
+//	UpdateShaderVariables(pd3dCommandList);
+//
+//	for (int i = 0; i < m_nMeshes; i++) if (m_ppMeshes[i]) m_ppMeshes[i]->PreRender(pd3dCommandList, 0); //Stream Output
+//	for (int i = 0; i < m_nMeshes; i++) if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 0); //Stream Output
+//
+//	//갯수읽어오기
+//	for (int i = 0; i < m_nMeshes; i++) if (m_ppMeshes[i]) m_ppMeshes[i]->PostRender(pd3dCommandList, 0); //Stream Output
+//
+//	if (m_pMaterial && m_pMaterial->m_pShader) m_pMaterial->m_pShader->OnPrepareRender(pd3dCommandList, 1);
+//
+//	for (int i = 0; i < m_nMeshes; i++) if (m_ppMeshes[i]) m_ppMeshes[i]->PreRender(pd3dCommandList, 1); //Draw
+//	for (int i = 0; i < m_nMeshes; i++) if (m_ppMeshes[i]) m_ppMeshes[i]->Render(pd3dCommandList, 1); //Draw
+//}
+//

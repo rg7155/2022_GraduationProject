@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "Player.h"
 #include "Component.h"
+#include "Shadow.h"
 
 struct LIGHT
 {
@@ -32,6 +33,8 @@ struct LIGHTS
 	int									m_nLights;
 };
 
+class CDepthRenderShader;
+class CTextureToViewportShader;
 class CScene
 {
 public:
