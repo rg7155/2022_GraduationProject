@@ -75,7 +75,9 @@ Texture2D gtxtSpecularTexture : register(t7);
 Texture2D gtxtNormalTexture : register(t8);
 
 Texture2D gtxtTexture2/*gtxtMetallicTexture*/ : register(t9); //¾îÂ÷ÇÇ ¾È¾µ²¨ ±×³É ÀÌÆåÆ® ÅØÃ÷Ã³ 1
-Texture2D gtxtEmissionTexture : register(t10);
+//Texture2D gtxtEmissionTexture : register(t10);
+Buffer<float4> gRandomBuffer : register(t10);
+
 Texture2D gtxtDetailAlbedoTexture : register(t11);
 Texture2D gtxtDetailNormalTexture : register(t12); 
 
@@ -349,7 +351,6 @@ VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
     return (input);
 }
 
-Buffer<float4> gRandomBuffer : register(t1);
 
 void GetBillboardCorners(float3 position, float2 size, out float4 pf4Positions[4])
 {

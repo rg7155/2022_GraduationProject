@@ -248,8 +248,9 @@ void CShader::CreateShader(ID3D12Device *pd3dDevice, ID3D12RootSignature *pd3dGr
 	::ZeroMemory(&m_d3dPipelineStateDesc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
 	m_d3dPipelineStateDesc.pRootSignature = pd3dGraphicsRootSignature;
 	m_d3dPipelineStateDesc.VS = CreateVertexShader(&pd3dVertexShaderBlob, nPipelineState);
-	m_d3dPipelineStateDesc.GS = CreateGeometryShader(&pd3dGeometryShaderBlob, nPipelineState);
+	m_d3dPipelineStateDesc.GS = CreateGeometryShader(&pd3dGeometryShaderBlob, nPipelineState);//파티클
 	m_d3dPipelineStateDesc.PS = CreatePixelShader(&pd3dPixelShaderBlob, nPipelineState);
+	m_d3dPipelineStateDesc.StreamOutput = CreateStreamOuputState(nPipelineState); //파티클
 	m_d3dPipelineStateDesc.RasterizerState = CreateRasterizerState(nPipelineState);
 	m_d3dPipelineStateDesc.BlendState = CreateBlendState(nPipelineState);
 	m_d3dPipelineStateDesc.DepthStencilState = CreateDepthStencilState(nPipelineState);
@@ -1123,6 +1124,20 @@ void CParticleShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature
 {
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0); //Stream Output Pipeline State
 	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 1); //Draw Pipeline State
+}
+
+void CParticleShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
+{
+	CParticleObject* pObject = new CParticleObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pObject->SetActiveState(true);
+	AddObject(L"Particle", pObject);
+}
+
+void CParticleShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
+{
+	for (auto& iter : m_mapObject)
+		for (auto& iterSec : iter.second)
+			static_cast<CParticleObject*>(iterSec)->Render(pd3dCommandList, pCamera, this);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

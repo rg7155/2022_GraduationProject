@@ -292,7 +292,11 @@ public:
 	virtual void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime);
 	virtual void CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles);
 
-	virtual void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
-	virtual void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+	void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+
+	//virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+	//virtual void OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 };

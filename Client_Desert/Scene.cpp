@@ -67,7 +67,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
 	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+10); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+20); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -93,6 +93,12 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pNPCObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pNPCObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pNPCObjectShader;
+
+	CShader* pShader = new CParticleShader();
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex++] = pShader;
+
 
 	m_nAlphaShaderStartIndex = iIndex;
 	m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader();
@@ -124,8 +130,8 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetDescriptorRange(pd3dDescriptorRanges, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);//t6: gtxtAlbedoTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 1, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 7, 0);//t7: gtxtSpecularTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 2, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 8, 0);//t8: gtxtNormalTexture
-	SetDescriptorRange(pd3dDescriptorRanges, 3, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 9, 0);//t9: gtxtMetallicTexture = effect2
-	SetDescriptorRange(pd3dDescriptorRanges, 4, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 10, 0);//t10: gtxtEmissionTexture
+	SetDescriptorRange(pd3dDescriptorRanges, 3, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 9, 0);//t9: gtxtMetallicTexture = Texture2
+	SetDescriptorRange(pd3dDescriptorRanges, 4, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 10, 0);//t10: gtxtEmissionTexture = RandomBuffer
 	SetDescriptorRange(pd3dDescriptorRanges, 5, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 11, 0);//t11: gtxtDetailAlbedoTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 6, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 12, 0);//t12: gtxtDetailNormalTexture
 	SetDescriptorRange(pd3dDescriptorRanges, 7, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 13, 0);//t13: gtxtSkyBoxTexture
@@ -139,8 +145,8 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterDescriptorTable(pd3dRootParameters, 3, 1, &pd3dDescriptorRanges[0], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 4, 1, &pd3dDescriptorRanges[1], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 5, 1, &pd3dDescriptorRanges[2], D3D12_SHADER_VISIBILITY_PIXEL);
-	SetRootParameterDescriptorTable(pd3dRootParameters, 6, 1, &pd3dDescriptorRanges[3], D3D12_SHADER_VISIBILITY_PIXEL);
-	SetRootParameterDescriptorTable(pd3dRootParameters, 7, 1, &pd3dDescriptorRanges[4], D3D12_SHADER_VISIBILITY_PIXEL);
+	SetRootParameterDescriptorTable(pd3dRootParameters, RP_TEXTURE2, 1, &pd3dDescriptorRanges[3], D3D12_SHADER_VISIBILITY_ALL); 
+	SetRootParameterDescriptorTable(pd3dRootParameters, RP_RANDOM_BUFFER, 1, &pd3dDescriptorRanges[4], D3D12_SHADER_VISIBILITY_ALL);//기하
 	SetRootParameterDescriptorTable(pd3dRootParameters, 8, 1, &pd3dDescriptorRanges[5], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 9, 1, &pd3dDescriptorRanges[6], D3D12_SHADER_VISIBILITY_PIXEL);
 	SetRootParameterDescriptorTable(pd3dRootParameters, 10, 1, &pd3dDescriptorRanges[7], D3D12_SHADER_VISIBILITY_PIXEL);
@@ -149,7 +155,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterDescriptorTable(pd3dRootParameters, RP_DEPTH_BUFFER, 1, &pd3dDescriptorRanges[8], D3D12_SHADER_VISIBILITY_PIXEL); //t14: gtxtDepthTextures
 	SetRootParameterCBV(pd3dRootParameters, RP_TO_LIGHT, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
 	SetRootParameterCBV(pd3dRootParameters, RP_FRAMEWORK_INFO, 5, 0, D3D12_SHADER_VISIBILITY_ALL);//b5 FRAMEWORKInfo
-	SetRootParameterDescriptorTable(pd3dRootParameters, RP_TEXTURE, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_PIXEL);
+	SetRootParameterDescriptorTable(pd3dRootParameters, RP_TEXTURE, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_ALL);
 	SetRootParameterCBV(pd3dRootParameters, RP_TEXTUREANIM, 6, 0, D3D12_SHADER_VISIBILITY_ALL);//b6 TextureAnim
 
 
@@ -197,7 +203,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	pd3dSamplerDescs[2].RegisterSpace = 0;
 	pd3dSamplerDescs[2].ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
-	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
+	D3D12_ROOT_SIGNATURE_FLAGS d3dRootSignatureFlags = D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT | D3D12_ROOT_SIGNATURE_FLAG_ALLOW_STREAM_OUTPUT | D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS | D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS;
 	D3D12_ROOT_SIGNATURE_DESC d3dRootSignatureDesc;
 	::ZeroMemory(&d3dRootSignatureDesc, sizeof(D3D12_ROOT_SIGNATURE_DESC));
 	d3dRootSignatureDesc.NumParameters = _countof(pd3dRootParameters);

@@ -438,22 +438,16 @@ private:
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//class CParticleObject : public CGameObject
-//{
-//public:
-//	CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-//	virtual ~CParticleObject();
-//
-//	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
-//
-//public:
-//	CTexture* m_pRandowmValueTexture = NULL;
-//
-//	ID3D12CommandAllocator* m_pd3dCommandAllocator = NULL;
-//	ID3D12GraphicsCommandList* m_pd3dCommandList = NULL;
-//
-//	ID3D12Fence						* m_pd3dFence = NULL;
-//	UINT64							m_nFenceValue = 0;
-//	HANDLE							m_hFenceEvent;
-//
-//};
+class CParticleObject : public CGameObject
+{
+public:
+	CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CParticleObject();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
+
+public:
+	CTexture* m_pRandowmValueTexture = NULL;
+	CParticleMesh					*m_pParticleMesh = NULL;
+
+};

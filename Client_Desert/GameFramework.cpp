@@ -9,6 +9,8 @@
 
 CGameFramework::CGameFramework()
 {
+	srand((unsigned)time(NULL));
+
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
 	m_pd3dDevice = NULL;
