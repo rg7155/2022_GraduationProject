@@ -51,10 +51,6 @@ private:
 
 	UINT*							m_pnResourceTypes = NULL;
 
-	DXGI_FORMAT*					m_pdxgiBufferFormats = NULL;
-	int*							m_pnBufferElements = NULL;
-	int*							m_pnBufferStrides = NULL;
-
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE		*m_pd3dSamplerGpuDescriptorHandles = NULL;
 
@@ -63,6 +59,11 @@ public:
 	SRVROOTARGUMENTINFO				*m_pRootArgumentInfos = NULL;
 	int 							m_nRows = 1; //몇곱몇인지, 이건 텍스쳐에
 	int 							m_nCols = 1;
+
+
+	DXGI_FORMAT* m_pdxgiBufferFormats = NULL;
+	int* m_pnBufferElements = NULL;
+	int* m_pnBufferStrides = NULL;
 public:
 	//만들자마자 해줘야함
 	void AddRef() { 

@@ -427,7 +427,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateConstantBufferViews(ID3D12Device *pd3d
 	return(d3dCbvGPUDescriptorHandle);
 }
 
-D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3dResourceDesc, UINT nTextureType)
+D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3dResourceDesc, UINT nTextureType, CTexture* pTexture, int nIndex)
 {
 	D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc;
 	d3dShaderResourceViewDesc.Format = d3dResourceDesc.Format;
@@ -459,10 +459,16 @@ D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3
 			break;
 		case RESOURCE_BUFFER: //(d3dResourceDesc.Dimension == D3D12_RESOURCE_DIMENSION_BUFFER)
 			d3dShaderResourceViewDesc.ViewDimension = D3D12_SRV_DIMENSION_BUFFER;
-			d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
+	/*		d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
 			d3dShaderResourceViewDesc.Buffer.NumElements = 0;
-			d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;
+			d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;*/
+			d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
+			d3dShaderResourceViewDesc.Buffer.NumElements = pTexture->m_pnBufferElements[nIndex];
+			d3dShaderResourceViewDesc.Buffer.StructureByteStride = pTexture->m_pnBufferStrides[nIndex];
+
 			d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
+
+			//d3dShaderResourceViewDesc.Format = pTexture->m_pdxgiBufferFormats[nIndex]; //포멧 임시 지정
 			break;
 	}
 	return(d3dShaderResourceViewDesc);
@@ -479,7 +485,7 @@ D3D12_GPU_DESCRIPTOR_HANDLE CScene::CreateShaderResourceViews(ID3D12Device *pd3d
 		{
 			ID3D12Resource *pShaderResource = pTexture->GetTexture(i);
 			D3D12_RESOURCE_DESC d3dResourceDesc = pShaderResource->GetDesc();
-			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = GetShaderResourceViewDesc(d3dResourceDesc, nTextureType);
+			D3D12_SHADER_RESOURCE_VIEW_DESC d3dShaderResourceViewDesc = GetShaderResourceViewDesc(d3dResourceDesc, nTextureType, pTexture, i);
 			pd3dDevice->CreateShaderResourceView(pShaderResource, &d3dShaderResourceViewDesc, m_d3dSrvCPUDescriptorNextHandle);
 			m_d3dSrvCPUDescriptorNextHandle.ptr += ::gnCbvSrvDescriptorIncrementSize;
 
