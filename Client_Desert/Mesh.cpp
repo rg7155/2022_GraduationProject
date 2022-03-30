@@ -664,10 +664,14 @@ void CTrailMesh::SetVertices(CTexturedVertex* pVertices, size_t iVertexCount)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles) : CMesh(pd3dDevice, pd3dCommandList)
+#define MAX_PARTICLES					1/*9999999*/
+
+CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime) : CMesh(pd3dDevice, pd3dCommandList)
 {
+	m_nMaxParticles = MAX_PARTICLES;
+
 	CreateVertexBuffer(pd3dDevice, pd3dCommandList, xmf3Position, xmf3Velocity, xmf3Acceleration, xmf3Color, xmf2Size, fLifetime);
-	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList, nMaxParticles);
+	CreateStreamOutputBuffer(pd3dDevice, pd3dCommandList);
 }
 
 void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime)
@@ -693,10 +697,8 @@ void CParticleMesh::CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_d3dPositionBufferView.SizeInBytes = m_nStride * m_nVertices;
 }
 
-void CParticleMesh::CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles)
+void CParticleMesh::CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
 {
-	m_nMaxParticles = nMaxParticles;
-
 	m_pd3dStreamOutputBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_STREAM_OUT, NULL);
 	m_pd3dDrawBuffer = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, (m_nStride * m_nMaxParticles), D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
 
@@ -710,6 +712,7 @@ void CParticleMesh::CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12Gra
 	m_d3dStreamOutputBufferView.SizeInBytes = m_nStride * m_nMaxParticles;
 	m_d3dStreamOutputBufferView.BufferFilledSizeLocation = m_pd3dDefaultBufferFilledSize->GetGPUVirtualAddress();
 
+	//리드백 내부 구현하기
 	m_pd3dReadBackBufferFilledSize = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, sizeof(UINT64), D3D12_HEAP_TYPE_READBACK, D3D12_RESOURCE_STATE_COPY_DEST, NULL);
 }
 
@@ -795,9 +798,9 @@ void CParticleMesh::PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int n
 
 		//::gnCurrentParticles = m_nVertices;
 #ifdef _WITH_DEBUG_STREAM_OUTPUT_VERTICES
-		//TCHAR pstrDebug[256] = { 0 };
-		//_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
-		//OutputDebugString(pstrDebug);
+		TCHAR pstrDebug[256] = { 0 };
+		_stprintf_s(pstrDebug, 256, _T("Stream Output Vertices = %d\n"), m_nVertices);
+		OutputDebugString(pstrDebug);
 #endif
 		if ((m_nVertices == 0)/* || (m_nVertices >= MAX_PARTICLES)*/) m_bStart = true;
 		//m_bStart = true;

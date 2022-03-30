@@ -1453,11 +1453,13 @@ void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPo
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
-	 CParticleMesh* pMesh = m_pParticleMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 20.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(8.0f, 12.0f), 1.0f, MAX_PARTICLES);
+	 CParticleMesh* pMesh = m_pParticleMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 20.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(8.0f, 12.0f), 1.0f);
 	SetMesh(pMesh);
 
 	CTexture* pParticleTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/RoundParticle.dds", 0);
+	//pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
+
 
 	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1000];
 	for (int i = 0; i < 1000; i++)
@@ -1469,7 +1471,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	CMaterial* pMaterial = new CMaterial(2);
 	pMaterial->SetTexture(pParticleTexture);
-	pMaterial->SetTexture(m_pRandowmValueTexture);
+	pMaterial->SetTexture(m_pRandowmValueTexture, 1); //1³Ö¾îÁà¾ßÁö!!!!!!!!!!!!
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pParticleTexture, RP_TEXTURE, false);
 	CScene::CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, RP_RANDOM_BUFFER, false);
@@ -1481,14 +1483,14 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 CParticleObject::~CParticleObject()
 {
-	if (m_pRandowmValueTexture) m_pRandowmValueTexture->Release();
-
-	ReleaseShaderVariables();
+	//if (m_pRandowmValueTexture)
+	//	m_pRandowmValueTexture->ReleaseUploadBuffers();
 
 }
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
+	cout << "Particle Render" << endl;
 	//0
 	pShader->OnPrepareRender(pd3dCommandList, 0);
 

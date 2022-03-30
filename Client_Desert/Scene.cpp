@@ -67,7 +67,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
 	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+20); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+40); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -75,7 +75,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_nShaders = 5;
+	m_nShaders = 6;
 	m_ppShaders = new CShader*[m_nShaders];
 
 	int iIndex = 0;
@@ -464,11 +464,11 @@ D3D12_SHADER_RESOURCE_VIEW_DESC GetShaderResourceViewDesc(D3D12_RESOURCE_DESC d3
 			d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;*/
 			d3dShaderResourceViewDesc.Buffer.FirstElement = 0;
 			d3dShaderResourceViewDesc.Buffer.NumElements = pTexture->m_pnBufferElements[nIndex];
-			d3dShaderResourceViewDesc.Buffer.StructureByteStride = pTexture->m_pnBufferStrides[nIndex];
+			d3dShaderResourceViewDesc.Buffer.StructureByteStride = 0;
 
 			d3dShaderResourceViewDesc.Buffer.Flags = D3D12_BUFFER_SRV_FLAG_NONE;
 
-			//d3dShaderResourceViewDesc.Format = pTexture->m_pdxgiBufferFormats[nIndex]; //포멧 임시 지정
+			d3dShaderResourceViewDesc.Format = pTexture->m_pdxgiBufferFormats[nIndex]; //포멧 임시 지정
 			break;
 	}
 	return(d3dShaderResourceViewDesc);

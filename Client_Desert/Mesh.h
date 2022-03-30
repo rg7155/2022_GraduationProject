@@ -261,36 +261,15 @@ private:
 	UINT8*		m_pBufferDataBegin = NULL;
 };
 
-#define MAX_PARTICLES					100/*9999999*/
 
 class CParticleMesh : public CMesh
 {
 public:
-	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime, UINT nMaxParticles);
+	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime);
 	virtual ~CParticleMesh();
 
-	bool								m_bStart = true;
-
-	UINT								m_nMaxParticles = MAX_PARTICLES;
-
-	ID3D12Resource* m_pd3dStreamOutputBuffer = NULL;
-	ID3D12Resource* m_pd3dDrawBuffer = NULL;
-
-	ID3D12Resource* m_pd3dDefaultBufferFilledSize = NULL;
-	ID3D12Resource* m_pd3dUploadBufferFilledSize = NULL;
-	UINT64* m_pnUploadBufferFilledSize = NULL;
-#ifdef _WITH_QUERY_DATA_SO_STATISTICS
-	ID3D12QueryHeap* m_pd3dSOQueryHeap = NULL;
-	ID3D12Resource* m_pd3dSOQueryBuffer = NULL;
-	D3D12_QUERY_DATA_SO_STATISTICS* m_pd3dSOQueryDataStatistics = NULL;
-#else
-	ID3D12Resource* m_pd3dReadBackBufferFilledSize = NULL;
-#endif
-
-	D3D12_STREAM_OUTPUT_BUFFER_VIEW		m_d3dStreamOutputBufferView;
-
 	virtual void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime);
-	virtual void CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, UINT nMaxParticles);
+	virtual void CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 
 	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
 	void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
@@ -299,4 +278,18 @@ public:
 	//virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
 	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
 	//virtual void OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+
+public:
+	bool								m_bStart = true;
+
+	UINT								m_nMaxParticles = 0;
+
+	ID3D12Resource* m_pd3dStreamOutputBuffer = NULL;
+	ID3D12Resource* m_pd3dDrawBuffer = NULL;
+
+	ID3D12Resource* m_pd3dDefaultBufferFilledSize = NULL;
+	ID3D12Resource* m_pd3dUploadBufferFilledSize = NULL;
+	UINT64* m_pnUploadBufferFilledSize = NULL;
+	ID3D12Resource* m_pd3dReadBackBufferFilledSize = NULL;
+	D3D12_STREAM_OUTPUT_BUFFER_VIEW		m_d3dStreamOutputBufferView;
 };
