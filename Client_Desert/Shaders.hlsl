@@ -335,22 +335,6 @@ VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
 #define PARTICLE_TYPE_EMITTER	0 //정점을 만드는
 #define PARTICLE_TYPE_FLARE		0x0ff //다른파티클을 생성하지 못하는?
 
-struct VS_PARTICLE_INPUT
-{
-    float3 position : POSITION;
-    float3 color : COLOR;
-    float3 velocity : VELOCITY;
-    float3 acceleration : ACCELERATION; //가속도
-    float2 size : SIZE;
-    float2 age : AGELIFETIME; //(Age, Lifetime)
-    uint type : PARTICLETYPE;
-};
-
-VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
-{
-    return (input);
-}
-
 
 void GetBillboardCorners(float3 position, float2 size, out float4 pf4Positions[4])
 {
@@ -382,9 +366,26 @@ void GetPositions(float3 position, float2 f2Size, out float3 pf3Positions[8])
     pf3Positions[7] = position + float3(0.0f, 0.0f, -f2Size.y);
 }
 
-[maxvertexcount(9)]
-//[maxvertexcount(2)]
 
+struct VS_PARTICLE_INPUT
+{
+    float3 position : POSITION;
+    float3 color : COLOR;
+    float3 velocity : VELOCITY;
+    float3 acceleration : ACCELERATION; //가속도
+    float2 size : SIZE;
+    float2 age : AGELIFETIME; //(Age, Lifetime)
+    uint type : PARTICLETYPE;
+};
+
+//0번
+VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
+{
+    return (input);
+}
+
+
+[maxvertexcount(9)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
     VS_PARTICLE_INPUT particle = input[0];
@@ -476,6 +477,8 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
 	
 }
 
+
+//1번
 VS_PARTICLE_INPUT VSParticleDraw(VS_PARTICLE_INPUT input)
 {
     return (input);
@@ -524,6 +527,7 @@ void GSParticleDraw(point VS_PARTICLE_INPUT input[1], inout TriangleStream<GS_PA
 float4 PSParticleDraw(GS_PARTICLE_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    cColor.a = cColor.r;
     if (input.type == PARTICLE_TYPE_FLARE)
     {
         cColor *= float4(input.color, 1.f);

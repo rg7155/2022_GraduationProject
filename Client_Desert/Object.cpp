@@ -1490,7 +1490,14 @@ CParticleObject::~CParticleObject()
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
-	cout << "Particle Render" << endl;
+	//cout << "Particle Render" << endl;
+	
+	//CGameObject::Render(pd3dCommandList, pCamera);
+
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	for (int i = 0; i < m_nMaterials; i++)
+		m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
 	//0
 	pShader->OnPrepareRender(pd3dCommandList, 0);
 
