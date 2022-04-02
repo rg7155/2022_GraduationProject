@@ -1,6 +1,0 @@
-﻿  pch.cpp
-  Server.cpp
-D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Server.cpp(178,10): warning C4101: 'buf' :참조되지 않은 지역 변수입니다.
-D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Server.cpp(175,9): warning C4101: 'retval' :참조되지 않은 지역 변수입니다.
-  Timer.cpp
-  Client_Desert_Server.vcxproj -> D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Debug\Client_Desert_Server.exe

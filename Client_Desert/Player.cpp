@@ -354,7 +354,13 @@ void CPlayer::Update(float fTimeElapsed)
 	if (m_eCurAnim == ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Explosion");
-		if (pObj) pObj->SetPosition(GetPosition());
+		if (pObj) {
+			XMFLOAT3 xmf3Pos = GetPosition();
+			xmf3Pos.x += m_xmf3Look.x;
+			xmf3Pos.z += m_xmf3Look.z;
+
+			pObj->SetPosition(xmf3Pos);
+		}
 		m_bSkill1EffectOn = true;
 
 	}
