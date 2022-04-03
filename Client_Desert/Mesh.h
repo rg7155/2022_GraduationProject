@@ -36,6 +36,7 @@ public:
 	XMFLOAT2						m_xmf2Size = XMFLOAT2(0.0f, 0.0f);
 	XMFLOAT2						m_xmf2AgeLifetime = XMFLOAT2(0.0f, 0.0f); //(Age, Lifetime)
 	UINT							m_nType = 0;
+	float							m_fAlpha = 0.f;
 
 public:
 	CParticleVertex() {}
@@ -284,12 +285,14 @@ public:
 
 	UINT								m_nMaxParticles = 0;
 
+	//두개 번갈아가며 사용
 	ID3D12Resource* m_pd3dStreamOutputBuffer = NULL;
 	ID3D12Resource* m_pd3dDrawBuffer = NULL;
 
 	ID3D12Resource* m_pd3dDefaultBufferFilledSize = NULL;
 	ID3D12Resource* m_pd3dUploadBufferFilledSize = NULL;
 	UINT64* m_pnUploadBufferFilledSize = NULL;
+
 	ID3D12Resource* m_pd3dReadBackBufferFilledSize = NULL;
 	D3D12_STREAM_OUTPUT_BUFFER_VIEW		m_d3dStreamOutputBufferView;
 };

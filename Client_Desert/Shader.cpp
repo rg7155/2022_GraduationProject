@@ -1072,7 +1072,7 @@ D3D12_DEPTH_STENCIL_DESC CParticleShader::CreateDepthStencilState(int nPipelineS
 
 D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 {
-	UINT nInputElementDescs = 7;
+	UINT nInputElementDescs = 8;
 	D3D12_INPUT_ELEMENT_DESC* pd3dInputElementDescs = new D3D12_INPUT_ELEMENT_DESC[nInputElementDescs];
 
 	pd3dInputElementDescs[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
@@ -1082,6 +1082,8 @@ D3D12_INPUT_LAYOUT_DESC CParticleShader::CreateInputLayout(int nPipelineState)
 	pd3dInputElementDescs[4] = { "SIZE", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 48, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[5] = { "AGELIFETIME", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 56, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
 	pd3dInputElementDescs[6] = { "PARTICLETYPE", 0, DXGI_FORMAT_R32_UINT, 0, 64, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	pd3dInputElementDescs[7] = { "ALPHA", 0, DXGI_FORMAT_R32_FLOAT, 0, 68, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
 
 	D3D12_INPUT_LAYOUT_DESC d3dInputLayoutDesc;
 	d3dInputLayoutDesc.pInputElementDescs = pd3dInputElementDescs;
@@ -1097,7 +1099,7 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 
 	if (nPipelineState == 0)
 	{
-		UINT nStreamOutputDecls = 7;
+		UINT nStreamOutputDecls = 8;
 		D3D12_SO_DECLARATION_ENTRY* pd3dStreamOutputDecls = new D3D12_SO_DECLARATION_ENTRY[nStreamOutputDecls];
 		pd3dStreamOutputDecls[0] = { 0, "POSITION", 0, 0, 3, 0 }; //float3, 0번 슬롯 버퍼로 출력
 		pd3dStreamOutputDecls[1] = { 0, "COLOR", 0, 0, 3, 0 };
@@ -1106,9 +1108,10 @@ D3D12_STREAM_OUTPUT_DESC CParticleShader::CreateStreamOuputState(int nPipelineSt
 		pd3dStreamOutputDecls[4] = { 0, "SIZE", 0, 0, 2, 0 };
 		pd3dStreamOutputDecls[5] = { 0, "AGELIFETIME", 0, 0, 2, 0 };
 		pd3dStreamOutputDecls[6] = { 0, "PARTICLETYPE", 0, 0, 1, 0 };
+		pd3dStreamOutputDecls[7] = { 0, "ALPHA", 0, 0, 1, 0 };
 
 		UINT* pBufferStrides = new UINT[1];
-		pBufferStrides[0] = sizeof(CParticleVertex);
+		pBufferStrides[0] = sizeof(CParticleVertex); //여기도 추가해주기
 
 		d3dStreamOutputDesc.NumEntries = nStreamOutputDecls;
 		d3dStreamOutputDesc.pSODeclaration = pd3dStreamOutputDecls;

@@ -376,6 +376,7 @@ struct VS_PARTICLE_INPUT
     float2 size : SIZE;
     float2 age : AGELIFETIME; //(Age, Lifetime)
     uint type : PARTICLETYPE;
+    float alpha : ALPHA;
 };
 
 //0번
@@ -388,50 +389,60 @@ VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 [maxvertexcount(9)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
+     //VS_PARTICLE_INPUT particle = input[0];
+
+    //particle.age.x += gfElapsedTime;
+    
+
+    /////////////////////////////////////////////////////1
     VS_PARTICLE_INPUT particle = input[0];
 
     particle.age.x += gfElapsedTime;
-    if (particle.age.x <= particle.age.y)
+    if (particle.type == PARTICLE_TYPE_EMITTER)
     {
-        if (particle.type == PARTICLE_TYPE_EMITTER)
+        if (particle.age.x >= 0.01f)
         {
-            particle.color = float3(1.0f, 0.0f, 0.0f);
+            particle.age.x = 0.0f;
             output.Append(particle);
 
-            float4 f4Random = gRandomBuffer.Load(int(fmod(gfCurrentTime - floor(gfCurrentTime) * 1000.0f, 1000.0f)));
-
-            float3 pf3Positions[8];
-            GetPositions(particle.position, float2(particle.size.x /** 1.25f*/, particle.size.x/* * 1.25f*/), pf3Positions);
-
-            particle.color = float3(0.f, 0.0f, 1.0f);
+            //float4 f4Random = gRandomBuffer.Load(int(fmod(gfCurrentTime - floor(gfCurrentTime) * 1000.0f, 1000.0f)));
+            //float3 pf3Positions[8];
             
-            particle.age.x = 0.0f;
-
+            
             for (int j = 0; j < 8; j++)
             {
-                float4 f4Random2 = gRandomBuffer.Load(int(fmod((gfCurrentTime - floor(gfCurrentTime)) * 1000.0f, 1000.0f)));
+                float4 f4Random2 = gRandomBuffer.Load( int(fmod( (gfCurrentTime - floor(gfCurrentTime)) * 1000.0f, 1000.0f) ) );
                 
                 particle.type = PARTICLE_TYPE_FLARE;
                 
-                particle.position = pf3Positions[j].xyz + (f4Random2.xyz * 100.f);
-                particle.velocity = float3(0.0f, particle.size.x * particle.age.y * 10.0f, 0.0f);
+                particle.color = float3(1.f, 1.f, 1.f);
+                particle.position = f4Random2.xyz * 10.f;
+                particle.velocity = float3(0.0f, 10.0f, 0.0f);
                 particle.acceleration = float3(10.0f, 250.f, 10.0f) * abs(f4Random2.x);
-                particle.age.y = 2.f; //수명
+                //particle.acceleration = float3(10.0f, 250.f, 10.0f);
                 
+                particle.age.y = 10.f; //수명
+                particle.size.x = 1.f; //알파값 임시로 사용
                 output.Append(particle);
             }
         }
-        else
+    }
+    else
+    {
+         //수명까지
+        if (particle.age.x <= particle.age.y)
         {
-            //particle.color = GetParticleColor(particle.age.x, particle.age.y);
-            particle.color = float3(1.f, 1.f, 1.f);
-            
             particle.position += (0.5f * particle.acceleration * gfElapsedTime * gfElapsedTime) + (particle.velocity * gfElapsedTime);
-
+            
+            float x = particle.age.x;
+            float y = particle.age.y;
+            //particle.alpha = saturate(1.f - ((y - x) / y)); // 1~0값
+            particle.alpha = 0.1f;
             output.Append(particle);
         }
     }
-	
+    
+    /////////////////////////////////////////////////////2
     //VS_PARTICLE_INPUT particle = input[0];
     //particle.age.x += gfElapsedTime;
     //if (particle.type == PARTICLE_TYPE_EMITTER)
@@ -498,6 +509,7 @@ struct GS_PARTICLE_OUTPUT
     float3 color : COLOR;
     float2 uv : TEXCOORD;
     float2 age : AGELIFETIME; //(Age, Lifetime)
+    float alpha : ALPHA;
     uint type : PARTICLETYPE;
 };
 
@@ -515,6 +527,8 @@ void GSParticleDraw(point VS_PARTICLE_INPUT input[1], inout TriangleStream<GS_PA
     output.color = input[0].color;
     output.age = input[0].age;
     output.type = input[0].type;
+    output.alpha = input[0].alpha;
+    
     for (int i = 0; i < 4; i++)
     {
         output.position = mul(mul(pVertices[i], gmtxView), gmtxProjection);
@@ -527,17 +541,18 @@ void GSParticleDraw(point VS_PARTICLE_INPUT input[1], inout TriangleStream<GS_PA
 float4 PSParticleDraw(GS_PARTICLE_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
-    cColor.a = cColor.r;
-    if (input.type == PARTICLE_TYPE_FLARE)
-    {
-        cColor *= float4(input.color, 1.f);
-    }
-
+    
+    //cColor.a = cColor.r;
+    
+    cColor.a = input.alpha;
+    cColor.a *= cColor.r;
+    
     return (cColor);
 }
 
 
 
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 struct VS_SKYBOX_CUBEMAP_INPUT
