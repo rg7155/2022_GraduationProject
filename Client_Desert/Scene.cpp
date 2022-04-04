@@ -227,6 +227,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_C))
 	{
+		//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
 		ChangeScene(SCENE_2);
 	}
 

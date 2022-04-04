@@ -1405,6 +1405,12 @@ void CUIObject::Animate(float fTimeElapsed)
 		else
 		{
 			if (m_fAlpha > 0.f) m_fAlpha -= fTimeElapsed;
+			//m_fAlpha -= fTimeElapsed;
+			//if (m_fAlpha < -2.f)
+			//{
+			//	SetFadeState(m_isFadeIn = !m_isFadeIn);
+			//}
+
 		}
 		break;
 	}
@@ -1453,7 +1459,7 @@ void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPo
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
-	 CParticleMesh* pMesh = m_pParticleMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(1.0f, 1.0f), 1.0f);
+	 CParticleMesh* pMesh = m_pParticleMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f), 1.0f);
 	SetMesh(pMesh);
 
 	CTexture* pParticleTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
@@ -1478,7 +1484,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SetMaterial(0, pMaterial);
 
-	//std::cout << std::fmodf(35.f, 1000.f) << std::endl;
+	SetPosition(10.f, 0.f, 10.f);
 }
 
 CParticleObject::~CParticleObject()

@@ -985,7 +985,7 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	CUIObject* pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pObject->SetActiveState(true);
 	pObject->m_eUIType = CUIObject::UI_TYPE::UI_FADE;
-	AddObject(L"UI", pObject);
+	AddObject(L"UI_Fade", pObject);
 }
 
 void CUIObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)

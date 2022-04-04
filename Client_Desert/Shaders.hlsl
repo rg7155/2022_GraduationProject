@@ -416,12 +416,12 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
                 particle.type = PARTICLE_TYPE_FLARE;
                 
                 particle.color = float3(1.f, 1.f, 1.f);
-                particle.position = f4Random2.xyz * 10.f;
-                particle.velocity = float3(0.0f, 10.0f, 0.0f);
-                particle.acceleration = float3(10.0f, 250.f, 10.0f) * abs(f4Random2.x);
+                particle.position = f4Random2.xyz * 5.f;
+                particle.velocity = float3(0.0f, 3.0f, 0.0f);
+                particle.acceleration = float3(10.0f * f4Random2.y, 1000.f * abs(f4Random2.x), 10.0f * f4Random2.z);
                 //particle.acceleration = float3(10.0f, 250.f, 10.0f);
                 
-                particle.age.y = 3.f; //수명
+                particle.age.y = 1.f; //수명
                 particle.alpha = 1.f; //알파값
                 output.Append(particle);
             }
@@ -436,8 +436,10 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
             
             float x = particle.age.x;
             float y = particle.age.y;
-            particle.alpha = saturate(1.f - ((y - x) / y)); // 1~0값
-            //particle.alpha = (y - x) / y; // 1~0값
+            //particle.alpha = saturate(1.f - ((y - x) / y)); // 1~0값
+            
+            //너무 많은 append로 인해 알파값이 0이 되기전에 사라짐, 따라서 수명을 짧게하여 금방 사라지도록 함
+            particle.alpha = saturate((y - x) / y); // 1~0값
             
             //particle.alpha = 0.1f;
             output.Append(particle);
