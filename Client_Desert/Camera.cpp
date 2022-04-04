@@ -329,10 +329,10 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		// 카메라 right 기준
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(dwMouseMove / DPI));
 		XMFLOAT3 xmf3NewOffSet = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
-		if (xmf3NewOffSet.y > 1.f && xmf3NewOffSet.y < CAM_OFFSET_Y + CAM_OFFSET_Y*0.5f)
-		{
+		//if (xmf3NewOffSet.y > 1.f && xmf3NewOffSet.y < CAM_OFFSET_Y + CAM_OFFSET_Y*0.5f)
+		//{
 			m_xmf3Offset = xmf3NewOffSet;
-		}
+		//}
 
 		if (m_pPlayer)
 		{

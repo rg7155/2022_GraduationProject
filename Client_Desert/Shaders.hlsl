@@ -421,8 +421,8 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
                 particle.acceleration = float3(10.0f, 250.f, 10.0f) * abs(f4Random2.x);
                 //particle.acceleration = float3(10.0f, 250.f, 10.0f);
                 
-                particle.age.y = 10.f; //수명
-                particle.size.x = 1.f; //알파값 임시로 사용
+                particle.age.y = 3.f; //수명
+                particle.alpha = 1.f; //알파값
                 output.Append(particle);
             }
         }
@@ -436,8 +436,10 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
             
             float x = particle.age.x;
             float y = particle.age.y;
-            //particle.alpha = saturate(1.f - ((y - x) / y)); // 1~0값
-            particle.alpha = 0.1f;
+            particle.alpha = saturate(1.f - ((y - x) / y)); // 1~0값
+            //particle.alpha = (y - x) / y; // 1~0값
+            
+            //particle.alpha = 0.1f;
             output.Append(particle);
         }
     }

@@ -664,7 +664,7 @@ void CTrailMesh::SetVertices(CTexturedVertex* pVertices, size_t iVertexCount)
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#define MAX_PARTICLES					500/*9999999*/
+#define MAX_PARTICLES					1000/*9999999*/
 
 CParticleMesh::CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime) : CMesh(pd3dDevice, pd3dCommandList)
 {
