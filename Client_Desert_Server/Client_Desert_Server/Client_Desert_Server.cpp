@@ -121,20 +121,6 @@ int main()
 	WSACleanup();
 }
 
-void error_display(const char* msg, int err_no)
-{
-	WCHAR* lpMsgBuf;
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, err_no,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMsgBuf, 0, NULL);
-	std::cout << msg;
-	std::wcout << L"에러 " << lpMsgBuf << std::endl;
-	while (true);
-	LocalFree(lpMsgBuf);
-}
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
 {
 	int client_id = over_to_session[over];
@@ -157,6 +143,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 
 	XMFLOAT3* pos = reinterpret_cast<XMFLOAT3*>(clients[client_id]._c_mess);
 	// 모든 클라에게 클라의 위치 전송 (나를 제외)
+	cout << pos->x << endl;
 	for (auto& cl : clients)
 	{
 		if (cl.first == client_id) continue;

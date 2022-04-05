@@ -5,7 +5,7 @@
 constexpr int SERVER_PORT = 4000;
 constexpr int BUFSIZE = 200;
 
-#define DISCONNECT -99.f;
+#define DISCONNECT -99.f
 
 
 // 프로토콜 정의

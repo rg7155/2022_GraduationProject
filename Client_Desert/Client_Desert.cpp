@@ -4,7 +4,7 @@
 #include "stdafx.h"
 #include "Client_Desert.h"
 #include "GameFramework.h"
-
+#include "../Client_Desert_Server/Client_Desert_Server/Protocol.h"
 #define MAX_LOADSTRING 100
 
 HINSTANCE						ghAppInstance;
@@ -17,6 +17,36 @@ ATOM MyRegisterClass(HINSTANCE hInstance);
 BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
+
+// Server
+char SERVER_ADDR[BUFSIZE] = "127.0.0.1";
+SOCKET s_socket;
+WSABUF wsabuf_r;
+char recv_buf[BUFSIZE];
+WSABUF wsabuf_s;
+char send_buf[BUFSIZE];
+
+void Server_PosSend();
+void Server_PosRecv();
+void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
+	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
+void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
+	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
+
+void error_display(const char* msg, int err_no)
+{
+	WCHAR* lpMsgBuf;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, err_no,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf, 0, NULL);
+	std::cout << msg;
+	std::wcout << L"에러 " << lpMsgBuf << std::endl;
+	while (true);
+	LocalFree(lpMsgBuf);
+}
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
@@ -34,6 +64,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
+	wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
+	WSADATA WSAData;
+	WSAStartup(MAKEWORD(2, 2), &WSAData); // 소켓 네트워킹 시작 - 윈도우만
+	s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, 0, 0, WSA_FLAG_OVERLAPPED);
+	SOCKADDR_IN server_addr;
+	ZeroMemory(&server_addr, sizeof(server_addr));
+	server_addr.sin_family = AF_INET;
+	server_addr.sin_port = htons(SERVER_PORT);
+	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
+	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 
 
 	while (1)
@@ -50,6 +90,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		else
 		{
 			gGameFramework.FrameAdvance();
+
+			////// 키 send
+			Server_PosSend();
+
+			//// 위치 받기
+			Server_PosRecv();
+
+			// Sleep -> recv_callback -> send_callback 순으로 실행된다.
+
+			SleepEx(0, true);
 		}
 		//// Start the Dear ImGui frame
 		//ImGui_ImplDX12_NewFrame();
@@ -169,3 +219,75 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return((INT_PTR)FALSE);
 }
+
+void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
+	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
+{
+	char* m_start = recv_buf;
+
+	while (true)
+	{
+		int msg_size = m_start[0];
+		int from_client_id = m_start[1];
+		XMFLOAT3* pos;
+		pos = reinterpret_cast<XMFLOAT3*>(m_start + 2);
+		gGameFramework.GetPlayer()->SetPosition(*pos);
+		//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
+		//	cout << "client disconnection\n";
+		//else
+		//	cout << pos->x << pos->y << endl;
+
+		cbTransferred -= msg_size;
+		if (0 >= cbTransferred) break;
+		m_start += msg_size;
+
+	}
+
+	delete lpOverlapped;
+
+
+}
+
+void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
+	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
+{
+	delete lpOverlapped;
+}
+
+void Server_PosRecv()
+{
+	// 위치 recv
+	wsabuf_r.buf = recv_buf; wsabuf_r.len = BUFSIZE;
+	DWORD recv_flag = 0;
+	WSAOVERLAPPED* r_over = new WSAOVERLAPPED;
+	ZeroMemory(r_over, sizeof(WSAOVERLAPPED));
+
+	int ret = WSARecv(s_socket, &wsabuf_r, 1, 0, &recv_flag, r_over, recv_callback);
+
+	if (0 != ret)
+	{
+		int err_no = WSAGetLastError();
+		if (err_no != WSA_IO_PENDING)
+			error_display("WSARecv", err_no);
+		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
+	}
+
+}
+void Server_PosSend()
+{
+	DWORD sent_byte;
+	WSABUF mybuf;
+	
+	mybuf.buf = reinterpret_cast<char*>(&gGameFramework.GetPlayer()->GetPosition());
+	mybuf.len = BUFSIZE;
+	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
+	int ret = WSASend(s_socket, &mybuf, 1, 0, 0, s_over, send_callback);
+	if (0 != ret)
+	{
+		int err_no = WSAGetLastError();
+		if (err_no != WSA_IO_PENDING)
+			error_display("WSASend", err_no);
+		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
+	}
+}
+

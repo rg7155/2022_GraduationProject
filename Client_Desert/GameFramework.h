@@ -51,6 +51,11 @@ public:
 	void CreateShaderVariables();
 	void UpdateShaderVariables();
 	void ReleaseShaderVariables();
+
+
+	// Server
+public:
+	CPlayer* GetPlayer() { return m_pPlayer; }
 private:
 	void CreateImgui();
 private:
