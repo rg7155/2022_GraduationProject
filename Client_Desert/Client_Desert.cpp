@@ -73,7 +73,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
-	connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 
 
 	while (1)
@@ -91,11 +91,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			gGameFramework.FrameAdvance();
 
-			////// 키 send
-			Server_PosSend();
+			if (ret != SOCKET_ERROR)
+			{
+				////// 키 send
+				Server_PosSend();
 
-			//// 위치 받기
-			Server_PosRecv();
+				//// 위치 받기
+				Server_PosRecv();
+			}
+		
 
 			// Sleep -> recv_callback -> send_callback 순으로 실행된다.
 
