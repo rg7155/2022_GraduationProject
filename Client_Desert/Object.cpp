@@ -462,7 +462,8 @@ void CGameObject::Animate(float fTimeElapsed)
 
 void CGameObject::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, bool isChangePipeline /*= true*/)
 {
-	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
+	if (m_pSkinnedAnimationController)
+		m_pSkinnedAnimationController->UpdateShaderVariables(pd3dCommandList);
 
 	if (m_pMesh)
 	{
@@ -1325,7 +1326,7 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 		if (m_nCol == nCols)
 		{
 			//cout << "end" << endl;
-			//m_isDead = true;
+			m_isActive = false;
 			m_nCol = 0;
 		}
 	}
@@ -1373,7 +1374,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
 	CMaterial* pMaterial = new CMaterial(1);
@@ -1382,14 +1383,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	//pMaterial->SetShader(nullptr/*pShader*/);
 	SetMaterial(0, pMaterial);
 
-	//m_vMouseColor = { 1.f,1.f, 1.f };
-	//m_vMousePos.x = WINCX * 0.5f;
-	//m_vMousePos.y = WINCY * 0.5f;
-	//m_vMouseSize.x = 64.f;
-	//m_vMouseSize.y = 64.f;
-
-	SetOrthoWorld(800.f, 600.f, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
-
+	SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
 }
 
 CUIObject::~CUIObject()
@@ -1398,15 +1392,132 @@ CUIObject::~CUIObject()
 
 void CUIObject::Animate(float fTimeElapsed)
 {
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_F))
+		SetFadeState(m_isFadeIn = !m_isFadeIn);
+
+	//m_Alpha = 0.8f;
+	switch (m_eUIType)
+	{
+	case CUIObject::UI_FADE:
+		if (m_isFadeIn)
+		{
+			if (m_fAlpha < 1.f) m_fAlpha += fTimeElapsed;
+		}
+		else
+		{
+			if (m_fAlpha > 0.f) m_fAlpha -= fTimeElapsed;
+			//m_fAlpha -= fTimeElapsed;
+			//if (m_fAlpha < -2.f)
+			//{
+			//	SetFadeState(m_isFadeIn = !m_isFadeIn);
+			//}
+
+		}
+		break;
+	}
+
 	CGameObject::Animate(fTimeElapsed);
+}
+
+void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	UpdateShaderVariables(pd3dCommandList);
+
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CUIObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
+}
+
+void CUIObject::SetFadeState(bool isIn)
+{
+	m_isFadeIn = isIn;
+
+	if (isIn)
+	{
+		//¹à¾ÆÁü
+		m_fAlpha = 0.f;
+	}
+	else
+	{
+		//ÆäÀÌµå ¾Æ¿ô - ¾îµÎ¿öÁü
+		m_fAlpha = 1.f;
+	}
 }
 
 void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY)
 {
-	//// Á÷±³Åõ¿µ
+	// Á÷±³Åõ¿µ
 	m_xmf4x4ToParent._11 = fSizeX;
 	m_xmf4x4ToParent._22 = fSizeY;
 	m_xmf4x4ToParent._33 = 1.f;
 	m_xmf4x4ToParent._41 = fPosX - FRAME_BUFFER_WIDTH * 0.5f;
 	m_xmf4x4ToParent._42 = -fPosY + FRAME_BUFFER_HEIGHT * 0.5f;
 }
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
+{
+	 CParticleMesh* pMesh = m_pParticleMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f), 1.0f);
+	SetMesh(pMesh);
+
+	CTexture* pParticleTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/RoundParticle.dds", 0);
+	//pParticleTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
+
+
+	XMFLOAT4* pxmf4RandomValues = new XMFLOAT4[1000];
+	for (int i = 0; i < 1000; i++)
+		pxmf4RandomValues[i] = XMFLOAT4(RandomValue(-1.0f, 1.0f), RandomValue(-1.0f, 1.0f), RandomValue(-1.0f, 1.0f), RandomValue(0.0f, 1.0f));
+
+	m_pRandowmValueTexture = new CTexture(1, RESOURCE_BUFFER, 0, 1);
+	m_pRandowmValueTexture->LoadBuffer(pd3dDevice, pd3dCommandList, pxmf4RandomValues, 1000, sizeof(XMFLOAT4), DXGI_FORMAT_R32G32B32A32_FLOAT, D3D12_HEAP_TYPE_DEFAULT, D3D12_RESOURCE_STATE_GENERIC_READ, 0);
+
+
+	CMaterial* pMaterial = new CMaterial(2);
+	pMaterial->SetTexture(pParticleTexture);
+	pMaterial->SetTexture(m_pRandowmValueTexture, 1); //1³Ö¾îÁà¾ßÁö!!!!!!!!!!!!
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pParticleTexture, RP_TEXTURE, false);
+	CScene::CreateShaderResourceViews(pd3dDevice, m_pRandowmValueTexture, RP_RANDOM_BUFFER, false);
+
+	SetMaterial(0, pMaterial);
+
+	SetPosition(10.f, 0.f, 10.f);
+}
+
+CParticleObject::~CParticleObject()
+{
+	//if (m_pRandowmValueTexture)
+	//	m_pRandowmValueTexture->ReleaseUploadBuffers();
+
+}
+
+void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	//cout << "Particle Render" << endl;
+	
+	//CGameObject::Render(pd3dCommandList, pCamera);
+
+	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
+	for (int i = 0; i < m_nMaterials; i++)
+		m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
+
+	//0
+	pShader->OnPrepareRender(pd3dCommandList, 0);
+
+	m_pParticleMesh->PreRender(pd3dCommandList, 0); //Stream Output
+	m_pParticleMesh->Render(pd3dCommandList, 0); //Stream Output
+
+	//°¹¼öÀÐ¾î¿À±â
+	m_pParticleMesh->PostRender(pd3dCommandList, 0); //Stream Output
+
+	//1
+	pShader->OnPrepareRender(pd3dCommandList, 1);
+
+	m_pParticleMesh->PreRender(pd3dCommandList, 1); //Draw
+	m_pParticleMesh->Render(pd3dCommandList, 1); //Draw
+}
+

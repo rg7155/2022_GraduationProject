@@ -9,6 +9,8 @@
 
 CGameFramework::CGameFramework()
 {
+	srand((unsigned)time(NULL));
+
 	m_pdxgiFactory = NULL;
 	m_pdxgiSwapChain = NULL;
 	m_pd3dDevice = NULL;
@@ -512,7 +514,7 @@ void CGameFramework::AnimateObjects()
 //#define _WITH_PLAYER_TOP
 void CGameFramework::FrameAdvance()
 {
-	m_GameTimer.Tick(0.0f);
+	m_GameTimer.Tick(60.0f);
 
 	CInputDev::GetInstance()->Set_InputDev();
 

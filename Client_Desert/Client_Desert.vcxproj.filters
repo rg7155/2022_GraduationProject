@@ -67,8 +67,8 @@
     <Filter Include="소스 파일\03. GameObject\00. Monster">
       <UniqueIdentifier>{4f343e48-2e86-4e23-bf7f-0943630848a2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="소스 파일\04. Player\00. DuoPlayer">
-      <UniqueIdentifier>{c08093a1-4409-449a-8b2b-177065dc1a10}</UniqueIdentifier>
+    <Filter Include="소스 파일\07. Shader\00. Shadow">
+      <UniqueIdentifier>{6397739e-af39-43f0-82bf-f023fbb67132}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -171,8 +171,8 @@
     <ClInclude Include="Monster.h">
       <Filter>소스 파일\03. GameObject\00. Monster</Filter>
     </ClInclude>
-    <ClInclude Include="DuoPlayer.h">
-      <Filter>소스 파일\04. Player\00. DuoPlayer</Filter>
+    <ClInclude Include="Shadow.h">
+      <Filter>소스 파일\07. Shader\00. Shadow</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -254,8 +254,8 @@
     <ClCompile Include="Monster.cpp">
       <Filter>소스 파일\03. GameObject\00. Monster</Filter>
     </ClCompile>
-    <ClCompile Include="DuoPlayer.cpp">
-      <Filter>소스 파일\04. Player\00. DuoPlayer</Filter>
+    <ClCompile Include="Shadow.cpp">
+      <Filter>소스 파일\07. Shader\00. Shadow</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

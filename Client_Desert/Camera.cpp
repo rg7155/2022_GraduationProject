@@ -8,7 +8,6 @@ CCamera::CCamera()
 	m_xmf4x4View = Matrix4x4::Identity();
 	m_xmf4x4Projection = Matrix4x4::Identity();
 	m_xmf4x4OrthoProjection = Matrix4x4::Identity();
-	m_xmf4x4OrthoProjection = Matrix4x4::OrthographicLH(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, 1.f);
 	m_d3dViewport = { 0, 0, FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT, 0.0f, 1.0f };
 	m_d3dScissorRect = { 0, 0, FRAME_BUFFER_WIDTH , FRAME_BUFFER_HEIGHT };
 	m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -131,6 +130,7 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
 
+	m_xmf4x4OrthoProjection = Matrix4x4::OrthographicLH(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, 1.f);
 	XMFLOAT4X4 xmf4x4OrthoProjection;
 	XMStoreFloat4x4(&xmf4x4OrthoProjection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4OrthoProjection)));
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4OrthoProjection, &xmf4x4OrthoProjection, sizeof(XMFLOAT4X4));
@@ -329,10 +329,10 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		// 카메라 right 기준
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(dwMouseMove / DPI));
 		XMFLOAT3 xmf3NewOffSet = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
-		if (xmf3NewOffSet.y > 1.f && xmf3NewOffSet.y < CAM_OFFSET_Y + CAM_OFFSET_Y*0.5f)
-		{
+		//if (xmf3NewOffSet.y > 1.f && xmf3NewOffSet.y < CAM_OFFSET_Y + CAM_OFFSET_Y*0.5f)
+		//{
 			m_xmf3Offset = xmf3NewOffSet;
-		}
+		//}
 
 		if (m_pPlayer)
 		{

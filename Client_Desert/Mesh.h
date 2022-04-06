@@ -26,6 +26,22 @@ public:
 	CTexturedVertex(XMFLOAT3 xmf3Position, XMFLOAT2 xmf2TexCoord = XMFLOAT2(0.0f, 0.0f)) { m_xmf3Position = xmf3Position; m_xmf2TexCoord = xmf2TexCoord; }
 	~CTexturedVertex() {}
 };
+
+class CParticleVertex : public CVertex
+{
+public:
+	XMFLOAT3						m_xmf3Color = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3						m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT3						m_xmf3Acceleration = XMFLOAT3(0.0f, 0.0f, 0.0f);
+	XMFLOAT2						m_xmf2Size = XMFLOAT2(0.0f, 0.0f);
+	XMFLOAT2						m_xmf2AgeLifetime = XMFLOAT2(0.0f, 0.0f); //(Age, Lifetime)
+	UINT							m_nType = 0;
+	float							m_fAlpha = 0.f;
+
+public:
+	CParticleVertex() {}
+	~CParticleVertex() {}
+};
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CGameObject;
@@ -76,6 +92,7 @@ public:
 	D3D12_PRIMITIVE_TOPOLOGY		m_d3dPrimitiveTopology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	UINT							m_nSlot = 0;
 	UINT							m_nOffset = 0;
+	UINT							m_nStride = 0;
 
 protected:
 	int								m_nVertices = 0;
@@ -243,4 +260,39 @@ public:
 	void		SetVertices(CTexturedVertex* pVertices, size_t iVertexCount);
 private:
 	UINT8*		m_pBufferDataBegin = NULL;
+};
+
+
+class CParticleMesh : public CMesh
+{
+public:
+	CParticleMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime);
+	virtual ~CParticleMesh();
+
+	virtual void CreateVertexBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, XMFLOAT3 xmf3Position, XMFLOAT3 xmf3Velocity, XMFLOAT3 xmf3Acceleration, XMFLOAT3 xmf3Color, XMFLOAT2 xmf2Size, float fLifetime);
+	virtual void CreateStreamOutputBuffer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+
+	void PreRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+	void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+	void PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState);
+
+	//virtual void OnPreRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, int nSubSet);
+	//virtual void OnPostRender(ID3D12GraphicsCommandList* pd3dCommandList, void* pContext);
+
+public:
+	bool								m_bStart = true;
+
+	UINT								m_nMaxParticles = 0;
+
+	//두개 번갈아가며 사용
+	ID3D12Resource* m_pd3dStreamOutputBuffer = NULL;
+	ID3D12Resource* m_pd3dDrawBuffer = NULL;
+
+	ID3D12Resource* m_pd3dDefaultBufferFilledSize = NULL;
+	ID3D12Resource* m_pd3dUploadBufferFilledSize = NULL;
+	UINT64* m_pnUploadBufferFilledSize = NULL;
+
+	ID3D12Resource* m_pd3dReadBackBufferFilledSize = NULL;
+	D3D12_STREAM_OUTPUT_BUFFER_VIEW		m_d3dStreamOutputBufferView;
 };

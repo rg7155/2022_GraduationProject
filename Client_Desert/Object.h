@@ -51,10 +51,6 @@ private:
 
 	UINT*							m_pnResourceTypes = NULL;
 
-	DXGI_FORMAT*					m_pdxgiBufferFormats = NULL;
-	int*							m_pnBufferElements = NULL;
-	int*							m_pnBufferStrides = NULL;
-
 	int								m_nSamplers = 0;
 	D3D12_GPU_DESCRIPTOR_HANDLE		*m_pd3dSamplerGpuDescriptorHandles = NULL;
 
@@ -63,6 +59,11 @@ public:
 	SRVROOTARGUMENTINFO				*m_pRootArgumentInfos = NULL;
 	int 							m_nRows = 1; //몇곱몇인지, 이건 텍스쳐에
 	int 							m_nCols = 1;
+
+
+	DXGI_FORMAT* m_pdxgiBufferFormats = NULL;
+	int* m_pnBufferElements = NULL;
+	int* m_pnBufferStrides = NULL;
 public:
 	//만들자마자 해줘야함
 	void AddRef() { 
@@ -416,11 +417,40 @@ protected:
 class CUIObject : public CGameObject
 {
 public:
+	enum UI_TYPE { UI_FADE, UI_END };
+
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CUIObject();
 
 public:
 	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
-	void	SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY);
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+public:
+	void		SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY);
+	void		SetFadeState(bool isIn);
+
+public:
+	UI_TYPE		m_eUIType = UI_END;
+
+private:
+	float	m_fAlpha = 0.f;
+	bool	m_isFadeIn = false;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CParticleObject : public CGameObject
+{
+public:
+	CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CParticleObject();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader);
+
+public:
+	CTexture* m_pRandowmValueTexture = NULL;
+	CParticleMesh					*m_pParticleMesh = NULL;
+
 };
