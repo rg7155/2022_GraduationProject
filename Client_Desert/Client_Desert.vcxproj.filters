@@ -67,6 +67,9 @@
     <Filter Include="소스 파일\03. GameObject\00. Monster">
       <UniqueIdentifier>{4f343e48-2e86-4e23-bf7f-0943630848a2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\04. Player\00. DuoPlayer">
+      <UniqueIdentifier>{c08093a1-4409-449a-8b2b-177065dc1a10}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client_Desert.h">
@@ -168,6 +171,9 @@
     <ClInclude Include="Monster.h">
       <Filter>소스 파일\03. GameObject\00. Monster</Filter>
     </ClInclude>
+    <ClInclude Include="DuoPlayer.h">
+      <Filter>소스 파일\04. Player\00. DuoPlayer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -247,6 +253,9 @@
     </ClCompile>
     <ClCompile Include="Monster.cpp">
       <Filter>소스 파일\03. GameObject\00. Monster</Filter>
+    </ClCompile>
+    <ClCompile Include="DuoPlayer.cpp">
+      <Filter>소스 파일\04. Player\00. DuoPlayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -154,6 +154,7 @@
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="DirectXTex.h" />
+    <ClInclude Include="DuoPlayer.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameFramework.h" />
@@ -202,6 +203,7 @@
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Client_Desert.cpp" />
     <ClCompile Include="DDSTextureLoader12.cpp" />
+    <ClCompile Include="DuoPlayer.cpp" />
     <ClCompile Include="GameFramework.cpp" />
     <ClCompile Include="GameMgr.cpp" />
     <ClCompile Include="imgui\imgui.cpp">
