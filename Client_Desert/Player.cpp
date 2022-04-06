@@ -437,6 +437,18 @@ void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamer
 	CGameObject::Render(pd3dCommandList, pCamera);
 
 	m_pComTrail->RenderTrail(pd3dCommandList, pCamera);
+
+
+	//
+	//XMFLOAT3 xmf3Temp = GetPosition(), xmf3Pos = { 5.f,0.f,0.f };
+	//CGameObject::SetPosition(xmf3Pos);
+	////OnPrepareRender();
+
+	//CGameObject::Render(pd3dCommandList, pCamera);
+
+	//CGameObject::SetPosition(xmf3Temp);
+	////OnPrepareRender();
+
 }
 
 void CPlayer::LerpRotate(float fTimeElapsed)
@@ -713,6 +725,7 @@ void CPlayer::Blending_Animation(float fTimeElapsed)
 		return;
 	}
 	
+
 	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f-m_fBlendingTime);
 	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
 	//cout << m_fBlendingTime << endl;

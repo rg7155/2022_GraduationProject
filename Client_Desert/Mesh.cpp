@@ -789,7 +789,7 @@ void CParticleMesh::Render(ID3D12GraphicsCommandList* pd3dCommandList, int nPipe
 	}
 }
 
-#define _WITH_DEBUG_STREAM_OUTPUT_VERTICES
+//#define _WITH_DEBUG_STREAM_OUTPUT_VERTICES
 
 void CParticleMesh::PostRender(ID3D12GraphicsCommandList* pd3dCommandList, int nPipelineState)
 {
