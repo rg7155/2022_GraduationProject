@@ -70,6 +70,9 @@
     <Filter Include="소스 파일\07. Shader\00. Shadow">
       <UniqueIdentifier>{6397739e-af39-43f0-82bf-f023fbb67132}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\04. Player\00. DuoPlayer">
+      <UniqueIdentifier>{694b18c2-ea3c-420d-a590-b05a741f139d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client_Desert.h">
@@ -174,6 +177,9 @@
     <ClInclude Include="Shadow.h">
       <Filter>소스 파일\07. Shader\00. Shadow</Filter>
     </ClInclude>
+    <ClInclude Include="DuoPlayer.h">
+      <Filter>소스 파일\04. Player\00. DuoPlayer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -256,6 +262,9 @@
     </ClCompile>
     <ClCompile Include="Shadow.cpp">
       <Filter>소스 파일\07. Shader\00. Shadow</Filter>
+    </ClCompile>
+    <ClCompile Include="DuoPlayer.cpp">
+      <Filter>소스 파일\04. Player\00. DuoPlayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -64,6 +64,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
+#ifdef USE_SERVER
 	wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData); // 소켓 네트워킹 시작 - 윈도우만
@@ -74,6 +75,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+#endif // USE_SERVER
 
 
 	while (1)
@@ -90,20 +92,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		else
 		{
 			gGameFramework.FrameAdvance();
+#ifdef USE_SERVER
+			////// 키 send
+			Server_PosSend();
 
-			if (ret != SOCKET_ERROR)
-			{
-				////// 키 send
-				Server_PosSend();
-
-				//// 위치 받기
-				Server_PosRecv();
-			}
-		
-
-			// Sleep -> recv_callback -> send_callback 순으로 실행된다.
-
+			//// 위치 받기
+			Server_PosRecv();
 			SleepEx(0, true);
+			// Sleep -> recv_callback -> send_callback 순으로 실행된다.
+#endif // USE_SERVER
 		}
 		//// Start the Dear ImGui frame
 		//ImGui_ImplDX12_NewFrame();

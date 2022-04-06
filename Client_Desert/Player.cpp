@@ -134,6 +134,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	// 대기동작이나 이동중일때만 움직이기 가능
 	if (m_eCurAnim != ANIM::IDLE && m_eCurAnim != ANIM::IDLE_RELAXED && m_eCurAnim != ANIM::RUN)
 	{
+		m_fLerpSpeed = 0.f;
 		return;
 	}
 	// 속도 보간
