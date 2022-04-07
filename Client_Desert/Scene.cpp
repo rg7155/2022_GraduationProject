@@ -119,6 +119,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pShadowMapToViewport = new CTextureToViewportShader();
 	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 
+	// 다른 플레이어 생성 부분
 	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
