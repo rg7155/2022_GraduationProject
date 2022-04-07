@@ -112,6 +112,11 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_ppShaders[iIndex++] = m_pUIObjectShader;
 	
 	//////////////////////////////////////////////////
+	//오브젝트를 갖지 않는 쉐이더 구현하기, 파이프라인 변경 용
+	//CTexturedShader, CPortalObject
+
+
+	//////////////////////////////////////////////////
 	m_pDepthRenderShader = new CDepthRenderShader(m_pMapObjectShader, m_pLights);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
@@ -287,10 +292,11 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = 0; i < m_nAlphaShaderStartIndex; i++)
 		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
-	//트레일 렌더링 따로 빼야함
+	m_pDuoPlayer->Render(pd3dCommandList, pCamera);
+
+	//트레일 렌더링 따로 빼야함, 아님 야매로 불투명 젤 마지막에 렌더하던지..
 	m_pPlayer->Render(pd3dCommandList, pCamera);
 
-	m_pDuoPlayer->Render(pd3dCommandList, pCamera);
 
 	//2.투명-이펙트
 	for (int i = m_nAlphaShaderStartIndex; i < m_nShaders; i++)
