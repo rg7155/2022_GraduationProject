@@ -8,6 +8,7 @@
 #include "Player.h"
 #include "Component.h"
 #include "Shadow.h"
+#include "DuoPlayer.h"
 
 struct LIGHT
 {
@@ -69,6 +70,8 @@ public:
 	void SetRootParameterConstants(D3D12_ROOT_PARAMETER pd3dRootParameter[], int iIndex, UINT Num32BitValues, UINT ShaderRegister, UINT RegisterSpace, D3D12_SHADER_VISIBILITY ShaderVisibility);
 
 	CPlayer								*m_pPlayer = NULL;
+	CDuoPlayer							*m_pDuoPlayer = NULL;
+
 
 	float								m_fElapsedTime = 0.0f;
 
