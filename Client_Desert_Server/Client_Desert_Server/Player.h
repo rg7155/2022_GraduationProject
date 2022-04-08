@@ -1,4 +1,6 @@
 #pragma once
+#include "Protocol.h"
+
 class CPlayer
 {
 
@@ -10,6 +12,7 @@ public:
 
 public:
 	XMFLOAT4X4 m_xmf4x4World;
+	player_anim m_eAnimInfo[ANIM::END];
 
 };
 

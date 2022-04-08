@@ -1,8 +1,7 @@
-﻿  Client_Desert_Server.cpp
-D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(98,2): warning C4002: 함수 같은 매크로 호출 'RtlZeroMemory'에 대해 인수가 너무 많습니다.
-  Player.cpp
+﻿  Player.cpp
   코드를 생성하고 있습니다.
-  Previous IPDB not found, fall back to full compilation.
-  All 411 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  9 of 411 functions ( 2.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    0 functions had inline decision re-evaluated but remain unchanged
   코드를 생성했습니다.
   Client_Desert_Server.vcxproj -> D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\x64\Release\Client_Desert_Server.exe

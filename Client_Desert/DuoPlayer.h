@@ -15,5 +15,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
 
+public:
+	void Server_SetParentAndAnimation(duoPlayer* _duoPlayer);
 };
 

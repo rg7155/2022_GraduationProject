@@ -577,6 +577,21 @@ bool CPlayer::IsNowAttack()
 	return false;
 }
 
+duoPlayer* CPlayer::Server_GetParentAndAnimation()
+{
+	// За·Д
+	duoPlayer* _duoPlayer = new duoPlayer;
+	_duoPlayer->xmf4x4World = m_xmf4x4ToParent;
+
+	for (int i = 0; i < ANIM::END; i++)
+	{
+		_duoPlayer->animInfo[i].fWeight = m_pSkinnedAnimationController->GetTrackWeight(i);
+		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
+		_duoPlayer->animInfo[i].fPosition = m_pSkinnedAnimationController->m_fPosition[i];
+	}
+	return _duoPlayer;
+}
+
 
 CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {

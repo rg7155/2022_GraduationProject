@@ -230,9 +230,9 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	{
 		int msg_size = m_start[0];
 		int from_client_id = m_start[1];
-		XMFLOAT4X4* pos;
-		pos = reinterpret_cast<XMFLOAT4X4*>(m_start + 2);
-		gGameFramework.m_pScene->m_pDuoPlayer->m_xmf4x4ToParent = *pos;
+		duoPlayer* duoPl;
+		duoPl = reinterpret_cast<duoPlayer*>(m_start + 2);
+		//gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
 
 		//gGameFramework.GetPlayer()->SetPosition(*pos);
 		//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
@@ -281,9 +281,16 @@ void Server_PosSend()
 	DWORD sent_byte;
 	WSABUF mybuf;
 	
-	mybuf.buf = reinterpret_cast<char*>(&gGameFramework.m_pPlayer->m_xmf4x4ToParent);
+	// 버퍼에 duoPlayer 넣기
+	duoPlayer* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
+	mybuf.buf = reinterpret_cast<char*>(pDuoPlayer);
 	mybuf.len = BUFSIZE;
+
+	//memcpy(send_buf, mybuf.buf, sizeof(mybuf.buf));
+
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
+	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
+
 	int ret = WSASend(s_socket, &mybuf, 1, 0, 0, s_over, send_callback);
 	if (0 != ret)
 	{
@@ -292,5 +299,7 @@ void Server_PosSend()
 			error_display("WSASend", err_no);
 		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
 	}
+
+	//delete pDuoPlayer;
 }
 

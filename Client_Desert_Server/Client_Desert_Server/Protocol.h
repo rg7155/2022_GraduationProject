@@ -3,7 +3,7 @@
 #pragma comment(lib, "WS2_32.lib")
 
 constexpr int SERVER_PORT = 4000;
-constexpr int BUFSIZE = 200;
+constexpr int BUFSIZE = 256;
 constexpr int NAME_SIZE = 20;
 constexpr int MAX_USER = 10;
 
@@ -66,5 +66,19 @@ struct SC_MOVE_PLAYER_PACKET
 	short id;
 	short x, y;
 };
+struct player_anim
+{
+
+	float	fPosition;
+	float	fWeight;
+	bool	bEnable;
+
+};
+struct duoPlayer
+{
+	XMFLOAT4X4	xmf4x4World;
+	player_anim animInfo[ANIM::END];
+};
+
 
 #pragma pack (pop)
