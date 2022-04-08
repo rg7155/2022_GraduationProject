@@ -1339,19 +1339,48 @@ CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pModel->m_pModelRootObject, true);
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 1, pModel);
 
+	//상호작용 ui
+	m_pInteractionUI = new CGameObject(1);
+	CMesh * pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.f);
+	m_pInteractionUI->SetMesh(pMesh);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_R.dds", 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	CMaterial* pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->m_ppPipelineShaders[CScene::PIPE_TEXTURE]);
+
+	m_pInteractionUI->SetMaterial(0, pMaterial);
+	
+	XMFLOAT3 xmf3Pos = { 5.f, 0.f, 5.f };
+	SetPosition(xmf3Pos);
+	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetRight(), -1.f));
+	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetUp(), 1.5f));
+
+	m_pInteractionUI->SetPosition(xmf3Pos);
 }
 
 CNPCObject::~CNPCObject()
 {
+	if (m_pInteractionUI) delete m_pInteractionUI;
 }
 
 void CNPCObject::Animate(float fTimeElapsed)
 {
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
-	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, false);
-	else SetEffectsType(EFFECT_LIMLIGHT, true);
+	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
+	else SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = true);
 
 	CGameObject::Animate(fTimeElapsed);
+
+	if (m_pInteractionUI)
+	{
+		XMFLOAT3 xmf3Target = CGameMgr::GetInstance()->GetCamera()->GetPosition();
+		m_pInteractionUI->SetLookAt(xmf3Target);
+		m_pInteractionUI->UpdateTransform(NULL);
+	}
 }
 
 void CNPCObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
@@ -1359,6 +1388,16 @@ void CNPCObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	UpdateShaderVariables(pd3dCommandList);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+
+	if (m_isAbleInteraction && m_pInteractionUI) m_pInteractionUI->Render(pd3dCommandList, pCamera, true); //쉐이더 바꿔주기
+}
+
+void CNPCObject::ReleaseUploadBuffers()
+{
+	CGameObject::ReleaseUploadBuffers();
+
+	//호출해줘야 메모리 릭 안남
+	if (m_pInteractionUI)	m_pInteractionUI->ReleaseUploadBuffers();
 }
 
 void CNPCObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -1374,7 +1413,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_R.dds", 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
 	CMaterial* pMaterial = new CMaterial(1);
@@ -1521,3 +1560,35 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	m_pParticleMesh->Render(pd3dCommandList, 1); //Draw
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	SetMesh(pMesh);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	CMaterial* pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	SetMaterial(0, pMaterial);
+}
+
+CPortalObject::~CPortalObject()
+{
+}
+
+void CPortalObject::Animate(float fTimeElapsed)
+{
+}
+
+void CPortalObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+}
+
+void CPortalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+}

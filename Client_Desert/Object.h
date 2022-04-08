@@ -118,7 +118,9 @@ private:
 
 public:
 	void AddRef() { m_nReferences++; }
-	void Release() { if (--m_nReferences <= 0) delete this; }
+	void Release() { 
+		if (--m_nReferences <= 0) 
+		delete this; }
 
 public:
 	CShader							*m_pShader = NULL;
@@ -408,9 +410,13 @@ public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
+	virtual void ReleaseUploadBuffers() override;
+
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
-protected:
+private:
+	CGameObject* m_pInteractionUI = NULL;
+	bool		m_isAbleInteraction = false;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -453,4 +459,20 @@ public:
 	CTexture* m_pRandowmValueTexture = NULL;
 	CParticleMesh					*m_pParticleMesh = NULL;
 
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CPortalObject : public CGameObject
+{
+public:
+	CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CPortalObject();
+
+public:
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+protected:
 };

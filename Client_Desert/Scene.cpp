@@ -73,10 +73,35 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	BuildDefaultLightsAndMaterials();
 
+	CreateShaders(pd3dDevice, pd3dCommandList);
+
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
+	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+
+	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+}
+
+void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	CShader* pShader = nullptr;
+
+	//////////////////////////////////////////////////
+	//오브젝트를 갖지 않는 쉐이더 구현하기, 파이프라인 변경 용
+	//CTexturedShader, CPortalObject
+
+	m_nPipelineShaders = PIPE_END;
+	m_ppPipelineShaders = new CShader * [m_nPipelineShaders];
+
+	pShader = new CTexturedShader();
+	pShader->AddRef(); //다른 오브젝트에서도 참조하기 때문에
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	m_ppPipelineShaders[PIPE_TEXTURE] = pShader;
+
+	//////////////////////////////////////////////////
+
 	m_nShaders = 6;
-	m_ppShaders = new CShader*[m_nShaders];
+	m_ppShaders = new CShader * [m_nShaders];
 
 	int iIndex = 0;
 	m_pMapObjectShader = new CMapObjectsShader();
@@ -94,7 +119,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pNPCObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pNPCObjectShader;
 
-	CShader* pShader = new CParticleShader();
+	pShader = new CParticleShader();
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = pShader;
@@ -110,23 +135,16 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pUIObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pUIObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = m_pUIObjectShader;
-	
-	//////////////////////////////////////////////////
-	//오브젝트를 갖지 않는 쉐이더 구현하기, 파이프라인 변경 용
-	//CTexturedShader, CPortalObject
 
 
 	//////////////////////////////////////////////////
+	//그림자 쉐이더
 	m_pDepthRenderShader = new CDepthRenderShader(m_pMapObjectShader, m_pLights);
 	m_pDepthRenderShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
 	m_pDepthRenderShader->BuildObjects(pd3dDevice, pd3dCommandList, NULL);
 
 	m_pShadowMapToViewport = new CTextureToViewportShader();
 	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-
-	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
 
@@ -354,6 +372,16 @@ void CScene::ReleaseObjects()
 		}
 		delete[] m_ppShaders;
 	}
+
+	if (m_ppPipelineShaders)
+	{
+		for (int i = 0; i < m_nPipelineShaders; i++)
+		{
+			m_ppPipelineShaders[i]->Release();
+		}
+		delete[] m_ppPipelineShaders;
+	}
+
 	if (m_pDepthRenderShader)
 	{
 		m_pDepthRenderShader->ReleaseShaderVariables();
@@ -407,6 +435,8 @@ void CScene::ReleaseUploadBuffers()
 	if (m_pSkyBox) m_pSkyBox->ReleaseUploadBuffers();
 
 	for (int i = 0; i < m_nShaders; i++) m_ppShaders[i]->ReleaseUploadBuffers();
+	for (int i = 0; i < m_nPipelineShaders; i++) m_ppPipelineShaders[i]->ReleaseUploadBuffers();
+
 	if (m_pDepthRenderShader) m_pDepthRenderShader->ReleaseUploadBuffers();
 
 	if (m_pDuoPlayer) m_pDuoPlayer->ReleaseUploadBuffers();

@@ -760,7 +760,6 @@ void CNPCObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	CNPCObject* pObj = new CNPCObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
 	AddObject(L"NPC", pObj);
 	pObj->SetActiveState(true);
-	pObj->SetPosition(5.f, 0.f, 5.f);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

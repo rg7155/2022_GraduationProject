@@ -39,6 +39,8 @@ class CTextureToViewportShader;
 class CScene
 {
 public:
+	enum PIPELINE { PIPE_TEXTURE, PIPE_END };
+public:
     CScene();
     ~CScene();
 
@@ -48,6 +50,7 @@ public:
 
 	void BuildDefaultLightsAndMaterials();
 	void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
+	void CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	void ReleaseObjects();
 
 	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
@@ -84,6 +87,9 @@ public:
 	CNPCObjectsShader					*m_pNPCObjectShader = nullptr;
 	CMultiSpriteObjectsShader			*m_pMultiSpriteObjectShader = nullptr;
 	CUIObjectsShader					*m_pUIObjectShader = nullptr;
+
+	int									m_nPipelineShaders = 0;
+	CShader**							m_ppPipelineShaders = NULL;
 
 
 	CSkyBox								*m_pSkyBox = NULL;
