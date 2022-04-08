@@ -9,7 +9,7 @@ public:
 	//void Check_Move();
 
 public:
-	XMFLOAT3 m_xmf3Position;
+	XMFLOAT4X4 m_xmf4x4World;
 
 };
 

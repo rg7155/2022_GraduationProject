@@ -52,10 +52,6 @@ public:
 	void UpdateShaderVariables();
 	void ReleaseShaderVariables();
 
-
-	// Server
-public:
-	CPlayer* GetPlayer() { return m_pPlayer; }
 private:
 	void CreateImgui();
 private:
@@ -94,11 +90,11 @@ private:
 #endif
 
 	CGameTimer					m_GameTimer;
-
+public:
 	CScene						*m_pScene = NULL;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
-
+private:
 	POINT						m_ptOldCursorPos;
 
 	_TCHAR						m_pszFrameRate[70];

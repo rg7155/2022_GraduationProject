@@ -230,9 +230,11 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	{
 		int msg_size = m_start[0];
 		int from_client_id = m_start[1];
-		XMFLOAT3* pos;
-		pos = reinterpret_cast<XMFLOAT3*>(m_start + 2);
-		gGameFramework.GetPlayer()->SetPosition(*pos);
+		XMFLOAT4X4* pos;
+		pos = reinterpret_cast<XMFLOAT4X4*>(m_start + 2);
+		gGameFramework.m_pScene->m_pDuoPlayer->m_xmf4x4ToParent = *pos;
+
+		//gGameFramework.GetPlayer()->SetPosition(*pos);
 		//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
 		//	cout << "client disconnection\n";
 		//else
@@ -279,7 +281,7 @@ void Server_PosSend()
 	DWORD sent_byte;
 	WSABUF mybuf;
 	
-	mybuf.buf = reinterpret_cast<char*>(&gGameFramework.GetPlayer()->GetPosition());
+	mybuf.buf = reinterpret_cast<char*>(&gGameFramework.m_pPlayer->m_xmf4x4ToParent);
 	mybuf.len = BUFSIZE;
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
 	int ret = WSASend(s_socket, &mybuf, 1, 0, 0, s_over, send_callback);
