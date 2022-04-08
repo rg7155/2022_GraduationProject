@@ -53,6 +53,8 @@ void CMonsterObject::Animate(float fTimeElapsed)
 	//cout << m_fDissolve << endl;
 
 	CGameObject::Animate(fTimeElapsed);
+	cout << m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet]->m_fPosition << endl;
+
 }
 
 void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
