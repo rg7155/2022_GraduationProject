@@ -720,14 +720,11 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
 	pObj->SetPosition(10.f, 0.f, 10.f);
 	pObj->SetActiveState(true);
-	//pObj->m_pSkinnedAnimationController->SetTrackSpeed(0, 1.f);
 	AddObject(L"Cactus", pObj);
 
 	pObj = new CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
 	pObj->SetPosition(20.f, 0.f, 10.f);
 	pObj->SetActiveState(true);
-	//pObj->m_pSkinnedAnimationController->SetTrackSpeed(0, 1.f);
-
 	AddObject(L"Cactus", pObj);
 }
 

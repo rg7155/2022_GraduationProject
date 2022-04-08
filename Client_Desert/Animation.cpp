@@ -164,7 +164,11 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	m_nAnimationTracks = nAnimationTracks;
 	m_pAnimationTracks = new CAnimationTrack[nAnimationTracks];
-
+	m_fPosition = new float[nAnimationTracks];
+	for (int i = 0; i < nAnimationTracks; i++)
+	{
+		m_fPosition[i] = 0.f;
+	}
 	// Sets도 각자 갖도록?!
 	//int nAnimationSets = pModel->m_pAnimationSets->m_nAnimationSets;
 	
@@ -230,7 +234,10 @@ void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimat
 
 void CAnimationController::SetTrackEnable(int nAnimationTrack, bool bEnable)
 {
-	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetEnable(bEnable);
+	if (m_pAnimationTracks) {
+		m_pAnimationTracks[nAnimationTrack].SetEnable(bEnable);
+		m_pAnimationTracks[nAnimationTrack].m_fPosition = 0.0f;
+	}
 }
 
 void CAnimationController::SetTrackPosition(int nAnimationTrack, float fPosition)
@@ -239,7 +246,7 @@ void CAnimationController::SetTrackPosition(int nAnimationTrack, float fPosition
 	{
 		m_pAnimationTracks[nAnimationTrack].SetPosition(fPosition);
 		m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[nAnimationTrack].m_nAnimationSet]->m_fPosition = fPosition;
-
+		m_fPosition[nAnimationTrack] = fPosition;
 	}
 }
 
@@ -255,6 +262,17 @@ void CAnimationController::SetTrackWeight(int nAnimationTrack, float fWeight)
 
 void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	UpdateAnimationSets();
+
+	for (int i = 0; i < m_nSkinnedMeshes; i++)
+	{
+		m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i];
+		m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
+	}
+}
+
+void CAnimationController::UpdateAnimationSets()
+{
 	for (int j = 0; j < m_pAnimationSets->m_nAnimatedBoneFrames; j++)
 	{
 		XMFLOAT4X4 xmf4x4Transform = Matrix4x4::Zero();
@@ -263,7 +281,7 @@ void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 			if (m_pAnimationTracks[k].m_bEnable)
 			{
 				CAnimationSet* pAnimationSet = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet];
-				pAnimationSet->m_fPosition = m_fPosition;
+				pAnimationSet->m_fPosition = m_fPosition[k];
 				XMFLOAT4X4 xmf4x4TrackTransform = pAnimationSet->GetSRT(j);
 				xmf4x4Transform = Matrix4x4::Add(xmf4x4Transform, Matrix4x4::Scale(xmf4x4TrackTransform, m_pAnimationTracks[k].m_fWeight));
 			}
@@ -271,11 +289,6 @@ void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3d
 		m_pAnimationSets->m_ppAnimatedBoneFrameCaches[j]->m_xmf4x4ToParent = xmf4x4Transform;
 	}
 
-	for (int i = 0; i < m_nSkinnedMeshes; i++)
-	{
-		m_ppSkinnedMeshes[i]->m_pd3dcbSkinningBoneTransforms = m_ppd3dcbSkinningBoneTransforms[i];
-		m_ppSkinnedMeshes[i]->m_pcbxmf4x4MappedSkinningBoneTransforms = m_ppcbxmf4x4MappedSkinningBoneTransforms[i];
-	}
 }
 
 void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGameObject)
@@ -297,9 +310,9 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 			if (m_pAnimationTracks[k].m_bEnable)
 			{
 				m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->HandleCallback();
-				m_fPosition += fTimeElapsed;
-				if (m_fPosition > m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->m_fLength)
-					m_fPosition = 0.f;
+				m_fPosition[k] += fTimeElapsed;
+				if (m_fPosition[k] >= m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->m_fLength)
+					m_fPosition[k] = 0.f;
 			}
 		}
 	}

@@ -143,10 +143,11 @@ public:
 	XMFLOAT4X4** m_ppcbxmf4x4MappedSkinningBoneTransforms = NULL; //[SkinnedMeshes]
 
 public:
-	float		m_fPosition = 0.0f;
+	float* m_fPosition = NULL;
 	int			m_iNowTrack = 0.f;
 public:
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
+	void UpdateAnimationSets();
 
 	void SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet);
 
