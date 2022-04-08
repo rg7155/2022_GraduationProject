@@ -205,6 +205,7 @@ CAnimationController::~CAnimationController()
 	if (m_pAnimationSets) m_pAnimationSets->Release();
 
 	if (m_ppSkinnedMeshes) delete[] m_ppSkinnedMeshes;
+	if (m_fPosition) delete[] m_fPosition;
 }
 
 void CAnimationController::SetCallbackKeys(int nAnimationSet, int nCallbackKeys)
