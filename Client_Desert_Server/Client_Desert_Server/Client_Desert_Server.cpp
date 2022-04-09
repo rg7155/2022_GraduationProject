@@ -132,22 +132,20 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		// 모든 클라에게 삭제됨을 전송
 		for (auto& cl : clients)
 		{
-			XMFLOAT3* pos = &clients[client_id].pPlayer->m_xmf3Position;
-			pos->x = DISCONNECT; pos->y = DISCONNECT;
-			cl.second.do_send(sizeof(XMFLOAT3), client_id, reinterpret_cast<char*>(pos));
+			XMFLOAT4X4* pos = &clients[client_id].pPlayer->m_xmf4x4World;
+			cl.second.do_send(sizeof(XMFLOAT4X4), client_id, reinterpret_cast<char*>(pos));
 		}
 		cout << client_id << "Client Disconnection\n";
 		clients.erase(client_id);
 		return;
 	}
 
-	XMFLOAT3* pos = reinterpret_cast<XMFLOAT3*>(clients[client_id]._c_mess);
+	XMFLOAT4X4* pos = reinterpret_cast<XMFLOAT4X4*>(clients[client_id]._c_mess);
 	// 모든 클라에게 클라의 위치 전송 (나를 제외)
-	cout << pos->x << endl;
 	for (auto& cl : clients)
 	{
 		if (cl.first == client_id) continue;
-		cl.second.do_send(sizeof(XMFLOAT3), client_id, reinterpret_cast<char*>(pos));
+		cl.second.do_send(sizeof(XMFLOAT4X4), client_id, reinterpret_cast<char*>(pos));
 	}
 	clients[client_id].do_recv();
 }
