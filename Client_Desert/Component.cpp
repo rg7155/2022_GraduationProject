@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Mesh.h"
 #include "Object.h"
+#include "ChildObject.h"
 CFrustum::CFrustum()
 {
 }

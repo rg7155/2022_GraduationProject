@@ -144,7 +144,7 @@ public:
 
 public:
 	float* m_fPosition = NULL;
-	int			m_iNowTrack = 0.f;
+	int			m_iNowTrack = 0;
 public:
 	void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 	void UpdateAnimationSets();

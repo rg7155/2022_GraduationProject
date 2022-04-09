@@ -9,6 +9,7 @@
 #include "Component.h"
 #include "Shadow.h"
 #include "DuoPlayer.h"
+#include "ChildObject.h"
 
 struct LIGHT
 {

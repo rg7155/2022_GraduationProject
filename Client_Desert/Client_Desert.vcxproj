@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Animation.h" />
+    <ClInclude Include="ChildObject.h" />
     <ClInclude Include="CollsionMgr.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Client_Desert.h" />
@@ -200,6 +201,7 @@
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Animation.cpp" />
+    <ClCompile Include="ChildObject.cpp" />
     <ClCompile Include="CollsionMgr.cpp" />
     <ClCompile Include="Component.cpp" />
     <ClCompile Include="Client_Desert.cpp" />

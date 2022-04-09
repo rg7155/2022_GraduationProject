@@ -537,11 +537,6 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		XMFLOAT3 xmf3Top = Vector3::Add(m_pSword->GetPosition(), m_pSword->GetUp(), -1.f);
 		m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition()); 
 	}
-
-	//if (m_pSword)
-	//{
-	//	cout << m_pSword->GetRight().x << "," << m_pSword->GetRight().y << "," << m_pSword->GetRight().z << endl;
-	//}
 }
 
 void CPlayer::CollsionDetection(CGameObject* pObj)
@@ -762,7 +757,6 @@ void CPlayer::Blending_Animation(float fTimeElapsed)
 
 	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f-m_fBlendingTime);
 	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
-	//cout << m_fBlendingTime << endl;
 }
 
 
