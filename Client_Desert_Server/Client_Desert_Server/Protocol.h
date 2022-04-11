@@ -76,6 +76,7 @@ struct player_anim
 };
 struct duoPlayer
 {
+	unsigned char size;
 	XMFLOAT4X4	xmf4x4World;
 	player_anim animInfo[ANIM::END];
 };

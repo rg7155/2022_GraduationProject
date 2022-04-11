@@ -226,25 +226,21 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 {
 	char* m_start = recv_buf;
 
-	while (true)
-	{
-		int msg_size = m_start[0];
-		int from_client_id = m_start[1];
-		duoPlayer* duoPl;
-		duoPl = reinterpret_cast<duoPlayer*>(m_start + 2);
-		//gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
+	int msg_size = m_start[0];
+	int from_client_id = m_start[1];
+	duoPlayer* duoPl;
+	duoPl = reinterpret_cast<duoPlayer*>(m_start + 2);
+	gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
 
-		//gGameFramework.GetPlayer()->SetPosition(*pos);
-		//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
-		//	cout << "client disconnection\n";
-		//else
-		//	cout << pos->x << pos->y << endl;
+	//gGameFramework.GetPlayer()->SetPosition(*pos);
+	//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
+	//	cout << "client disconnection\n";
+	//else
+	//	cout << pos->x << pos->y << endl;
 
-		cbTransferred -= msg_size;
-		if (0 >= cbTransferred) break;
-		m_start += msg_size;
-
-	}
+	//cbTransferred -= msg_size;
+	//if (0 >= cbTransferred) break;
+	//m_start += msg_size;
 
 	delete lpOverlapped;
 
