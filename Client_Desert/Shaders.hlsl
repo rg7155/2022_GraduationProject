@@ -10,10 +10,10 @@ cbuffer cbCameraInfo : register(b1)
 {
 	matrix					gmtxView : packoffset(c0);
 	matrix					gmtxProjection : packoffset(c4);
-    matrix gmtxOrthoProjection : packoffset(c8);
-    float3 gvCameraPosition : packoffset(c12);
+    matrix                  gmtxOrthoProjection : packoffset(c8);
+    float3                  gvCameraPosition : packoffset(c12);
 	//float3				gvCameraPosition : packoffset(c8);
- //   matrix				gmtxOrthoProjection : packoffset(c9);
+    //matrix				gmtxOrthoProjection : packoffset(c9);
 };
 
 cbuffer cbGameObjectInfo : register(b2)
@@ -305,6 +305,7 @@ float4 PSAlphaTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
     return (cColor);
 }
 
+
 float4 PSTexturedTrail(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
@@ -326,6 +327,18 @@ VS_TEXTURED_OUTPUT VSSpriteAnimation(VS_TEXTURED_INPUT input)
 
     return (output);
 }
+
+
+float4 PSSpriteAnimationShockwave(VS_TEXTURED_OUTPUT input) : SV_TARGET
+{
+    float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    cColor.a = cColor.r;
+    
+    float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };
+    cColor += cMulColor;
+    return (cColor);
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

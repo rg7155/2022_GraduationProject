@@ -167,7 +167,7 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_xmf4x4Texture = Matrix4x4::Identity();
-	m_fSpeed = 0.01f;
+	m_fSpeed = 0.005f;
 }
 
 
@@ -321,7 +321,11 @@ void CNPCObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 
-	if (m_isAbleInteraction && m_pInteractionUI) m_pInteractionUI->Render(pd3dCommandList, pCamera, true); //½¦ÀÌ´õ ¹Ù²ãÁÖ±â
+	if (m_isAbleInteraction && m_pInteractionUI)
+	{
+		//m_pInteractionUI->Render(pd3dCommandList, pCamera, true); //½¦ÀÌ´õ ¹Ù²ãÁÖ±â
+		CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(m_pInteractionUI);
+	}
 }
 
 void CNPCObject::ReleaseUploadBuffers()

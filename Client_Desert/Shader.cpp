@@ -921,6 +921,21 @@ D3D12_SHADER_BYTECODE CMultiSpriteObjectsShader::CreateVertexShader(ID3DBlob** p
 	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSSpriteAnimation", "vs_5_1", ppd3dShaderBlob));
 }
 
+D3D12_SHADER_BYTECODE CMultiSpriteObjectsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
+{
+	if(nPipelineState == 0)
+		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSSpriteAnimationShockwave", "ps_5_1", ppd3dShaderBlob));
+	else
+		return(CShader::CreatePixelShader(ppd3dShaderBlob, nPipelineState));
+
+}
+
+void CMultiSpriteObjectsShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState)
+{
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0); //쇼크웨이브
+	//CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 1); //
+}
+
 HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag)
 {
 	CMesh* pMesh = m_mapObjectInfo.find(pObjTag)->second.first;
@@ -960,7 +975,22 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
 {
-	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
+	//CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
+
+	//TODO키값에 따라 파이프라인 바꿔주기
+	if (isChangePipeline)
+		CStandardShader::Render(pd3dCommandList, pCamera);
+
+	for (auto& iter : m_mapObject)
+	{
+		for (auto& iterSec : iter.second)
+		{
+			if (!iterSec->m_isActive)
+				continue;
+			iterSec->UpdateTransform(NULL);
+			iterSec->Render(pd3dCommandList, pCamera, isChangePipeline);
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

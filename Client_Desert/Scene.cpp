@@ -284,15 +284,17 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	//트레일 렌더링 따로 빼야함, 아님 야매로 불투명 젤 마지막에 렌더하던지..
 	m_pPlayer->Render(pd3dCommandList, pCamera);
 
-
+	//이걸 먼저 해야 그려짐?? 
+	for (auto& iter : m_listAlphaObject)
+		iter->Render(pd3dCommandList, pCamera, true);
+	m_listAlphaObject.clear();
+	
 	//2.투명-이펙트
 	for (int i = m_nAlphaShaderStartIndex; i < m_nShaders; i++)
 		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
-	for (auto& iter : m_listAlphaObject)
-		iter->Render(pd3dCommandList, pCamera);
-	m_listAlphaObject.clear();
 
+	 
 	//화면에 뎁스 텍스쳐 그린다, 디버깅 용
 	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
