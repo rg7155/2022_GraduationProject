@@ -941,21 +941,21 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	//방법1-오브젝트를 미리 만들어둔다-오브젝트풀링
 	//방법2-텍스쳐와 매쉬만 미리 만들고, 오브젝트는 런타임중에 만든다
 
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,5.f,5.f, 0.f);
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,5.f, 0.f, 5.f);
 	//SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 8, 8);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Explode_8x8.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_shockwave_B-x8.dds", 0);
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
 	CMaterial* pMaterial = new CMaterial(1);
 	pMaterial->SetTexture(pTexture);
 
-	m_mapObjectInfo.emplace(L"Explosion", make_pair(pMesh, pMaterial));
+	m_mapObjectInfo.emplace(L"Shockwave", make_pair(pMesh, pMaterial));
 
 	for(int i = 0; i < 10; ++i)
-		CreateObject(pd3dDevice, pd3dCommandList, L"Explosion");
+		CreateObject(pd3dDevice, pd3dCommandList, L"Shockwave");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)

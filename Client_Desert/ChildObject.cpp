@@ -214,12 +214,11 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 
 	AnimateRowColumn(m_fTime);
 
-	m_isBiliboard = true;
-	if (m_isBiliboard)
-	{
-		XMFLOAT3 xmf3Target = CGameMgr::GetInstance()->GetCamera()->GetPosition();
-		SetLookAt(xmf3Target);
-	}
+	//if (m_isBiliboard)
+	//{
+	//	XMFLOAT3 xmf3Target = CGameMgr::GetInstance()->GetCamera()->GetPosition();
+	//	SetLookAt(xmf3Target);
+	//}
 
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -346,7 +345,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_R.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
 	CMaterial* pMaterial = new CMaterial(1);
