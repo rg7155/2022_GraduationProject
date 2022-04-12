@@ -69,7 +69,7 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	//////////////////////////////////////////////////
 
-	m_nShaders = 6;
+	m_nShaders = 7;
 	m_ppShaders = new CShader * [m_nShaders];
 
 	int iIndex = 0;
@@ -93,6 +93,10 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
 	m_ppShaders[iIndex++] = pShader;
 
+	//따로 쉐이더를 만들지 않는 오브젝트
+	m_pStandardObjectShader = new CStandardObjectsShader(0); //파이프라인 안씀
+	m_ppShaders[iIndex++] = m_pStandardObjectShader;
+	CreateStandardObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_nAlphaShaderStartIndex = iIndex;
 	m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader();
@@ -114,6 +118,14 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_pShadowMapToViewport = new CTextureToViewportShader();
 	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+}
+
+void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	//포탈
+	CPortalObject* pObj = new CPortalObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	pObj->SetActiveState(true);
+	m_pStandardObjectShader->AddObject(L"Portal", pObj);
 }
 
 
@@ -272,6 +284,7 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	if (m_pSkyBox) m_pSkyBox->Render(pd3dCommandList, pCamera);
 
+
 	//그림자 그린다-오브젝트 그린다
 	//1.맵 2.이펙트 3.플레이어  / 투명은 나중에 그려야함
 
@@ -289,14 +302,16 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 		iter->Render(pd3dCommandList, pCamera, true);
 	m_listAlphaObject.clear();
 	
+
 	//2.투명-이펙트
 	for (int i = m_nAlphaShaderStartIndex; i < m_nShaders; i++)
 		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
 
-	 
 	//화면에 뎁스 텍스쳐 그린다, 디버깅 용
+	//TODO- 투명이펙트에 가려진다. 수정할것.
 	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
+
 
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);

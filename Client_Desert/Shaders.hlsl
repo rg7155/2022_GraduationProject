@@ -294,7 +294,7 @@ VS_TEXTURED_OUTPUT VSOrthoTextured(VS_TEXTURED_INPUT input)
 float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
-    cColor.a = cColor.r;
+    //cColor.a = cColor.r;
     return (cColor);
 }
 
@@ -430,7 +430,7 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
                 particle.type = PARTICLE_TYPE_FLARE;
                 
                 particle.color = float3(1.f, 1.f, 1.f);
-                particle.position = f4Random2.xyz * 5.f;
+                particle.position = f4Random2.xyz * 3.f;
                 particle.velocity = float3(0.0f, 3.0f, 0.0f);
                 particle.acceleration = float3(10.0f * f4Random2.y, 1000.f * abs(f4Random2.x), 10.0f * f4Random2.z);
                 //particle.acceleration = float3(10.0f, 250.f, 10.0f);

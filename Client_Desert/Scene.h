@@ -52,6 +52,7 @@ public:
 	void BuildDefaultLightsAndMaterials();
 	void BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList);
 	void CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	void CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	void ReleaseObjects();
 
 	ID3D12RootSignature *CreateGraphicsRootSignature(ID3D12Device *pd3dDevice);
@@ -88,6 +89,7 @@ public:
 	CNPCObjectsShader					*m_pNPCObjectShader = nullptr;
 	CMultiSpriteObjectsShader			*m_pMultiSpriteObjectShader = nullptr;
 	CUIObjectsShader					*m_pUIObjectShader = nullptr;
+	CStandardObjectsShader				*m_pStandardObjectShader = nullptr;
 
 	int									m_nPipelineShaders = 0;
 	CShader**							m_ppPipelineShaders = NULL;

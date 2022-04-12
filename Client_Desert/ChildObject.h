@@ -159,5 +159,6 @@ public:
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
-protected:
+private:
+	float m_fAlpha = 0.f;
 };

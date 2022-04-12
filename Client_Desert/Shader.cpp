@@ -13,7 +13,8 @@ CShader::CShader(int nPipelineStates /*= 1*/)
 {
 	m_nPipelineStates = nPipelineStates;
 
-	m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
+	if(nPipelineStates >= 1)
+		m_ppd3dPipelineStates = new ID3D12PipelineState * [m_nPipelineStates];
 }
 
 CShader::~CShader()

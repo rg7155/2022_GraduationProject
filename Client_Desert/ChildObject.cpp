@@ -167,7 +167,7 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	m_xmf4x4Texture = Matrix4x4::Identity();
-	m_fSpeed = 0.005f;
+	m_fSpeed = 0.001f;
 }
 
 
@@ -288,8 +288,8 @@ CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	XMFLOAT3 xmf3Pos = { 5.f, 0.f, 5.f };
 	SetPosition(xmf3Pos);
-	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetRight(), -1.f));
-	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetUp(), 1.5f));
+	//xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetRight(), -1.f));
+	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetUp(), 2.f));
 
 	m_pInteractionUI->SetPosition(xmf3Pos);
 }
@@ -460,7 +460,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(10.f, 0.f, 10.f);
+	SetPosition(25.f, 0.f, 15.f);
 }
 
 CParticleObject::~CParticleObject()
@@ -498,6 +498,7 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+	: CGameObject(1)//추가!!!!!!!!!!!!!!!!!!!!!!!!!!
 {
 	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
 	SetMesh(pMesh);
@@ -508,10 +509,11 @@ CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CMaterial* pMaterial = new CMaterial(1);
 	pMaterial->SetTexture(pTexture);
+	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->m_ppPipelineShaders[CScene::PIPE_TEXTURE]);
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(15.f, 0.1f, 15.f);
+	SetPosition(25.f, 0.1f, 15.f);
 
 	SetScale(3.f, 1.f, 3.f);
 
@@ -536,7 +538,7 @@ void CPortalObject::Animate(float fTimeElapsed)
 	if (fDistance < 5.f)
 	{
 		//맵 체인지
-		m_isActive = false;
+		//m_isActive = false;
 	}
 	CGameObject::Animate(fTimeElapsed);
 }
