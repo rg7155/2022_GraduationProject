@@ -499,7 +499,7 @@ void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 
 CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
 	SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
@@ -510,6 +510,12 @@ CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	pMaterial->SetTexture(pTexture);
 
 	SetMaterial(0, pMaterial);
+
+	SetPosition(15.f, 0.1f, 15.f);
+
+	SetScale(3.f, 1.f, 3.f);
+
+	m_fAlpha = 1.f;
 }
 
 CPortalObject::~CPortalObject()
@@ -518,12 +524,36 @@ CPortalObject::~CPortalObject()
 
 void CPortalObject::Animate(float fTimeElapsed)
 {
+	if (!m_isActive)
+		return;
+
+	m_fAlpha -= fTimeElapsed;
+	if (m_fAlpha <= 0.f)
+		m_fAlpha = 1.f;
+
+
+	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
+	if (fDistance < 5.f)
+	{
+		//¸Ê Ã¼ÀÎÁö
+		m_isActive = false;
+	}
+	CGameObject::Animate(fTimeElapsed);
 }
 
 void CPortalObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
+	if (!m_isActive)
+		return; 
+	
+	UpdateShaderVariables(pd3dCommandList);
+
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
 void CPortalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
+
 }
