@@ -3,13 +3,6 @@
 #include "Protocol.h"
 class SESSION;
 
-unordered_map<int, SESSION> clients;
-unordered_map<WSAOVERLAPPED*, int> over_to_session;
-
-void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
-void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
-
-char recv_buf[BUFSIZE];
 
 void error_display(const char* msg, int err_no)
 {
@@ -26,76 +19,198 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
-class SEND_DATA {
+enum COMP_TYPE { OP_ACCEPT, OP_RECV, OP_SEND };
+
+class OVER_EXP {
 public:
 	WSAOVERLAPPED _over;
 	WSABUF _wsabuf;
 	char send_buf[BUFSIZE];
+	char _comp_type;	
 
-	SEND_DATA(int size, int client_id, char* n_data )
+	OVER_EXP()
 	{
-		// size id data 순으로 보낸다.
-		_wsabuf.len = size + 2;
+		_wsabuf.len = BUFSIZE;
 		_wsabuf.buf = send_buf;
+		_comp_type = OP_RECV;
 		ZeroMemory(&_over, sizeof(_over));
-		ZeroMemory(&send_buf, BUFSIZE);
+	}
+	OVER_EXP(char* packet)
+	{
+		_wsabuf.len = packet[0];
+		_wsabuf.buf = send_buf;
+		_comp_type = OP_SEND;
 
-		send_buf[0] = size + 2;
-		send_buf[1] = client_id;
-		memcpy(send_buf + 2, n_data, size);
+		ZeroMemory(&_over, sizeof(_over));
+		memcpy(send_buf, packet, packet[0]);
 	}
 };
 
 class SESSION
 {
-	WSAOVERLAPPED _c_over;
-	WSABUF _c_wsabuf[1];
-	int _id;
+	OVER_EXP _recv_over;
 
 public:
+	bool	in_use;
+	int		_id;
 	SOCKET	_socket;
-	CHAR	_c_mess[BUFSIZE];
-
-	CPlayer* pPlayer;
+	char	_name[NAME_SIZE];
+	int		_prev_remain;
 
 public:
-	SESSION() {}
-	SESSION(int id, SOCKET s) : _id(id), _socket(s)
+	CPlayer* _pPlayer;
+
+public:
+	SESSION()
 	{
-		_c_wsabuf[0].buf = _c_mess;
-		_c_wsabuf[0].len = sizeof(_c_mess);
-		over_to_session[&_c_over] = id;
-		pPlayer = new CPlayer;
-		pPlayer->Initialize();
+		_id = -1;
+		_socket = 0;
+		_name[0] = 0;
+		in_use = 0;
+		_prev_remain = 0;
+		_pPlayer = new CPlayer;
+		_pPlayer->Initialize();
 	}
 	~SESSION() {}
 
 	void do_recv()
 	{
-		// 받기전에 초기화 해준다.......
-		_c_wsabuf[0].buf = _c_mess;
-		_c_wsabuf[0].len = BUFSIZE;
 		DWORD recv_flag = 0;
-		memset(&_c_over, 0, sizeof(_c_over));
-
-		// 키값 받음
-		WSARecv(_socket, _c_wsabuf, 1, 0, &recv_flag, &_c_over, recv_callback);
+		memset(&_recv_over._over, 0, sizeof(_recv_over._over));
+		_recv_over._wsabuf.len = BUFSIZE - _prev_remain;
+		_recv_over._wsabuf.buf = _recv_over.send_buf + _prev_remain;
+		WSARecv(_socket, &_recv_over._wsabuf, 1, 0, &recv_flag, &_recv_over._over, 0);
 	}
 
-	void do_send(int num_bytes, int client_id, char* mess)
+	void do_send(void* packet)
 	{
-		SEND_DATA* sdata = new SEND_DATA{ num_bytes, client_id, mess };
-		WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
+		OVER_EXP* sdata = new OVER_EXP{ reinterpret_cast<char*>(packet) };
+		WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, 0);
 
 	}
+
+	void send_login_info_packet()
+	{
+		SC_LOGIN_INFO_PACKET p;
+		p.id = _id;
+		p.size = sizeof(SC_LOGIN_INFO_PACKET);
+		p.type = SC_LOGIN_INFO;
+		p.xmf4x4World = _pPlayer->m_xmf4x4World;
+		memcpy(p.animInfo, _pPlayer->m_eAnimInfo, sizeof(player_anim) * ANIM::END);
+		do_send(&p);
+	}
+
+	void send_move_packet(int c_id);
+
 };
+
+array<SESSION, MAX_USER> clients;
+
+void SESSION::send_move_packet(int c_id)
+{
+	SC_MOVE_PLAYER_PACKET p;
+	p.id = c_id; // _id로 해서 오류 났었음
+	p.size = sizeof(SC_MOVE_PLAYER_PACKET);
+	p.type = SC_MOVE_PLAYER;
+	p.xmf4x4World = _pPlayer->m_xmf4x4World;
+	do_send(&p);
+}
+
+int get_new_client_id()
+{
+	for (int i = 0; i < MAX_USER; ++i)
+	{
+		if (clients[i].in_use == false)
+			return i;
+	}
+	return -1;
+
+}
+
+void process_packet(int c_id, char* packet)
+{
+	// 프로토콜을 클라와 같이 정의해야한다. 헤더파일에 정의하도록
+
+	switch (packet[1])
+	{
+	case CS_LOGIN: {
+		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
+		strcpy_s(clients[c_id]._name, p->name);
+		clients[c_id].send_login_info_packet();
+
+		// 다른플레이어에게 접속했다고 알림
+		for (auto& pl : clients)
+		{
+			if (!pl.in_use) continue;
+			if (pl._id == c_id) continue;
+			SC_ADD_PLAYER_PACKET add_packet;
+			add_packet.id = c_id;
+			strcpy_s(add_packet.name, p->name);
+			add_packet.size = sizeof(add_packet);
+			add_packet.type = SC_ADD_PLAYER;
+			add_packet.xmf4x4World = clients[c_id]._pPlayer->m_xmf4x4World;
+			memcpy(add_packet.animInfo, clients[c_id]._pPlayer->m_eAnimInfo, sizeof(player_anim) * ANIM::END);
+			pl.do_send(&add_packet);
+		}
+		for (auto& pl : clients)
+		{
+			if (!pl.in_use) continue;
+			if (pl._id == c_id) continue;
+			SC_ADD_PLAYER_PACKET add_packet;
+			add_packet.id = pl._id;
+			strcpy_s(add_packet.name, pl._name);
+			add_packet.size = sizeof(add_packet);
+			add_packet.type = SC_ADD_PLAYER;
+			add_packet.xmf4x4World = pl._pPlayer->m_xmf4x4World;
+			memcpy(add_packet.animInfo, pl._pPlayer->m_eAnimInfo, sizeof(player_anim) * ANIM::END);
+			clients[c_id].do_send(&add_packet);
+		}
+		break;
+	}
+	case CS_MOVE: {
+		// 일단 받아서 넘겨주는 것만 수행
+		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
+		clients[c_id]._pPlayer->m_xmf4x4World = p->xmf4x4World;
+		memcpy(clients[c_id]._pPlayer->m_eAnimInfo, p->animInfo, sizeof(player_anim) * ANIM::END);
+		for (auto& pl : clients)
+			if (true == pl.in_use)
+				pl.send_move_packet(c_id);
+
+		clients[c_id].send_move_packet(c_id);
+		break;
+	}
+
+	default:
+		break;
+	}
+
+}
+
+void disconnect(int c_id)
+{
+	for (auto& pl : clients)
+	{
+		if (pl.in_use == false)
+			continue;
+		if (pl._id == c_id) continue;
+		SC_REMOVE_PLAYER_PACKET p;
+		p.id = c_id;
+		p.size = sizeof(p);
+		p.type = SC_REMOVE_PLAYER;
+		pl.do_send(&p);
+	}
+	closesocket(clients[c_id]._socket);
+	clients[c_id].in_use = false;
+}
 
 int main()
 {
+	HANDLE h_iocp;
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	SOCKET server = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
-	
+
 	SOCKADDR_IN server_addr;
 	ZeroMemory(&server_addr, 0, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
@@ -106,69 +221,94 @@ int main()
 
 	SOCKADDR_IN cl_addr;
 	int addr_size = sizeof(cl_addr);
-
 	int client_id = 0;
+
+	h_iocp = CreateIoCompletionPort(INVALID_HANDLE_VALUE, 0, 0, 0);
+	CreateIoCompletionPort(reinterpret_cast<HANDLE>(server), h_iocp, 9999, 0); // 동접량
+
+	SOCKET c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+	OVER_EXP a_over;
+
+	a_over._comp_type = OP_ACCEPT;
+	AcceptEx(server, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over._over);
+
 	while (true)
 	{
-		SOCKET client = WSAAccept(server, reinterpret_cast<sockaddr*>(&cl_addr), &addr_size, 0, 0);
-		clients.try_emplace(client_id, client_id, client); // clients[client] = SESSION{ client };
-		clients[client_id].do_recv();
-		client_id++;
+		DWORD num_bytes;
+		ULONG_PTR key;
+		OVERLAPPED* over = nullptr;
+		BOOL ret = GetQueuedCompletionStatus(h_iocp, &num_bytes, &key, &over, INFINITE);
+		OVER_EXP* ex_over = reinterpret_cast<OVER_EXP*>(over);
 
-		cout << "Client " << client_id << '\n';
+		if (FALSE == ret)
+		{
+			if (ex_over->_comp_type == OP_ACCEPT) cout << "Accept\n";
+			else {
+				cout << "GQCS Error on client[" << key << "]\n";
+				disconnect(key);
+				if (ex_over->_comp_type == OP_SEND)
+					continue;
+			}
+		}
 
+		switch (ex_over->_comp_type)
+		{
+		case OP_ACCEPT:
+		{
+			int client_id = get_new_client_id();
+			if (client_id != -1)
+			{
+				clients[client_id].in_use = true;
+				clients[client_id]._id = client_id;
+				clients[client_id]._name[0] = 0;
+				clients[client_id]._prev_remain = 0;
+				clients[client_id]._socket = c_socket;
+				CreateIoCompletionPort(reinterpret_cast<HANDLE>(c_socket), h_iocp, client_id, 0);
+
+				clients[client_id].do_recv();
+				c_socket = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
+
+			}
+			else
+			{
+				cout << "Max User exceeded.\n";
+			}
+			ZeroMemory(&a_over._over, sizeof(a_over._over));
+			// 서버를 iocp에 등록해야함. -> 핸들 필요
+			AcceptEx(server, c_socket, a_over.send_buf, 0, addr_size + 16, addr_size + 16, 0, &a_over._over);
+			break;
+		}
+		case OP_RECV:
+		{
+			int remain_data = num_bytes + clients[key]._prev_remain;
+			char* p = ex_over->send_buf;
+			while (remain_data > 0)
+			{
+				int packet_size = p[0];
+				if (packet_size <= remain_data) {
+					// 여러 개가 뭉쳐서 올 수도, 잘려서 올 수도 있음.
+					process_packet(static_cast<int>(key), p);
+					p = p + packet_size;
+					remain_data = remain_data - packet_size;
+				}
+				else break;
+			}
+			clients[key]._prev_remain = remain_data;
+			if (remain_data > 0) {
+				memcpy(ex_over->send_buf, p, remain_data);
+			}
+			clients[key].do_recv();
+			break;
+		}
+
+		case OP_SEND:
+			delete ex_over;
+			break;
+		default:
+			break;
+		}
 	}
 
 	closesocket(server);
 	WSACleanup();
-}
-
-void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
-{
-	int client_id = over_to_session[over];
-	if (clients.find(client_id) == clients.end())
-		return;
-
-	duoPlayer* duoPl = reinterpret_cast<duoPlayer*>(clients[client_id]._c_mess);
-
-	if (num_bytes == 0)
-	{
-		// 모든 클라에게 삭제됨을 전송
-		for (auto& cl : clients)
-		{
-			duoPl->xmf4x4World = clients[client_id].pPlayer->m_xmf4x4World;
-			memcpy(duoPl->animInfo, clients[client_id].pPlayer->m_eAnimInfo, sizeof(player_anim) * ANIM::END);
-			cl.second.do_send(sizeof(duoPlayer), client_id, reinterpret_cast<char*>(duoPl));
-		}
-		cout << client_id << "Client Disconnection\n";
-		clients.erase(client_id);
-		return;
-	}
-	clients[client_id].pPlayer->m_xmf4x4World = duoPl->xmf4x4World;
-	for (int i = 0; i < ANIM::END; i++)
-	{
-		clients[client_id].pPlayer->m_eAnimInfo[i] = duoPl->animInfo[i];
-	}
-	// 모든 클라에게 클라의 위치 전송 (나를 제외)
-	for (auto& cl : clients)
-	{
-		if (cl.first == client_id) continue;
-		cl.second.do_send(sizeof(duoPlayer), client_id, reinterpret_cast<char*>(duoPl));
-	}
-	clients[client_id].do_recv();
-}
-
-void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
-{
-	int client_id = over_to_session[over];
-
-	// 삭제된 클라면 over_to_session에서도 삭제해준다. over은 여기에서만 쓰니까.
-	auto iter = clients.find(client_id);
-	if (iter == clients.end())
-		over_to_session.erase(over);
-
-	SEND_DATA* sdata = reinterpret_cast<SEND_DATA*>(over);
-	delete sdata;
-
-	return;
 }
