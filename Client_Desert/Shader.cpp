@@ -578,6 +578,13 @@ CGameObject* CStandardObjectsShader::SetActive(const wchar_t* pObjTag)
 	return nullptr;
 }
 
+void CStandardObjectsShader::SetInactiveAllObject()
+{
+	for (auto& iter : m_mapObject)
+		for (auto& iterSec : iter.second)
+			iterSec->SetActiveState(false);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

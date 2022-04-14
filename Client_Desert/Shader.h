@@ -122,6 +122,7 @@ public:
 
 	virtual HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag) { return S_OK; }
 	CGameObject*		SetActive(const wchar_t* pObjTag);
+	void				SetInactiveAllObject();
 public:
 	map<const wchar_t*, list<CGameObject*>>		m_mapObject;
 };

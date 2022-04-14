@@ -367,26 +367,27 @@ CUIObject::~CUIObject()
 
 void CUIObject::Animate(float fTimeElapsed)
 {
-	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_F))
-		SetFadeState(m_isFadeIn = !m_isFadeIn);
-
-	//m_Alpha = 0.8f;
 	switch (m_eUIType)
 	{
 	case CUIObject::UI_FADE:
-		if (m_isFadeIn)
+		if (m_isStartFade)
 		{
-			if (m_fAlpha < 1.f) m_fAlpha += fTimeElapsed;
-		}
-		else
-		{
-			if (m_fAlpha > 0.f) m_fAlpha -= fTimeElapsed;
-			//m_fAlpha -= fTimeElapsed;
-			//if (m_fAlpha < -2.f)
-			//{
-			//	SetFadeState(m_isFadeIn = !m_isFadeIn);
-			//}
-
+			if (m_isFadeIn)
+			{
+				if (m_fAlpha > 0.f) m_fAlpha -= fTimeElapsed;
+				else m_isStartFade = false;
+			}
+			else
+			{
+				//m_fAlpha 1¿Ã∏È æÓµŒøÚ
+				m_fAlpha += fTimeElapsed;
+				if (m_fAlpha > 2.f) SetFadeState(true); //3√  »ƒ π‡æ∆¡¸
+				else if (!m_isChangeScene && m_fAlpha > 1.f)
+				{
+					m_isChangeScene = true;
+					CGameMgr::GetInstance()->GetScene()->ChangeScene(SCENE::SCENE_2);
+				}
+			}
 		}
 		break;
 	}
@@ -413,12 +414,13 @@ void CUIObject::SetFadeState(bool isIn)
 	if (isIn)
 	{
 		//π‡æ∆¡¸
-		m_fAlpha = 0.f;
+		m_fAlpha = 1.f;
 	}
 	else
 	{
+		m_isStartFade = true;
 		//∆‰¿ÃµÂ æ∆øÙ - æÓµŒøˆ¡¸
-		m_fAlpha = 1.f;
+		m_fAlpha = 0.f;
 	}
 }
 
@@ -472,7 +474,8 @@ CParticleObject::~CParticleObject()
 
 void CParticleObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
-
+	if (!m_isActive)
+		return;
 	//CGameObject::Render(pd3dCommandList, pCamera);
 
 	UpdateShaderVariable(pd3dCommandList, &m_xmf4x4World);
@@ -535,10 +538,16 @@ void CPortalObject::Animate(float fTimeElapsed)
 
 
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
-	if (fDistance < 5.f)
+	if (fDistance < 5.f && !m_isOverlap)
 	{
+		m_isOverlap = true;
+		//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
+
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
+		static_cast<CUIObject*>(pObj)->SetFadeState(false);
 		//∏  √º¿Œ¡ˆ
 		//m_isActive = false;
+		
 	}
 	CGameObject::Animate(fTimeElapsed);
 }

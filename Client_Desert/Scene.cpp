@@ -73,25 +73,11 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_ppShaders = new CShader * [m_nShaders];
 
 	int iIndex = 0;
-	m_pMapObjectShader = new CMapObjectsShader();
-	m_pMapObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pMapObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = m_pMapObjectShader;
-
-	m_pMonsterObjectShader = new CMonsterObjectsShader();
-	m_pMonsterObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pMonsterObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = m_pMonsterObjectShader;
-
-	m_pNPCObjectShader = new CNPCObjectsShader();
-	m_pNPCObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pNPCObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = m_pNPCObjectShader;
-
-	pShader = new CParticleShader();
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = pShader;
+	
+	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMapObjectShader = new CMapObjectsShader(), iIndex++);
+	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMonsterObjectShader = new CMonsterObjectsShader(), iIndex++);
+	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pNPCObjectShader = new CNPCObjectsShader(), iIndex++);
+	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pParticleObjectShader = new CParticleShader(), iIndex++);
 
 	//따로 쉐이더를 만들지 않는 오브젝트
 	m_pStandardObjectShader = new CStandardObjectsShader(0); //파이프라인 안씀
@@ -99,15 +85,8 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CreateStandardObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	m_nAlphaShaderStartIndex = iIndex;
-	m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader();
-	m_pMultiSpriteObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pMultiSpriteObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = m_pMultiSpriteObjectShader;
-
-	m_pUIObjectShader = new CUIObjectsShader();
-	m_pUIObjectShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
-	m_pUIObjectShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-	m_ppShaders[iIndex++] = m_pUIObjectShader;
+	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader(), iIndex++);
+	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pUIObjectShader = new CUIObjectsShader(), iIndex++);
 
 
 	//////////////////////////////////////////////////
@@ -118,6 +97,13 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_pShadowMapToViewport = new CTextureToViewportShader();
 	m_pShadowMapToViewport->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+}
+
+void CScene::CreateShaderAndBuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, CShader* pShader, int iIndex)
+{
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->BuildObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
+	m_ppShaders[iIndex] = pShader;
 }
 
 void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
@@ -339,8 +325,16 @@ void CScene::ChangeScene(SCENE eScene)
 	case SCENE_1:
 		break;
 	case SCENE_2:
+		m_pPlayer->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+
 		m_pMapObjectShader->ChangeMap(eScene);
+
 		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
+
+		m_pMonsterObjectShader->SetInactiveAllObject();
+		m_pNPCObjectShader->SetInactiveAllObject();
+		m_pStandardObjectShader->SetInactiveAllObject();
+		m_pParticleObjectShader->SetInactiveAllObject();
 		break;
 	}
 }

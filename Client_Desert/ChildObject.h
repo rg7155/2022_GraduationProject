@@ -129,6 +129,8 @@ public:
 private:
 	float	m_fAlpha = 0.f;
 	bool	m_isFadeIn = false;
+	bool	m_isStartFade = false;
+	bool	m_isChangeScene = false;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -161,4 +163,5 @@ public:
 
 private:
 	float m_fAlpha = 0.f;
+	bool	m_isOverlap = false;
 };
