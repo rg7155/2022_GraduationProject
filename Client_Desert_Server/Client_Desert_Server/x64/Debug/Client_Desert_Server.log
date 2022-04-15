@@ -1,6 +1,4 @@
 ﻿  Client_Desert_Server.cpp
-D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(215,2): warning C4002: 함수 같은 매크로 호출 'RtlZeroMemory'에 대해 인수가 너무 많습니다.
-D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(248,16): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
-  Player.cpp
-  코드를 생성하고 있습니다...
-  Client_Desert_Server.vcxproj -> D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\x64\Debug\Client_Desert_Server.exe
+C:\Users\ysj\Desktop\Graduate_Game\2022_GraduationProject\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(216,2): warning C4002: 함수 같은 매크로 호출 'RtlZeroMemory'에 대해 인수가 너무 많습니다.
+C:\Users\ysj\Desktop\Graduate_Game\2022_GraduationProject\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(249,16): warning C4244: '인수': 'ULONG_PTR'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Client_Desert_Server.vcxproj -> C:\Users\ysj\Desktop\Graduate_Game\2022_GraduationProject\2022_GraduationProject\Client_Desert_Server\x64\Debug\Client_Desert_Server.exe

@@ -37,12 +37,13 @@ public:
 	}
 	OVER_EXP(char* packet)
 	{
-		_wsabuf.len = packet[0];
+		unsigned char* p = reinterpret_cast<unsigned char*>(packet);
+		_wsabuf.len = p[0];
 		_wsabuf.buf = send_buf;
 		_comp_type = OP_SEND;
 
 		ZeroMemory(&_over, sizeof(_over));
-		memcpy(send_buf, packet, packet[0]);
+		memcpy(send_buf, p, p[0]);
 	}
 };
 

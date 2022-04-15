@@ -26,6 +26,14 @@ char recv_buf[BUFSIZE];
 WSABUF wsabuf_s;
 char send_buf[BUFSIZE];
 
+// new
+int g_myid;
+int g_duoid;
+
+void ProcessPacket(char* ptr);
+void process_data(char* net_buf, size_t io_byte);
+void send_packet(void* packet);
+
 void Server_PosSend();
 void Server_PosRecv();
 void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
@@ -75,6 +83,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	if (0 != ret)
+	{
+		int err_no = WSAGetLastError();
+		if (err_no != WSA_IO_PENDING)
+			error_display("connect", err_no);
+		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
+	}
+	CS_LOGIN_PACKET p;
+	p.size = sizeof(CS_LOGIN_PACKET);
+	p.type = CS_LOGIN;
+	strcpy_s(p.name, "TEMP");
+	send_packet(&p);
+
 #endif // USE_SERVER
 
 
@@ -93,12 +114,14 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 			gGameFramework.FrameAdvance();
 #ifdef USE_SERVER
-			////// 키 send
+			////// 위치 send -> 키입력 있었을때만 Send하는걸로 바꾸고 다른 클라는 입력 값없으면 알아서 돌아가도록
 			Server_PosSend();
 
 			//// 위치 받기
-			Server_PosRecv();
-			SleepEx(0, true);
+			//Server_PosRecv();
+			
+
+			//SleepEx(0, true);
 			// Sleep -> recv_callback -> send_callback 순으로 실행된다.
 #endif // USE_SERVER
 		}
@@ -224,27 +247,11 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
-	char* m_start = recv_buf;
-
-	int msg_size = m_start[0];
-	int from_client_id = m_start[1];
-	duoPlayer* duoPl;
-	duoPl = reinterpret_cast<duoPlayer*>(m_start + 2);
-	gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
-
-	//gGameFramework.GetPlayer()->SetPosition(*pos);
-	//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
-	//	cout << "client disconnection\n";
-	//else
-	//	cout << pos->x << pos->y << endl;
-
-	//cbTransferred -= msg_size;
-	//if (0 >= cbTransferred) break;
-	//m_start += msg_size;
+	size_t received = cbTransferred;
+	
+	if (received > 0) process_data(recv_buf, received);
 
 	delete lpOverlapped;
-
-
 }
 
 void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
@@ -272,18 +279,152 @@ void Server_PosRecv()
 	}
 
 }
+
 void Server_PosSend()
 {
-	DWORD sent_byte;
+	CS_MOVE_PACKET p;
+	p.size = sizeof(p);
+	p.type = CS_MOVE;
+	p.xmf4x4World = gGameFramework.m_pPlayer->m_xmf4x4ToParent;
+	for (int i = 0; i < ANIM::END; i++)
+	{
+		p.animInfo[i].fWeight = gGameFramework.m_pPlayer->m_pSkinnedAnimationController->GetTrackWeight(i);
+		p.animInfo[i].bEnable = gGameFramework.m_pPlayer->m_pSkinnedAnimationController->GetTrackEnable(i);
+		p.animInfo[i].fPosition = gGameFramework.m_pPlayer->m_pSkinnedAnimationController->m_fPosition[i];
+	}
+	send_packet(&p);
+}
+void ProcessPacket(unsigned char* ptr)
+{
+	static bool duo_add = false;
+
+	switch (ptr[1])
+	{
+	case SC_LOGIN_INFO:
+	{
+		SC_LOGIN_INFO_PACKET* packet = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
+		g_myid = packet->id;
+
+		// 행렬, 애니메이션
+		gGameFramework.m_pPlayer->m_xmf4x4ToParent = packet->xmf4x4World;
+		for (int i = 0; i < ANIM::END; i++)
+		{
+			gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackWeight(i, packet->animInfo[i].fWeight);
+			gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackPosition(i, packet->animInfo[i].fPosition);
+			gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackEnable(i, packet->animInfo[i].bEnable);
+		}
+		break;
+	}
+	case SC_ADD_PLAYER:
+	{
+		SC_ADD_PLAYER_PACKET* my_packet = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(ptr);
+		int id = my_packet->id;
+
+		if (id == g_myid) {
+			// 행렬, 애니메이션
+			gGameFramework.m_pPlayer->m_xmf4x4ToParent = my_packet->xmf4x4World;
+			for (int i = 0; i < ANIM::END; i++)
+			{
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackWeight(i, my_packet->animInfo[i].fWeight);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackPosition(i, my_packet->animInfo[i].fPosition);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackEnable(i, my_packet->animInfo[i].bEnable);
+			}
+		}
+		else if (id < MAX_USER)
+		{
+			// duoPlayer 1명만 받아요
+			if (duo_add)
+				break;
+			duo_add = true;
+			g_duoid = id;
+
+			// 행렬, 애니메이션
+			gGameFramework.m_pScene->m_pDuoPlayer->m_xmf4x4ToParent = my_packet->xmf4x4World;
+			for (int i = 0; i < ANIM::END; i++)
+			{
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackWeight(i, my_packet->animInfo[i].fWeight);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackPosition(i, my_packet->animInfo[i].fPosition);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackEnable(i, my_packet->animInfo[i].bEnable);
+			}
+		}
+		break;
+	}
+	case SC_MOVE_PLAYER:
+	{
+		SC_MOVE_PLAYER_PACKET* my_packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
+		int other_id = my_packet->id;
+		if (other_id == g_myid)
+		{
+			gGameFramework.m_pPlayer->m_xmf4x4ToParent = my_packet->xmf4x4World;
+			for (int i = 0; i < ANIM::END; i++)
+			{
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackWeight(i, my_packet->animInfo[i].fWeight);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackPosition(i, my_packet->animInfo[i].fPosition);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackEnable(i, my_packet->animInfo[i].bEnable);
+			}
+		}
+		else if (other_id == g_duoid)
+		{
+			// 행렬, 애니메이션
+			gGameFramework.m_pScene->m_pDuoPlayer->m_xmf4x4ToParent = my_packet->xmf4x4World;
+			for (int i = 0; i < ANIM::END; i++)
+			{
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackWeight(i, my_packet->animInfo[i].fWeight);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackPosition(i, my_packet->animInfo[i].fPosition);
+				gGameFramework.m_pPlayer->m_pSkinnedAnimationController->SetTrackEnable(i, my_packet->animInfo[i].bEnable);
+			}
+		}
+		break;
+	}
+	case SC_REMOVE_PLAYER:
+	{
+		SC_REMOVE_PLAYER_PACKET* my_packet = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
+		int other_id = my_packet->id;
+		if (other_id == g_myid) {
+			// 숨기기
+		}
+		else if (other_id == g_duoid) {
+			// duo 숨기기
+		}
+		break;
+	}
+	default:
+		printf("Unknown PACKET type [%d]\n", ptr[1]);
+		break;
+	}
+}
+
+void process_data(char* net_buf, size_t io_byte)
+{
+	unsigned char* ptr = reinterpret_cast<unsigned char*>(net_buf);
+	static size_t in_packet_size = 0;
+	static size_t saved_packet_size = 0;
+	static unsigned char packet_buffer[BUFSIZE];
+
+	while (0 != io_byte) {
+		if (0 == in_packet_size) in_packet_size = ptr[0];
+		if (io_byte + saved_packet_size >= in_packet_size) {
+			memcpy(packet_buffer + saved_packet_size, ptr, in_packet_size - saved_packet_size);
+			ProcessPacket(packet_buffer);
+			ptr += in_packet_size - saved_packet_size;
+			io_byte -= in_packet_size - saved_packet_size;
+			in_packet_size = 0;
+			saved_packet_size = 0;
+		}
+		else {
+			memcpy(packet_buffer + saved_packet_size, ptr, io_byte);
+			saved_packet_size += io_byte;
+			io_byte = 0;
+		}
+	}
+}
+
+void send_packet(void* packet)
+{
 	WSABUF mybuf;
-	
-	// 버퍼에 duoPlayer 넣기
-	duoPlayer* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
-	mybuf.buf = reinterpret_cast<char*>(pDuoPlayer);
-	mybuf.len = BUFSIZE;
-
-	//memcpy(send_buf, mybuf.buf, sizeof(mybuf.buf));
-
+	unsigned char* p = reinterpret_cast<unsigned char*>(packet);
+	mybuf.buf = reinterpret_cast<char*>(packet);
+	mybuf.len = p[0];
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
 	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
 
@@ -295,7 +436,4 @@ void Server_PosSend()
 			error_display("WSASend", err_no);
 		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
 	}
-
-	//delete pDuoPlayer;
 }
-
