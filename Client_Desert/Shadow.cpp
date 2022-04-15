@@ -118,6 +118,8 @@ void CDepthRenderShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCo
 		for (UINT i = 0; i < MAX_DEPTH_TEXTURES; i++)
 			m_pDepthTexture->CreateTexture(pd3dDevice, _DEPTH_BUFFER_WIDTH, _DEPTH_BUFFER_HEIGHT, DXGI_FORMAT_R32_FLOAT, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON, &d3dClearValue, RESOURCE_TEXTURE2D, i);
 
+		m_eCurResource[0] = m_eCurResource[1] = D3D12_RESOURCE_STATE_COMMON;
+
 		D3D12_RENDER_TARGET_VIEW_DESC d3dRenderTargetViewDesc;
 		d3dRenderTargetViewDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
 		d3dRenderTargetViewDesc.Texture2D.MipSlice = 0;
@@ -294,7 +296,7 @@ void CDepthRenderShader::PrepareShadowMap(ID3D12GraphicsCommandList* pd3dCommand
 
 void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, int iIndex)
 {
-	::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), m_eCurResource[iIndex], D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	FLOAT pfClearColor[4] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	pd3dCommandList->ClearRenderTargetView(m_pd3dRtvCPUDescriptorHandles[iIndex], pfClearColor, 0, NULL);
@@ -315,9 +317,9 @@ void CDepthRenderShader::RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCom
 	Render(pd3dCommandList, m_ppDepthRenderCameras[iIndex], 0, iIndex);
 
 	if (iIndex == DYNAMIC_SHADOW)
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, m_eCurResource[iIndex] = D3D12_RESOURCE_STATE_COMMON);
 	else
-		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COPY_SOURCE);
+		::SynchronizeResourceTransition(pd3dCommandList, m_pDepthTexture->GetTexture(iIndex), D3D12_RESOURCE_STATE_RENDER_TARGET, m_eCurResource[iIndex] = D3D12_RESOURCE_STATE_COPY_SOURCE);
 
 
 }
@@ -342,6 +344,10 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 		pScene->m_pMonsterObjectShader->ShadowRender(pd3dCommandList, pCamera, this);// ShadowRender(pd3dCommandList, pCamera, this);
 	}
 
+}
+
+void CDepthRenderShader::RenderStaticShadow()
+{
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

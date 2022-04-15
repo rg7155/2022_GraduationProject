@@ -52,6 +52,7 @@ public:
 	void RenderToDepthTexture(ID3D12GraphicsCommandList* pd3dCommandList, int iIndex);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, int iIndex = 0);
 
+	void		RenderStaticShadow();
 protected:
 	//깊이 저장 텍스쳐
 	CTexture* m_pDepthTexture = NULL;
@@ -75,6 +76,8 @@ protected:
 
 	ID3D12Resource* m_pd3dcbToLightSpaces = NULL;
 	TOLIGHTSPACES* m_pcbMappedToLightSpaces = NULL;
+
+	D3D12_RESOURCE_STATES m_eCurResource[2];
 public:
 	CTexture* GetDepthTexture() { return(m_pDepthTexture); }
 	ID3D12Resource* GetDepthTextureResource(UINT nIndex) { return(m_pDepthTexture->GetTexture(nIndex)); }
