@@ -19,7 +19,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = "127.0.0.1";
+char SERVER_ADDR[BUFSIZE] = "210.99.123.127";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
@@ -225,24 +225,27 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	char* m_start = recv_buf;
-	while (true)
-	{
-		int from_client_id = m_start[0];
-		duoPlayer* duoPl;
-		duoPl = reinterpret_cast<duoPlayer*>(m_start + 1);
-		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
-		int msg_size = duoPl->size;
 
-		//gGameFramework.GetPlayer()->SetPosition(*pos);
-		//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
-		//	cout << "client disconnection\n";
-		//else
-		//	cout << pos->x << pos->y << endl;
+	int from_client_id = m_start[0];
+	duoPlayer* duoPl;
+	duoPl = reinterpret_cast<duoPlayer*>(m_start + 1);
+	gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
+	int msg_size = duoPl->size;
 
-		cbTransferred -= msg_size;
-		if (0 >= cbTransferred) break;
-		m_start += msg_size;
-	}
+	//while (true)
+	//{
+	//	
+
+	//	//gGameFramework.GetPlayer()->SetPosition(*pos);
+	//	//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
+	//	//	cout << "client disconnection\n";
+	//	//else
+	//	//	cout << pos->x << pos->y << endl;
+
+	//	//cbTransferred -= msg_size;
+	//	//if (0 >= cbTransferred) break;
+	//	//m_start += msg_size;
+	//}
 	
 
 	delete lpOverlapped;
