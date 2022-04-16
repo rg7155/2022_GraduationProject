@@ -35,14 +35,12 @@ public:
 	SEND_DATA(int size, int client_id, char* n_data )
 	{
 		// size id data 순으로 보낸다.
-		_wsabuf.len = size + 2;
+		_wsabuf.len = size;
 		_wsabuf.buf = send_buf;
 		ZeroMemory(&_over, sizeof(_over));
 		ZeroMemory(&send_buf, BUFSIZE);
-
-		send_buf[0] = size + 2;
-		send_buf[1] = client_id;
-		memcpy(send_buf + 2, n_data, size);
+		send_buf[0] = client_id;
+		memcpy(send_buf + 1, n_data, size);
 	}
 };
 
@@ -130,15 +128,16 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		return;
 
 	duoPlayer* duoPl = reinterpret_cast<duoPlayer*>(clients[client_id]._c_mess);
-
+	duoPl->size = sizeof(duoPlayer) + 1;
 	if (num_bytes == 0)
 	{
 		// 모든 클라에게 삭제됨을 전송
 		for (auto& cl : clients)
 		{
+			
 			duoPl->xmf4x4World = clients[client_id].pPlayer->m_xmf4x4World;
 			memcpy(duoPl->animInfo, clients[client_id].pPlayer->m_eAnimInfo, sizeof(player_anim) * ANIM::END);
-			cl.second.do_send(sizeof(duoPlayer), client_id, reinterpret_cast<char*>(duoPl));
+			cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
 		}
 		cout << client_id << "Client Disconnection\n";
 		clients.erase(client_id);
@@ -153,7 +152,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 	for (auto& cl : clients)
 	{
 		if (cl.first == client_id) continue;
-		cl.second.do_send(sizeof(duoPlayer), client_id, reinterpret_cast<char*>(duoPl));
+		cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
 	}
 	clients[client_id].do_recv();
 }
