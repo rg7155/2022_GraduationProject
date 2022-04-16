@@ -555,8 +555,12 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3Position, pObj->GetPosition(), true, true);
 		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, PLAYER_SPEED * CGameMgr::GetInstance()->m_fElapsedTime);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
+		//cout << "Before" << m_pCamera->GetPosition().x << m_pCamera->GetPosition().y << m_pCamera->GetPosition().z << endl;
 		m_pCamera->Move(xmf3ToPlayer);
+		//cout << "After" << m_pCamera->GetPosition().x << m_pCamera->GetPosition().y << m_pCamera->GetPosition().z << endl;
+
 		OnPrepareRender();
+		//UpdateTransform(NULL);
 		break;
 	case OBJ_END:
 		break;

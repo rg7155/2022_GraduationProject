@@ -507,7 +507,7 @@ CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Ring.dds", 0);
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
 	CMaterial* pMaterial = new CMaterial(1);
@@ -538,17 +538,16 @@ void CPortalObject::Animate(float fTimeElapsed)
 
 
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
-	if (fDistance < 5.f && !m_isOverlap)
-	{
-		m_isOverlap = true;
-		//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
+	//if (fDistance < 2.5f && !m_isOverlap)
+	//{
+	//	m_isOverlap = true;
+	//	//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
 
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
-		static_cast<CUIObject*>(pObj)->SetFadeState(false);
-		//∏  √º¿Œ¡ˆ
-		//m_isActive = false;
-		
-	}
+	//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
+	//	static_cast<CUIObject*>(pObj)->SetFadeState(false);
+	//	//∏  √º¿Œ¡ˆ
+	//	//m_isActive = false;
+	//}
 	CGameObject::Animate(fTimeElapsed);
 }
 

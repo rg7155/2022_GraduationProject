@@ -150,8 +150,7 @@ namespace Vector3
 
 	inline XMFLOAT3 Subtract(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, bool bNormalize = false, bool bYZero = false)
 	{
-		if (bYZero)
-			xmf3Vector1.y = 0.f, xmf3Vector2.y = 0.f;
+		if (bYZero)	xmf3Vector1.y = 0.f, xmf3Vector2.y = 0.f;
 
 		XMFLOAT3 xmf3Result;
 		if(bNormalize)
