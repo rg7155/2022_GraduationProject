@@ -221,6 +221,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 
 	// 이동
 	Move(MoveByDir(fDistance * m_fLerpSpeed), bUpdateVelocity);
+	m_fTempShift = fDistance * m_fLerpSpeed;
 
 	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
 	if (m_eCurAnim != ANIM::RUN)
@@ -232,13 +233,13 @@ void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)
 	{
+		//XMFLOAT3 xmf3Temp = m_xmf3Velocity;
+		//cout << "Before" << xmf3Temp.x << xmf3Temp.y << xmf3Temp.z << endl;
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
+		//xmf3Temp = m_xmf3Velocity;
+		//cout << "After" << xmf3Temp.x << xmf3Temp.y << xmf3Temp.z << endl;
+
 		m_xmf3PreVelocity = m_xmf3Velocity;
-		//if (m_pComCollision->m_isCollision)
-		//{
-		//	XMFLOAT3 xmf3Temp = Vector3::ScalarProduct(xmf3Shift, -1.5, false);
-		//	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Temp);
-		//}
 	}
 	else
 	{
@@ -546,21 +547,18 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 	{
 	case OBJ_MAP:
 		////방법1. 이동한값 취소
-		//XMFLOAT3 xmShift = Vector3::ScalarProduct(m_xmf3PreVelocity, -2, false);
+		//XMFLOAT3 xmShift = Vector3::ScalarProduct(m_xmf3PreVelocity, -1, false);
 		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmShift);
-		//m_pCamera->Move(xmShift);
-		//OnPrepareRender();
 		
 		//방법2. 오브젝트 밀어주기
 		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3Position, pObj->GetPosition(), true, true);
-		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, PLAYER_SPEED * CGameMgr::GetInstance()->m_fElapsedTime);
+		//xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, PLAYER_SPEED * CGameMgr::GetInstance()->m_fElapsedTime);
+		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, m_fTempShift);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
-		//cout << "Before" << m_pCamera->GetPosition().x << m_pCamera->GetPosition().y << m_pCamera->GetPosition().z << endl;
-		m_pCamera->Move(xmf3ToPlayer);
-		//cout << "After" << m_pCamera->GetPosition().x << m_pCamera->GetPosition().y << m_pCamera->GetPosition().z << endl;
 
+		m_pCamera->Move(xmf3ToPlayer);
+		m_pCamera->RegenerateViewMatrix();
 		OnPrepareRender();
-		//UpdateTransform(NULL);
 		break;
 	case OBJ_END:
 		break;

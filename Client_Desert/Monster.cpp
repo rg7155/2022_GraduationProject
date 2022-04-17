@@ -13,7 +13,7 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	CTexture* pTexture2 = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	pTexture2->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/burn_dissolve.dds", 0);
-	CScene::CreateShaderResourceViews(pd3dDevice, pTexture2, 6, false);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture2, RP_TEXTURE2, false);
 
 
 	CMaterial* pMaterial = new CMaterial(2);

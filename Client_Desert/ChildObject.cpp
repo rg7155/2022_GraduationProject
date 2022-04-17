@@ -139,17 +139,22 @@ CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail_Rot.dds", 0);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Trail.dds", 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	CTexture* pTexture2 = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	pTexture2->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Dissolve2.dds", 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture2, RP_TEXTURE2, false);
 
 	CTrailShader* pShader = new CTrailShader();
 	pShader->CreateShader(pd3dDevice, pd3dGraphicsRootSignature);
 	pShader->CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
-	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
-	CMaterial* pMaterial = new CMaterial(1);
+	CMaterial* pMaterial = new CMaterial(2);
 	pMaterial->SetTexture(pTexture);
+	pMaterial->SetTexture(pTexture2, 1);
+
 	pMaterial->SetShader(pShader);
 	SetMaterial(0, pMaterial);
 }
