@@ -19,7 +19,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = "127.0.0.1";
+char SERVER_ADDR[BUFSIZE] = "210.99.123.127";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
@@ -226,25 +226,27 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 {
 	char* m_start = recv_buf;
 
-	while (true)
-	{
-		int msg_size = m_start[0];
-		int from_client_id = m_start[1];
-		XMFLOAT4X4* pos;
-		pos = reinterpret_cast<XMFLOAT4X4*>(m_start + 2);
-		gGameFramework.m_pScene->m_pDuoPlayer->m_xmf4x4ToParent = *pos;
+	int from_client_id = m_start[0];
+	duoPlayer* duoPl;
+	duoPl = reinterpret_cast<duoPlayer*>(m_start + 1);
+	gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
+	int msg_size = duoPl->size;
 
-		//gGameFramework.GetPlayer()->SetPosition(*pos);
-		//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
-		//	cout << "client disconnection\n";
-		//else
-		//	cout << pos->x << pos->y << endl;
+	//while (true)
+	//{
+	//	
 
-		cbTransferred -= msg_size;
-		if (0 >= cbTransferred) break;
-		m_start += msg_size;
+	//	//gGameFramework.GetPlayer()->SetPosition(*pos);
+	//	//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
+	//	//	cout << "client disconnection\n";
+	//	//else
+	//	//	cout << pos->x << pos->y << endl;
 
-	}
+	//	//cbTransferred -= msg_size;
+	//	//if (0 >= cbTransferred) break;
+	//	//m_start += msg_size;
+	//}
+	
 
 	delete lpOverlapped;
 
@@ -281,9 +283,16 @@ void Server_PosSend()
 	DWORD sent_byte;
 	WSABUF mybuf;
 	
-	mybuf.buf = reinterpret_cast<char*>(&gGameFramework.m_pPlayer->m_xmf4x4ToParent);
+	// 버퍼에 duoPlayer 넣기
+	duoPlayer* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
+	mybuf.buf = reinterpret_cast<char*>(pDuoPlayer);
 	mybuf.len = BUFSIZE;
+
+	//memcpy(send_buf, mybuf.buf, sizeof(mybuf.buf));
+
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
+	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
+
 	int ret = WSASend(s_socket, &mybuf, 1, 0, 0, s_over, send_callback);
 	if (0 != ret)
 	{
@@ -292,5 +301,7 @@ void Server_PosSend()
 			error_display("WSASend", err_no);
 		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
 	}
+
+	//delete pDuoPlayer;
 }
 

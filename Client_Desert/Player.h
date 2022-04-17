@@ -110,6 +110,10 @@ private:
 
 	XMVECTOR m_xmVecSrc;
 
+public:
+	duoPlayer* Server_GetParentAndAnimation();
+
+
 
 private:
 	ANIM	m_ePrevAnim;			// 이전 애니메이션

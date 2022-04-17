@@ -54,3 +54,16 @@ void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
+void CDuoPlayer::Server_SetParentAndAnimation(duoPlayer* _duoPlayer)
+{
+	// За·Д
+	m_xmf4x4ToParent = _duoPlayer->xmf4x4World;
+	player_anim* _player_anim = _duoPlayer->animInfo;
+
+	for (int i = 0; i < ANIM::END; i++)
+	{
+		m_pSkinnedAnimationController->SetTrackWeight(i, _player_anim[i].fWeight);
+		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
+		m_pSkinnedAnimationController->m_fPosition[i] = _player_anim[i].fPosition;
+	}
+}

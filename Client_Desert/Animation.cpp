@@ -261,6 +261,21 @@ void CAnimationController::SetTrackWeight(int nAnimationTrack, float fWeight)
 	if (m_pAnimationTracks) m_pAnimationTracks[nAnimationTrack].SetWeight(fWeight);
 }
 
+float CAnimationController::GetTrackWeight(int nAnimationTrack)
+{
+	if (m_pAnimationTracks) {
+		return m_pAnimationTracks[nAnimationTrack].m_fWeight;
+	}
+
+}
+
+bool CAnimationController::GetTrackEnable(int nAnimationTrack)
+{
+	if (m_pAnimationTracks) {
+		return m_pAnimationTracks[nAnimationTrack].m_bEnable;
+	}
+}
+
 void CAnimationController::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	UpdateAnimationSets();

@@ -35,12 +35,12 @@ public:
 	SEND_DATA(int size, int client_id, char* n_data )
 	{
 		// size id data 순으로 보낸다.
-		_wsabuf.len = size + 2;
+		_wsabuf.len = size;
 		_wsabuf.buf = send_buf;
 		ZeroMemory(&_over, sizeof(_over));
-		send_buf[0] = size + 2;
-		send_buf[1] = client_id;
-		memcpy(send_buf + 2, n_data, size);
+		ZeroMemory(&send_buf, BUFSIZE);
+		send_buf[0] = client_id;
+		memcpy(send_buf + 1, n_data, size);
 	}
 };
 
@@ -127,25 +127,32 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 	if (clients.find(client_id) == clients.end())
 		return;
 
+	duoPlayer* duoPl = reinterpret_cast<duoPlayer*>(clients[client_id]._c_mess);
+	duoPl->size = sizeof(duoPlayer) + 1;
 	if (num_bytes == 0)
 	{
 		// 모든 클라에게 삭제됨을 전송
 		for (auto& cl : clients)
 		{
-			XMFLOAT4X4* pos = &clients[client_id].pPlayer->m_xmf4x4World;
-			cl.second.do_send(sizeof(XMFLOAT4X4), client_id, reinterpret_cast<char*>(pos));
+			
+			duoPl->xmf4x4World = clients[client_id].pPlayer->m_xmf4x4World;
+			memcpy(duoPl->animInfo, clients[client_id].pPlayer->m_eAnimInfo, sizeof(player_anim) * ANIM::END);
+			cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
 		}
 		cout << client_id << "Client Disconnection\n";
 		clients.erase(client_id);
 		return;
 	}
-
-	XMFLOAT4X4* pos = reinterpret_cast<XMFLOAT4X4*>(clients[client_id]._c_mess);
+	clients[client_id].pPlayer->m_xmf4x4World = duoPl->xmf4x4World;
+	for (int i = 0; i < ANIM::END; i++)
+	{
+		clients[client_id].pPlayer->m_eAnimInfo[i] = duoPl->animInfo[i];
+	}
 	// 모든 클라에게 클라의 위치 전송 (나를 제외)
 	for (auto& cl : clients)
 	{
 		if (cl.first == client_id) continue;
-		cl.second.do_send(sizeof(XMFLOAT4X4), client_id, reinterpret_cast<char*>(pos));
+		cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
 	}
 	clients[client_id].do_recv();
 }

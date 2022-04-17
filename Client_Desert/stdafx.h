@@ -61,7 +61,7 @@ using Microsoft::WRL::ComPtr;
 //
 #include "Define.h"
 #include "Enum.h"
-
+#include "../Client_Desert_Server/Client_Desert_Server/Protocol.h"
 //
 
 
