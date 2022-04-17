@@ -538,16 +538,13 @@ void CPortalObject::Animate(float fTimeElapsed)
 
 
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
-	//if (fDistance < 2.5f && !m_isOverlap)
-	//{
-	//	m_isOverlap = true;
-	//	//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
-
-	//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
-	//	static_cast<CUIObject*>(pObj)->SetFadeState(false);
-	//	//∏  √º¿Œ¡ˆ
-	//	//m_isActive = false;
-	//}
+	if (fDistance < 2.5f && !m_isOverlap)
+	{
+		m_isOverlap = true;
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
+		static_cast<CUIObject*>(pObj)->SetFadeState(false);
+		//m_isActive = false;
+	}
 	CGameObject::Animate(fTimeElapsed);
 }
 
