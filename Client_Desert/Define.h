@@ -58,7 +58,7 @@
 #define RP_RANDOM_BUFFER	7
 
 
-//#define USE_SERVER 1
+#define USE_SERVER 1
 
 #define NO_COPY(CLASSNAME)							\
 	private:										\
