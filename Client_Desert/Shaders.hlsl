@@ -195,7 +195,7 @@ float4 PSStandard(VS_STANDARD_OUTPUT input) : SV_TARGET
     float4 cColorByLight = lerp(cColor, cIllumination, 0.5f);
 	
     float4 cColorByFog = cColorByLight;
-    if (gnEffectsMask & EFFECT_FOG)			cColorByFog = Fog(cColorByLight, input.positionW);
+    //if (gnEffectsMask & EFFECT_FOG)			cColorByFog = Fog(cColorByLight, input.positionW);
     float4 cColorByLim = float4(0.0f, 0.0f, 0.0f, 1.0f);
     if (gnEffectsMask & EFFECT_LIMLIGHT)	cColorByLim = Limlight(input.normalW);
     if (gnEffectsMask & EFFECT_DISSOLVE)    cColorByFog *= Dissolve(input.uv);

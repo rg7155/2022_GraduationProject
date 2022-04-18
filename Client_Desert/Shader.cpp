@@ -599,7 +599,8 @@ CMapObjectsShader::~CMapObjectsShader()
 
 void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/MapTransform.bin", true);
+	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/MapTransform.bin", true);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform.bin", true);
 	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/MapTransform2.bin", false);
 
 }
@@ -645,7 +646,7 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			if (bLoad && iter == m_mapModelInfo.end())
 			{
 				//»ðÀÔ
-				char pName[64] = "Model/";
+				char pName[64] = "Model/Map/";
 				strcat_s(pName, pstrToken);
 				strcat_s(pName, ".bin");
 
@@ -662,10 +663,10 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 			//Å©ÀÚÀÌ·Î ÀÐ¾î¿È
 			XMFLOAT3 xmf3Scale = ReadVectorFromFile(pInFile, 3);
-			pGameObject->SetScale(xmf3Scale);
 
 			XMFLOAT3 xmf3Rotaion = ReadVectorFromFile(pInFile, 3);
 			pGameObject->Rotate(xmf3Rotaion.x, xmf3Rotaion.y, xmf3Rotaion.z);
+			pGameObject->SetScale(xmf3Scale);
 
 			XMFLOAT3 xmf3Position = ReadVectorFromFile(pInFile, 3);
 			pGameObject->SetPosition(xmf3Position);
