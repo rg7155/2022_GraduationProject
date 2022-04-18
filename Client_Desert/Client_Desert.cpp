@@ -19,12 +19,12 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = "127.0.0.1";
+char SERVER_ADDR[BUFSIZE] = "210.99.123.127";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
 WSABUF wsabuf_s;
-char send_buf[BUFSIZE];
+duoPlayer* duoPlBuf = nullptr;
 
 void Server_PosSend();
 void Server_PosRecv();
@@ -265,6 +265,7 @@ void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	delete lpOverlapped;
+	delete duoPlBuf;
 }
 
 void Server_PosRecv()
@@ -295,7 +296,7 @@ void Server_PosSend()
 	duoPlayer* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
 	mybuf.buf = reinterpret_cast<char*>(pDuoPlayer);
 	mybuf.len = BUFSIZE;
-
+	duoPlBuf = pDuoPlayer;
 	//memcpy(send_buf, mybuf.buf, sizeof(mybuf.buf));
 
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
