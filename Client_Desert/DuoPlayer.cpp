@@ -11,13 +11,13 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
 
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(ANIM::IDLE_RELAXED, true);
+	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE_RELAXED, true);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 
@@ -60,7 +60,7 @@ void CDuoPlayer::Server_SetParentAndAnimation(duoPlayer* _duoPlayer)
 	m_xmf4x4ToParent = _duoPlayer->xmf4x4World;
 	player_anim* _player_anim = _duoPlayer->animInfo;
 
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackWeight(i, _player_anim[i].fWeight);
 		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);

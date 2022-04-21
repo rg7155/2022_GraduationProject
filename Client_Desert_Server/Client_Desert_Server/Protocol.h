@@ -44,7 +44,7 @@ struct CS_MOVE_PACKET
 	unsigned char size;
 	char type;
 	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[ANIM::END];
+	player_anim animInfo[PLAYER::ANIM::END];
 };
 
 struct SC_LOGIN_INFO_PACKET
@@ -53,7 +53,7 @@ struct SC_LOGIN_INFO_PACKET
 	char type;
 	char id;
 	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[ANIM::END];
+	player_anim animInfo[PLAYER::ANIM::END];
 };
 
 struct SC_ADD_PLAYER_PACKET
@@ -62,7 +62,7 @@ struct SC_ADD_PLAYER_PACKET
 	char type;
 	char id;
 	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[ANIM::END];
+	player_anim animInfo[PLAYER::ANIM::END];
 	char name[NAME_SIZE];
 };
 
@@ -79,14 +79,14 @@ struct SC_MOVE_PLAYER_PACKET
 	char type;
 	short id;
 	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[ANIM::END];
+	player_anim animInfo[PLAYER::ANIM::END];
 };
 
 struct duoPlayer
 {
 	unsigned char size;
 	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[ANIM::END];
+	player_anim animInfo[PLAYER::ANIM::END];
 };
 
 

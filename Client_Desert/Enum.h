@@ -10,9 +10,22 @@ enum OBJ_ID { OBJ_PLAYER, OBJ_MAP, OBJ_END };
 
 enum SCENE { SCENE_1, SCENE_2, SCENE_END};
 
-enum ANIM {
-	IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
-	SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8, END = 9,
-};
+namespace PLAYER
+{
+	enum ANIM {
+		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
+		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8, END = 9,
+	};
+}
+
+namespace GOLEM
+{
+	enum ANIM {
+		IDLE = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3,
+		DAMAGED_RIGHT = 4, DAMAGED_LEFT = 5, DIE = 6, GETUP = 7, END = 8
+	};
+}
+
+
 //string COM_FRUSTUM = "Frustum";
 #endif // Eunm_h__

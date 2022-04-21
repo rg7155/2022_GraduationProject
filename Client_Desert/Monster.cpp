@@ -5,7 +5,7 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	: CGameObject(1)
 {
 	SetChild(pModel->m_pModelRootObject, true);
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 1, pModel);
+	
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Dissolve.dds", 0);
@@ -28,6 +28,8 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	SetEffectsType(EFFECT_DISSOLVE, true);
 	m_fDissolve = 0.f; //1에 가까울수록 사라짐
+
+
 }
 
 CMonsterObject::~CMonsterObject()
@@ -82,6 +84,15 @@ void CMonsterObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
+
+	//m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 10, pModel);
+	//for (int i = 0; i < 10; i++)
+	//{
+	//	m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
+	//	m_pSkinnedAnimationController->SetTrackEnable(i, false);
+
+	//}
+	//m_pSkinnedAnimationController->SetTrackEnable(3, true);
 }
 
 CBossObject::~CBossObject()
@@ -94,6 +105,36 @@ void CBossObject::Animate(float fTimeElapsed)
 }
 
 void CBossObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
+{
+	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+
+CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
+{
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, GOLEM::ANIM::END, pModel);
+	for (int i = 0; i < GOLEM::ANIM::END; i++)
+	{
+		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+
+	}
+	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::IDLE, true);
+
+}
+
+CGolemObject::~CGolemObject()
+{
+}
+
+void CGolemObject::Animate(float fTimeElapsed)
+{
+	CGameObject::Animate(fTimeElapsed);
+
+}
+
+void CGolemObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
 	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
