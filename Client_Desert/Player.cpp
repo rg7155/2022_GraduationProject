@@ -57,13 +57,13 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 
 
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(ANIM::IDLE_RELAXED, true);
+	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE_RELAXED, true);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -89,8 +89,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 
 	m_bBattleOn = false;
-	m_eCurAnim = ANIM::IDLE_RELAXED;
-	m_ePrevAnim = ANIM::IDLE_RELAXED;
+	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
+	m_ePrevAnim = PLAYER::ANIM::IDLE_RELAXED;
 	m_bBlendingOn = false;
 	m_bSkill1EffectOn = false;
 
@@ -132,13 +132,13 @@ void CPlayer::ReleaseShaderVariables()
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
 	// 대기동작이나 이동중일때만 움직이기 가능
-	if (m_eCurAnim != ANIM::IDLE && m_eCurAnim != ANIM::IDLE_RELAXED && m_eCurAnim != ANIM::RUN)
+	if (m_eCurAnim != PLAYER::ANIM::IDLE && m_eCurAnim != PLAYER::ANIM::IDLE_RELAXED && m_eCurAnim != PLAYER::ANIM::RUN)
 	{
 		m_fLerpSpeed = 0.f;
 		return;
 	}
 	// 속도 보간
-	if (m_eCurAnim == ANIM::RUN)
+	if (m_eCurAnim == PLAYER::ANIM::RUN)
 	{
 		m_fLerpSpeed += fDistance / PLAYER_SPEED;
 		if (m_fLerpSpeed > 1.f)
@@ -224,8 +224,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	m_fTempShift = fDistance * m_fLerpSpeed;
 
 	// 현재가 RUN이면 애니메이션 바꾸지 않아도 된다.
-	if (m_eCurAnim != ANIM::RUN)
-		Change_Animation(ANIM::RUN);
+	if (m_eCurAnim != PLAYER::ANIM::RUN)
+		Change_Animation(PLAYER::ANIM::RUN);
 
 }
 
@@ -353,7 +353,7 @@ void CPlayer::Update(float fTimeElapsed)
 	////////////////////////////////////////////
 
 	// 바닥 이펙트
-	if (m_eCurAnim == ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
+	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
 		if (pObj) {
@@ -384,13 +384,13 @@ void CPlayer::Update(float fTimeElapsed)
 		if (!Check_MoveInput())
 		{   
 			// IDLE 애니메이션이 실행되도록 하기 위해
-			if (m_eCurAnim == ANIM::IDLE || m_eCurAnim == ANIM::IDLE_RELAXED)
+			if (m_eCurAnim == PLAYER::ANIM::IDLE || m_eCurAnim == PLAYER::ANIM::IDLE_RELAXED)
 				return;
 
 			if (m_bBattleOn)
-				Change_Animation(ANIM::IDLE);
+				Change_Animation(PLAYER::ANIM::IDLE);
 			else
-				Change_Animation(ANIM::IDLE_RELAXED);
+				Change_Animation(PLAYER::ANIM::IDLE_RELAXED);
 		}
 	}
 
@@ -567,8 +567,8 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 
 bool CPlayer::IsNowAttack()
 {
-	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2 ||
-		m_eCurAnim == ANIM::SKILL1 || m_eCurAnim == ANIM::SKILL2)
+	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 ||
+		m_eCurAnim == PLAYER::ANIM::SKILL1 || m_eCurAnim == PLAYER::ANIM::SKILL2)
 		return true;
 
 	return false;
@@ -580,7 +580,7 @@ duoPlayer* CPlayer::Server_GetParentAndAnimation()
 	duoPlayer* _duoPlayer = new duoPlayer;
 	_duoPlayer->xmf4x4World = m_xmf4x4ToParent;
 
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		_duoPlayer->animInfo[i].fWeight = m_pSkinnedAnimationController->GetTrackWeight(i);
 		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
@@ -656,50 +656,51 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 	// 공격 4가지 처리
 
 		// attack1
-	if (m_eCurAnim == ANIM::ATTACK1 || m_eCurAnim == ANIM::ATTACK2 || m_eCurAnim == ANIM::SKILL1 || m_eCurAnim == ANIM::SKILL2 || m_eCurAnim == ANIM::DIE || m_eCurAnim == ANIM::GET_RESOURCE)
+	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 || m_eCurAnim == PLAYER::ANIM::SKILL1 
+		|| m_eCurAnim == PLAYER::ANIM::SKILL2 || m_eCurAnim == PLAYER::ANIM::DIE || m_eCurAnim == PLAYER::ANIM::GET_RESOURCE)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 		{
 			// 이동 중인지 확인
 			if(Check_MoveInput())
-				Change_Animation(ANIM::RUN);
+				Change_Animation(PLAYER::ANIM::RUN);
 			else if (m_bBattleOn)
-				Change_Animation(ANIM::IDLE);
+				Change_Animation(PLAYER::ANIM::IDLE);
 			else
-				Change_Animation(ANIM::IDLE_RELAXED);
+				Change_Animation(PLAYER::ANIM::IDLE_RELAXED);
 
 		}
 		return true;
 	}
 	if (CInputDev::GetInstance()->LButtonDown())
 	{
-		Change_Animation(ANIM::ATTACK1);
+		Change_Animation(PLAYER::ANIM::ATTACK1);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->RButtonDown())
 	{
-		Change_Animation(ANIM::ATTACK2);
+		Change_Animation(PLAYER::ANIM::ATTACK2);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_1))
 	{
-		Change_Animation(ANIM::SKILL1);
+		Change_Animation(PLAYER::ANIM::SKILL1);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_2))
 	{
-		Change_Animation(ANIM::SKILL2);
+		Change_Animation(PLAYER::ANIM::SKILL2);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_0))
 	{
-		Change_Animation(ANIM::DIE);
+		Change_Animation(PLAYER::ANIM::DIE);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))
 	{
-		Change_Animation(ANIM::GET_RESOURCE);
+		Change_Animation(PLAYER::ANIM::GET_RESOURCE);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_9))
@@ -707,12 +708,12 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 		if (m_bBattleOn)
 		{
 			m_bBattleOn = false;
-			Change_Animation(ANIM::IDLE_RELAXED);
+			Change_Animation(PLAYER::ANIM::IDLE_RELAXED);
 		}
 		else
 		{
 			m_bBattleOn = true;
-			Change_Animation(ANIM::IDLE);
+			Change_Animation(PLAYER::ANIM::IDLE);
 		}
 
 
@@ -723,13 +724,13 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 }
 
 
-void CPlayer::Change_Animation(ANIM eNewAnim)
+void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 {
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
 
 
-	if (m_eCurAnim != SKILL1)
+	if (m_eCurAnim != PLAYER::SKILL1)
 		m_bSkill1EffectOn = false;
 
 
@@ -738,7 +739,7 @@ void CPlayer::Change_Animation(ANIM eNewAnim)
 	m_bBlendingOn = true;
 
 	// Prev, Cur 빼고 Enable
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		if (i == m_ePrevAnim || i == m_eCurAnim)
 			continue;

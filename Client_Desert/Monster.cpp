@@ -122,6 +122,18 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::IDLE, true);
 
+	m_eCurAnim = GOLEM::ANIM::IDLE;
+	m_ePrevAnim = GOLEM::ANIM::IDLE;
+	m_bBlendingOn = false;
+	m_fAnimElapsedTime = 0.f;
+	m_fAnimMaxTime = 0.f;
+	m_fBlendingTime = 0.f;
+
+	m_bAttack1On = false;
+	m_bAttack2On = false;
+
+	m_fAttackTime = 0.f;
+
 }
 
 CGolemObject::~CGolemObject()
@@ -130,11 +142,111 @@ CGolemObject::~CGolemObject()
 
 void CGolemObject::Animate(float fTimeElapsed)
 {
+	if ((m_ePrevAnim == GOLEM::IDLE && m_eCurAnim == GOLEM::RUN) ||
+		(m_eCurAnim == GOLEM::IDLE && m_ePrevAnim == GOLEM::RUN))
+	{
+		Blending_Animation(fTimeElapsed);
+	}
+
+	m_fAttackTime += fTimeElapsed;
+	m_fAnimElapsedTime += fTimeElapsed;
+
+	if (m_fAttackTime > 8.f)
+	{
+		Change_Animation(GOLEM::ANIM::ATTACK1);
+
+		m_fAttackTime = 0.f;
+	}
+
+	if (m_eCurAnim != GOLEM::IDLE && m_eCurAnim != GOLEM::RUN && m_fAnimElapsedTime >= m_fAnimMaxTime)
+	{
+		Change_Animation(GOLEM::ANIM::IDLE);
+
+	}
+
 	CGameObject::Animate(fTimeElapsed);
+
+
 
 }
 
 void CGolemObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
 	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
+{
+	m_ePrevAnim = m_eCurAnim;
+	m_eCurAnim = eNewAnim;
+
+	m_fAnimElapsedTime = 0.f;
+	m_fBlendingTime = 0.f;
+	m_bBlendingOn = true;
+	for (int i = 0; i < GOLEM::ANIM::END; i++)
+	{
+		if (i == m_ePrevAnim || i == m_eCurAnim)
+			continue;
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+		m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
+	}
+
+	// 애니메이션 진행시간 
+	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
+
+	if ((m_ePrevAnim == GOLEM::IDLE && m_eCurAnim == GOLEM::RUN) ||
+		(m_eCurAnim == GOLEM::IDLE && m_ePrevAnim == GOLEM::RUN))
+	{
+		////	// 1 2 3 순으로 애니메이션 진행된다하면. 1,2 블렌딩 중에 3으로 바뀌면 2의 블렌딩값과 3의 1-2의블렌딩값으로 세팅되어야 함
+		if (m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim) < 0.8f)
+		{
+			m_fBlendingTime = m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim);
+
+			m_fAnimElapsedTime = 1.f - m_fBlendingTime;
+
+			m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, m_fBlendingTime);
+
+			m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fAnimElapsedTime);
+			m_fBlendingTime = m_fAnimElapsedTime;
+			m_fAnimElapsedTime = 0.f;
+		}
+		else
+		{
+			m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f);	// 애니메이션 3개중첩 방지
+			m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 0.f);
+		}
+		// 이전 애니메이션의 가중치가 1보다 작으면 1로 바꾸지말고 그때부터 보간해야함
+	}
+	else
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(m_ePrevAnim, false);
+		m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 0.f);
+		m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 1.f);	// 애니메이션 3개중첩 방지
+
+	}
+	
+}
+
+void CGolemObject::Blending_Animation(float fTimeElapsed)
+{
+	if (!m_bBlendingOn)
+		return;
+
+	m_fBlendingTime += fTimeElapsed * 2.f;
+
+	if (m_fBlendingTime >= 1.f)
+	{
+		m_bBlendingOn = false;
+		m_pSkinnedAnimationController->SetTrackEnable(m_ePrevAnim, false);
+		m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 0.f);
+		m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 1.f);
+
+		return;
+	}
+
+
+	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f - m_fBlendingTime);
+	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
 }
