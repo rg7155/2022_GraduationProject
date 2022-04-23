@@ -75,8 +75,7 @@ void CMapObject::CreateComponent()
 
 	if (m_strName.find("tree") != string::npos || m_strName.find("grass") != string::npos)
 		m_pComCollision->m_isCollisionIgnore = true;
-
-	if (m_strName.find("Plane") != string::npos)
+	else if (m_strName.find("Plane") != string::npos)
 	{
 		m_isPlane = true;
 		m_pComCollision->m_isCollisionIgnore = true;
@@ -120,8 +119,10 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	else
 	{
 		XMFLOAT3 xmf3Extents = m_pChild->m_pMesh->m_xmOOBB.Extents;
-		float fMax = max(xmf3Extents.x, max(xmf3Extents.y, xmf3Extents.z));
-		float fRadi = m_xmf3Scale.x * fMax; //스케일 x,y,z 다를수도
+		float fMaxExtents = max(xmf3Extents.x, max(xmf3Extents.y, xmf3Extents.z));
+		float fMaxRadius = max(m_xmf3Scale.x, max(m_xmf3Scale.y, m_xmf3Scale.z));//스케일 x,y,z 다를수도
+
+		float fRadi = fMaxRadius * fMaxExtents; 
 
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
 			CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
@@ -291,7 +292,7 @@ CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	m_pInteractionUI->SetMaterial(0, pMaterial);
 
-	XMFLOAT3 xmf3Pos = { 5.f, 0.f, 5.f };
+	XMFLOAT3 xmf3Pos = { 28.f, 0.f, 21.f };
 	SetPosition(xmf3Pos);
 	//xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetRight(), -1.f));
 	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetUp(), 2.f));
@@ -347,23 +348,40 @@ void CNPCObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType)
 	: CGameObject(1)
 {
 	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
 	SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
+
+	m_eUIType = eType;
+	m_fAlpha = 1.f;
+	switch (eType)
+	{
+	case CUIObject::UI_FADE:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Fade.dds", 0);
+		SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+		m_fAlpha = 0.f;
+		break;
+	case CUIObject::UI_PLAYER:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.85f);
+		break;
+	case CUIObject::UI_PROFILE:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
+		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.9f); break;
+	}
+
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
 	CMaterial* pMaterial = new CMaterial(1);
 	pMaterial->SetTexture(pTexture);
 
-	//pMaterial->SetShader(nullptr/*pShader*/);
 	SetMaterial(0, pMaterial);
 
-	SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+	SetActiveState(true);
 }
 
 CUIObject::~CUIObject()
@@ -467,7 +485,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(25.f, 0.f, 15.f);
+	SetPosition(80.f, 0.f, 20.f);
 }
 
 CParticleObject::~CParticleObject()
@@ -521,7 +539,7 @@ CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(25.f, 0.1f, 15.f);
+	SetPosition(80.f, 0.1f, 20.f);
 
 	SetScale(3.f, 1.f, 3.f);
 
@@ -548,7 +566,7 @@ void CPortalObject::Animate(float fTimeElapsed)
 		m_isOverlap = true;
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
 		static_cast<CUIObject*>(pObj)->SetFadeState(false);
-		//m_isActive = false;
+		m_isActive = false;
 	}
 	CGameObject::Animate(fTimeElapsed);
 }

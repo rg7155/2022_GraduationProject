@@ -108,9 +108,9 @@ private:
 class CUIObject : public CGameObject
 {
 public:
-	enum UI_TYPE { UI_FADE, UI_END };
+	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_END };
 
-	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
 
 public:

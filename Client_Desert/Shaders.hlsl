@@ -301,7 +301,7 @@ float4 PSTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 float4 PSAlphaTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
-    cColor.a = gfDissolve;
+    cColor.a *= gfDissolve;
     
     return (cColor);
 }
@@ -312,6 +312,7 @@ float4 PSTexturedTrail(VS_TEXTURED_OUTPUT input) : SV_TARGET
     float4 cDistortion = gtxtTexture2.Sample(gssWrap, input.uv);
     
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv + (cDistortion.r * 2.f));
+    
     cColor.a = input.uv.y;
 	
     float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };

@@ -293,16 +293,13 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 	for (int i = m_nAlphaShaderStartIndex; i < m_nShaders; i++)
 		m_ppShaders[i]->Render(pd3dCommandList, pCamera);
 
-
 	//화면에 뎁스 텍스쳐 그린다, 디버깅 용
 	//TODO- 투명이펙트에 가려진다. 수정할것.
 	if (m_pShadowMapToViewport) m_pShadowMapToViewport->Render(pd3dCommandList, pCamera);
 
-
 	pCamera->SetViewportsAndScissorRects(pd3dCommandList);
 	pCamera->UpdateShaderVariables(pd3dCommandList);
 }
-
 
 
 
@@ -354,12 +351,16 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 	m_pLights[0].m_bEnable = true;
 	m_pLights[0].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.3f, 0.3f, 0.3f, 1.0f);
+	m_pLights[0].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
 	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 300.0f, (_PLANE_WIDTH * 0.5f));
-	//m_pLights[0].m_xmf3Position = XMFLOAT3((_PLANE_WIDTH * 0.5f), 150.0f, (_PLANE_WIDTH * 0.5f));
+	m_pLights[0].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
+
+	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 150.0f, (_PLANE_WIDTH * 0.5f));
+	//m_pLights[0].m_xmf3Position = XMFLOAT3(-0.f, 50.0f, 0.f);
+
+
 	m_pLights[0].m_fRange = 700.0f;
 
 	m_pLights[1].m_bEnable = false;

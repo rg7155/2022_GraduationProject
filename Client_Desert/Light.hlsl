@@ -32,6 +32,24 @@ cbuffer cbLights : register(b4)
 	int						gnLights;
 };
 
+float Compute3x3ShadowFactor(float2 uv, float fDepth, uint nIndex)
+{
+	//uv에서 읽은것은 조명에서의 깊이값, fDepth현재 월드에서 조명까지의 거리
+	//0또는1 리턴
+    float fPercentLit = gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv, fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, 0.0f), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, 0.0f), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(0.0f, +DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(-DELTA_X, +DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, -DELTA_Y), fDepth).r;
+    fPercentLit += gtxtDepthTextures[nIndex].SampleCmpLevelZero(gssComparisonPCFShadow, uv + float2(+DELTA_X, +DELTA_Y), fDepth).r;
+
+	//평균을 내거나 보간을
+    return (fPercentLit / 9.0f);
+}
+
 float Compute5x5ShadowFactor(float2 uv, float fDepth, uint nIndex)
 {
 	//float fPercentLit = 0.0f;
@@ -183,8 +201,9 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			//그림자인지 판단하는 0~1사이 값, 1은 현재 픽셀이 그림자 아님
             float fShadowFactor = 1.0f;
 			//pcf
-			if (bShadow) fShadowFactor = Compute5x5ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
-				
+			//if (bShadow) fShadowFactor = Compute5x5ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+            if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+			
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
                 cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;

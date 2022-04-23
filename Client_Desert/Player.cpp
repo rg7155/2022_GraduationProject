@@ -42,7 +42,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
+	SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
 	
 
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Adventurer_Aland_Blue.bin", NULL);
@@ -233,13 +233,13 @@ void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 {
 	if (bUpdateVelocity)
 	{
-		//XMFLOAT3 xmf3Temp = m_xmf3Velocity;
-		//cout << "Before" << xmf3Temp.x << xmf3Temp.y << xmf3Temp.z << endl;
 		m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, xmf3Shift);
-		//xmf3Temp = m_xmf3Velocity;
 		//cout << "After" << xmf3Temp.x << xmf3Temp.y << xmf3Temp.z << endl;
 
 		m_xmf3PreVelocity = m_xmf3Velocity;
+
+
+
 	}
 	else
 	{
@@ -547,9 +547,12 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 	{
 	case OBJ_MAP:
 		////방법1. 이동한값 취소
-		//XMFLOAT3 xmShift = Vector3::ScalarProduct(m_xmf3PreVelocity, -1, false);
-		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmShift);
-		
+		//XMFLOAT3 xmf3Shift = Vector3::ScalarProduct(m_xmf3PreVelocity, -1, false);
+		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
+		//m_pCamera->Move(xmf3Shift);
+		//m_pCamera->RegenerateViewMatrix();
+		//OnPrepareRender();
+
 		//방법2. 오브젝트 밀어주기
 		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3Position, pObj->GetPosition(), true, true);
 		//xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, PLAYER_SPEED * CGameMgr::GetInstance()->m_fElapsedTime);
