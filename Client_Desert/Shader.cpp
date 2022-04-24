@@ -493,7 +493,7 @@ void CStandardObjectsShader::ReleaseUploadBuffers()
 void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, CCamera *pCamera, int nPipelineState /*= 0*/, bool isChangePipeline /*= true*/)
 {
 	if(isChangePipeline)
-		CStandardShader::Render(pd3dCommandList, pCamera);
+		CStandardShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
 	for (auto & iter : m_mapObject)
 	{
@@ -892,12 +892,22 @@ D3D12_SHADER_BYTECODE CTexturedShader::CreateVertexShader(ID3DBlob** ppd3dShader
 
 D3D12_SHADER_BYTECODE CTexturedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", ppd3dShaderBlob));
+	if(nPipelineState == 0)
+		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", ppd3dShaderBlob));
+	else if (nPipelineState == 1)
+		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSAlphaTextured", "ps_5_1", ppd3dShaderBlob));
+	else
+		return(CShader::CreatePixelShader(ppd3dShaderBlob, nPipelineState));
+
 }
 
 void CTexturedShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState /*= 0*/)
 {
-	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	//분기문 타야지!
+	if(nPipelineState == 0)
+		CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
+	else if (nPipelineState == 1)
+		CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 1);//알파값 변하는
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1065,13 +1075,14 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 {
 	CUIObject* pObject = NULL;
 
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PROFILE);
+	AddObject(L"UI_Info", pObject); 
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PLAYER);
 	AddObject(L"UI_Info", pObject);
-	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PROFILE);
-	AddObject(L"UI_Info", pObject);
 
+	//젤 마지막에 삽입
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);
-	AddObject(L"UI_Fade", pObject);
+	AddObject(L"UI_Info", pObject);
 
 
 }

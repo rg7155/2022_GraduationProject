@@ -38,6 +38,8 @@ CGameFramework::CGameFramework()
 	m_pPlayer = NULL;
 
 	_tcscpy_s(m_pszFrameRate, _T("LabProject ("));
+	_tcscpy_s(m_pszFrameRate, _T("Client_Desert ("));
+
 }
 
 CGameFramework::~CGameFramework()
@@ -588,7 +590,7 @@ void CGameFramework::FrameAdvance()
 
 	MoveToNextFrame();
 
-	m_GameTimer.GetFrameRate(m_pszFrameRate + 12, 37);
+	m_GameTimer.GetFrameRate(m_pszFrameRate + 15, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
 	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
 	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
@@ -643,6 +645,13 @@ void CGameFramework::UpdateShaderVariables()
 
 	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbFrameworkInfo->GetGPUVirtualAddress();
 	m_pd3dCommandList->SetGraphicsRootConstantBufferView(RP_FRAMEWORK_INFO, d3dGpuVirtualAddress);
+
+	float gfCurrentTime = m_GameTimer.GetTotalTime();
+	//for (int j = 0; j < 8; j++)
+		//cout << int(fmod(gfCurrentTime  * 1000.0f, 900.0f)) + j << endl;
+	//cout << gfCurrentTime << endl;
+
+	//cout << gfCurrentTime << endl;
 }
 
 void CGameFramework::ReleaseShaderVariables()

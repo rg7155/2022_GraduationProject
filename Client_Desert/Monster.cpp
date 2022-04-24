@@ -52,6 +52,20 @@ void CMonsterObject::Animate(float fTimeElapsed)
 
 	//cout << m_fDissolve << endl;
 
+
+
+
+	static bool bToggle = false;
+	if (!bToggle)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");
+		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+		xmf3Pos.y += 0.01f;
+		pObj->SetPosition(xmf3Pos);
+		bToggle = true;
+	}
+
+
 	CGameObject::Animate(fTimeElapsed);
 	//cout << m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet]->m_fPosition << endl;
 

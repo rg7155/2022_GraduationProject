@@ -36,7 +36,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
 	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+40); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+50); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -62,9 +62,12 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_nPipelineShaders = PIPE_END;
 	m_ppPipelineShaders = new CShader * [m_nPipelineShaders];
 
-	pShader = new CTexturedShader();
+	//파이프라인 2개!!!!!!!!
+	pShader = new CTexturedShader(2);
 	pShader->AddRef(); //다른 오브젝트에서도 참조하기 때문에
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature);
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 1);
+
 	m_ppPipelineShaders[PIPE_TEXTURE] = pShader;
 
 	//////////////////////////////////////////////////
@@ -109,9 +112,19 @@ void CScene::CreateShaderAndBuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	//포탈
-	CPortalObject* pObj = new CPortalObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	CGameObject* pObj = NULL;
+	pObj = new CPortalObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	pObj->SetActiveState(true);
 	m_pStandardObjectShader->AddObject(L"Portal", pObj);
+
+	//몬스터 바닥 이펙트
+	for (int i = 0; i < 10; ++i)
+	{
+		pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_QUAKE);
+		pObj->SetActiveState(false);
+		m_pStandardObjectShader->AddObject(L"Quake", pObj);
+	}
+
 }
 
 
@@ -309,6 +322,8 @@ CGameObject* CScene::SetActiveObjectFromShader(const wchar_t* pShaderTag, const 
 		return m_pMapObjectShader->SetActive(pObjTag);
 	else if (!wcscmp(pShaderTag, L"MultiSprite"))
 		return m_pMultiSpriteObjectShader->SetActive(pObjTag);
+	else if (!wcscmp(pShaderTag, L"StandardObject"))
+		return m_pStandardObjectShader->SetActive(pObjTag);
 	else
 		return nullptr;
 }
@@ -359,22 +374,30 @@ void CScene::BuildDefaultLightsAndMaterials()
 
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 150.0f, (_PLANE_WIDTH * 0.5f));
 	//m_pLights[0].m_xmf3Position = XMFLOAT3(-0.f, 50.0f, 0.f);
-
-
 	m_pLights[0].m_fRange = 700.0f;
 
 	m_pLights[1].m_bEnable = false;
-	m_pLights[1].m_nType = SPOT_LIGHT;
-	m_pLights[1].m_fRange = 500.0f;
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
-	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
-	m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
-	m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
-	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
-	m_pLights[1].m_fFalloff = 8.0f;
-	m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
-	m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+	m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	m_pLights[1].m_xmf3Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	m_pLights[1].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
+	m_pLights[1].m_xmf3Position = XMFLOAT3((_PLANE_WIDTH * 1.f), 350.0f, (_PLANE_WIDTH * 0.5f));
+	m_pLights[1].m_fRange = 1700.0f;
+
+	//m_pLights[1].m_bEnable = false;
+	//m_pLights[1].m_nType = SPOT_LIGHT;
+	//m_pLights[1].m_fRange = 500.0f;
+	//m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
+	//m_pLights[1].m_xmf4Specular = XMFLOAT4(0.3f, 0.3f, 0.3f, 0.0f);
+	//m_pLights[1].m_xmf3Position = XMFLOAT3(-50.0f, 20.0f, -5.0f);
+	//m_pLights[1].m_xmf3Direction = XMFLOAT3(0.0f, -1.0f, 1.0f);
+	//m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.01f, 0.0001f);
+	//m_pLights[1].m_fFalloff = 8.0f;
+	//m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
+	//m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 }
 
 

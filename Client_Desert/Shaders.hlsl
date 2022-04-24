@@ -408,11 +408,6 @@ VS_PARTICLE_INPUT VSParticleStreamOutput(VS_PARTICLE_INPUT input)
 [maxvertexcount(9)]
 void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<VS_PARTICLE_INPUT> output)
 {
-     //VS_PARTICLE_INPUT particle = input[0];
-
-    //particle.age.x += gfElapsedTime;
-    
-
     /////////////////////////////////////////////////////1
     VS_PARTICLE_INPUT particle = input[0];
 
@@ -428,15 +423,23 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
             //float3 pf3Positions[8];
             
             
+
+            //[unroll(8)]
             for (int j = 0; j < 8; j++)
             {
-                float4 f4Random2 = gRandomBuffer.Load( int(fmod( (gfCurrentTime - floor(gfCurrentTime)) * 1000.0f, 1000.0f) ) );
+                //float4 f4Random = gRandomBuffer.Load(int(fmod((gfCurrentTime - floor(gfCurrentTime)) * 1000.0f, 1000.0f)));
+                //float4 f4Random2 = gRandomBuffer.Load(int(fmod((gfCurrentTime - floor(gfCurrentTime)) * 1000.0f, 1000.0f)));
+                int index = int(fmod(gfCurrentTime * 1000.0f, 900.0f)) + j + 8;
+                float4 f4Random = gRandomBuffer.Load(index);
                 
+                int index2 = int(fmod(gfCurrentTime * 1000.0f, 900.0f)) + j;
+                float4 f4Random2 = gRandomBuffer.Load(index2);
                 particle.type = PARTICLE_TYPE_FLARE;
                 
                 particle.color = float3(1.f, 1.f, 1.f);
-                particle.position = f4Random2.xyz * 3.f;
+                particle.position = f4Random.xyz * 3.f;
                 particle.velocity = float3(0.0f, 3.0f, 0.0f);
+                
                 particle.acceleration = float3(10.0f * f4Random2.y, 1000.f * abs(f4Random2.x), 10.0f * f4Random2.z);
                 //particle.acceleration = float3(10.0f, 250.f, 10.0f);
                 
@@ -464,50 +467,7 @@ void GSParticleStreamOutput(point VS_PARTICLE_INPUT input[1], inout PointStream<
             output.Append(particle);
         }
     }
-    
-    /////////////////////////////////////////////////////2
-    //VS_PARTICLE_INPUT particle = input[0];
-    //particle.age.x += gfElapsedTime;
-    //if (particle.type == PARTICLE_TYPE_EMITTER)
-    //{
-    //    if (particle.age.x > 0.2f) //2段原陥 持失
-    //    {
-    //        VS_PARTICLE_INPUT newParticle = input[0];
-    //        for (int i = 0; i < 1 /*9*/; ++i)
-    //        {
-    //            float4 f4Random = gRandomBuffer.Load(int(fmod((gfCurrentTime - floor(gfCurrentTime)) * 1000.0f, 1000.0f)));
-    //            //float4 f4Random = gRandomBuffer.Load(int((gfCurrentTime * 1000.f) % 1000.f));
-    //            //float4 f4Random = gRandomBuffer.Load(int( (gfCurrentTime - floor(gfCurrentTime))  * 1000.0f));
-                
-				
-    //            //f4Random = normalize(f4Random);
-    //            //f4Random.x = (f4Random.x * 500.f) % 500.f;
-    //            //f4Random.z = (f4Random.z * 500.f) % 500.f;
-    //            f4Random *= 500.f;
-    //            f4Random.y = 20.f;
 
-    //            newParticle.position = float3(f4Random.x, f4Random.y, f4Random.z);
-    //            //newParticle.position = float3(0.f + i * 10.f, 40.f, 0.f);
-    //            //float fColor = normalize(f4Random.x);
-    //            //newParticle.color = float3(fColor, fColor, fColor);
-    //            newParticle.velocity = float3(0.f, 1.f, 0.f);
-    //            newParticle.age = float2(0.f, 10.f);
-    //            newParticle.type = PARTICLE_TYPE_FLARE; // 0?
-    //            output.Append(newParticle);
-    //        }
-			
-    //        particle.age.x = 0.f;
-    //    }
-    //    output.Append(particle);
-    //}
-    //else
-    //{
-    //    if (particle.age.x <= particle.age.y) //lifetime
-    //    {
-    //        output.Append(particle);
-    //    }
-    //}
-		
 	
 }
 
@@ -563,13 +523,18 @@ void GSParticleDraw(point VS_PARTICLE_INPUT input[1], inout TriangleStream<GS_PA
 
 float4 PSParticleDraw(GS_PARTICLE_OUTPUT input) : SV_TARGET
 {
+    if (input.type == PARTICLE_TYPE_EMITTER)
+        return float4(0.f, 0.f, 0.f, 0.f);
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
     
     //cColor.a = cColor.r;
     
-    cColor.a = input.alpha;
-    cColor.a *= cColor.r;
+    //cColor.a = input.alpha;
+    //cColor.a *= cColor.r;
+    cColor *= float4(1.f, 0.f, 0.f, 1.f);
     
+    cColor.a = cColor.r;
+    cColor.a *= input.alpha;
     return (cColor);
 }
 

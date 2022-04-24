@@ -288,7 +288,7 @@ CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	CMaterial* pMaterial = new CMaterial(1);
 	pMaterial->SetTexture(pTexture);
-	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->m_ppPipelineShaders[CScene::PIPE_TEXTURE]);
+	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 
 	m_pInteractionUI->SetMaterial(0, pMaterial);
 
@@ -535,7 +535,7 @@ CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	CMaterial* pMaterial = new CMaterial(1);
 	pMaterial->SetTexture(pTexture);
-	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->m_ppPipelineShaders[CScene::PIPE_TEXTURE]);
+	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 
 	SetMaterial(0, pMaterial);
 
@@ -564,7 +564,7 @@ void CPortalObject::Animate(float fTimeElapsed)
 	if (fDistance < 2.5f && !m_isOverlap)
 	{
 		m_isOverlap = true;
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Info").back();
 		static_cast<CUIObject*>(pObj)->SetFadeState(false);
 		m_isActive = false;
 	}
@@ -587,3 +587,78 @@ void CPortalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
 
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType)
+	: CGameObject(1)
+{
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
+	SetMesh(pMesh);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	CMaterial* pMaterial = new CMaterial(1);
+
+	m_eTextureType = eType;
+	switch (eType)
+	{
+	case TEXTURE_TYPE::TEXTURE_QUAKE:
+		m_fAlpha = 5.f;
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Earthquake.dds", 0);
+		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_ImpactCrack_A.dds", 0);
+
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		pMaterial->m_iPipelineState = 1;
+		break;
+	}
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	pMaterial->SetTexture(pTexture);
+
+	SetMaterial(0, pMaterial);
+}
+
+CTexturedObject::~CTexturedObject()
+{
+}
+
+void CTexturedObject::Animate(float fTimeElapsed)
+{
+	if (!m_isActive)
+		return;
+
+	switch (m_eTextureType)
+	{
+	case TEXTURE_TYPE::TEXTURE_QUAKE:
+		//2초동안 생성, 1초는 서서히 사라짐
+		m_fAlpha -= fTimeElapsed;
+		if (m_fAlpha < 0.f)
+		{
+			m_fAlpha = 2.f;
+			m_isActive = false;
+		}
+		break;
+	}
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CTexturedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	//투명 오브젝트는 CScene의 AddAlphaObjectToList를 통해 렌더해야하지만, 어차피 바닥에 있으니 뭐 이건 나중에..
+	if (!m_isActive)
+		return;
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	// CTexturedShader의 2번째 파이프라인 쓰겠다. PSAlphaTextured, 알파가 변하는
+	CGameObject::Render(pd3dCommandList, pCamera, true);
+}
+
+void CTexturedObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//PSAlphaTextured의 gfDissolve값 설정
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
+}
+

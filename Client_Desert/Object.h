@@ -148,7 +148,7 @@ public:
 	float							m_fGlossyReflection = 0.0f;
 
 	bool							m_isAnimationShader = false;
-
+	int								m_iPipelineState = 0;
 public:
 	int 							m_nTextures = 0;
 	_TCHAR							(*m_ppstrTextureNames)[64] = NULL;

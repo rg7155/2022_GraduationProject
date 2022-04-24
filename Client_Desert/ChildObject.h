@@ -10,7 +10,7 @@ public:
 	CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual ~CSkyBox();
 
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -24,7 +24,7 @@ public:
 public:
 	virtual void Ready() override;
 	virtual void Animate(float fTimeElapsed) override;
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
 
 	virtual void CreateComponent() override;
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
@@ -67,7 +67,7 @@ public:
 	virtual void ReleaseShaderVariables() override;
 
 	virtual void Animate(float fTimeElapsed) override;
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
 
 public:
 	ID3D12Resource* m_pd3dcbTexture = NULL;
@@ -164,4 +164,27 @@ public:
 private:
 	float m_fAlpha = 0.f;
 	bool	m_isOverlap = false;
+};
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CTexturedObject : public CGameObject
+{
+public:
+	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_END };
+
+	CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType);
+	virtual ~CTexturedObject();
+
+public:
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+public:
+	TEXTURE_TYPE		m_eTextureType = TEXTURE_END;
+
+private:
+	float	m_fAlpha = 0.f;
+
 };
