@@ -85,6 +85,16 @@ struct SC_MOVE_PLAYER_PACKET
 	player_anim animInfo[PLAYER::ANIM::END];
 };
 
+struct SC_ADD_MONSTER_PACKET
+{
+	unsigned char size;
+	char type;
+	char id;
+	XMFLOAT4X4	xmf4x4World;
+	char name[NAME_SIZE];
+
+};
+
 struct SC_MOVE_MONSTER_PACKET
 {
 	// 타입추가

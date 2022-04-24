@@ -115,6 +115,10 @@ int main()
 
 	// 시간재는 용 스레드 만들어서 	m_GameTimer.Tick(60.0f); 하도록
 
+	monsterPacket.type = SC_MOVE_MONSTER;
+	monsterPacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
+	monsterPacket.eCurAnim = GOLEM::GETUP;
+
 	while (true)
 	{
 		SOCKET client = WSAAccept(server, reinterpret_cast<sockaddr*>(&cl_addr), &addr_size, 0, 0);
@@ -138,6 +142,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 
 	SC_MOVE_PLAYER_PACKET* duoPl = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(clients[client_id]._c_mess);
 	duoPl->size = sizeof(SC_MOVE_PLAYER_PACKET);
+	duoPl->type = SC_MOVE_PLAYER;
 	if (num_bytes == 0)
 	{
 		// 모든 클라에게 삭제됨을 전송
@@ -164,12 +169,14 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 
 	}
 
-	//// 모든 클라에게 골렘 몬스터 애니메이션 전송
-	//for (auto& cl : clients)
-	//{
-	//	cl.second.do_send(monsterPacket.size, client_id, reinterpret_cast<char*>(&monsterPacket));
+	// 모든 클라에게 골렘 몬스터 애니메이션 전송
+	for (auto& cl : clients)
+	{
+		if (cl.first == client_id) continue;
 
-	//}
+		cl.second.do_send(monsterPacket.size, client_id, reinterpret_cast<char*>(&monsterPacket));
+
+	}
 	clients[client_id].do_recv();
 }
 

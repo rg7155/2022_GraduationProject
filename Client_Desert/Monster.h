@@ -56,7 +56,7 @@ private:
 private:
 	bool	m_bBlendingOn;
 
-private:
+public:
 	void Change_Animation(GOLEM::ANIM eNewAnim);
 	void Blending_Animation(float fTimeElapsed);
 

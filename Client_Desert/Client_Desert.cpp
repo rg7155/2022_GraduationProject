@@ -4,6 +4,7 @@
 #include "stdafx.h"
 #include "Client_Desert.h"
 #include "GameFramework.h"
+#include "Monster.h"
 #include "../Client_Desert_Server/Client_Desert_Server/Protocol.h"
 #define MAX_LOADSTRING 100
 
@@ -75,6 +76,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	gGameFramework.FrameAdvance();
 	//////// 키 send
 	Server_PosSend();
 	//// 위치 받기
@@ -223,6 +225,7 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return((INT_PTR)FALSE);
 }
+int bStart = false;
 void Process_Packet(char* ptr)
 {
 	// type을 비교
@@ -236,7 +239,18 @@ void Process_Packet(char* ptr)
 		break;
 	}
 	case SC_MOVE_MONSTER:
+	{
+		if (bStart)
+			break;
+		bStart = true;
+
+		SC_MOVE_MONSTER_PACKET* packet;
+		packet = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
+		CGolemObject* pGolem = static_cast<CGolemObject*>(pObj);
+		pGolem->Change_Animation(packet->eCurAnim);
 		break;
+	}
 	default:
 		break;
 	}
@@ -248,11 +262,11 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 
 	while (true)
 	{
+		unsigned char* msg_size = reinterpret_cast<unsigned char*>(&m_start[0]);
 		Process_Packet(m_start);
-		int msg_size = m_start[0];
-		cbTransferred -= msg_size;
+		cbTransferred -= *msg_size;
 		if (0 >= cbTransferred) break;
-		m_start += msg_size;
+		m_start += *msg_size;
 	}
 
 	//while (true)
