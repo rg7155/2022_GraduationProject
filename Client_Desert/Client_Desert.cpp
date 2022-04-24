@@ -225,8 +225,8 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return((INT_PTR)FALSE);
 }
-int bStart = false;
-void Process_Packet(char* ptr)
+
+int Process_Packet(char* ptr)
 {
 	// type을 비교
 	switch (ptr[1])
@@ -236,20 +236,16 @@ void Process_Packet(char* ptr)
 		SC_MOVE_PLAYER_PACKET* packet;
 		packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
 		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(packet);
-		break;
+		return packet->size;
 	}
 	case SC_MOVE_MONSTER:
 	{
-		if (bStart)
-			break;
-		bStart = true;
-
 		SC_MOVE_MONSTER_PACKET* packet;
 		packet = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
 		CGolemObject* pGolem = static_cast<CGolemObject*>(pObj);
 		pGolem->Change_Animation(packet->eCurAnim);
-		break;
+		return packet->size;
 	}
 	default:
 		break;
@@ -259,14 +255,12 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	char* m_start = recv_buf;
-
 	while (true)
 	{
-		unsigned char* msg_size = reinterpret_cast<unsigned char*>(&m_start[0]);
-		Process_Packet(m_start);
-		cbTransferred -= *msg_size;
+		int msg_size = Process_Packet(m_start);
+		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
-		m_start += *msg_size;
+		m_start += msg_size;
 	}
 
 	//while (true)

@@ -5,6 +5,9 @@
 #include <array>
 #include <unordered_map>
 #include <DirectXMath.h>
+#include <thread>
+#include <mutex>
+
 #pragma comment(lib, "WS2_32.lib")
 enum ANIM {
 	IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,

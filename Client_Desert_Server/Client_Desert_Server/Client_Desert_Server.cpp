@@ -59,7 +59,7 @@ public:
 	CHAR	_c_mess[BUFSIZE];
 
 	CPlayer* pPlayer;
-
+	bool	_bGolemSend = false;
 public:
 	SESSION() {}
 	SESSION(int id, SOCKET s) : _id(id), _socket(s)
@@ -92,6 +92,29 @@ public:
 	}
 };
 
+mutex mylock;
+
+void TimerThread_func()
+{
+	float fGolemAttackTime = 0.f;
+	while (true)
+	{
+		m_GameTimer.Tick(60.0f);
+		//monsterPacket.fElapsedTime = m_GameTimer.GetTimeElapsed();
+		fGolemAttackTime += m_GameTimer.GetTimeElapsed();
+		if (fGolemAttackTime > 8.f)
+		{
+			monsterPacket.eCurAnim = GOLEM::ANIM::GETUP;
+			fGolemAttackTime = 0.f;
+			for (auto& cl : clients)
+			{
+				cl.second._bGolemSend = true;
+			}
+
+		}
+	}
+
+}
 int main()
 {
 	m_GameTimer.Start();
@@ -118,6 +141,8 @@ int main()
 	monsterPacket.type = SC_MOVE_MONSTER;
 	monsterPacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
 	monsterPacket.eCurAnim = GOLEM::GETUP;
+	cout << sizeof(SC_MOVE_MONSTER_PACKET) << endl;
+	thread timerThread{ TimerThread_func };
 
 	while (true)
 	{
@@ -129,7 +154,7 @@ int main()
 		cout << "Client " << client_id << '\n';
 
 	}
-
+	timerThread.join();
 	closesocket(server);
 	WSACleanup();
 }
@@ -168,15 +193,20 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
 
 	}
-
-	// 모든 클라에게 골렘 몬스터 애니메이션 전송
 	for (auto& cl : clients)
 	{
 		if (cl.first == client_id) continue;
 
-		cl.second.do_send(monsterPacket.size, client_id, reinterpret_cast<char*>(&monsterPacket));
+		if (cl.second._bGolemSend)
+		{
+			cl.second.do_send(monsterPacket.size, cl.first, reinterpret_cast<char*>(&monsterPacket));
+			cl.second._bGolemSend = false;
+		}
 
 	}
+
+	
+
 	clients[client_id].do_recv();
 }
 

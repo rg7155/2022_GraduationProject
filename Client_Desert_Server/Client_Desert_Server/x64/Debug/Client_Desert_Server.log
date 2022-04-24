@@ -1,3 +1,3 @@
 ﻿  Client_Desert_Server.cpp
-D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(104,2): warning C4002: 함수 같은 매크로 호출 'RtlZeroMemory'에 대해 인수가 너무 많습니다.
+D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(127,2): warning C4002: 함수 같은 매크로 호출 'RtlZeroMemory'에 대해 인수가 너무 많습니다.
   Client_Desert_Server.vcxproj -> D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\x64\Debug\Client_Desert_Server.exe
