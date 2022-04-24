@@ -1,15 +1,19 @@
 #include "Client_Desert_Server.h"
 #include "Player.h"
 #include "Protocol.h"
+#include "Timer.h"
 class SESSION;
 
 unordered_map<int, SESSION> clients;
 unordered_map<WSAOVERLAPPED*, int> over_to_session;
 
+SC_MONSTER_PACKET monsterPacket;
+
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 
 char recv_buf[BUFSIZE];
+CGameTimer					m_GameTimer;
 
 void error_display(const char* msg, int err_no)
 {
@@ -90,6 +94,8 @@ public:
 
 int main()
 {
+	m_GameTimer.Start();
+
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData);
 	SOCKET server = WSASocket(AF_INET, SOCK_STREAM, 0, NULL, 0, WSA_FLAG_OVERLAPPED);
@@ -106,6 +112,9 @@ int main()
 	int addr_size = sizeof(cl_addr);
 
 	int client_id = 0;
+
+	// 시간재는 용 스레드 만들어서 	m_GameTimer.Tick(60.0f); 하도록
+
 	while (true)
 	{
 		SOCKET client = WSAAccept(server, reinterpret_cast<sockaddr*>(&cl_addr), &addr_size, 0, 0);
@@ -153,6 +162,14 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 	{
 		if (cl.first == client_id) continue;
 		cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
+
+	}
+
+	// 모든 클라에게 골렘 몬스터 애니메이션 전송
+	for (auto& cl : clients)
+	{
+		cl.second.do_send(monsterPacket.size, client_id, reinterpret_cast<char*>(&monsterPacket));
+
 	}
 	clients[client_id].do_recv();
 }

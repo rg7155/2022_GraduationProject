@@ -120,10 +120,10 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::IDLE, true);
+	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::RUN, true);
 
-	m_eCurAnim = GOLEM::ANIM::IDLE;
-	m_ePrevAnim = GOLEM::ANIM::IDLE;
+	m_eCurAnim = GOLEM::ANIM::RUN;
+	m_ePrevAnim = GOLEM::ANIM::RUN;
 	m_bBlendingOn = false;
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
@@ -151,7 +151,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 	m_fAttackTime += fTimeElapsed;
 	m_fAnimElapsedTime += fTimeElapsed;
 
-	if (m_fAttackTime > 8.f)
+	if (m_fAttackTime > 4.f)
 	{
 		Change_Animation(GOLEM::ANIM::ATTACK1);
 

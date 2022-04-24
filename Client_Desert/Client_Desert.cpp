@@ -223,7 +223,19 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return((INT_PTR)FALSE);
 }
-
+void Process_Packet(char* ptr)
+{
+	// type을 비교
+	switch (ptr[1])
+	{
+	case SC_MOVE_PLAYER:
+		break;
+	case SC_MOVE_MONSTER:
+		break;
+	default:
+		break;
+	}
+}
 void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
