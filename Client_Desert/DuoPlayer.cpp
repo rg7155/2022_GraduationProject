@@ -54,11 +54,11 @@ void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
-void CDuoPlayer::Server_SetParentAndAnimation(duoPlayer* _duoPlayer)
+void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
 {
 	// За·Д
-	m_xmf4x4ToParent = _duoPlayer->xmf4x4World;
-	player_anim* _player_anim = _duoPlayer->animInfo;
+	m_xmf4x4ToParent = packet->xmf4x4World;
+	player_anim* _player_anim = packet->animInfo;
 
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{

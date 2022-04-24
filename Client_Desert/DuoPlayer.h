@@ -16,6 +16,6 @@ public:
 
 
 public:
-	void Server_SetParentAndAnimation(duoPlayer* _duoPlayer);
+	void Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet);
 };
 

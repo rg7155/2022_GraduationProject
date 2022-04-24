@@ -112,7 +112,7 @@ private:
 	XMVECTOR m_xmVecSrc;
 
 public:
-	duoPlayer* Server_GetParentAndAnimation();
+	SC_MOVE_PLAYER_PACKET* Server_GetParentAndAnimation();
 
 
 

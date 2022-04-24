@@ -24,7 +24,7 @@ SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
 WSABUF wsabuf_s;
-duoPlayer* duoPlBuf = nullptr;
+SC_MOVE_PLAYER_PACKET* duoPlBuf = nullptr;
 
 void Server_PosSend();
 void Server_PosRecv();
@@ -229,7 +229,12 @@ void Process_Packet(char* ptr)
 	switch (ptr[1])
 	{
 	case SC_MOVE_PLAYER:
+	{
+		SC_MOVE_PLAYER_PACKET* packet;
+		packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
+		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(packet);
 		break;
+	}
 	case SC_MOVE_MONSTER:
 		break;
 	default:
@@ -239,16 +244,12 @@ void Process_Packet(char* ptr)
 void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
+	char* m_start = recv_buf;
+
 	while (true)
 	{
-		char* m_start = recv_buf;
-
-		int from_client_id = m_start[0];
-		duoPlayer* duoPl;
-		duoPl = reinterpret_cast<duoPlayer*>(m_start + 1);
-		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
-		int msg_size = duoPl->size;
-
+		Process_Packet(m_start);
+		int msg_size = m_start[0];
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
 		m_start += msg_size;
@@ -307,7 +308,7 @@ void Server_PosSend()
 	WSABUF mybuf;
 	
 	// 버퍼에 duoPlayer 넣기
-	duoPlayer* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
+	SC_MOVE_PLAYER_PACKET* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
 	mybuf.buf = reinterpret_cast<char*>(pDuoPlayer);
 	mybuf.len = BUFSIZE;
 	duoPlBuf = pDuoPlayer;

@@ -574,10 +574,10 @@ bool CPlayer::IsNowAttack()
 	return false;
 }
 
-duoPlayer* CPlayer::Server_GetParentAndAnimation()
+SC_MOVE_PLAYER_PACKET* CPlayer::Server_GetParentAndAnimation()
 {
 	// За·Д
-	duoPlayer* _duoPlayer = new duoPlayer;
+	SC_MOVE_PLAYER_PACKET* _duoPlayer = new SC_MOVE_PLAYER_PACKET;
 	_duoPlayer->xmf4x4World = m_xmf4x4ToParent;
 
 	for (int i = 0; i < PLAYER::ANIM::END; i++)

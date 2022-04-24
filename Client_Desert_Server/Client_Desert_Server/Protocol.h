@@ -85,16 +85,6 @@ struct SC_MOVE_PLAYER_PACKET
 	player_anim animInfo[PLAYER::ANIM::END];
 };
 
-struct duoPlayer
-{
-	// 타입추가
-	unsigned char size;
-	char type;
-	short id;
-	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[PLAYER::ANIM::END];
-};
-
 struct SC_MOVE_MONSTER_PACKET
 {
 	// 타입추가
