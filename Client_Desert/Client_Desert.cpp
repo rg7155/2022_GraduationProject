@@ -245,6 +245,8 @@ int Process_Packet(char* ptr)
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
 		CGolemObject* pGolem = static_cast<CGolemObject*>(pObj);
 		pGolem->Change_Animation(packet->eCurAnim);
+		pGolem->SetLookAt(packet->xmf3Look);
+		pGolem->SetPosition(packet->xmf3Position);
 		return packet->size;
 	}
 	default:
@@ -258,6 +260,11 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	while (true)
 	{
 		int msg_size = Process_Packet(m_start);
+		if (cbTransferred < msg_size)
+		{
+			cout << "recv_callback Error" << endl;
+			break;
+		}
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
 		m_start += msg_size;

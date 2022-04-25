@@ -155,6 +155,7 @@
     <ClInclude Include="DDSTextureLoader12.h" />
     <ClInclude Include="Define.h" />
     <ClInclude Include="DirectXTex.h" />
+    <ClInclude Include="DirectX_option.h" />
     <ClInclude Include="DuoPlayer.h" />
     <ClInclude Include="Enum.h" />
     <ClInclude Include="framework.h" />

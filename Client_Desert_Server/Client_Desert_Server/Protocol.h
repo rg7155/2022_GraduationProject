@@ -101,7 +101,8 @@ struct SC_MOVE_MONSTER_PACKET
 	unsigned char size;
 	char type;
 	short id;
-	//XMFLOAT4X4	xmf4x4World;
+	XMFLOAT3 xmf3Look;
+	XMFLOAT3 xmf3Position;
 	GOLEM::ANIM eCurAnim;
 	//float	fElapsedTime;
 };

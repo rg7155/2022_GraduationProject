@@ -1,19 +1,19 @@
 #include "Client_Desert_Server.h"
 #include "Player.h"
+#include "GolemMonster.h"
 #include "Protocol.h"
 #include "Timer.h"
 class SESSION;
 
-unordered_map<int, SESSION> clients;
-unordered_map<WSAOVERLAPPED*, int> over_to_session;
-
-SC_MOVE_MONSTER_PACKET monsterPacket;
+unordered_map<int, SESSION>			clients;
+unordered_map<WSAOVERLAPPED*, int>	over_to_session;
+CGolemMonster*						g_pGolemMonster = nullptr;
+CGameTimer							m_GameTimer;
 
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 
 char recv_buf[BUFSIZE];
-CGameTimer					m_GameTimer;
 
 void error_display(const char* msg, int err_no)
 {
@@ -92,29 +92,31 @@ public:
 	}
 };
 
-mutex mylock;
-
 void TimerThread_func()
 {
-	float fGolemAttackTime = 0.f;
+	float	fGolemCreateTime = 0.f;
+	bool	bGolemCreateOn = false;
 	while (true)
 	{
 		m_GameTimer.Tick(60.0f);
-		//monsterPacket.fElapsedTime = m_GameTimer.GetTimeElapsed();
-		fGolemAttackTime += m_GameTimer.GetTimeElapsed();
-		if (fGolemAttackTime > 8.f)
-		{
-			monsterPacket.eCurAnim = GOLEM::ANIM::GETUP;
-			fGolemAttackTime = 0.f;
-			for (auto& cl : clients)
-			{
-				cl.second._bGolemSend = true;
-			}
+		float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+		if(clients.size() >= 1)
+			fGolemCreateTime += fTimeElapsed;
 
+		if (!bGolemCreateOn && fGolemCreateTime > 10.f)
+		{
+			g_pGolemMonster = new CGolemMonster(clients[0].pPlayer);
+			bGolemCreateOn = true;
+		}
+
+		if (g_pGolemMonster)
+		{
+			g_pGolemMonster->Update(fTimeElapsed);
 		}
 	}
 
 }
+
 int main()
 {
 	m_GameTimer.Start();
@@ -138,10 +140,6 @@ int main()
 
 	// 시간재는 용 스레드 만들어서 	m_GameTimer.Tick(60.0f); 하도록
 
-	monsterPacket.type = SC_MOVE_MONSTER;
-	monsterPacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
-	monsterPacket.eCurAnim = GOLEM::GETUP;
-	cout << sizeof(SC_MOVE_MONSTER_PACKET) << endl;
 	thread timerThread{ TimerThread_func };
 
 	while (true)
@@ -159,6 +157,24 @@ int main()
 	WSACleanup();
 }
 
+void send_GolemMonster(int c_id)
+{
+	SC_MOVE_MONSTER_PACKET p;
+	p.id = 0;
+	p.type = SC_MOVE_MONSTER;
+	p.size = sizeof(SC_MOVE_MONSTER_PACKET);
+	p.eCurAnim = g_pGolemMonster->m_eCurAnim;
+	p.xmf3Position = g_pGolemMonster->m_xmf3Position;
+	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
+
+	for (auto& cl : clients)
+	{
+		if (cl.first == c_id) continue;
+		cl.second.do_send(p.size, cl.first, reinterpret_cast<char*>(&p));
+
+	}
+}
+
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
 {
 	int client_id = over_to_session[over];
@@ -174,7 +190,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		for (auto& cl : clients)
 		{
 			duoPl->xmf4x4World = clients[client_id].pPlayer->m_xmf4x4World;
-			memcpy(duoPl->animInfo, clients[client_id].pPlayer->m_eAnimInfo, sizeof(player_anim) * ANIM::END);
+			memcpy(duoPl->animInfo, clients[client_id].pPlayer->m_eAnimInfo, sizeof(player_anim) * PLAYER::ANIM::END);
 			cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
 		}
 		cout << client_id << "Client Disconnection\n";
@@ -182,7 +198,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		return;
 	}
 	clients[client_id].pPlayer->m_xmf4x4World = duoPl->xmf4x4World;
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		clients[client_id].pPlayer->m_eAnimInfo[i] = duoPl->animInfo[i];
 	}
@@ -193,22 +209,13 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		cl.second.do_send(duoPl->size, client_id, reinterpret_cast<char*>(duoPl));
 
 	}
-	for (auto& cl : clients)
-	{
-		if (cl.first == client_id) continue;
 
-		if (cl.second._bGolemSend)
-		{
-			cl.second.do_send(monsterPacket.size, cl.first, reinterpret_cast<char*>(&monsterPacket));
-			cl.second._bGolemSend = false;
-		}
-
-	}
-
-	
+	if(g_pGolemMonster)
+		send_GolemMonster(client_id);
 
 	clients[client_id].do_recv();
 }
+
 
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
 {
