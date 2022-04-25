@@ -18,5 +18,8 @@ public:
 	XMFLOAT3		m_xmf3Look;
 	GOLEM::ANIM		m_eCurAnim;
 
+private:
+	float			m_fAttackAnimTime;
+
 };
 

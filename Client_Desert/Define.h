@@ -21,7 +21,7 @@
 
 // Monster
 #define GOLEMSPEED						2.f
-
+#define ATTACK_DISTANCE					3.f
 
 
 //Light.hlsl과 맞추기

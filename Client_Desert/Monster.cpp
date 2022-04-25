@@ -160,7 +160,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 
 	if (m_eCurAnim != GOLEM::IDLE && m_eCurAnim != GOLEM::RUN && m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
-		Change_Animation(GOLEM::ANIM::IDLE);
+		Change_Animation(GOLEM::ANIM::RUN);
 
 	}
 
@@ -177,6 +177,10 @@ void CGolemObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 {
+	//if (m_eCurAnim == GOLEM::ANIM::ATTACK2 || m_eCurAnim == GOLEM::ANIM::ATTACK1)
+	//{
+	//	eNewAnim = GOLEM::ANIM::IDLE;
+	//}
 	if (m_eCurAnim == eNewAnim)
 		return;
 
