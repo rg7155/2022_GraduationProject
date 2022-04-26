@@ -49,6 +49,9 @@ void CDuoPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 
 void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
+	if (m_bDead)
+		return;
+
 	UpdateShaderVariables(pd3dCommandList);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);

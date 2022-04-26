@@ -271,6 +271,12 @@ int Process_Packet(char* ptr)
 		pGolem->SetPosition(p->xmf3Position);
 		return p->size;
 	}
+	case SC_REMOVE_PLAYER:
+	{
+		SC_REMOVE_PLAYER_PACKET* p = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
+		gGameFramework.m_pScene->m_pDuoPlayer->SetDead(true);
+		return p->size;
+	}
 	default:
 		break;
 	}
