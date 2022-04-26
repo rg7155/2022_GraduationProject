@@ -15,8 +15,22 @@ public:
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
+public:
+	void LerpRotate(float fTimeElapsed);
+	virtual void OnPrepareRender();
+
 protected:
 	float	m_fDissolve = 0.f; //0~1»çÀÌ °ª
+
+protected:
+	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
+	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
+	XMFLOAT3					m_xmf3Look = XMFLOAT3(0.0f, 0.0f, 1.0f);
+	XMVECTOR m_xmVecNowRotate;
+	XMVECTOR m_xmVecNewRotate;
+	XMVECTOR m_xmVecSrc;
+	float	m_fLerpSpeed;
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -59,14 +73,7 @@ private:
 public:
 	void Change_Animation(GOLEM::ANIM eNewAnim);
 	void Blending_Animation(float fTimeElapsed);
-
-private:
-	XMVECTOR m_xmVecNowRotate;
-	XMVECTOR m_xmVecTmpRotate;
-	XMVECTOR m_xmVecNewRotate;
-
-	XMVECTOR m_xmVecSrc;
-
+	void SetNewRotate(XMFLOAT3 xmf3Look);
 private:
 	bool	m_bAttack1On;
 	bool	m_bAttack2On;

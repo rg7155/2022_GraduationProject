@@ -29,6 +29,12 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	SetEffectsType(EFFECT_DISSOLVE, true);
 	m_fDissolve = 0.f; //1에 가까울수록 사라짐
 
+	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_xmf3Look = { 0.f, 0.f, 1.f };
+	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+
+	//SetPosition(XMFLOAT3(10.f, 0.f, 20.f));
 
 }
 
@@ -53,7 +59,7 @@ void CMonsterObject::Animate(float fTimeElapsed)
 	//	bToggle = !bToggle;
 
 	//cout << m_fDissolve << endl;
-
+	//LerpRotate(fTimeElapsed);
 	CGameObject::Animate(fTimeElapsed);
 	//cout << m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_pSkinnedAnimationController->m_pAnimationTracks[0].m_nAnimationSet]->m_fPosition << endl;
 
@@ -77,6 +83,32 @@ void CMonsterObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComman
 {
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fDissolve, 34);
+}
+
+void CMonsterObject::LerpRotate(float fTimeElapsed)
+{
+	m_xmVecNowRotate = XMVector3Normalize(m_xmVecNowRotate);
+	m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 10.f);
+
+	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
+
+	XMVECTOR xmVecRight = XMVector3Cross(XMLoadFloat3(&m_xmf3Up), XMLoadFloat3(&m_xmf3Look));
+	XMStoreFloat3(&m_xmf3Right, xmVecRight);
+
+
+	m_xmf3Look = Vector3::Normalize(m_xmf3Look);
+	m_xmf3Up = Vector3::Normalize(m_xmf3Up);
+	m_xmf3Right = Vector3::Normalize(m_xmf3Right);
+}
+
+void CMonsterObject::OnPrepareRender()
+{
+	//m_xmf4x4ToParent._11 = m_xmf3Right.x; m_xmf4x4ToParent._12 = m_xmf3Right.y; m_xmf4x4ToParent._13 = m_xmf3Right.z;
+	//m_xmf4x4ToParent._21 = m_xmf3Up.x; m_xmf4x4ToParent._22 = m_xmf3Up.y; m_xmf4x4ToParent._23 = m_xmf3Up.z;
+	//m_xmf4x4ToParent._31 = m_xmf3Look.x; m_xmf4x4ToParent._32 = m_xmf3Look.y; m_xmf4x4ToParent._33 = m_xmf3Look.z;
+	//////m_xmf4x4ToParent._41 = m_xmf3Position.x; m_xmf4x4ToParent._42 = m_xmf3Position.y; m_xmf4x4ToParent._43 = m_xmf3Position.z;
+
+	//m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +196,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 
 	}
 
-	CGameObject::Animate(fTimeElapsed);
+	CMonsterObject::Animate(fTimeElapsed);
 
 
 
@@ -256,4 +288,12 @@ void CGolemObject::Blending_Animation(float fTimeElapsed)
 
 	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f - m_fBlendingTime);
 	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
+}
+
+void CGolemObject::SetNewRotate(XMFLOAT3 xmf3Look)
+{
+	XMFLOAT3 xmNormalLook = Vector3::Normalize(xmf3Look);
+	m_xmVecNewRotate = XMLoadFloat3(&xmNormalLook);
+	m_xmVecNowRotate = XMLoadFloat3(&xmNormalLook);
+
 }

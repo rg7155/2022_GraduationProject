@@ -124,7 +124,7 @@ void TimerThread_func()
 	while (true)
 	{
 		m_GameTimer.Tick(60.0f);
-		/*float fTimeElapsed = m_GameTimer.GetTimeElapsed();
+		float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 		if(clients.size() >= 1)
 			fGolemCreateTime += fTimeElapsed;
 
@@ -137,7 +137,7 @@ void TimerThread_func()
 		if (g_pGolemMonster)
 		{
 			g_pGolemMonster->Update(fTimeElapsed);
-		}*/
+		}
 	}
 
 }
