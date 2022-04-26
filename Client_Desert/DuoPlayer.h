@@ -21,5 +21,8 @@ public:
 
 private:
 	bool m_bDead = false;
+
+public:
+	int m_iId;
 };
 

@@ -133,6 +133,9 @@ public:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;
 
+public:
+	int		m_iId;
+
 };
 
 class CSoundCallbackHandler : public CAnimationCallbackHandler

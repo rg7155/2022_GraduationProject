@@ -56,16 +56,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	MSG msg;
-	HACCEL hAccelTable;
-
-	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	::LoadString(hInstance, IDC_CLIENTDESERT, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance);
-
-	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
-
-	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
 #ifdef USE_SERVER
 	wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
@@ -78,17 +68,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	
+
 	CS_LOGIN_PACKET* p = new CS_LOGIN_PACKET;
 	p->size = sizeof(CS_LOGIN_PACKET);
 	p->type = CS_LOGIN;
 	strcpy_s(p->name, "PLAYER");
 	send_packet(p);
-	
+
 	//// 위치 받기
 	Server_PosRecv();
 
 #endif // USE_SERVER
+
+	MSG msg;
+	HACCEL hAccelTable;
+
+	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	::LoadString(hInstance, IDC_CLIENTDESERT, szWindowClass, MAX_LOADSTRING);
+	MyRegisterClass(hInstance);
+	
+	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
+
+	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
 
 	while (1)
@@ -104,7 +105,17 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
+#ifdef USE_SERVER
+
+			if (g_myid != -1)
+			{
+				gGameFramework.FrameAdvance();
+			}
+#else
 			gGameFramework.FrameAdvance();
+
+#endif // USE_SERVER
+
 #ifdef USE_SERVER
 
 
@@ -241,7 +252,8 @@ int Process_Packet(char* ptr)
 	{
 		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		g_myid = p->id;
-		gGameFramework.m_pPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
+		gGameFramework.m_iId = g_myid;
+		gGameFramework.BuildObjects();
 		return p->size;
 
 	}
@@ -297,21 +309,6 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 		if (0 >= cbTransferred) break;
 		m_start += msg_size;
 	}
-
-	//while (true)
-	//{
-	//	
-
-	//	//gGameFramework.GetPlayer()->SetPosition(*pos);
-	//	//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
-	//	//	cout << "client disconnection\n";
-	//	//else
-	//	//	cout << pos->x << pos->y << endl;
-
-	//	//cbTransferred -= msg_size;
-	//	//if (0 >= cbTransferred) break;
-	//	//m_start += msg_size;
-	//}
 	if(g_myid != -1)
 		Server_PosSend();
 	Server_PosRecv();

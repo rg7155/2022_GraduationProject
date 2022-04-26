@@ -44,10 +44,14 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	SetPosition(XMFLOAT3(10.0f, 0, 10.0f));
 	
+	char fileName[2048];
+	m_iId = *((int*)pContext);
+	if (m_iId == 0)
+		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
+	else
+		strcpy(fileName, "Model/Adventurer_Aland_Green.bin");
 
-	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Adventurer_Aland_Blue.bin", NULL);
-	
-
+	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, fileName, NULL);
 
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
