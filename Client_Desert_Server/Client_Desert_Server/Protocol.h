@@ -55,8 +55,7 @@ struct SC_LOGIN_INFO_PACKET
 	unsigned char size;
 	char type;
 	char id;
-	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[PLAYER::ANIM::END];
+	short x, z;
 };
 
 struct SC_ADD_PLAYER_PACKET
@@ -64,9 +63,8 @@ struct SC_ADD_PLAYER_PACKET
 	unsigned char size;
 	char type;
 	char id;
-	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[PLAYER::ANIM::END];
 	char name[NAME_SIZE];
+	short x, z;
 };
 
 struct SC_REMOVE_PLAYER_PACKET

@@ -112,7 +112,7 @@ private:
 	XMVECTOR m_xmVecSrc;
 
 public:
-	SC_MOVE_PLAYER_PACKET* Server_GetParentAndAnimation();
+	CS_MOVE_PACKET* Server_GetParentAndAnimation();
 
 
 

@@ -25,7 +25,8 @@ SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
 WSABUF wsabuf_s;
-SC_MOVE_PLAYER_PACKET* duoPlBuf = nullptr;
+int g_myid = -1;
+char* send_buf = nullptr;
 
 void Server_PosSend();
 void Server_PosRecv();
@@ -33,6 +34,7 @@ void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
 void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
+void send_packet(void* packet);
 
 void error_display(const char* msg, int err_no)
 {
@@ -76,9 +78,13 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-	gGameFramework.FrameAdvance();
-	//////// 키 send
-	Server_PosSend();
+	
+	CS_LOGIN_PACKET* p = new CS_LOGIN_PACKET;
+	p->size = sizeof(CS_LOGIN_PACKET);
+	p->type = CS_LOGIN;
+	strcpy_s(p->name, "PLAYER");
+	send_packet(p);
+	
 	//// 위치 받기
 	Server_PosRecv();
 
@@ -231,23 +237,39 @@ int Process_Packet(char* ptr)
 	// type을 비교
 	switch (ptr[1])
 	{
+	case SC_LOGIN_INFO:
+	{
+		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
+		g_myid = p->id;
+		gGameFramework.m_pPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
+		return p->size;
+
+	}
+	case SC_ADD_PLAYER: 
+	{
+		SC_ADD_PLAYER_PACKET* p = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(ptr);
+		gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
+
+		return p->size;
+	}
 	case SC_MOVE_PLAYER:
 	{
-		SC_MOVE_PLAYER_PACKET* packet;
-		packet = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
-		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(packet);
-		return packet->size;
+		// id에 해당하는 플레이어를 옮겨야하는데 1명 밖에 없으니 그냥 확인 안하고 넣기?
+		SC_MOVE_PLAYER_PACKET* p;
+		p = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
+		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(p);
+		return p->size;
 	}
 	case SC_MOVE_MONSTER:
 	{
-		SC_MOVE_MONSTER_PACKET* packet;
-		packet = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
+		SC_MOVE_MONSTER_PACKET* p;
+		p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
 		CGolemObject* pGolem = static_cast<CGolemObject*>(pObj);
-		pGolem->Change_Animation(packet->eCurAnim);
-		pGolem->SetLookAt(packet->xmf3Look);
-		pGolem->SetPosition(packet->xmf3Position);
-		return packet->size;
+		pGolem->Change_Animation(p->eCurAnim);
+		pGolem->SetLookAt(p->xmf3Look);
+		pGolem->SetPosition(p->xmf3Position);
+		return p->size;
 	}
 	default:
 		break;
@@ -284,7 +306,8 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	//	//if (0 >= cbTransferred) break;
 	//	//m_start += msg_size;
 	//}
-	Server_PosSend();
+	if(g_myid != -1)
+		Server_PosSend();
 	Server_PosRecv();
 	delete lpOverlapped;
 
@@ -295,7 +318,7 @@ void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	delete lpOverlapped;
-	delete duoPlBuf;
+	delete send_buf;
 }
 
 void Server_PosRecv()
@@ -317,18 +340,15 @@ void Server_PosRecv()
 	}
 
 }
-void Server_PosSend()
-{
-	DWORD sent_byte;
-	WSABUF mybuf;
-	
-	// 버퍼에 duoPlayer 넣기
-	SC_MOVE_PLAYER_PACKET* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
-	mybuf.buf = reinterpret_cast<char*>(pDuoPlayer);
-	mybuf.len = BUFSIZE;
-	duoPlBuf = pDuoPlayer;
-	//memcpy(send_buf, mybuf.buf, sizeof(mybuf.buf));
 
+void send_packet(void* packet)
+{
+	char* p = reinterpret_cast<char*>(packet);
+	size_t sent = 0;
+	WSABUF mybuf;
+	mybuf.buf = p;
+	mybuf.len = static_cast<unsigned char>(p[0]);
+	send_buf = p;
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
 	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
 
@@ -340,5 +360,13 @@ void Server_PosSend()
 			error_display("WSASend", err_no);
 		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
 	}
+}
+void Server_PosSend()
+{	
+	// 버퍼에 duoPlayer 넣기
+	CS_MOVE_PACKET *p = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
+	p->size = sizeof(CS_MOVE_PACKET);
+	p->type = CS_MOVE;
+	send_packet(p);
 }
 

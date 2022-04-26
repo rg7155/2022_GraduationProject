@@ -23,6 +23,9 @@
 #define GOLEMSPEED						2.f
 #define ATTACK_DISTANCE					3.f
 
+// Player
+#define PLAYER_INIT_POSITION_X			10.f
+#define PLAYER_INIT_POSITION_Z			10.f
 
 //Light.hlsl과 맞추기
 //#define MAX_LIGHTS				4 
