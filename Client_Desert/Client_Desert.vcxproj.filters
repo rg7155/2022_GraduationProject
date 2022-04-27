@@ -186,6 +186,9 @@
     <ClInclude Include="ChildObject.h">
       <Filter>소스 파일\03. GameObject\01. Child</Filter>
     </ClInclude>
+    <ClInclude Include="DirectX_option.h">
+      <Filter>소스 파일\98. Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">

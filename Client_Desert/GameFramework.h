@@ -106,5 +106,8 @@ private:
 
 	bool						m_isCursorFix = false;
 
+public:
+	int							m_iId;
+
 };
 

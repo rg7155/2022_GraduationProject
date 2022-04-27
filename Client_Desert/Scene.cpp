@@ -46,8 +46,6 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
-	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, NULL);
-
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 }
 
@@ -619,4 +617,12 @@ void CScene::SetRootParameterConstants(D3D12_ROOT_PARAMETER pd3dRootParameter[],
 	pd3dRootParameter[iIndex].Constants.ShaderRegister = ShaderRegister;
 	pd3dRootParameter[iIndex].Constants.RegisterSpace = RegisterSpace;
 	pd3dRootParameter[iIndex].ShaderVisibility = ShaderVisibility;
+}
+
+void CScene::CreateDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int id)
+{
+	int duo_id;
+	duo_id = 1 - id;
+
+	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (void*)&duo_id);
 }

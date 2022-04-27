@@ -4,8 +4,10 @@
 #include "stdafx.h"
 #include "Client_Desert.h"
 #include "GameFramework.h"
+#include "Monster.h"
 #include "../Client_Desert_Server/Client_Desert_Server/Protocol.h"
 #define MAX_LOADSTRING 100
+//#define USE_SERVER 1
 
 HINSTANCE						ghAppInstance;
 TCHAR							szTitle[MAX_LOADSTRING];
@@ -19,12 +21,13 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = "210.99.123.127";
+char SERVER_ADDR[BUFSIZE] = "127.0.0.1";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
 WSABUF wsabuf_s;
-char send_buf[BUFSIZE];
+int g_myid = -1;
+char* send_buf = nullptr;
 
 void Server_PosSend();
 void Server_PosRecv();
@@ -32,6 +35,7 @@ void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
 void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
+void send_packet(void* packet);
 
 void error_display(const char* msg, int err_no)
 {
@@ -53,16 +57,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-	MSG msg;
-	HACCEL hAccelTable;
-
-	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
-	::LoadString(hInstance, IDC_CLIENTDESERT, szWindowClass, MAX_LOADSTRING);
-	MyRegisterClass(hInstance);
-
-	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
-
-	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
 #ifdef USE_SERVER
 	wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
@@ -75,7 +69,28 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
 	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+
+	CS_LOGIN_PACKET* p = new CS_LOGIN_PACKET;
+	p->size = sizeof(CS_LOGIN_PACKET);
+	p->type = CS_LOGIN;
+	strcpy_s(p->name, "PLAYER");
+	send_packet(p);
+
+	//// 위치 받기
+	Server_PosRecv();
+
 #endif // USE_SERVER
+
+	MSG msg;
+	HACCEL hAccelTable;
+
+	::LoadString(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
+	::LoadString(hInstance, IDC_CLIENTDESERT, szWindowClass, MAX_LOADSTRING);
+	MyRegisterClass(hInstance);
+	
+	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
+
+	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
 
 	while (1)
@@ -91,13 +106,21 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		}
 		else
 		{
-			gGameFramework.FrameAdvance();
 #ifdef USE_SERVER
-			////// 키 send
-			Server_PosSend();
 
-			//// 위치 받기
-			Server_PosRecv();
+			if (g_myid != -1)
+			{
+				gGameFramework.FrameAdvance();
+			}
+#else
+			gGameFramework.FrameAdvance();
+
+#endif // USE_SERVER
+
+#ifdef USE_SERVER
+
+
+
 			SleepEx(0, true);
 			// Sleep -> recv_callback -> send_callback 순으로 실행된다.
 #endif // USE_SERVER
@@ -221,33 +244,75 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	return((INT_PTR)FALSE);
 }
 
+int Process_Packet(char* ptr)
+{
+	// type을 비교
+	switch (ptr[1])
+	{
+	case SC_LOGIN_INFO:
+	{
+		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
+		g_myid = p->id;
+		gGameFramework.m_iId = g_myid;
+		gGameFramework.BuildObjects();
+		return p->size;
+
+	}
+	case SC_ADD_PLAYER: 
+	{
+		SC_ADD_PLAYER_PACKET* p = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(ptr);
+		gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
+
+		return p->size;
+	}
+	case SC_MOVE_PLAYER:
+	{
+		// id에 해당하는 플레이어를 옮겨야하는데 1명 밖에 없으니 그냥 확인 안하고 넣기?
+		SC_MOVE_PLAYER_PACKET* p;
+		p = reinterpret_cast<SC_MOVE_PLAYER_PACKET*>(ptr);
+		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(p);
+		return p->size;
+	}
+	case SC_MOVE_MONSTER:
+	{
+		SC_MOVE_MONSTER_PACKET* p;
+		p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
+		CGolemObject* pGolem = static_cast<CGolemObject*>(pObj);
+		pGolem->Change_Animation(p->eCurAnim);
+		pGolem->SetLookAt(p->xmf3Look);
+		pGolem->SetPosition(p->xmf3Position);
+		return p->size;
+	}
+	case SC_REMOVE_PLAYER:
+	{
+		SC_REMOVE_PLAYER_PACKET* p = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
+		gGameFramework.m_pScene->m_pDuoPlayer->SetDead(true);
+		return p->size;
+	}
+	default:
+		break;
+	}
+}
 void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	char* m_start = recv_buf;
-
-	int from_client_id = m_start[0];
-	duoPlayer* duoPl;
-	duoPl = reinterpret_cast<duoPlayer*>(m_start + 1);
-	gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(duoPl);
-	int msg_size = duoPl->size;
-
-	//while (true)
-	//{
-	//	
-
-	//	//gGameFramework.GetPlayer()->SetPosition(*pos);
-	//	//if (pos->x <= DISCONNECT) // 연결 끊겼는지 확인
-	//	//	cout << "client disconnection\n";
-	//	//else
-	//	//	cout << pos->x << pos->y << endl;
-
-	//	//cbTransferred -= msg_size;
-	//	//if (0 >= cbTransferred) break;
-	//	//m_start += msg_size;
-	//}
-	
-
+	while (true)
+	{
+		int msg_size = Process_Packet(m_start);
+		if (cbTransferred < msg_size)
+		{
+			cout << "recv_callback Error" << endl;
+			break;
+		}
+		cbTransferred -= msg_size;
+		if (0 >= cbTransferred) break;
+		m_start += msg_size;
+	}
+	if(g_myid != -1)
+		Server_PosSend();
+	Server_PosRecv();
 	delete lpOverlapped;
 
 
@@ -257,6 +322,7 @@ void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	delete lpOverlapped;
+	delete send_buf;
 }
 
 void Server_PosRecv()
@@ -278,18 +344,15 @@ void Server_PosRecv()
 	}
 
 }
-void Server_PosSend()
+
+void send_packet(void* packet)
 {
-	DWORD sent_byte;
+	char* p = reinterpret_cast<char*>(packet);
+	size_t sent = 0;
 	WSABUF mybuf;
-	
-	// 버퍼에 duoPlayer 넣기
-	duoPlayer* pDuoPlayer = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
-	mybuf.buf = reinterpret_cast<char*>(pDuoPlayer);
-	mybuf.len = BUFSIZE;
-
-	//memcpy(send_buf, mybuf.buf, sizeof(mybuf.buf));
-
+	mybuf.buf = p;
+	mybuf.len = static_cast<unsigned char>(p[0]);
+	send_buf = p;
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
 	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
 
@@ -301,7 +364,13 @@ void Server_PosSend()
 			error_display("WSASend", err_no);
 		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
 	}
-
-	//delete pDuoPlayer;
+}
+void Server_PosSend()
+{	
+	// 버퍼에 duoPlayer 넣기
+	CS_MOVE_PACKET *p = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
+	p->size = sizeof(CS_MOVE_PACKET);
+	p->type = CS_MOVE;
+	send_packet(p);
 }
 

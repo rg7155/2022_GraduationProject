@@ -16,6 +16,13 @@ public:
 
 
 public:
-	void Server_SetParentAndAnimation(duoPlayer* _duoPlayer);
+	void Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet);
+	void SetDead(bool bDead) { m_bDead = bDead; }
+
+private:
+	bool m_bDead = false;
+
+public:
+	int m_iId;
 };
 

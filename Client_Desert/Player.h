@@ -6,11 +6,11 @@
 
 class CPlayer : public CGameObject
 {
-private:
-	enum ANIM {
-		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
-		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8, END = 9,
-	};
+//private:
+//	enum ANIM {
+//		IDLE_RELAXED = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3, SKILL1 = 4,
+//		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8, END = 9,
+//	};
 
 protected:
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -93,7 +93,7 @@ private:
 
 private:
 	bool Check_Input(float fTimeElapsed);
-	void Change_Animation(ANIM eNewAnim);
+	void Change_Animation(PLAYER::ANIM eNewAnim);
 	bool Check_MoveInput();
 
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
@@ -112,13 +112,13 @@ private:
 	XMVECTOR m_xmVecSrc;
 
 public:
-	duoPlayer* Server_GetParentAndAnimation();
+	CS_MOVE_PACKET* Server_GetParentAndAnimation();
 
 
 
 private:
-	ANIM	m_ePrevAnim;			// 이전 애니메이션
-	ANIM	m_eCurAnim;				// 현재 애니메이션
+	PLAYER::ANIM	m_ePrevAnim;			// 이전 애니메이션
+	PLAYER::ANIM	m_eCurAnim;				// 현재 애니메이션
 	float	m_fBlendingTime;		// 블렌딩 시간
 	float	m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
 	float	m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
@@ -132,6 +132,9 @@ private:
 public:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;
+
+public:
+	int		m_iId;
 
 };
 

@@ -2,22 +2,27 @@
 
 CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	//클라0번 파란색, 1번-빨간색
-	//CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Adventurer_Alice_Red.bin", NULL);
-	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Adventurer_Aland_Green.bin", NULL);
+	char fileName[2048];
+	m_iId = *((int*)pContext);
+	if (m_iId == 0)
+		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
+	else
+		strcpy(fileName, "Model/Adventurer_Aland_Green.bin");
+
+	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, fileName, NULL);
 
 
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 	
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
 
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(ANIM::IDLE_RELAXED, true);
+	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE_RELAXED, true);
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 
@@ -49,18 +54,21 @@ void CDuoPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 
 void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
+	if (m_bDead)
+		return;
+
 	UpdateShaderVariables(pd3dCommandList);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
-void CDuoPlayer::Server_SetParentAndAnimation(duoPlayer* _duoPlayer)
+void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
 {
 	// 행렬
-	m_xmf4x4ToParent = _duoPlayer->xmf4x4World;
-	player_anim* _player_anim = _duoPlayer->animInfo;
+	m_xmf4x4ToParent = packet->xmf4x4World;
+	player_anim* _player_anim = packet->animInfo;
 
-	for (int i = 0; i < ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackWeight(i, _player_anim[i].fWeight);
 		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);

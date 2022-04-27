@@ -19,6 +19,14 @@
 
 #define ANIMATION_CALLBACK_EPSILON		0.0165f
 
+// Monster
+#define GOLEMSPEED						2.f
+#define ATTACK_DISTANCE					3.f
+
+// Player
+#define PLAYER_INIT_POSITION_X			10.f
+#define PLAYER_INIT_POSITION_Z			10.f
+
 //Light.hlsl과 맞추기
 //#define MAX_LIGHTS				4 
 //#define MAX_DEPTH_TEXTURES		MAX_LIGHTS
@@ -58,7 +66,6 @@
 #define RP_RANDOM_BUFFER	7
 
 
-//#define USE_SERVER 1
 
 #define NO_COPY(CLASSNAME)							\
 	private:										\
