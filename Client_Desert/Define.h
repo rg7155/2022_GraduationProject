@@ -20,8 +20,8 @@
 #define ANIMATION_CALLBACK_EPSILON		0.0165f
 
 // Monster
-#define GOLEMSPEED						2.f
-#define ATTACK_DISTANCE					3.f
+#define GOLEMSPEED						4.f
+#define ATTACK_DISTANCE					2.f
 
 // Player
 #define PLAYER_INIT_POSITION_X			10.f

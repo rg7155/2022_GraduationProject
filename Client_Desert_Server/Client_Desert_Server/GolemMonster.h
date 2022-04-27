@@ -1,4 +1,5 @@
 #pragma once
+#include "Protocol.h"
 
 class CPlayer;
 class CGolemMonster
@@ -20,6 +21,9 @@ public:
 
 private:
 	float			m_fAttackAnimTime;
+
+public:
+	char			send_buf[BUFSIZE];
 
 };
 

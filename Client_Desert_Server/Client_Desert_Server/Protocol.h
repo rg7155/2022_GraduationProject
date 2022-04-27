@@ -6,7 +6,7 @@
 #pragma comment(lib, "MSWSock.lib")
 
 constexpr int SERVER_PORT = 4000;
-constexpr int BUFSIZE = 256;
+constexpr int BUFSIZE = 512;
 constexpr int NAME_SIZE = 20;
 constexpr int MAX_USER = 10;
 
