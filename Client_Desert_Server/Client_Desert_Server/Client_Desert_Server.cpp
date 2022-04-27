@@ -15,7 +15,7 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 void CALLBACK monster_send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 
 char recv_buf[BUFSIZE];
-void send_GolemMonster();
+void send_GolemMonster(int c_id);
 
 void error_display(const char* msg, int err_no)
 {
@@ -139,7 +139,7 @@ void TimerThread_func()
 		if (g_pGolemMonster)
 		{
 			g_pGolemMonster->Update(fTimeElapsed);
-			send_GolemMonster();
+			//send_GolemMonster();
 
 		}
 	}
@@ -186,7 +186,7 @@ int main()
 	WSACleanup();
 }
 
-void send_GolemMonster()
+void send_GolemMonster(int c_id)
 {
 	SC_MOVE_MONSTER_PACKET p;
 	p.id = 0;
@@ -198,6 +198,7 @@ void send_GolemMonster()
 
 	for (auto& cl : clients)
 	{
+		if (cl.first == c_id) continue;
 		cl.second.do_send(p.size, cl.first, reinterpret_cast<char*>(&p));
 	}
 }
@@ -300,7 +301,8 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 
 	process_packet(client_id);
 	
-
+	if (g_pGolemMonster)
+		send_GolemMonster(client_id);
 
 	clients[client_id].do_recv();
 }
