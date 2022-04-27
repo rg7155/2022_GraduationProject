@@ -228,11 +228,11 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_C))
-	{
-		//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
-		ChangeScene(SCENE_2);
-	}
+	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_C))
+	//{
+	//	//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
+	//	ChangeScene(SCENE_2);
+	//}
 
 	m_fElapsedTime = fTimeElapsed;
 	CGameMgr::GetInstance()->m_fElapsedTime = fTimeElapsed;

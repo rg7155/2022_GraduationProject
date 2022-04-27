@@ -11,9 +11,10 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, fileName, NULL);
 
-
 	SetChild(pPlayerModel->m_pModelRootObject, true);
-	
+
+	m_pSword = FindFrame("Sword");
+
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
 
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
@@ -31,6 +32,15 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	if (pPlayerModel) delete pPlayerModel;
 
 	SetPosition(15.f, 0.f, 15.f);
+
+
+	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
+	//if (IsNowAttack())
+		m_pComTrail->SetRenderingTrail(true);
+	//else
+	//	m_pComTrail->SetRenderingTrail(false);
+
 }
 
 CDuoPlayer::~CDuoPlayer()
@@ -52,6 +62,13 @@ void CDuoPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
 }
 
+void CDuoPlayer::Animate(float fTimeElapsed)
+{
+	UpdateComponent(fTimeElapsed);
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
 void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
 	if (m_bDead)
@@ -60,6 +77,27 @@ void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	UpdateShaderVariables(pd3dCommandList);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+
+	m_pComTrail->RenderTrail(pd3dCommandList, pCamera);
+}
+
+void CDuoPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
+}
+
+void CDuoPlayer::UpdateComponent(float fTimeElapsed)
+{
+	for (int i = 0; i < COM_END; ++i)
+		if (m_pComponent[i])
+			m_pComponent[i]->Update_Component(fTimeElapsed);
+
+	if (m_pComTrail)
+	{
+		XMFLOAT3 xmf3Top = Vector3::Add(m_pSword->GetPosition(), m_pSword->GetUp(), -1.f);
+		m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition());
+	}
 }
 
 void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
