@@ -15,7 +15,7 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 void CALLBACK monster_send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 
 char recv_buf[BUFSIZE];
-void send_GolemMonster(int c_id);
+void send_GolemMonster();
 
 void error_display(const char* msg, int err_no)
 {
@@ -118,7 +118,30 @@ public:
 		{
 			p.animInfo[i] = clients[c_id].pPlayer->m_eAnimInfo[i];
 		}		
-		do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+
+		// 몬스터 패킷
+		if (g_pGolemMonster)
+		{
+			SC_MOVE_MONSTER_PACKET monsterpacket;
+			monsterpacket.id = 0;
+			monsterpacket.type = SC_MOVE_MONSTER;
+			monsterpacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
+			monsterpacket.eCurAnim = g_pGolemMonster->m_eCurAnim;
+			monsterpacket.xmf3Position = g_pGolemMonster->m_xmf3Position;
+			monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
+			monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
+
+			char buf[BUFSIZE];
+			memcpy(buf, &p, p.size);
+			memcpy(buf + p.size, &monsterpacket, monsterpacket.size);
+			int bufSize = p.size + monsterpacket.size;
+
+			do_send(bufSize, p.id, buf);
+		}
+		else
+			do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+
+	
 	}
 };
 
@@ -139,7 +162,7 @@ void TimerThread_func()
 		if(clients.size() >= 1)
 			fGolemCreateTime += fTimeElapsed;
 
-		if (!bGolemCreateOn && fGolemCreateTime > 10.f)
+		if (!bGolemCreateOn && fGolemCreateTime > 10.f && clients.size() >= 2)
 		{
 			g_pGolemMonster = new CGolemMonster(clients[0].pPlayer);
 			bGolemCreateOn = true;
@@ -148,12 +171,12 @@ void TimerThread_func()
 		if (g_pGolemMonster)
 		{
 			g_pGolemMonster->Update(fTimeElapsed);
-			//send_GolemMonster();
 
 		}
 	}
 
 }
+mutex mylock;
 
 int main()
 {
@@ -195,7 +218,7 @@ int main()
 	WSACleanup();
 }
 
-void send_GolemMonster(int c_id)
+void send_GolemMonster()
 {
 	SC_MOVE_MONSTER_PACKET p;
 	p.id = 0;
@@ -207,8 +230,11 @@ void send_GolemMonster(int c_id)
 	p.target_id = g_pGolemMonster->m_pTarget->m_id;
 	for (auto& cl : clients)
 	{
-		if (cl.first == c_id) continue;
+		//if (cl.first == c_id) continue;
+		mylock.lock();
 		cl.second.do_send(p.size, cl.first, reinterpret_cast<char*>(&p));
+		mylock.unlock();
+
 	}
 }
 
@@ -320,8 +346,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 
 	process_packet(client_id);
 	
-	if (g_pGolemMonster)
-		send_GolemMonster(client_id);
+
 
 	clients[client_id].do_recv();
 }

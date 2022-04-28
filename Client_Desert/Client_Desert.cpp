@@ -343,6 +343,8 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	{
 		int msg_size = static_cast<unsigned char>(m_start[0]);
 		
+		Process_Packet(m_start);
+
 		if (cbTransferred < msg_size)
 		{
 			cout << "recv_callback Error" << endl;
@@ -351,17 +353,19 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 			cout << m_start[0] << endl;
 			break;
 		}
-		Process_Packet(m_start);
 
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
 		m_start += msg_size;
 	}
-
-	if(g_myid != -1)
-		Server_PosSend();
-	Server_PosRecv();
 	delete lpOverlapped;
+
+
+	if (g_myid != -1)
+		Server_PosSend();
+
+	Server_PosRecv();
+
 
 
 }
