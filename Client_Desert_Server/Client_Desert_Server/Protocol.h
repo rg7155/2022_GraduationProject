@@ -103,6 +103,7 @@ struct SC_MOVE_MONSTER_PACKET
 	XMFLOAT3 xmf3Look;
 	XMFLOAT3 xmf3Position;
 	GOLEM::ANIM eCurAnim;
+	short target_id;
 	//float	fElapsedTime;
 };
 #pragma pack (pop)

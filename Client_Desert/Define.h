@@ -27,7 +27,7 @@
 // Player
 #define PLAYER_INIT_POSITION_X			10.f
 #define PLAYER_INIT_POSITION_Z			10.f
-#define PLAYER_ATTACK_DISTANCE			1.f
+#define PLAYER_ATTACK_DISTANCE			2.f
 
 //Light.hlsl과 맞추기
 //#define MAX_LIGHTS				4 

@@ -204,7 +204,7 @@ void send_GolemMonster(int c_id)
 	p.eCurAnim = g_pGolemMonster->m_eCurAnim;
 	p.xmf3Position = g_pGolemMonster->m_xmf3Position;
 	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
-
+	p.target_id = g_pGolemMonster->m_pTarget->m_id;
 	for (auto& cl : clients)
 	{
 		if (cl.first == c_id) continue;
@@ -264,12 +264,16 @@ void process_packet(int c_id)
 			clients[c_id].pPlayer->m_eAnimInfo[i] = p->animInfo[i];
 		}
 		// 플레이어가 공격하면 몬스터랑 충돌체크
-		if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
-			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
+		if (g_pGolemMonster)
 		{
-			g_pGolemMonster->CheckCollision(clients[c_id].pPlayer);
-		}
+			if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
+				p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
+			{
+				g_pGolemMonster->CheckCollision(clients[c_id].pPlayer);
+			}
 
+		}
+		
 		// 모든 클라에게 클라의 위치 전송 (나를 제외)
 		for (auto& cl : clients)
 		{

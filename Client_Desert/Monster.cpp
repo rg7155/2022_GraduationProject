@@ -238,7 +238,11 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 	// 근접공격은 타겟 무조건 공격
 	if (eNewAnim == GOLEM::ANIM::ATTACK2)
 	{
-		//CGameMgr::GetInstance()->GetPlayer()->Change_Animation(PLAYER::ANIM::DIE);
+		// 타겟이면
+		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+
+		if(pPlayer->m_iId == m_targetId)
+			pPlayer->Change_Animation(PLAYER::ANIM::DIE);
 	}
 
 	// 원격공격은 거리 계산해서 공격
@@ -335,6 +339,10 @@ void CGolemObject::Check_Collision()
 	float fDis = Vector3::Distance(pPlayer->GetPosition(), GetPosition());
 	if (fDis < GOLEM_ATTACK1_DISTANCE)
 	{
-		//CGameMgr::GetInstance()->GetPlayer()->Change_Animation(PLAYER::ANIM::DIE);
+		// 타겟이면
+		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+
+		if (pPlayer->m_iId == m_targetId)
+			pPlayer->Change_Animation(PLAYER::ANIM::DIE);
 	}
 }

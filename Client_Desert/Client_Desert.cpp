@@ -257,6 +257,7 @@ int Process_Packet(char* ptr)
 		g_myid = p->id;
 		gGameFramework.m_iId = g_myid;
 		gGameFramework.BuildObjects();
+		gGameFramework.m_pPlayer->m_iId = g_myid;
 		return p->size;
 
 	}
@@ -284,7 +285,7 @@ int Process_Packet(char* ptr)
 		pGolem->Change_Animation(p->eCurAnim);
 		pGolem->SetLookAt(p->xmf3Look);
 		pGolem->SetPosition(p->xmf3Position);
-
+		pGolem->m_targetId = p->target_id;
 		return p->size;
 	}
 	case SC_REMOVE_PLAYER:

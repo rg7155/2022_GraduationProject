@@ -82,4 +82,7 @@ private:
 	bool	m_bAttack1On;
 	bool	m_bAttack2On;
 	float	m_fAttackTime;
+
+public:
+	short	m_targetId;
 };
