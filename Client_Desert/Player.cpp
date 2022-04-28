@@ -593,6 +593,7 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
 		_duoPlayer->animInfo[i].fPosition = m_pSkinnedAnimationController->m_fPosition[i];
 	}
+	_duoPlayer->eCurAnim = m_eCurAnim;
 	return _duoPlayer;
 }
 

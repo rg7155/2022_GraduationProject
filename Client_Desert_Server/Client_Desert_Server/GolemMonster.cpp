@@ -14,15 +14,23 @@ CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 
 void CGolemMonster::Update(float fTimeElapsed)
 {
-	if (m_eCurAnim == GOLEM::ANIM::ATTACK2)
+	m_fAnimElapsedTime += fTimeElapsed;
+
+	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
-		m_fAttackAnimTime += fTimeElapsed;
-		if (m_fAttackAnimTime > 1.f)
+		if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT || m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
 		{
-			m_eCurAnim = GOLEM::ANIM::RUN;
-			m_fAttackAnimTime = 0.f;
+			// 플레이어를 공격 -> 클라에서 처리
+			Change_Animation(GOLEM::ANIM::ATTACK1);
+
+		}
+
+		else if (m_eCurAnim != GOLEM::IDLE && m_eCurAnim != GOLEM::RUN)
+		{
+			Change_Animation(GOLEM::ANIM::RUN);
 		}
 	}
+
 	// 타겟을 쫓아가는 걸로 이동 & 회전
 	XMFLOAT3 mf3TargetPos = m_pTarget->GetPosition();
 
@@ -40,8 +48,12 @@ void CGolemMonster::Update(float fTimeElapsed)
 	float fDis = Vector3::Distance(mf3TargetPos, m_xmf3Position);
 	if (fDis < ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim)
 	{
-		m_eCurAnim = GOLEM::ANIM::ATTACK2;
+		Change_Animation(GOLEM::ANIM::ATTACK2);
 		m_fAttackAnimTime = 0.f;
+
+		// 공격 후 타겟 바꾸기
+		CPlayer* pPlayer = Get_Player(1 - m_pTarget->m_id);
+		m_pTarget = pPlayer;
 	}
 	// 피격 시 피격 애니메이션으로 변경
 	// 피격 애니메이션 종료 후 ATTACK1로 변경 (클라에서)
@@ -52,6 +64,26 @@ void CGolemMonster::Update(float fTimeElapsed)
 void CGolemMonster::Move(XMFLOAT3& xmf3Shift)
 {
 	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
+}
+
+void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
+{
+	if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT ||
+		m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
+		return;
+	float fDis = Vector3::Distance(pAttackPlayer->GetPosition(), m_xmf3Position);
+	if (fDis < PLAYER_ATTACK_DISTANCE)
+	{
+		m_eCurAnim = GOLEM::ANIM::DAMAGED_LEFT;
+	}
+}
+
+void CGolemMonster::Change_Animation(GOLEM::ANIM eNewAnim)
+{
+	m_fAnimElapsedTime = 0.f;
+	m_fAnimMaxTime = 1.f;
+	m_eCurAnim = eNewAnim;
+
 }
 
 

@@ -284,6 +284,7 @@ int Process_Packet(char* ptr)
 		pGolem->Change_Animation(p->eCurAnim);
 		pGolem->SetLookAt(p->xmf3Look);
 		pGolem->SetPosition(p->xmf3Position);
+
 		return p->size;
 	}
 	case SC_REMOVE_PLAYER:

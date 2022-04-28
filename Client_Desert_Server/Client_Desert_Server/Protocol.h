@@ -48,6 +48,7 @@ struct CS_MOVE_PACKET
 	char type;
 	XMFLOAT4X4	xmf4x4World;
 	player_anim animInfo[PLAYER::ANIM::END];
+	PLAYER::ANIM eCurAnim;
 };
 
 struct SC_LOGIN_INFO_PACKET

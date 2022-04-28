@@ -32,6 +32,8 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
+
+
 class SEND_DATA {
 public:
 	WSAOVERLAPPED _over;
@@ -71,6 +73,7 @@ public:
 		over_to_session[&_c_over] = id;
 		pPlayer = new CPlayer;
 		pPlayer->Initialize();
+		pPlayer->m_id = id;
 	}
 	~SESSION() {}
 
@@ -118,6 +121,12 @@ public:
 		do_send(p.size, p.id, reinterpret_cast<char*>(&p));
 	}
 };
+
+
+CPlayer* Get_Player(int c_id)
+{
+	return clients[c_id].pPlayer;
+}
 
 void TimerThread_func()
 {
@@ -253,6 +262,12 @@ void process_packet(int c_id)
 		for (int i = 0; i < PLAYER::ANIM::END; i++)
 		{
 			clients[c_id].pPlayer->m_eAnimInfo[i] = p->animInfo[i];
+		}
+		// 플레이어가 공격하면 몬스터랑 충돌체크
+		if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
+			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
+		{
+			g_pGolemMonster->CheckCollision(clients[c_id].pPlayer);
 		}
 
 		// 모든 클라에게 클라의 위치 전송 (나를 제외)
