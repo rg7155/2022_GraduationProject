@@ -21,7 +21,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = "127.0.0.1";
+char SERVER_ADDR[BUFSIZE] = /*"210.99.123.127"*/ "127.0.0.1";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
@@ -348,7 +348,7 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 			cout << "recv_callback Error" << endl;
 			cout << msg_size << endl;
 			cout << cbTransferred << endl;
-			cout << m_start[1] << endl;
+			cout << m_start[0] << endl;
 			break;
 		}
 		Process_Packet(m_start);

@@ -242,7 +242,7 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
 
 		if(pPlayer->m_iId == m_targetId)
-			pPlayer->Change_Animation(PLAYER::ANIM::DIE);
+			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
 	}
 
 	// 원격공격은 거리 계산해서 공격
@@ -343,6 +343,6 @@ void CGolemObject::Check_Collision()
 		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
 
 		if (pPlayer->m_iId == m_targetId)
-			pPlayer->Change_Animation(PLAYER::ANIM::DIE);
+			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
 	}
 }
