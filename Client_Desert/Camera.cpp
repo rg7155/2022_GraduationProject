@@ -331,7 +331,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		XMFLOAT3 xmf3NewOffSet = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
 
 		//상하 회전 제한 브랜치
-		if (xmf3NewOffSet.y > 1.f && xmf3NewOffSet.y < CAM_OFFSET_Y + CAM_OFFSET_Y*0.5f)
+		//if (xmf3NewOffSet.y > 1.f && xmf3NewOffSet.y < CAM_OFFSET_Y + CAM_OFFSET_Y*0.5f)
 		{
 			m_xmf3Offset = xmf3NewOffSet;
 		}
