@@ -531,7 +531,7 @@ float4 PSParticleDraw(GS_PARTICLE_OUTPUT input) : SV_TARGET
     
     //cColor.a = input.alpha;
     //cColor.a *= cColor.r;
-    cColor *= float4(1.f, 0.f, 0.f, 1.f);
+    cColor *= float4(0.8f, 0.3f, 0.3f, 1.f);
     
     cColor.a = cColor.r;
     cColor.a *= input.alpha;
