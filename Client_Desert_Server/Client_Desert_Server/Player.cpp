@@ -12,6 +12,7 @@ void CPlayer::Initialize()
 		m_eAnimInfo[i].bEnable = false;
 
 	}
+	m_eCurAnim = PLAYER::ANIM::IDLE;
 }
 
 XMFLOAT3 CPlayer::GetPosition()

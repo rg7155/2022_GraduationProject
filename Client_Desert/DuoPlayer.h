@@ -24,12 +24,18 @@ public:
 	void SetDead(bool bDead) { m_bDead = bDead; }
 
 private:
-	bool m_bDead = false;
+	bool m_bDead = true;
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;
 	CGameObject* m_pSword = NULL;
+	bool	m_bSkill1EffectOn;
+public:
+	bool IsNowAttack();
 
 public:
-	int m_iId;
+	int				m_iId;
+	
+	PLAYER::ANIM	m_eCurAnim;				// 현재 애니메이션
+
 };
 

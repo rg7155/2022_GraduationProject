@@ -82,6 +82,7 @@ struct SC_MOVE_PLAYER_PACKET
 	short id;
 	XMFLOAT4X4	xmf4x4World;
 	player_anim animInfo[PLAYER::ANIM::END];
+	PLAYER::ANIM eCurAnim;
 };
 
 struct SC_ADD_MONSTER_PACKET

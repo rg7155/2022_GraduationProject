@@ -1,4 +1,6 @@
 #include "DuoPlayer.h"
+#include "GameMgr.h"
+#include "Scene.h"
 
 CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
@@ -36,11 +38,13 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	//·»´õ¸µ ²°´Ù Ä×´Ù-> °ø°ÝÇÒ¶§¸¸ ³ª¿À°Ô º¯°æ
-	//if (IsNowAttack())
+	if (IsNowAttack())
 		m_pComTrail->SetRenderingTrail(true);
-	//else
-	//	m_pComTrail->SetRenderingTrail(false);
+	else
+		m_pComTrail->SetRenderingTrail(false);
+	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
 
+	m_bSkill1EffectOn = false;
 }
 
 CDuoPlayer::~CDuoPlayer()
@@ -64,8 +68,34 @@ void CDuoPlayer::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 
 void CDuoPlayer::Animate(float fTimeElapsed)
 {
-	UpdateComponent(fTimeElapsed);
+	if (m_eCurAnim != PLAYER::SKILL1)
+		m_bSkill1EffectOn = false;
 
+	UpdateComponent(fTimeElapsed);
+	//·»´õ¸µ ²°´Ù Ä×´Ù-> °ø°ÝÇÒ¶§¸¸ ³ª¿À°Ô º¯°æ
+	if (IsNowAttack())
+		m_pComTrail->SetRenderingTrail(true);
+	else
+		m_pComTrail->SetRenderingTrail(false);
+
+	// ¹Ù´Ú ÀÌÆåÆ®
+
+	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
+	cout << fAnimElapseTime << endl;
+	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && fAnimElapseTime > 1.0f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
+		if (pObj) {
+			XMFLOAT3 xmf3Pos = GetPosition();
+			XMFLOAT3 xmf3Look = GetLook();
+			xmf3Pos.x += xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			xmf3Pos.z += xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+		}
+		m_bSkill1EffectOn = true;
+
+	}
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -105,11 +135,20 @@ void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
 	// Çà·Ä
 	m_xmf4x4ToParent = packet->xmf4x4World;
 	player_anim* _player_anim = packet->animInfo;
-
+	m_eCurAnim = packet->eCurAnim;
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		m_pSkinnedAnimationController->SetTrackWeight(i, _player_anim[i].fWeight);
 		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
 		m_pSkinnedAnimationController->m_fPosition[i] = _player_anim[i].fPosition;
 	}
+}
+
+bool CDuoPlayer::IsNowAttack()
+{
+	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 ||
+		m_eCurAnim == PLAYER::ANIM::SKILL1 || m_eCurAnim == PLAYER::ANIM::SKILL2)
+		return true;
+
+	return false;
 }
