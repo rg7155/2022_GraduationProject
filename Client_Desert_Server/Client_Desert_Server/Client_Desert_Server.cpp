@@ -12,8 +12,10 @@ CGameTimer							m_GameTimer;
 
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
+void CALLBACK monster_send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 
 char recv_buf[BUFSIZE];
+void send_GolemMonster();
 
 void error_display(const char* msg, int err_no)
 {
@@ -29,6 +31,8 @@ void error_display(const char* msg, int err_no)
 	while (true);
 	LocalFree(lpMsgBuf);
 }
+
+
 
 class SEND_DATA {
 public:
@@ -69,6 +73,7 @@ public:
 		over_to_session[&_c_over] = id;
 		pPlayer = new CPlayer;
 		pPlayer->Initialize();
+		pPlayer->m_id = id;
 	}
 	~SESSION() {}
 
@@ -113,9 +118,38 @@ public:
 		{
 			p.animInfo[i] = clients[c_id].pPlayer->m_eAnimInfo[i];
 		}		
-		do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+
+		// 몬스터 패킷
+		if (g_pGolemMonster)
+		{
+			SC_MOVE_MONSTER_PACKET monsterpacket;
+			monsterpacket.id = 0;
+			monsterpacket.type = SC_MOVE_MONSTER;
+			monsterpacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
+			monsterpacket.eCurAnim = g_pGolemMonster->m_eCurAnim;
+			monsterpacket.xmf3Position = g_pGolemMonster->m_xmf3Position;
+			monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
+			monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
+
+			char buf[BUFSIZE];
+			memcpy(buf, &p, p.size);
+			memcpy(buf + p.size, &monsterpacket, monsterpacket.size);
+			int bufSize = p.size + monsterpacket.size;
+
+			do_send(bufSize, p.id, buf);
+		}
+		else
+			do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+
+	
 	}
 };
+
+
+CPlayer* Get_Player(int c_id)
+{
+	return clients[c_id].pPlayer;
+}
 
 void TimerThread_func()
 {
@@ -128,7 +162,7 @@ void TimerThread_func()
 		if(clients.size() >= 1)
 			fGolemCreateTime += fTimeElapsed;
 
-		if (!bGolemCreateOn && fGolemCreateTime > 10.f)
+		if (!bGolemCreateOn && fGolemCreateTime > 10.f && clients.size() >= 2)
 		{
 			g_pGolemMonster = new CGolemMonster(clients[0].pPlayer);
 			bGolemCreateOn = true;
@@ -137,10 +171,12 @@ void TimerThread_func()
 		if (g_pGolemMonster)
 		{
 			g_pGolemMonster->Update(fTimeElapsed);
+
 		}
 	}
 
 }
+mutex mylock;
 
 int main()
 {
@@ -182,7 +218,7 @@ int main()
 	WSACleanup();
 }
 
-void send_GolemMonster(int c_id)
+void send_GolemMonster()
 {
 	SC_MOVE_MONSTER_PACKET p;
 	p.id = 0;
@@ -191,11 +227,13 @@ void send_GolemMonster(int c_id)
 	p.eCurAnim = g_pGolemMonster->m_eCurAnim;
 	p.xmf3Position = g_pGolemMonster->m_xmf3Position;
 	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
-
+	p.target_id = g_pGolemMonster->m_pTarget->m_id;
 	for (auto& cl : clients)
 	{
-		if (cl.first == c_id) continue;
+		//if (cl.first == c_id) continue;
+		mylock.lock();
 		cl.second.do_send(p.size, cl.first, reinterpret_cast<char*>(&p));
+		mylock.unlock();
 
 	}
 }
@@ -251,7 +289,17 @@ void process_packet(int c_id)
 		{
 			clients[c_id].pPlayer->m_eAnimInfo[i] = p->animInfo[i];
 		}
+		// 플레이어가 공격하면 몬스터랑 충돌체크
+		if (g_pGolemMonster)
+		{
+			if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
+				p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
+			{
+				g_pGolemMonster->CheckCollision(clients[c_id].pPlayer);
+			}
 
+		}
+		
 		// 모든 클라에게 클라의 위치 전송 (나를 제외)
 		for (auto& cl : clients)
 		{
@@ -295,14 +343,22 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		disconnect(client_id);
 		return;
 	}
+
 	process_packet(client_id);
 	
-	if(g_pGolemMonster)
-		send_GolemMonster(client_id);
+
 
 	clients[client_id].do_recv();
 }
 
+void CALLBACK monster_send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
+{
+	SEND_DATA* sdata = reinterpret_cast<SEND_DATA*>(over);
+	//cout << static_cast<int>(sdata->send_buf[0]) << endl;
+	delete sdata;
+	return;
+
+}
 
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
 {

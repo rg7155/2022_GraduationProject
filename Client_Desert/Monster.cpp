@@ -192,21 +192,28 @@ void CGolemObject::Animate(float fTimeElapsed)
 		Blending_Animation(fTimeElapsed);
 	}
 
-	//m_fAttackTime += fTimeElapsed;
-	m_fAnimElapsedTime += fTimeElapsed;
+	////m_fAttackTime += fTimeElapsed;
+	//m_fAnimElapsedTime += fTimeElapsed;
 
-	/*if (m_fAttackTime > 4.f)
-	{
-		Change_Animation(GOLEM::ANIM::ATTACK1);
+	///*if (m_fAttackTime > 4.f)
+	//{
+	//	Change_Animation(GOLEM::ANIM::ATTACK1);
 
-		m_fAttackTime = 0.f;
-	}*/
+	//	m_fAttackTime = 0.f;
+	//}*/
+	//if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+	//{
+	//	if(m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT || m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
+	//		Change_Animation(GOLEM::ANIM::ATTACK1);
 
-	if (m_eCurAnim != GOLEM::IDLE && m_eCurAnim != GOLEM::RUN && m_fAnimElapsedTime >= m_fAnimMaxTime)
-	{
-		Change_Animation(GOLEM::ANIM::RUN);
+	//	else if (m_eCurAnim != GOLEM::IDLE && m_eCurAnim != GOLEM::RUN)
+	//	{
+	//		Change_Animation(GOLEM::ANIM::RUN);
 
-	}
+	//	}
+	//}
+
+	
 
 	CMonsterObject::Animate(fTimeElapsed);
 
@@ -227,6 +234,27 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 	//}
 	if (m_eCurAnim == eNewAnim)
 		return;
+
+	// 근접공격은 타겟 무조건 공격
+	if (eNewAnim == GOLEM::ANIM::ATTACK2)
+	{
+		// 타겟이면
+		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+
+		if (pPlayer->m_iId == m_targetId)
+		{
+			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
+
+			cout << "피격!!" << endl;
+
+		}
+	}
+
+	// 원격공격은 거리 계산해서 공격
+	if (eNewAnim == GOLEM::ANIM::ATTACK1)
+	{
+		Check_Collision();
+	}
 
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
@@ -308,4 +336,21 @@ void CGolemObject::SetNewRotate(XMFLOAT3 xmf3Look)
 	m_xmVecNewRotate = XMLoadFloat3(&xmNormalLook);
 	m_xmVecNowRotate = XMLoadFloat3(&xmNormalLook);
 
+}
+
+void CGolemObject::Check_Collision()
+{
+	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+	float fDis = Vector3::Distance(pPlayer->GetPosition(), GetPosition());
+	if (fDis < GOLEM_ATTACK1_DISTANCE)
+	{
+		// 타겟이면
+		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+
+		if (pPlayer->m_iId == m_targetId)
+		{
+			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
+			cout << "피격!!" << endl;
+		}
+	}
 }

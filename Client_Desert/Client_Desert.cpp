@@ -7,7 +7,7 @@
 #include "Monster.h"
 #include "../Client_Desert_Server/Client_Desert_Server/Protocol.h"
 #define MAX_LOADSTRING 100
-//#define USE_SERVER 1
+#define USE_SERVER 1
 
 HINSTANCE						ghAppInstance;
 TCHAR							szTitle[MAX_LOADSTRING];
@@ -21,13 +21,15 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = "127.0.0.1";
+char SERVER_ADDR[BUFSIZE] = /*"210.99.123.127"*/ "127.0.0.1";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
 WSABUF wsabuf_s;
 int g_myid = -1;
 char* send_buf = nullptr;
+char prev_buf[BUFSIZE];
+int prev_bytes = 0;
 
 void Server_PosSend();
 void Server_PosRecv();
@@ -255,6 +257,7 @@ int Process_Packet(char* ptr)
 		g_myid = p->id;
 		gGameFramework.m_iId = g_myid;
 		gGameFramework.BuildObjects();
+		gGameFramework.m_pPlayer->m_iId = g_myid;
 		return p->size;
 
 	}
@@ -278,10 +281,11 @@ int Process_Packet(char* ptr)
 		SC_MOVE_MONSTER_PACKET* p;
 		p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
-		CGolemObject* pGolem = static_cast<CGolemObject*>(pObj);
+		CGolemObject* pGolem = reinterpret_cast<CGolemObject*>(pObj);
 		pGolem->Change_Animation(p->eCurAnim);
 		pGolem->SetLookAt(p->xmf3Look);
 		pGolem->SetPosition(p->xmf3Position);
+		pGolem->m_targetId = p->target_id;
 		return p->size;
 	}
 	case SC_REMOVE_PLAYER:
@@ -297,23 +301,71 @@ int Process_Packet(char* ptr)
 void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
+	//// 패킷 잘려오는거 처리해야함.
+	//
+	//if (prev_bytes)
+	//{
+	//	//memcpy(recv_buf,prev_buf, prev_bytes);
+	//	char* p = recv_buf;
+
+	//	memcpy(recv_buf, prev_buf, prev_bytes);
+	//	memcpy(recv_buf + prev_bytes, p, cbTransferred);
+	//}
+	//int remain_data = cbTransferred + prev_bytes;
+
+	//char* p = recv_buf;
+	//while (remain_data > 0)
+	//{
+	//	int packet_size = static_cast<unsigned char>(p[0]);
+	//	if (packet_size == 0)
+	//	{
+	//		int a;
+	//		a = packet_size;
+	//	}
+	//	cout << packet_size << endl;
+	//	if (packet_size <= remain_data)
+	//	{
+	//		Process_Packet(p);
+	//		p = p + packet_size;
+	//		remain_data -= packet_size;
+	//	}
+	//	else break;
+	//}
+	//prev_bytes = remain_data;
+	//if (remain_data > 0)
+	//{
+	//	memcpy(prev_buf, p, remain_data);
+	//	cout << "cut"<< remain_data << endl;
+	//}
+
 	char* m_start = recv_buf;
 	while (true)
 	{
-		int msg_size = Process_Packet(m_start);
+		int msg_size = static_cast<unsigned char>(m_start[0]);
+		
+		Process_Packet(m_start);
+
 		if (cbTransferred < msg_size)
 		{
 			cout << "recv_callback Error" << endl;
+			cout << msg_size << endl;
+			cout << cbTransferred << endl;
+			cout << m_start[0] << endl;
 			break;
 		}
+
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
 		m_start += msg_size;
 	}
-	if(g_myid != -1)
-		Server_PosSend();
-	Server_PosRecv();
 	delete lpOverlapped;
+
+
+	if (g_myid != -1)
+		Server_PosSend();
+
+	Server_PosRecv();
+
 
 
 }

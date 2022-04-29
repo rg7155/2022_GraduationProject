@@ -57,7 +57,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pSword = FindFrame("Sword");
 
-	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 9, pPlayerModel);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, PLAYER::ANIM::END, pPlayerModel);
 
 
 
@@ -593,6 +593,7 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
 		_duoPlayer->animInfo[i].fPosition = m_pSkinnedAnimationController->m_fPosition[i];
 	}
+	_duoPlayer->eCurAnim = m_eCurAnim;
 	return _duoPlayer;
 }
 
@@ -664,7 +665,7 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 
 		// attack1
 	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 || m_eCurAnim == PLAYER::ANIM::SKILL1 
-		|| m_eCurAnim == PLAYER::ANIM::SKILL2 || m_eCurAnim == PLAYER::ANIM::DIE || m_eCurAnim == PLAYER::ANIM::GET_RESOURCE)
+		|| m_eCurAnim == PLAYER::ANIM::SKILL2 || m_eCurAnim == PLAYER::ANIM::DIE || m_eCurAnim == PLAYER::ANIM::GET_RESOURCE || m_eCurAnim == PLAYER::ANIM::TAKE_DAMAGED)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -702,7 +703,7 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_0))
 	{
-		Change_Animation(PLAYER::ANIM::DIE);
+		Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))

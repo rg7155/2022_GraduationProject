@@ -33,6 +33,7 @@
 #include <list>
 #include <queue>
 #include <stack>
+#include <thread>
 
 #include <d3d12.h>
 #include <dxgi1_4.h>

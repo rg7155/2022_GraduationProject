@@ -74,8 +74,15 @@ public:
 	void Change_Animation(GOLEM::ANIM eNewAnim);
 	void Blending_Animation(float fTimeElapsed);
 	void SetNewRotate(XMFLOAT3 xmf3Look);
+
+public:
+	void Check_Collision();
+
 private:
 	bool	m_bAttack1On;
 	bool	m_bAttack2On;
 	float	m_fAttackTime;
+
+public:
+	short	m_targetId;
 };

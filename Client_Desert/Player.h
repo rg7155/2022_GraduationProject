@@ -93,9 +93,12 @@ private:
 
 private:
 	bool Check_Input(float fTimeElapsed);
-	void Change_Animation(PLAYER::ANIM eNewAnim);
 	bool Check_MoveInput();
 
+public:
+	void Change_Animation(PLAYER::ANIM eNewAnim);
+
+private:
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void	UpdateComponent(float fTimeElapsed);
 

@@ -1,1 +1,17 @@
-﻿  Client_Desert_Server.vcxproj -> D:\Graduate\2022KPU_GAME\2022_GraduationProject\Client_Desert_Server\x64\Debug\Client_Desert_Server.exe
+﻿  Client_Desert_Server.cpp
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(105,31): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(106,31): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(190,2): warning C4002: 함수 같은 매크로 호출 'RtlZeroMemory'에 대해 인수가 너무 많습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(261,55): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(262,55): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(276,51): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Client_Desert_Server.cpp(277,51): warning C4244: '=': 'float'에서 'short'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  GolemMonster.cpp
+  Player.cpp
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Player.cpp(7,38): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Player.cpp(7,14): warning C4244: '인수': 'float'에서 'int'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Player.cpp(24,22): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\Player.cpp(25,22): warning C4244: '=': 'int'에서 'float'(으)로 변환하면서 데이터가 손실될 수 있습니다.
+  Timer.cpp
+  코드를 생성하고 있습니다...
+  Client_Desert_Server.vcxproj -> C:\Users\윤지선\Desktop\성주\2022_GraduationProject\Client_Desert_Server\Client_Desert_Server\x64\Debug\Client_Desert_Server.exe

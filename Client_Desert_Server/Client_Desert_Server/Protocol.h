@@ -6,7 +6,7 @@
 #pragma comment(lib, "MSWSock.lib")
 
 constexpr int SERVER_PORT = 4000;
-constexpr int BUFSIZE = 256;
+constexpr int BUFSIZE = 512;
 constexpr int NAME_SIZE = 20;
 constexpr int MAX_USER = 10;
 
@@ -48,6 +48,7 @@ struct CS_MOVE_PACKET
 	char type;
 	XMFLOAT4X4	xmf4x4World;
 	player_anim animInfo[PLAYER::ANIM::END];
+	PLAYER::ANIM eCurAnim;
 };
 
 struct SC_LOGIN_INFO_PACKET
@@ -102,6 +103,7 @@ struct SC_MOVE_MONSTER_PACKET
 	XMFLOAT3 xmf3Look;
 	XMFLOAT3 xmf3Position;
 	GOLEM::ANIM eCurAnim;
+	short target_id;
 	//float	fElapsedTime;
 };
 #pragma pack (pop)
