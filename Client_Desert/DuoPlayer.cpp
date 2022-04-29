@@ -41,6 +41,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	//else
 	//	m_pComTrail->SetRenderingTrail(false);
 
+	SetEffectsType(EFFECT_FOG, true);
 }
 
 CDuoPlayer::~CDuoPlayer()

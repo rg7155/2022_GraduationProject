@@ -599,7 +599,9 @@ CMapObjectsShader::~CMapObjectsShader()
 
 void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/MapTransform.bin", true);
+	
+	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform_Test.bin", true);
+
 	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform.bin", true);
 	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform2.bin", false);
 

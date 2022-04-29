@@ -27,6 +27,8 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	//	m_ppMaterials[0]->SetTexture(pTexture);
 
 	SetEffectsType(EFFECT_DISSOLVE, true);
+	SetEffectsType(EFFECT_FOG, true);
+
 	m_fDissolve = 0.f; //1에 가까울수록 사라짐
 
 	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);

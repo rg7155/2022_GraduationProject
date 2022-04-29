@@ -125,8 +125,11 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 		float fRadi = fMaxRadius * fMaxExtents; 
 
+		//포지션 축이 다르면 이상함
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
+		{
 			CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+		}
 	}
 }
 
@@ -299,6 +302,8 @@ CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetUp(), 2.f));
 
 	m_pInteractionUI->SetPosition(xmf3Pos);
+
+	SetEffectsType(EFFECT_FOG, true);
 }
 
 CNPCObject::~CNPCObject()

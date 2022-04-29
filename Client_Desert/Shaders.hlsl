@@ -133,7 +133,7 @@ float4 Fog(float4 cColor, float3 vPos)
     float fDisToCamera = length(vPosToCamera);
     float fFogFactor = 0.0f;
     
-    float fStart = 0.f, fEnd = 100.f;
+    float fStart = 0.f, fEnd = 200.f;
     fFogFactor = saturate((fEnd - fDisToCamera) / (fEnd - fStart));
 	
     //float4 fFogColor = float4(0.5f, 0.5f, 0.5f, 1.0f);
