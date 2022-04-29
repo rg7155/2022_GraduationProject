@@ -7,7 +7,7 @@ CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	:m_pTarget(_pTarget)
 {
 	m_eCurAnim = GOLEM::ANIM::RUN;
-	m_xmf3Position = XMFLOAT3(0.f, 0.f, 0.f);
+	m_xmf3Position = XMFLOAT3(13.f, 0.f, 134.f);
 	m_xmf3Look = m_pTarget->GetPosition();
 	m_fAttackAnimTime = 0.f;
 	m_targetId = _pTarget->m_id;
@@ -28,7 +28,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 		}
 
-		else if (m_eCurAnim != GOLEM::IDLE && m_eCurAnim != GOLEM::RUN)
+		else if (m_eCurAnim != GOLEM::IDLE && m_eCurAnim != GOLEM::RUN && m_eCurAnim != GOLEM::DIE)
 		{
 			Change_Animation(GOLEM::ANIM::RUN);
 		}
@@ -78,10 +78,21 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 	if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT ||
 		m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
 		return;
-	float fDis = Vector3::Distance(pAttackPlayer->GetPosition(), m_xmf3Position);
-	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 3.f)
+	
+	XMFLOAT3 fPlayerPos = pAttackPlayer->GetPosition();
+	float fDis = Vector3::Distance(fPlayerPos, m_xmf3Position);
+
+	// 플레이어 Look과 플레이어에서 몬스터 Dir 비교
+	XMFLOAT3 fPlayerLook = pAttackPlayer->GetLook();
+	XMFLOAT3 fDir = Vector3::Subtract(m_xmf3Position, fPlayerPos, true, true);
+
+	float fAngle = Vector3::Angle(fPlayerLook, fDir);
+	cout << fAngle << endl;
+	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 2.f && abs(fAngle) < 70.f)
 	{
-		m_eCurAnim = GOLEM::ANIM::DAMAGED_LEFT;
+		Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
+		cout << fAngle << endl;
+
 		m_fDamagedCoolTime = 0.f;
 	}
 }

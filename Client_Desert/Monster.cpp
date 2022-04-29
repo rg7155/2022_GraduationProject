@@ -60,7 +60,7 @@ void CMonsterObject::Animate(float fTimeElapsed)
 
 	//cout << m_fDissolve << endl;
 
-	static bool bToggle = false;
+	//static bool bToggle = false;
 	/*if (!bToggle)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");
@@ -165,7 +165,7 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	}
 	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::RUN, true);
-
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[GOLEM::ANIM::IDLE]->m_nType = ANIMATION_TYPE_ONCE;
 	m_eCurAnim = GOLEM::ANIM::RUN;
 	m_ePrevAnim = GOLEM::ANIM::RUN;
 	m_bBlendingOn = false;

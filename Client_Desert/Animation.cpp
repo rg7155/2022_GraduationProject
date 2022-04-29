@@ -52,6 +52,9 @@ void CAnimationSet::SetPosition(float fElapsedPosition)
 		break;
 	}
 	case ANIMATION_TYPE_ONCE:
+		m_fPosition += fElapsedPosition;
+		if (m_fPosition >= m_fLength)
+			m_fPosition = m_fLength;
 		break;
 	case ANIMATION_TYPE_PINGPONG:
 		break;

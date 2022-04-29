@@ -10,6 +10,7 @@ public:
 public:
 	//void Check_Move();
 	XMFLOAT3 GetPosition();
+	XMFLOAT3 GetLook();
 	void SetPosition(int x, int z);
 public:
 	XMFLOAT4X4 m_xmf4x4World;
