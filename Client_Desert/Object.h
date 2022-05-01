@@ -190,10 +190,17 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
+struct CB_SUBOBJECT_INFO
+{
+	XMFLOAT4X4		m_xmf4x4TextureAnim;
+	XMFLOAT4		m_xmf4Color;
+};
 class CAnimationController;
 class CGameObject
 {
+public:
+	enum CBV_TYPE { CBV_TEX_ANIM, CBV_COLOR, CBV_END };
+
 private:
 	int								m_nReferences = 0;
 
@@ -230,6 +237,9 @@ public:
 
 	bool							m_isActive = false;
 
+	ID3D12Resource					*m_pd3dcbSubUpload = NULL;
+	CB_SUBOBJECT_INFO				*m_pcbMappedSubInfo = NULL;
+
 	void SetActiveState(bool isActve) { m_isActive = isActve; }
 	void SetEffectsType(UINT nMask, bool isOn);
 
@@ -257,6 +267,11 @@ public:
 	virtual void UpdateShaderVariable(ID3D12GraphicsCommandList *pd3dCommandList, CMaterial *pMaterial);
 
 	virtual void ReleaseUploadBuffers();
+
+	virtual void CreateShaderVariables_Sub(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void UpdateShaderVariables_Sub(ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual void ReleaseShaderVariables_Sub();
+	void		SetCBVInfo(ID3D12GraphicsCommandList* pd3dCommandList, CBV_TYPE eType, void* pArg);
 
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();

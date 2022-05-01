@@ -138,6 +138,11 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define BLUE_COLOR4 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f
+//#define BLUE_COLOR4 1.f / 255.f, 102.f / 255.f, 200.f / 255.f, 0.f
+
+#define GREEN_COLOR4 1.f / 255.f, 102.f / 255.f, 200.f / 255.f, 0.f
+
 CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int iVertexCount)
 	: CGameObject(1)
 {
@@ -165,10 +170,21 @@ CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	pMaterial->SetShader(pShader);
 	SetMaterial(0, pMaterial);
+
+	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
+	m_xmf4Color = { BLUE_COLOR4 };
 }
 
 CTrailObject::~CTrailObject()
 {
+	ReleaseShaderVariables_Sub();
+}
+
+void CTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
+
+	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -177,43 +193,17 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 {
 	//m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
 
-	CreateShaderVariables(pd3dDevice, pd3dCommandList);
-
 	m_xmf4x4Texture = Matrix4x4::Identity();
 	m_fSpeed = 0.001f;
+
+	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
+	m_xmf4Color = { GREEN_COLOR4 };
 }
 
 
 CMultiSpriteObject::~CMultiSpriteObject()
 {
-	ReleaseShaderVariables();
-}
-
-void CMultiSpriteObject::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	UINT ncbElementBytes = ((sizeof(CB_TEXTURE_INFO) + 255) & ~255);
-	m_pd3dcbTexture = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
-
-	m_pd3dcbTexture->Map(0, NULL, (void**)&m_pcbMappedTexture);
-}
-
-void CMultiSpriteObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
-{
-	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 16, &m_xmf4x4Texture, 34);
-
-	XMStoreFloat4x4(&m_pcbMappedTexture->m_xmf4x4TextureAnim, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
-
-	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbTexture->GetGPUVirtualAddress();
-	pd3dCommandList->SetGraphicsRootConstantBufferView(RP_TEXTUREANIM, d3dGpuVirtualAddress);
-}
-
-void CMultiSpriteObject::ReleaseShaderVariables()
-{
-	if (m_pd3dcbTexture)
-	{
-		m_pd3dcbTexture->Unmap(0, NULL);
-		m_pd3dcbTexture->Release();
-	}
+	ReleaseShaderVariables_Sub();
 }
 
 void CMultiSpriteObject::Animate(float fTimeElapsed)
@@ -241,7 +231,10 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	if (!m_isActive)
 		return;
 
-	UpdateShaderVariables(pd3dCommandList);
+	//CBVø¿∫Í¡ß∆Æø°º≠ πŸ≤„¡‹
+	//UpdateShaderVariables(pd3dCommandList);
+	SetCBVInfo(pd3dCommandList, CGameObject::CBV_TEX_ANIM, &m_xmf4x4Texture);
+	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
 
 	CGameObject::Render(pd3dCommandList, pCamera);
 }

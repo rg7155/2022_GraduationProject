@@ -159,7 +159,7 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 	SetRootParameterCBV(pd3dRootParameters, RP_TO_LIGHT, 3, 0, D3D12_SHADER_VISIBILITY_ALL);//b3 ToLight
 	SetRootParameterCBV(pd3dRootParameters, RP_FRAMEWORK_INFO, 5, 0, D3D12_SHADER_VISIBILITY_ALL);//b5 FRAMEWORKInfo
 	SetRootParameterDescriptorTable(pd3dRootParameters, RP_TEXTURE, 1, &pd3dDescriptorRanges[9], D3D12_SHADER_VISIBILITY_ALL);
-	SetRootParameterCBV(pd3dRootParameters, RP_TEXTUREANIM, 6, 0, D3D12_SHADER_VISIBILITY_ALL);//b6 TextureAnim
+	SetRootParameterCBV(pd3dRootParameters, RP_SUB_OBJECT, 6, 0, D3D12_SHADER_VISIBILITY_ALL);//b6 TextureAnim
 
 
 	D3D12_STATIC_SAMPLER_DESC pd3dSamplerDescs[3];
@@ -436,7 +436,6 @@ void CScene::ReleaseObjects()
 		m_pShadowMapToViewport->ReleaseObjects();
 		m_pShadowMapToViewport->Release();
 	}
-
 
 	if (m_pSkyBox) delete m_pSkyBox;
 

@@ -566,6 +566,48 @@ void CGameObject::ReleaseUploadBuffers()
 	if (m_pChild) m_pChild->ReleaseUploadBuffers();
 }
 
+void CGameObject::CreateShaderVariables_Sub(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	UINT ncbElementBytes = ((sizeof(CB_SUBOBJECT_INFO) + 255) & ~255);
+	m_pd3dcbSubUpload = ::CreateBufferResource(pd3dDevice, pd3dCommandList, NULL, ncbElementBytes, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, NULL);
+
+	m_pd3dcbSubUpload->Map(0, NULL, (void**)&m_pcbMappedSubInfo);
+}
+
+void CGameObject::UpdateShaderVariables_Sub(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//XMStoreFloat4x4(&m_pcbMappedSubInfo->m_xmf4x4TextureAnim, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4Texture)));
+	//m_pcbMappedSubInfo->m_xmf4Color = m_xmf4Color;
+
+	D3D12_GPU_VIRTUAL_ADDRESS d3dGpuVirtualAddress = m_pd3dcbSubUpload->GetGPUVirtualAddress();
+	pd3dCommandList->SetGraphicsRootConstantBufferView(RP_SUB_OBJECT, d3dGpuVirtualAddress);
+}
+
+void CGameObject::ReleaseShaderVariables_Sub()
+{
+	if (m_pd3dcbSubUpload)
+	{
+		m_pd3dcbSubUpload->Unmap(0, NULL);
+		m_pd3dcbSubUpload->Release();
+	}
+}
+
+void CGameObject::SetCBVInfo(ID3D12GraphicsCommandList* pd3dCommandList, CBV_TYPE eType, void* pArg)
+{
+	switch (eType)
+	{
+	case CGameObject::CBV_TEX_ANIM:
+		memcpy(&m_pcbMappedSubInfo->m_xmf4x4TextureAnim, pArg, sizeof(XMFLOAT4X4));
+		XMStoreFloat4x4(&m_pcbMappedSubInfo->m_xmf4x4TextureAnim, XMMatrixTranspose(XMLoadFloat4x4(&m_pcbMappedSubInfo->m_xmf4x4TextureAnim)));
+		break;
+	case CGameObject::CBV_COLOR:
+		memcpy(&m_pcbMappedSubInfo->m_xmf4Color, pArg, sizeof(XMFLOAT4));
+		break;
+	}
+
+	UpdateShaderVariables_Sub(pd3dCommandList);
+}
+
 void CGameObject::SetPosition(float x, float y, float z)
 {
 	m_xmf4x4ToParent._41 = x;

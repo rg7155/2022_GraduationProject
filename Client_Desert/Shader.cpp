@@ -1010,7 +1010,7 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_mapObjectInfo.emplace(L"Shockwave", make_pair(pMesh, pMaterial));
 
-	for(int i = 0; i < 10; ++i)
+	for(int i = 0; i < 5; ++i)
 		CreateObject(pd3dDevice, pd3dCommandList, L"Shockwave");
 }
 

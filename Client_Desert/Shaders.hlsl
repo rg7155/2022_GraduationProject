@@ -45,9 +45,10 @@ cbuffer cbFrameworkInfo : register(b5)
     float gfShadowMapIndex : packoffset(c0.z);
 };
 
-cbuffer cbTextureAnim : register(b6)
+cbuffer cbSubObjectInfo : register(b6)
 {
 	matrix	gmtxTextureAnim : packoffset(c0);
+    float4 gf4Color : packoffset(c4);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -315,8 +316,9 @@ float4 PSTexturedTrail(VS_TEXTURED_OUTPUT input) : SV_TARGET
     
     cColor.a = input.uv.y;
 	
-    float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };
-    cColor += cMulColor;
+    //float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };
+    //cColor += cMulColor;
+    cColor += gf4Color;
     
     return (cColor);
 }
@@ -339,8 +341,9 @@ float4 PSSpriteAnimationShockwave(VS_TEXTURED_OUTPUT input) : SV_TARGET
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
     cColor.a = cColor.r;
     
-    float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };
-    cColor += cMulColor;
+    //float4 cMulColor = { 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f };
+    //cColor += cMulColor;
+    cColor += gf4Color;
     return (cColor);
 }
 

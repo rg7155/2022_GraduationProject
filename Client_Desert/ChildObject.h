@@ -44,34 +44,28 @@ class CTrailObject : public CGameObject
 public:
 	CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int iVertexCount);
 	virtual ~CTrailObject();
+
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+
 public:
 	CTrailMesh* m_pTrailMesh = nullptr;
+	XMFLOAT4	m_xmf4Color;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-struct CB_TEXTURE_INFO
-{
-	XMFLOAT4X4		m_xmf4x4TextureAnim;
-};
 class CMultiSpriteObject : public CGameObject
 {
 public:
 	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
 	virtual ~CMultiSpriteObject();
 public:
-
 	void		AnimateRowColumn(float fTime);
-
-	virtual void CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) override;
-	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
-	virtual void ReleaseShaderVariables() override;
 
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
 
 public:
-	ID3D12Resource* m_pd3dcbTexture = NULL;
-	CB_TEXTURE_INFO* m_pcbMappedTexture = NULL;
+	XMFLOAT4			m_xmf4Color;
 
 	int 				m_nRow = 0; //시간에 의해 바뀌는
 	int 				m_nCol = 0;

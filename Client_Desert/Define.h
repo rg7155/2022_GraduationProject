@@ -63,7 +63,7 @@
 #define RP_TO_LIGHT			14
 #define RP_FRAMEWORK_INFO	15
 #define RP_TEXTURE			16
-#define RP_TEXTUREANIM		17
+#define RP_SUB_OBJECT		17
 #define RP_TEXTURE2			6
 #define RP_RANDOM_BUFFER	7
 
