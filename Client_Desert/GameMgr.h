@@ -36,6 +36,6 @@ private:
 public:
 	bool		m_isShadowMapRendering = false;
 	float		m_fElapsedTime = 0.0f;
-	int			m_iId;
+	int			m_iId = 0;
 };
 

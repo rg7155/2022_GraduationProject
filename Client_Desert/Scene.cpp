@@ -334,7 +334,7 @@ void CScene::ChangeScene(SCENE eScene)
 	case SCENE_1:
 		break;
 	case SCENE_2:
-		m_pPlayer->SetPosition(XMFLOAT3(0.f, 0.f, 0.f));
+		m_pPlayer->SetPosition(XMFLOAT3(70.f, 0.f, 70.f));
 
 		m_pMapObjectShader->ChangeMap(eScene);
 

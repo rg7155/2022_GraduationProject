@@ -199,7 +199,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 	// ¹Ù´Ú ÀÌÆåÆ®
 
 	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
-	cout << fAnimElapseTime << endl;
+	//cout << fAnimElapseTime << endl;
 	if (m_eCurAnim == GOLEM::ANIM::ATTACK1 && !m_bSkill1EffectOn && fAnimElapseTime > 0.5f)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");

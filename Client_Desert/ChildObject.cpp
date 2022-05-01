@@ -172,7 +172,7 @@ CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	SetMaterial(0, pMaterial);
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
-	m_xmf4Color = { BLUE_COLOR4 };
+	(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
 }
 
 CTrailObject::~CTrailObject()
@@ -197,7 +197,7 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_fSpeed = 0.001f;
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
-	m_xmf4Color = { GREEN_COLOR4 };
+	(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
 }
 
 
