@@ -141,7 +141,7 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 #define BLUE_COLOR4 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f
 //#define BLUE_COLOR4 1.f / 255.f, 102.f / 255.f, 200.f / 255.f, 0.f
 
-#define GREEN_COLOR4 1.f / 255.f, 102.f / 255.f, 200.f / 255.f, 0.f
+#define GREEN_COLOR4 65.f / 255.f, 150.f / 255.f, 43.f / 255.f, 0.f
 
 CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int iVertexCount)
 	: CGameObject(1)

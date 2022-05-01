@@ -122,7 +122,6 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		pObj->SetActiveState(false);
 		m_pStandardObjectShader->AddObject(L"Quake", pObj);
 	}
-
 }
 
 
