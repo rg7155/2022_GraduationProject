@@ -102,6 +102,8 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
 		cout << fAngle << endl;
 
+		m_targetId = rand() % 2;
+		m_pTarget = Get_Player(m_targetId);
 		m_fDamagedCoolTime = 0.f;
 	}
 }

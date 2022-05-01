@@ -180,6 +180,8 @@ mutex mylock;
 
 int main()
 {
+	srand(unsigned int(time(NULL)));
+
 	m_GameTimer.Start();
 
 	WSADATA WSAData;
