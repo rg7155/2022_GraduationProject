@@ -7,7 +7,7 @@
 #include "Monster.h"
 #include "../Client_Desert_Server/Client_Desert_Server/Protocol.h"
 #define MAX_LOADSTRING 100
-#define USE_SERVER 1
+
 
 HINSTANCE						ghAppInstance;
 TCHAR							szTitle[MAX_LOADSTRING];

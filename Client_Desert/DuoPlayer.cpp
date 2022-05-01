@@ -81,7 +81,7 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 	// ¹Ù´Ú ÀÌÆåÆ®
 
 	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
-	cout << fAnimElapseTime << endl;
+
 	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && fAnimElapseTime > 1.0f)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
