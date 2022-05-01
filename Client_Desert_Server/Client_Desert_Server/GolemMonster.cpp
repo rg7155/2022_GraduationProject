@@ -12,7 +12,7 @@ CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	m_fAttackAnimTime = 0.f;
 	m_targetId = _pTarget->m_id;
 	m_fDamagedCoolTime = 0.f;
-	m_iHp = 1.f;
+	m_iHp = 100.f;
 }
 
 void CGolemMonster::Update(float fTimeElapsed)

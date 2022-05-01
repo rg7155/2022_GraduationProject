@@ -54,7 +54,7 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	CShader* pShader = nullptr;
 
 	//////////////////////////////////////////////////
-	//오브젝트를 갖지 않는 쉐이더 구현하기, 파이프라인 변경 용
+	//오브젝트를 갖지 않는 쉐이더 구현하기, 파이프라인 변경 용z
 	//CTexturedShader, CPortalObject
 
 	m_nPipelineShaders = PIPE_END;

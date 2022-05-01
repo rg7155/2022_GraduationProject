@@ -167,10 +167,14 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::RUN, true);
+
+
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[GOLEM::ANIM:: DIE]->m_nType = ANIMATION_TYPE_ONCE;
-	m_eCurAnim = GOLEM::ANIM::RUN;
-	m_ePrevAnim = GOLEM::ANIM::RUN;
+	m_eCurAnim = GOLEM::ANIM::IDLE;
+	m_ePrevAnim = GOLEM::ANIM::IDLE;
+
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
 	m_bBlendingOn = false;
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
@@ -181,8 +185,9 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_fAttackTime = 0.f;
 	m_bSkill1EffectOn = false;
-
+	SetLookAt(XMFLOAT3(0.f, 0.f, -1.f));
 	SetPosition(XMFLOAT3(13.f, 0.f, 134.f));
+
 }
 
 CGolemObject::~CGolemObject()
@@ -217,7 +222,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 		m_bSkill1EffectOn = true;
 
 	}
-
+	
 	// m_fDissolve 0 - 1
 	
 	if (m_eCurAnim == GOLEM::ANIM::DIE)
