@@ -62,15 +62,15 @@ void CMonsterObject::Animate(float fTimeElapsed)
 
 	//cout << m_fDissolve << endl;
 
-	static bool bToggle = false;
-	if (!bToggle)
+	//static bool bToggle = false;
+	/*if (!bToggle)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");
 		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
 		xmf3Pos.y += 0.01f;
 		pObj->SetPosition(xmf3Pos);
 		bToggle = true;
-	}
+	}*/
 
 
 	//LerpRotate(fTimeElapsed);
@@ -167,7 +167,7 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	}
 	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::RUN, true);
-
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[GOLEM::ANIM::IDLE]->m_nType = ANIMATION_TYPE_ONCE;
 	m_eCurAnim = GOLEM::ANIM::RUN;
 	m_ePrevAnim = GOLEM::ANIM::RUN;
 	m_bBlendingOn = false;
@@ -179,7 +179,7 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_bAttack2On = false;
 
 	m_fAttackTime = 0.f;
-
+	m_bSkill1EffectOn = false;
 }
 
 CGolemObject::~CGolemObject()
@@ -188,10 +188,31 @@ CGolemObject::~CGolemObject()
 
 void CGolemObject::Animate(float fTimeElapsed)
 {
+	if (m_eCurAnim != GOLEM::ANIM::ATTACK1)
+		m_bSkill1EffectOn = false;
+
 	if ((m_ePrevAnim == GOLEM::IDLE && m_eCurAnim == GOLEM::RUN) ||
 		(m_eCurAnim == GOLEM::IDLE && m_ePrevAnim == GOLEM::RUN))
 	{
 		Blending_Animation(fTimeElapsed);
+	}
+	// ¹Ù´Ú ÀÌÆåÆ®
+
+	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
+	cout << fAnimElapseTime << endl;
+	if (m_eCurAnim == GOLEM::ANIM::ATTACK1 && !m_bSkill1EffectOn && fAnimElapseTime > 0.5f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");
+		if (pObj) {
+			XMFLOAT3 xmf3Pos = GetPosition();
+			XMFLOAT3 xmf3Look = GetLook();
+			xmf3Pos.x += xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			xmf3Pos.z += xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+		}
+		m_bSkill1EffectOn = true;
+
 	}
 
 	////m_fAttackTime += fTimeElapsed;

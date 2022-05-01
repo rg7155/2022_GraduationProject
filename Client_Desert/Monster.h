@@ -82,7 +82,7 @@ private:
 	bool	m_bAttack1On;
 	bool	m_bAttack2On;
 	float	m_fAttackTime;
-
+	bool	m_bSkill1EffectOn;
 public:
 	short	m_targetId;
 };

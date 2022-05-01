@@ -357,6 +357,7 @@ void CPlayer::Update(float fTimeElapsed)
 	////////////////////////////////////////////
 
 	// ¹Ù´Ú ÀÌÆåÆ®
+
 	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
@@ -586,7 +587,7 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 	// Çà·Ä
 	CS_MOVE_PACKET* _duoPlayer = new CS_MOVE_PACKET;
 	_duoPlayer->xmf4x4World = m_xmf4x4ToParent;
-
+	_duoPlayer->eCurAnim = m_eCurAnim;
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
 		_duoPlayer->animInfo[i].fWeight = m_pSkinnedAnimationController->GetTrackWeight(i);

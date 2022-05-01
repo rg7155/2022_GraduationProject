@@ -605,7 +605,7 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	switch (eType)
 	{
 	case TEXTURE_TYPE::TEXTURE_QUAKE:
-		m_fAlpha = 5.f;
+		m_fAlpha = 1.5f;
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Earthquake.dds", 0);
 		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_ImpactCrack_A.dds", 0);
 
@@ -639,7 +639,7 @@ void CTexturedObject::Animate(float fTimeElapsed)
 		m_fAlpha -= fTimeElapsed;
 		if (m_fAlpha < 0.f)
 		{
-			m_fAlpha = 2.f;
+			m_fAlpha =1.5f;
 			m_isActive = false;
 		}
 		break;

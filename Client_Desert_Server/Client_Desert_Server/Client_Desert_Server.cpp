@@ -114,6 +114,7 @@ public:
 		p.size = sizeof(SC_MOVE_PLAYER_PACKET);
 		p.type = SC_MOVE_PLAYER;
 		p.xmf4x4World = clients[c_id].pPlayer->m_xmf4x4World;
+		p.eCurAnim = pPlayer->m_eCurAnim;
 		for (int i = 0; i < PLAYER::ANIM::END; i++)
 		{
 			p.animInfo[i] = clients[c_id].pPlayer->m_eAnimInfo[i];
@@ -285,12 +286,13 @@ void process_packet(int c_id)
 		// 받은 데이터로 클라 갱신
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 		clients[c_id].pPlayer->m_xmf4x4World = p->xmf4x4World;
+		clients[c_id].pPlayer->m_eCurAnim = p->eCurAnim;
 		for (int i = 0; i < PLAYER::ANIM::END; i++)
 		{
 			clients[c_id].pPlayer->m_eAnimInfo[i] = p->animInfo[i];
 		}
 		// 플레이어가 공격하면 몬스터랑 충돌체크
-		if (g_pGolemMonster)
+		if (g_pGolemMonster && g_pGolemMonster->GetHp() > 0.f)
 		{
 			if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
 				p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
@@ -328,6 +330,9 @@ void disconnect(int c_id)
 		cl.second.do_send(p.size, p.id, reinterpret_cast<char*>(&p));
 	}
 	cout << c_id << "Client Disconnection\n";
+	delete clients[c_id].pPlayer;
+	clients[c_id].pPlayer = nullptr;
+
 	clients.erase(c_id);
 }
 

@@ -21,7 +21,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = /*"210.99.123.127"*/ "127.0.0.1";
+char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*//*"210.99.123.127"*/ "127.0.0.1";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
@@ -258,6 +258,7 @@ int Process_Packet(char* ptr)
 		gGameFramework.m_iId = g_myid;
 		gGameFramework.BuildObjects();
 		gGameFramework.m_pPlayer->m_iId = g_myid;
+		CGameMgr::GetInstance()->SetId(g_myid);
 		return p->size;
 
 	}
@@ -265,7 +266,7 @@ int Process_Packet(char* ptr)
 	{
 		SC_ADD_PLAYER_PACKET* p = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(ptr);
 		gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
-
+		gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(true);
 		return p->size;
 	}
 	case SC_MOVE_PLAYER:
@@ -291,7 +292,7 @@ int Process_Packet(char* ptr)
 	case SC_REMOVE_PLAYER:
 	{
 		SC_REMOVE_PLAYER_PACKET* p = reinterpret_cast<SC_REMOVE_PLAYER_PACKET*>(ptr);
-		gGameFramework.m_pScene->m_pDuoPlayer->SetDead(true);
+		gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(false);
 		return p->size;
 	}
 	default:
