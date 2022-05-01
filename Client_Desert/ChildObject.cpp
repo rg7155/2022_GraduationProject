@@ -125,6 +125,9 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 		float fRadi = fMaxRadius * fMaxExtents; 
 
+		//임시로
+		fRadi *= 1.51f;
+
 		//포지션 축이 다르면 이상함
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
 		{
