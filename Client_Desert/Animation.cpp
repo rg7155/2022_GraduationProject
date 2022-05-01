@@ -330,8 +330,15 @@ void CAnimationController::AdvanceTime(float fTimeElapsed, CGameObject* pRootGam
 			{
 				m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->HandleCallback();
 				m_fPosition[k] += fTimeElapsed;
-				if (m_fPosition[k] >= m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->m_fLength)
-					m_fPosition[k] = 0.f;
+				float fLength = m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->m_fLength;
+				if (m_fPosition[k] >= fLength)
+				{
+					if (m_pAnimationSets->m_pAnimationSets[m_pAnimationTracks[k].m_nAnimationSet]->m_nType == ANIMATION_TYPE_ONCE)
+						m_fPosition[k] = fLength;
+					else
+						m_fPosition[k] = 0.f;
+
+				}
 			}
 		}
 	}

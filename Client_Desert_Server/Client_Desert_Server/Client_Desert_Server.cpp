@@ -12,7 +12,6 @@ CGameTimer							m_GameTimer;
 
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
-void CALLBACK monster_send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 
 char recv_buf[BUFSIZE];
 void send_GolemMonster();
@@ -354,15 +353,6 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 
 
 	clients[client_id].do_recv();
-}
-
-void CALLBACK monster_send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)
-{
-	SEND_DATA* sdata = reinterpret_cast<SEND_DATA*>(over);
-	//cout << static_cast<int>(sdata->send_buf[0]) << endl;
-	delete sdata;
-	return;
-
 }
 
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags)

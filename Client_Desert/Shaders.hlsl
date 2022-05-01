@@ -167,7 +167,7 @@ float4 Limlight(float3 normalW)
 float4 Dissolve(float2 uv)
 {
 	float4 f4Dissolve = gtxtTexture.Sample(gssWrap, uv);
-	float fClip = f4Dissolve.r * 2.f - gfDissolve;
+	float fClip = f4Dissolve.r - gfDissolve;
 	clip(fClip);
 
 	//return;

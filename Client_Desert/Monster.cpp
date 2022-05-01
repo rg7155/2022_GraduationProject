@@ -50,6 +50,9 @@ void CMonsterObject::Animate(float fTimeElapsed)
 	if (!m_isActive)
 		return; 
 
+
+	// m_fDissolve 0 - 1
+	
 	//m_fDissolve = 0.5;
 	//static bool bToggle = false;
 	//if(!bToggle)
@@ -166,10 +169,14 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(GOLEM::ANIM::RUN, true);
-	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[GOLEM::ANIM::IDLE]->m_nType = ANIMATION_TYPE_ONCE;
-	m_eCurAnim = GOLEM::ANIM::RUN;
-	m_ePrevAnim = GOLEM::ANIM::RUN;
+
+
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[GOLEM::ANIM:: DIE]->m_nType = ANIMATION_TYPE_ONCE;
+	m_eCurAnim = GOLEM::ANIM::IDLE;
+	m_ePrevAnim = GOLEM::ANIM::IDLE;
+
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
 	m_bBlendingOn = false;
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
@@ -180,6 +187,9 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	m_fAttackTime = 0.f;
 	m_bSkill1EffectOn = false;
+	SetLookAt(XMFLOAT3(0.f, 0.f, -1.f));
+	SetPosition(XMFLOAT3(13.f, 0.f, 134.f));
+
 }
 
 CGolemObject::~CGolemObject()
@@ -199,7 +209,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 	// ¹Ù´Ú ÀÌÆåÆ®
 
 	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
-	//cout << fAnimElapseTime << endl;
+
 	if (m_eCurAnim == GOLEM::ANIM::ATTACK1 && !m_bSkill1EffectOn && fAnimElapseTime > 0.5f)
 	{
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");
@@ -214,7 +224,23 @@ void CGolemObject::Animate(float fTimeElapsed)
 		m_bSkill1EffectOn = true;
 
 	}
+	
+	// m_fDissolve 0 - 1
+	
+	if (m_eCurAnim == GOLEM::ANIM::DIE)
+	{
+		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
+		if (fAnimElapseTime >= fLength - EPSILON)
+		{
+			m_fDissolve += fTimeElapsed * 0.5f;
+			if (m_fDissolve > 1.f)
+				m_fDissolve = 1.f;
+		}
+	}
 
+
+	cout << m_fDissolve << endl;
+	
 	////m_fAttackTime += fTimeElapsed;
 	//m_fAnimElapsedTime += fTimeElapsed;
 
@@ -267,8 +293,6 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 		if (pPlayer->m_iId == m_targetId)
 		{
 			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
-
-			cout << "ÇÇ°Ý!!" << endl;
 
 		}
 	}
@@ -373,7 +397,6 @@ void CGolemObject::Check_Collision()
 		if (pPlayer->m_iId == m_targetId)
 		{
 			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
-			cout << "ÇÇ°Ý!!" << endl;
 		}
 	}
 }

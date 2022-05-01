@@ -7,7 +7,7 @@
 #define RANDOM_COLOR			XMFLOAT4(rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX), rand() / float(RAND_MAX))
 
 #define EPSILON					1.0e-10f
-
+#define USE_SERVER 1
 
 #define PLAYER_SPEED					10.f
 #define BLENDING_TIME					0.3f
