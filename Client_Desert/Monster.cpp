@@ -239,7 +239,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 	}
 
 
-	cout << m_fDissolve << endl;
+	//cout << m_fDissolve << endl;
 	
 	////m_fAttackTime += fTimeElapsed;
 	//m_fAnimElapsedTime += fTimeElapsed;
