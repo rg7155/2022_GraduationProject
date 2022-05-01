@@ -6,12 +6,13 @@
 CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	:m_pTarget(_pTarget)
 {
-	m_eCurAnim = GOLEM::ANIM::RUN;
+	m_eCurAnim = GOLEM::ANIM::IDLE;
 	m_xmf3Position = XMFLOAT3(13.f, 0.f, 134.f);
 	m_xmf3Look = m_pTarget->GetPosition();
 	m_fAttackAnimTime = 0.f;
 	m_targetId = _pTarget->m_id;
 	m_fDamagedCoolTime = 0.f;
+	m_iHp = 100.f;
 }
 
 void CGolemMonster::Update(float fTimeElapsed)
@@ -79,6 +80,10 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 		m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
 		return;
 	
+	// 애니메이션 position 계산해서 검사
+	if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.8f)
+		return;
+
 	XMFLOAT3 fPlayerPos = pAttackPlayer->GetPosition();
 	float fDis = Vector3::Distance(fPlayerPos, m_xmf3Position);
 
@@ -90,7 +95,11 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 	cout << fAngle << endl;
 	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 2.f && abs(fAngle) < 70.f)
 	{
-		Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
+		m_iHp -= 20.f;
+		if(m_iHp <= 0.f)
+			Change_Animation(GOLEM::ANIM::DIE);
+		else
+			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
 		cout << fAngle << endl;
 
 		m_fDamagedCoolTime = 0.f;

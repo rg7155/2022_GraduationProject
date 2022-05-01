@@ -292,7 +292,7 @@ void process_packet(int c_id)
 			clients[c_id].pPlayer->m_eAnimInfo[i] = p->animInfo[i];
 		}
 		// 플레이어가 공격하면 몬스터랑 충돌체크
-		if (g_pGolemMonster)
+		if (g_pGolemMonster && g_pGolemMonster->GetHp() > 0.f)
 		{
 			if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
 				p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)

@@ -21,10 +21,8 @@ private:
 
 public:
 	void Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet);
-	void SetDead(bool bDead) { m_bDead = bDead; }
 
 private:
-	bool m_bDead = true;
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;
 	CGameObject* m_pSword = NULL;

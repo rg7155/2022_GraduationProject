@@ -101,7 +101,7 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 
 void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
-	if (m_bDead)
+	if (!m_isActive)
 		return;
 
 	UpdateShaderVariables(pd3dCommandList);
