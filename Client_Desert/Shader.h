@@ -226,6 +226,7 @@ public:
 
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState) override;
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState) override;
+	D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState) override;
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;

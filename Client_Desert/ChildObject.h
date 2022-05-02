@@ -165,7 +165,7 @@ private:
 class CTexturedObject : public CGameObject
 {
 public:
-	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_END };
+	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_END };
 
 	CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType);
 	virtual ~CTexturedObject();

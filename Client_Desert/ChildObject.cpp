@@ -604,31 +604,44 @@ void CPortalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType)
 	: CGameObject(1)
 {
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
-	SetMesh(pMesh);
-
+	CMesh* pMesh = NULL;
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	CMaterial* pMaterial = new CMaterial(1);
 
 	m_eTextureType = eType;
 	switch (eType)
 	{
-	case TEXTURE_TYPE::TEXTURE_QUAKE:
-		m_fAlpha = 1.5f;
+	case CTexturedObject::TEXTURE_QUAKE:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Earthquake.dds", 0);
 		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_ImpactCrack_A.dds", 0);
 
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		pMaterial->m_iPipelineState = 1;
 
-		SetScale(2.f, 1.f, 2.f);
+		SetScale(2.f, 1.f, 2.f); 
+		m_fAlpha = 1.5f;
+		break;
+
+	case CTexturedObject::TEXTURE_HP:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Hp.dds", 0);
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		SetActiveState(true);
+		break;
+
+	case CTexturedObject::TEXTURE_HP_FRAME:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HpFrame.dds", 0); 
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		SetActiveState(true);
 		break;
 	}
 
+	SetMesh(pMesh);
+
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
-
 	pMaterial->SetTexture(pTexture);
-
 	SetMaterial(0, pMaterial);
 }
 
@@ -651,6 +664,16 @@ void CTexturedObject::Animate(float fTimeElapsed)
 			m_fAlpha =1.5f;
 			m_isActive = false;
 		}
+		break;
+
+	case CTexturedObject::TEXTURE_HP:
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		UpdateTransform(NULL);
+		break;
+
+	case CTexturedObject::TEXTURE_HP_FRAME:
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		UpdateTransform(NULL); 
 		break;
 	}
 

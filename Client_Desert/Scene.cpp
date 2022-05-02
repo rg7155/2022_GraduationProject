@@ -75,15 +75,17 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	int iIndex = 0;
 	
+	//따로 쉐이더를 만들지 않는 오브젝트
+	m_pStandardObjectShader = new CStandardObjectsShader(0); //파이프라인 안씀
+	m_ppShaders[iIndex++] = m_pStandardObjectShader;
+	CreateStandardObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
+	
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMapObjectShader = new CMapObjectsShader(), iIndex++);
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMonsterObjectShader = new CMonsterObjectsShader(), iIndex++);
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pNPCObjectShader = new CNPCObjectsShader(), iIndex++);
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pParticleObjectShader = new CParticleShader(), iIndex++);
 
-	//따로 쉐이더를 만들지 않는 오브젝트
-	m_pStandardObjectShader = new CStandardObjectsShader(0); //파이프라인 안씀
-	m_ppShaders[iIndex++] = m_pStandardObjectShader;
-	CreateStandardObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
 
 	m_nAlphaShaderStartIndex = iIndex;
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader(), iIndex++);
@@ -116,12 +118,24 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pStandardObjectShader->AddObject(L"Portal", pObj);
 
 	//몬스터 바닥 이펙트
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_QUAKE);
 		pObj->SetActiveState(false);
 		m_pStandardObjectShader->AddObject(L"Quake", pObj);
 	}
+
+	////hp,hpFrame
+	//for (int i = 0; i < 5; ++i)
+	//{
+	//	pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
+	//	pObj->SetActiveState(false);
+	//	m_pStandardObjectShader->AddObject(L"Hp", pObj);
+
+	//	pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
+	//	pObj->SetActiveState(false);
+	//	m_pStandardObjectShader->AddObject(L"HpFrame", pObj);
+	//}
 }
 
 

@@ -1,5 +1,6 @@
 #include "Monster.h"
 #include "Scene.h"
+#include "ChildObject.h"
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CGameObject(1)
@@ -29,6 +30,16 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	SetEffectsType(EFFECT_DISSOLVE, true);
 	SetEffectsType(EFFECT_FOG, true);
 
+	m_pHp = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
+	m_pHpFrame = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
+	//m_pHp = static_cast<CTexturedObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Hp"));
+	//m_pHpFrame = static_cast<CTexturedObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"HpFrame"));
+
+	//각 몬스터에 따라 변경할 것
+	m_fHpOffsetY = 3.f;
+	m_iHp = 50;
+	m_iMaxHp = m_iHp;
+
 	m_fDissolve = 0.f; //1에 가까울수록 사라짐
 
 	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
@@ -37,12 +48,22 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 
 	//SetPosition(XMFLOAT3(10.f, 0.f, 20.f));
-
 }
 
 CMonsterObject::~CMonsterObject()
 {
-
+	if (m_pHp)
+	{
+		m_pHp->ReleaseUploadBuffers();
+		m_pHp->ReleaseShaderVariables();
+		m_pHp->Release();
+	}
+	if (m_pHpFrame)
+	{
+		m_pHpFrame->ReleaseUploadBuffers();
+		m_pHpFrame->ReleaseShaderVariables();
+		m_pHpFrame->Release();
+	}
 }
 
 void CMonsterObject::Animate(float fTimeElapsed)
@@ -50,6 +71,12 @@ void CMonsterObject::Animate(float fTimeElapsed)
 	if (!m_isActive)
 		return; 
 
+	UpdateHpBar(fTimeElapsed);
+
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+	{
+		SetDamaged(10);
+	}
 
 	// m_fDissolve 0 - 1
 	
@@ -126,6 +153,35 @@ void CMonsterObject::OnPrepareRender()
 	//////m_xmf4x4ToParent._41 = m_xmf3Position.x; m_xmf4x4ToParent._42 = m_xmf3Position.y; m_xmf4x4ToParent._43 = m_xmf3Position.z;
 
 	//m_xmf4x4ToParent = Matrix4x4::Multiply(XMMatrixScaling(m_xmf3Scale.x, m_xmf3Scale.y, m_xmf3Scale.z), m_xmf4x4ToParent);
+}
+
+void CMonsterObject::UpdateHpBar(float fTimeElapsed)
+{
+	if (!m_pHp || !m_pHpFrame)
+		return;
+
+	m_pHp->Animate(fTimeElapsed);
+	m_pHpFrame->Animate(fTimeElapsed);
+
+	CScene* pScene = CGameMgr::GetInstance()->GetScene();
+	pScene->AddAlphaObjectToList(m_pHp);
+	pScene->AddAlphaObjectToList(m_pHpFrame);
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += m_fHpOffsetY;
+	m_pHp->SetPosition(xmf3Pos);
+	m_pHpFrame->SetPosition(xmf3Pos);
+
+}
+
+void CMonsterObject::SetDamaged(int iDamage)
+{
+	m_iHp -= iDamage;
+	if (m_iHp < 0)
+		m_iHp = 0;
+
+	float fRatio = (m_iHp / (float)m_iMaxHp);
+	m_pHp->SetScale(fRatio, 1.f, 1.f);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

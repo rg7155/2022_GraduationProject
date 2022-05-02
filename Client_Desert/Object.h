@@ -228,7 +228,7 @@ public:
 	CGameObject 					*m_pChild = NULL;
 	CGameObject 					*m_pSibling = NULL;
 
-	XMFLOAT3						m_xmf3Scale;
+	XMFLOAT3						m_xmf3Scale = {1.f, 1.f, 1.f};
 
 	BoundingOrientedBox				m_xmOOBB;
 	bool							m_isRootModelObject = false;
