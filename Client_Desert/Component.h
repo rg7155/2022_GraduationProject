@@ -99,6 +99,7 @@ public:
 	void			AddTrail(XMFLOAT3& xmf3Top, XMFLOAT3& xmf3Bottom);
 	void			RenderTrail(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera);
 	void			SetRenderingTrail(bool isOn);
+	void			SetColor(bool isHero);
 public:
 	static CTrail* Create(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 
@@ -111,6 +112,7 @@ private:
 	list<pair<XMFLOAT3, XMFLOAT3>>	m_listPos; //Top,Bottom
 	list<pair<XMFLOAT3, XMFLOAT3>>	m_listRomPos; 
 	CTrailObject*					m_pTrailObject = nullptr;
+	bool							m_isZeroPlayer = true;
 };
 
 

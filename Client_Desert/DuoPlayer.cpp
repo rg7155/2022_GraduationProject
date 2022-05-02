@@ -16,6 +16,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 	m_pSword = FindFrame("Sword");
+	m_pSwordTail = FindFrame("SwordTail");
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, PLAYER::ANIM::END, pPlayerModel);
 
@@ -37,11 +38,10 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	
 	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
-	if (IsNowAttack())
-		m_pComTrail->SetRenderingTrail(true);
-	else
-		m_pComTrail->SetRenderingTrail(false);
+	IsNowAttack() ? m_pComTrail->SetRenderingTrail(true) : m_pComTrail->SetRenderingTrail(false);
+
 	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
 
 	SetEffectsType(EFFECT_FOG, true);
@@ -115,6 +115,7 @@ void CDuoPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 {
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
+	m_pComTrail->SetColor(false);
 }
 
 void CDuoPlayer::UpdateComponent(float fTimeElapsed)
@@ -124,10 +125,7 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 			m_pComponent[i]->Update_Component(fTimeElapsed);
 
 	if (m_pComTrail)
-	{
-		XMFLOAT3 xmf3Top = Vector3::Add(m_pSword->GetPosition(), m_pSword->GetUp(), -1.f);
-		m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition());
-	}
+		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 }
 
 void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)

@@ -90,7 +90,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	//SetCameraUpdatedContext(pContext);
 
 
-
 	if (pPlayerModel) delete pPlayerModel;
 
 
@@ -527,8 +526,7 @@ void CPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
-
-
+	m_pComTrail->SetColor(true);
 }
 
 void CPlayer::UpdateComponent(float fTimeElapsed)

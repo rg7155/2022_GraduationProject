@@ -255,9 +255,9 @@ int Process_Packet(char* ptr)
 		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		g_myid = p->id;
 		gGameFramework.m_iId = g_myid;
+		CGameMgr::GetInstance()->SetId(g_myid);
 		gGameFramework.BuildObjects();
 		gGameFramework.m_pPlayer->m_iId = g_myid;
-		CGameMgr::GetInstance()->SetId(g_myid);
 		return p->size;
 
 	}

@@ -172,7 +172,7 @@ CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	SetMaterial(0, pMaterial);
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
-	(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
+	//(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
 }
 
 CTrailObject::~CTrailObject()
@@ -185,6 +185,15 @@ void CTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
 
 	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+void CTrailObject::SetColor(bool isHero)
+{
+	//Á¦·Î
+	if (CGameMgr::GetInstance()->GetId() == 0)
+		isHero ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
+	else
+		isHero ? m_xmf4Color = { GREEN_COLOR4 } : m_xmf4Color = { BLUE_COLOR4 };
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

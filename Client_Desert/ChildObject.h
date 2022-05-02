@@ -47,6 +47,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
+	void		SetColor(bool isPlayerZero);
 public:
 	CTrailMesh* m_pTrailMesh = nullptr;
 	XMFLOAT4	m_xmf4Color;
