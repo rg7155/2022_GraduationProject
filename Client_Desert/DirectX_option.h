@@ -146,6 +146,14 @@ namespace Vector3
 			XMLoadFloat3(&xmf3Vector[2]), XMLoadFloat3(&xmf3Vector[3]), t));
 		return(xmf3Result);
 	}
+
+	inline XMFLOAT3 Lerp(XMFLOAT3& xmf3Vector1, XMFLOAT3& xmf3Vector2, float t)
+	{
+		XMFLOAT3 xmf3Result;
+		XMStoreFloat3(&xmf3Result, XMVectorLerp(XMLoadFloat3(&xmf3Vector1), XMLoadFloat3(&xmf3Vector2), t));
+		return(xmf3Result);
+	}
+
 }
 
 namespace Vector4

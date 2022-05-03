@@ -319,7 +319,24 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 
 void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+	Vector3::Lerp(m_xmf3Position, m_xmf3TargetPos, 0.5f);
 
+	RotateByMouse(xmf3LookAt);
+
+	
+	CCamera::Update(xmf3LookAt, fTimeElapsed);
+}
+
+void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
+{
+	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
+	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
+	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
+	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
+}
+
+void CThirdPersonCamera::RotateByMouse(XMFLOAT3& vLookAt)
+{
 	// 마우스 회전 
 	// 위아래
 	long dwMouseMove = 0;
@@ -359,7 +376,7 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(dwMouseMove / DPI));
 		m_xmf3Offset = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
-		
+
 		if (m_pPlayer)
 		{
 			XMFLOAT4X4 xmf4x4Rotate = Matrix4x4::Identity();
@@ -379,15 +396,4 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 		}
 
 	}
-
-	
-	CCamera::Update(xmf3LookAt, fTimeElapsed);
-}
-
-void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
-{
-	XMFLOAT4X4 mtxLookAt = Matrix4x4::LookAtLH(m_xmf3Position, xmf3LookAt, m_pPlayer->GetUpVector());
-	m_xmf3Right = XMFLOAT3(mtxLookAt._11, mtxLookAt._21, mtxLookAt._31);
-	m_xmf3Up = XMFLOAT3(mtxLookAt._12, mtxLookAt._22, mtxLookAt._32);
-	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
 }

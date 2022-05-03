@@ -142,5 +142,10 @@ public:
 
 	virtual void Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed);
 	virtual void SetLookAt(XMFLOAT3& vLookAt);
+	
+	void RotateByMouse(XMFLOAT3& vLookAt);
+
+public:
+	XMFLOAT3	m_xmf3TargetPos = { 0.f, 0.f, 0.f };
 };
 

@@ -80,7 +80,7 @@ void CMonsterObject::Animate(float fTimeElapsed)
 
 	// m_fDissolve 0 - 1
 	
-	m_fDissolve = 0.2f;
+	//m_fDissolve = 0.2f;
 	//static bool bToggle = false;
 	//if(!bToggle)
 	//	m_fDissolve += fTimeElapsed * 0.5f;

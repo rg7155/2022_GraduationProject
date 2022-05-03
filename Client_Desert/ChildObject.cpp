@@ -667,9 +667,6 @@ void CTexturedObject::Animate(float fTimeElapsed)
 		break;
 
 	case CTexturedObject::TEXTURE_HP:
-		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
-		UpdateTransform(NULL);
-		break;
 
 	case CTexturedObject::TEXTURE_HP_FRAME:
 		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
