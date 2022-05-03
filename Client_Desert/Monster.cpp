@@ -73,10 +73,10 @@ void CMonsterObject::Animate(float fTimeElapsed)
 
 	UpdateHpBar(fTimeElapsed);
 
-	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
-	{
-		SetDamaged(10);
-	}
+	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+	//{
+	//	SetDamaged(10);
+	//}
 
 	// m_fDissolve 0 - 1
 	

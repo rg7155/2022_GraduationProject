@@ -318,6 +318,12 @@ CNPCObject::~CNPCObject()
 
 void CNPCObject::Animate(float fTimeElapsed)
 {
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+	{
+		XMFLOAT3 xmf3Offset = { 0.f, 3.f, 5.f };
+		static_cast<CThirdPersonCamera*>(CGameMgr::GetInstance()->GetCamera())->SetFocusOnTarget(true, GetPosition(), xmf3Offset);
+	}
+
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
 	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
 	else SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = true);
@@ -561,6 +567,7 @@ CPortalObject::~CPortalObject()
 {
 }
 
+#define RANGE 2.5f
 void CPortalObject::Animate(float fTimeElapsed)
 {
 	if (!m_isActive)
@@ -570,9 +577,13 @@ void CPortalObject::Animate(float fTimeElapsed)
 	if (m_fAlpha <= 0.f)
 		m_fAlpha = 1.f;
 
+	float fDistanceToPlayer = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
+	float fDistanceToDuo = 0.f;
+#ifdef USE_SERVER
+	fDistanceToDuo = Vector3::Distance(CGameMgr::GetInstance()->GetDuoPlayer()->GetPosition(), GetPosition());
+#endif // USE_SERVER
 
-	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
-	if (fDistance < 2.5f && !m_isOverlap)
+	if (fDistanceToPlayer < RANGE && fDistanceToDuo < RANGE && !m_isOverlap)
 	{
 		m_isOverlap = true;
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Info").back();

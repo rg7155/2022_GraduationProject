@@ -319,9 +319,19 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 
 void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
-	Vector3::Lerp(m_xmf3Position, m_xmf3TargetPos, 0.5f);
+	if (m_isStartFocusing)
+	{
+		m_fTime += fTimeElapsed;
 
-	RotateByMouse(xmf3LookAt);
+		SetLookAtPosition(m_xmf3TargetPos);
+
+		XMFLOAT3 xmf3OffsetPos = Vector3::Add(m_xmf3TargetPos, m_xmf3TargetLookingOffset);
+		if (m_fTime <= 1.f)
+			m_xmf3Position = Vector3::Lerp(m_xmf3PrePos, xmf3OffsetPos, m_fTime);
+		
+	}
+	else
+		RotateByMouse(xmf3LookAt);
 
 	
 	CCamera::Update(xmf3LookAt, fTimeElapsed);
@@ -335,7 +345,7 @@ void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 	m_xmf3Look = XMFLOAT3(mtxLookAt._13, mtxLookAt._23, mtxLookAt._33);
 }
 
-void CThirdPersonCamera::RotateByMouse(XMFLOAT3& vLookAt)
+void CThirdPersonCamera::RotateByMouse(XMFLOAT3& xmf3LookAt)
 {
 	// 마우스 회전 
 	// 위아래
@@ -394,6 +404,25 @@ void CThirdPersonCamera::RotateByMouse(XMFLOAT3& vLookAt)
 
 			}
 		}
+
+	}
+}
+
+void CThirdPersonCamera::SetFocusOnTarget(bool isFocus, XMFLOAT3 xmf3Target, XMFLOAT3 xmf3TargetOffset)
+{
+	m_xmf3TargetPos = xmf3Target;
+	m_xmf3TargetLookingOffset = xmf3TargetOffset;
+	m_isStartFocusing = isFocus;
+	if (isFocus)
+	{
+		m_xmf3PrePos = m_xmf3Position;
+		//m_fTime += fTimeElapsed;
+
+		//Vector3::Lerp(m_xmf3Position, m_xmf3TargetPos, 0.5f);
+
+	}
+	else
+	{
 
 	}
 }

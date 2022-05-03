@@ -511,9 +511,9 @@ void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-	m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
+	//m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
 
-	m_pCamera->Update(m_pPlayer->GetLook(), fTimeElapsed);
+	//m_pCamera->Update(m_pPlayer->GetLook(), fTimeElapsed);
 	m_pPlayer->Update(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);

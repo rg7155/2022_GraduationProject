@@ -144,8 +144,12 @@ public:
 	virtual void SetLookAt(XMFLOAT3& vLookAt);
 	
 	void RotateByMouse(XMFLOAT3& vLookAt);
-
+	void SetFocusOnTarget(bool isFocus, XMFLOAT3 xmf3Target, XMFLOAT3 xmf3TargetOffset);
 public:
 	XMFLOAT3	m_xmf3TargetPos = { 0.f, 0.f, 0.f };
+	XMFLOAT3	m_xmf3TargetLookingOffset = { 0.f, 0.f, 0.f };
+	XMFLOAT3	m_xmf3PrePos = { 0.f, 0.f, 0.f };
+	bool		m_isStartFocusing = false;
+	float		m_fTime = 0.f;
 };
 

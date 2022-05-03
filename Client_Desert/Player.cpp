@@ -315,6 +315,11 @@ void CPlayer::Rotate(float x, float y, float z)
 
 void CPlayer::Update(float fTimeElapsed)
 {
+	Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
+
+	m_pCamera->Update(GetLook(), fTimeElapsed);
+
+	////////////////////////////////////////////////////////////////////////
 	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
 	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 	float fMaxVelocityXZ = m_fMaxVelocityXZ;
@@ -348,10 +353,7 @@ void CPlayer::Update(float fTimeElapsed)
 	Blending_Animation(fTimeElapsed);
 
 	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
-	if (IsNowAttack())
-		m_pComTrail->SetRenderingTrail(true);
-	else
-		m_pComTrail->SetRenderingTrail(false);
+	m_pComTrail->SetRenderingTrail(IsNowAttack());
 
 	////////////////////////////////////////////
 	UpdateComponent(fTimeElapsed);

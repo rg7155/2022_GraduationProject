@@ -39,9 +39,6 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	
-	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
-	IsNowAttack() ? m_pComTrail->SetRenderingTrail(true) : m_pComTrail->SetRenderingTrail(false);
-
 	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
 
 	SetEffectsType(EFFECT_FOG, true);
@@ -74,10 +71,7 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 
 	UpdateComponent(fTimeElapsed);
 	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
-	if (IsNowAttack())
-		m_pComTrail->SetRenderingTrail(true);
-	else
-		m_pComTrail->SetRenderingTrail(false);
+	m_pComTrail->SetRenderingTrail(IsNowAttack());
 
 	// 바닥 이펙트
 
