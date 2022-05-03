@@ -13,6 +13,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, CShader* pShader = NULL) override;
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 

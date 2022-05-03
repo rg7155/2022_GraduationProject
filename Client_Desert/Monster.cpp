@@ -80,7 +80,7 @@ void CMonsterObject::Animate(float fTimeElapsed)
 
 	// m_fDissolve 0 - 1
 	
-	//m_fDissolve = 0.5;
+	m_fDissolve = 0.2f;
 	//static bool bToggle = false;
 	//if(!bToggle)
 	//	m_fDissolve += fTimeElapsed * 0.5f;
@@ -121,6 +121,15 @@ void CMonsterObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera*
 		if (m_ppMaterials[i])	m_ppMaterials[i]->UpdateShaderVariable(pd3dCommandList);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CMonsterObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
+{
+	//디졸브 시작되면 그림자 그리지 않기
+	if (m_fDissolve > 0.f)
+		return;
+
+	CGameObject::ShadowRender(pd3dCommandList, pCamera, pShader);
 }
 
 void CMonsterObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -244,7 +253,7 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_fAttackTime = 0.f;
 	m_bSkill1EffectOn = false;
 	SetLookAt(XMFLOAT3(0.f, 0.f, -1.f));
-	SetPosition(XMFLOAT3(13.f, 0.f, 134.f));
+	SetPosition(XMFLOAT3(23.f, 0.f, 114.f));
 
 }
 

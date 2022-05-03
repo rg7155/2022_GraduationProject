@@ -585,6 +585,19 @@ void CStandardObjectsShader::SetInactiveAllObject()
 			iterSec->SetActiveState(false);
 }
 
+void CStandardObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (auto& iter : m_mapObject)
+	{
+		for (auto& iterSec : iter.second)
+		{
+			if (!iterSec->m_isActive)
+				continue;
+			iterSec->UpdateShaderVariables(pd3dCommandList);
+		}
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
