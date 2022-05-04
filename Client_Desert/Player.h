@@ -107,7 +107,7 @@ private:
 public:
 	virtual void	CollsionDetection(CGameObject* pObj) override;
 
-private:
+public:
 	bool IsNowAttack();
 private:
 	XMVECTOR m_xmVecNowRotate;
@@ -119,6 +119,8 @@ private:
 public:
 	CS_MOVE_PACKET* Server_GetParentAndAnimation();
 
+public:
+	PLAYER::ANIM GetCurAnim() { return m_eCurAnim; }
 
 
 private:

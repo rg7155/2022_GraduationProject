@@ -8,7 +8,7 @@
 
 #define EPSILON					1.0e-10f
 
-//#define USE_SERVER 1
+#define USE_SERVER 1
 
 #define PLAYER_SPEED					10.f
 #define BLENDING_TIME					0.3f
@@ -23,7 +23,7 @@
 // Monster
 #define GOLEMSPEED						4.f
 #define ATTACK_DISTANCE					2.f
-#define GOLEM_ATTACK1_DISTANCE			3.f
+#define GOLEM_ATTACK1_DISTANCE			2.f
 
 // Player
 #define PLAYER_INIT_POSITION_X			10.f

@@ -349,25 +349,32 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 	if (m_eCurAnim == eNewAnim)
 		return;
 
-	// 근접공격은 타겟 무조건 공격
-	if (eNewAnim == GOLEM::ANIM::ATTACK2)
+	// 플레이어가 공격 중이면 공격하지 않음
+	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+
+
+	if (!pPlayer->IsNowAttack())
 	{
-		// 타겟이면
-		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+		// 근접공격은 타겟 무조건 공격
 
-		if (pPlayer->m_iId == m_targetId)
+		if (eNewAnim == GOLEM::ANIM::ATTACK2)
 		{
-			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
+			// 타겟이면
 
+			if (pPlayer->m_iId == m_targetId)
+			{
+				pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
+
+			}
+		}
+
+		// 원격공격은 거리 계산해서 공격
+		if (eNewAnim == GOLEM::ANIM::ATTACK1)
+		{
+			Check_Collision();
 		}
 	}
-
-	// 원격공격은 거리 계산해서 공격
-	if (eNewAnim == GOLEM::ANIM::ATTACK1)
-	{
-		Check_Collision();
-	}
-
+	
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
 

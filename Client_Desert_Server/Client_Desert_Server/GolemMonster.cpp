@@ -35,6 +35,8 @@ void CGolemMonster::Update(float fTimeElapsed)
 		}
 	}
 
+
+
 	if (m_pTarget)
 	{
 		// 타겟을 쫓아가는 걸로 이동 & 회전
@@ -52,7 +54,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 		// 타겟과 일정거리 내로 좁혀지면 공격
 		float fDis = Vector3::Distance(mf3TargetPos, m_xmf3Position);
-		if (fDis < ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim)
+		if (fDis < ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !m_pTarget->IsNowAttack())
 		{
 			Change_Animation(GOLEM::ANIM::ATTACK2);
 			m_fAttackAnimTime = 0.f;
@@ -81,8 +83,19 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 		return;
 	
 	// 애니메이션 position 계산해서 검사
-	if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.8f)
-		return;
+	if (m_eCurAnim == GOLEM::ATTACK1)
+	{
+		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.8f)
+			return;
+	}
+	else
+	{
+		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.5f ||
+			pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition > 1.f)
+			return;
+	}
+
+	
 
 	XMFLOAT3 fPlayerPos = pAttackPlayer->GetPosition();
 	float fDis = Vector3::Distance(fPlayerPos, m_xmf3Position);
@@ -92,8 +105,12 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 	XMFLOAT3 fDir = Vector3::Subtract(m_xmf3Position, fPlayerPos, true, true);
 
 	float fAngle = Vector3::Angle(fPlayerLook, fDir);
-	cout << fAngle << endl;
-	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 2.f && abs(fAngle) < 70.f)
+
+	if (m_eCurAnim == GOLEM::ANIM::ATTACK1 || m_eCurAnim == GOLEM::ANIM::ATTACK2)
+		fAngle = 0.f;
+
+
+	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 2.f && abs(fAngle) < 90.f)
 	{
 		m_iHp -= 20.f;
 		if(m_iHp <= 0.f)
@@ -102,6 +119,8 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
 		cout << fAngle << endl;
 
+		m_targetId = rand() % 2;
+		m_pTarget = Get_Player(m_targetId);
 		m_fDamagedCoolTime = 0.f;
 	}
 }
@@ -111,6 +130,7 @@ void CGolemMonster::Change_Animation(GOLEM::ANIM eNewAnim)
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 1.f;
 	m_eCurAnim = eNewAnim;
+	m_fDamagedCoolTime = 0.f;
 
 }
 
