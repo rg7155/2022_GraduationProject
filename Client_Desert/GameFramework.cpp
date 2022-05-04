@@ -59,7 +59,10 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CoInitialize(NULL);
 
+#ifndef USE_SERVER
 	BuildObjects();
+#endif // !USE_SERVER
+
 	CreateImgui();
 
 

@@ -260,8 +260,8 @@ int Process_Packet(char* ptr)
 		g_myid = p->id;
 		gGameFramework.m_iId = g_myid;
 		CGameMgr::GetInstance()->SetId(g_myid);
-		//gGameFramework.BuildObjects();
-
+		gGameFramework.BuildObjects();
+		CGameMgr::GetInstance()->GetPlayer()->m_iId = g_myid;
 		return p->size;
 
 	}
@@ -286,10 +286,16 @@ int Process_Packet(char* ptr)
 		p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
 		CGolemObject* pGolem = reinterpret_cast<CGolemObject*>(pObj);
+
+		if (!pGolem->m_isActive)
+			pGolem->SetActiveState(true);
+
 		pGolem->Change_Animation(p->eCurAnim);
 		pGolem->SetLookAt(p->xmf3Look);
 		pGolem->SetPosition(p->xmf3Position);
 		pGolem->m_targetId = p->target_id;
+		pGolem->SetHp(static_cast<int>(p->hp));
+		cout << static_cast<int>(p->hp) << endl;
 		return p->size;
 	}
 	case SC_REMOVE_PLAYER:

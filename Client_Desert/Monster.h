@@ -21,7 +21,8 @@ public:
 	void LerpRotate(float fTimeElapsed);
 	virtual void OnPrepareRender();
 	void UpdateHpBar(float fTimeElapsed);
-	void SetDamaged(int iDamage);
+	void SetHp(int iDamage);
+
 protected:
 	float	m_fDissolve = 0.f; //0~1»çÀÌ °ª
 

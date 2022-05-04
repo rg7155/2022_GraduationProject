@@ -742,7 +742,6 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_mapModelInfo.emplace(L"Golem", pModel);
 
 	CMonsterObject* pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
-	pObj->SetActiveState(true);
 	AddObject(L"Golem", pObj);
 
 }

@@ -130,6 +130,8 @@ public:
 			monsterpacket.xmf3Position = g_pGolemMonster->m_xmf3Position;
 			monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
 			monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
+			monsterpacket.hp = static_cast<short>(g_pGolemMonster->GetHp());
+			cout << monsterpacket.hp<< endl;
 
 			char buf[BUFSIZE];
 			memcpy(buf, &p, p.size);
@@ -162,7 +164,7 @@ void TimerThread_func()
 		if(clients.size() >= 1)
 			fGolemCreateTime += fTimeElapsed;
 
-		if (!bGolemCreateOn && fGolemCreateTime > 10.f && clients.size() >= 2)
+		if (!bGolemCreateOn && clients.size() >= 2)
 		{
 			g_pGolemMonster = new CGolemMonster(clients[0].pPlayer);
 			bGolemCreateOn = true;
@@ -230,6 +232,8 @@ void send_GolemMonster()
 	p.xmf3Position = g_pGolemMonster->m_xmf3Position;
 	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
 	p.target_id = g_pGolemMonster->m_pTarget->m_id;
+	p.hp = static_cast<short>(g_pGolemMonster->GetHp());
+	cout << p.hp << endl;
 	for (auto& cl : clients)
 	{
 		//if (cl.first == c_id) continue;
