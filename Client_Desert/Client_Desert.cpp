@@ -32,6 +32,7 @@ int g_myid = -1;
 char* send_buf = nullptr;
 char prev_buf[BUFSIZE];
 int prev_bytes = 0;
+bool isWindow = false;
 
 void Server_PosSend();
 void Server_PosRecv();
@@ -100,12 +101,15 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	if (!InitInstance(hInstance, nCmdShow)) return(FALSE);
 
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
+#ifdef USE_SERVER
 
 	send_packet(p);
 	std::cout << "상대 클라 대기중" << endl;
 
 	//thread serverThread{ Server_PosRecv };
 	Server_PosRecv();
+#endif // USE_SERVER
+
 	while (1)
 	{
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
@@ -124,8 +128,8 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		else
 		{
 #ifdef USE_SERVER
-
-			if (g_myid != -1)
+			
+			if (isWindow)
 			{
 				gGameFramework.FrameAdvance();
 			}
@@ -184,13 +188,17 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	if (!hMainWnd) return(FALSE);
 
+#ifdef USE_SERVER
 	// 클라 2명 연결전 윈도우 안보이게 (임시)
-	ShowWindow(hMainWnd, false);
+	ShowWindow(hMainWnd, isWindow);
+#else
+	::ShowWindow(hMainWnd, nCmdShow);
+#endif
+
 	g_hWnd = hMainWnd;
 
 	gGameFramework.OnCreate(hInstance, hMainWnd);
 
-	//::ShowWindow(hMainWnd, nCmdShow);
 	::UpdateWindow(hMainWnd);
 	
 
@@ -287,7 +295,8 @@ int Process_Packet(char* ptr)
 		gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
 		gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(true);
 		std::cout << "상대 클라 접속!" << endl;
-		ShowWindow(g_hWnd, true);
+		isWindow = true;
+		ShowWindow(g_hWnd, isWindow);
 
 		return p->size;
 	}
