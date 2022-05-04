@@ -313,8 +313,18 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
 }
 
+#define START_POS 25.0f, 0, 25.0f
+
 void CPlayer::Update(float fTimeElapsed)
 {
+	//Nan°ª ÀÌ¸é
+	if (isnan(GetPosition().x) != 0)
+	{
+		XMFLOAT3 xmf3Pos = { START_POS };
+		SetPosition(xmf3Pos);
+		cout << "Position is Nan!" << endl;
+	}
+
 	Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
 
 	m_pCamera->Update(GetLook(), fTimeElapsed);

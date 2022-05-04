@@ -109,3 +109,5 @@ crashlytics-build.properties
 # End of https://www.toptal.com/developers/gitignore/api/unity
 Client_Desert_Server/Client_Desert_Server/x64
 x64
+Client_Desert_Server/Client_Desert_Server/Debug/Client_D.c1b4c7c1.tlog
+Client_Desert_Server/Client_Desert_Server/Debug

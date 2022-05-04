@@ -318,11 +318,11 @@ CNPCObject::~CNPCObject()
 
 void CNPCObject::Animate(float fTimeElapsed)
 {
-	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
-	{
-		XMFLOAT3 xmf3Offset = { 0.f, 3.f, 5.f };
-		static_cast<CThirdPersonCamera*>(CGameMgr::GetInstance()->GetCamera())->SetFocusOnTarget(true, GetPosition(), xmf3Offset);
-	}
+	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+	//{
+	//	XMFLOAT3 xmf3Offset = { 0.f, 3.f, 5.f };
+	//	static_cast<CThirdPersonCamera*>(CGameMgr::GetInstance()->GetCamera())->SetFocusOnTarget(true, GetPosition(), xmf3Offset);
+	//}
 
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
 	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
@@ -388,7 +388,13 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_PROFILE:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
-		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.9f); break;
+		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.9f); 
+		break;
+	case CUIObject::UI_READY:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		SetOrthoWorld(100, 100, FRAME_BUFFER_WIDTH - 100.f, FRAME_BUFFER_HEIGHT - 100.f);
+		m_isClickedAble = true;
+		break;
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -430,6 +436,15 @@ void CUIObject::Animate(float fTimeElapsed)
 			}
 		}
 		break;
+	case CUIObject::UI_READY:
+		if (CInputDev::GetInstance()->LButtonDown())
+		{
+			XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
+			if (Cursor.x > m_xmf2Pos.x - m_xmf2Size.x && Cursor.x < m_xmf2Pos.x + m_xmf2Size.x &&
+				Cursor.y > m_xmf2Pos.y - m_xmf2Size.y && Cursor.y < m_xmf2Pos.y + m_xmf2Size.y)
+				cout << "Cliked" << endl;
+		}
+		break;
 	}
 
 	CGameObject::Animate(fTimeElapsed);
@@ -466,6 +481,9 @@ void CUIObject::SetFadeState(bool isIn)
 
 void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY)
 {
+	m_xmf2Size.x = fSizeX, m_xmf2Size.y = fSizeY;
+	m_xmf2Pos.x = fPosX, m_xmf2Pos.y = fPosY;
+
 	// 직교투영
 	m_xmf4x4ToParent._11 = fSizeX;
 	m_xmf4x4ToParent._22 = fSizeY;

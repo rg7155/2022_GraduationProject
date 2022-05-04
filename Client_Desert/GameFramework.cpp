@@ -499,6 +499,11 @@ void CGameFramework::ProcessInput()
 		ClientToScreen(m_hWnd, &pt);
 		SetCursorPos(pt.x, pt.y);
 	}
+
+	POINT pt;
+	GetCursorPos(&pt);
+	ScreenToClient(m_hWnd, &pt);
+	CGameMgr::GetInstance()->m_xmf2CursorPos = XMFLOAT2(pt.x, pt.y);
 }
 
 void CGameFramework::AnimateObjects()

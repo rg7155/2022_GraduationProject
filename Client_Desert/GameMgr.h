@@ -40,5 +40,6 @@ public:
 	bool		m_isShadowMapRendering = false;
 	float		m_fElapsedTime = 0.0f;
 	int			m_iId = 0;
+	XMFLOAT2	m_xmf2CursorPos = { 0.f, 0.f };
 };
 

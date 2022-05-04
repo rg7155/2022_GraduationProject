@@ -103,7 +103,7 @@ private:
 class CUIObject : public CGameObject
 {
 public:
-	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_END };
+	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY, UI_END };
 
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
@@ -126,6 +126,11 @@ private:
 	bool	m_isFadeIn = false;
 	bool	m_isStartFade = false;
 	bool	m_isChangeScene = false;
+
+	XMFLOAT2	m_xmf2Size = { 0.f, 0.f };
+	XMFLOAT2	m_xmf2Pos = { 0.f, 0.f };
+
+	bool		m_isClickedAble = false;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

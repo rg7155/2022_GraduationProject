@@ -20,7 +20,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*/"210.99.123.127"/* "127.0.0.1"*/;
+char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*//*"210.99.123.127"*/ "127.0.0.1";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
@@ -94,9 +94,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
+#ifdef USE_SERVER
 	send_packet(p);
 	//thread serverThread{ Server_PosRecv };
 	Server_PosRecv();
+#endif // USE_SERVER
 
 	while (1)
 	{

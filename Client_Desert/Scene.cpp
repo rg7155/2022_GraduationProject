@@ -367,6 +367,7 @@ void CScene::AddAlphaObjectToList(CGameObject* pObj)
 	m_listAlphaObject.emplace_back(pObj);
 }
 
+
 void CScene::BuildDefaultLightsAndMaterials()
 {
 	m_nLights = 2;
