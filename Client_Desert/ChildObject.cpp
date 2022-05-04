@@ -580,7 +580,9 @@ void CPortalObject::Animate(float fTimeElapsed)
 	float fDistanceToPlayer = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
 	float fDistanceToDuo = 0.f;
 #ifdef USE_SERVER
-	fDistanceToDuo = Vector3::Distance(CGameMgr::GetInstance()->GetDuoPlayer()->GetPosition(), GetPosition());
+	CGameObject* pObj = CGameMgr::GetInstance()->GetDuoPlayer();
+	if(pObj)
+		fDistanceToDuo = Vector3::Distance(pObj->GetPosition(), GetPosition());
 #endif // USE_SERVER
 
 	if (fDistanceToPlayer < RANGE && fDistanceToDuo < RANGE && !m_isOverlap)
