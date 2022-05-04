@@ -131,7 +131,6 @@ public:
 			monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
 			monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
 			monsterpacket.hp = static_cast<short>(g_pGolemMonster->GetHp());
-			cout << monsterpacket.hp<< endl;
 
 			char buf[BUFSIZE];
 			memcpy(buf, &p, p.size);

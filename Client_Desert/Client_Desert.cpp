@@ -19,6 +19,9 @@ BOOL InitInstance(HINSTANCE, int);
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
+
+HWND g_hWnd = NULL;
+
 // Server
 char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*/"210.99.123.127"/* "127.0.0.1"*/;
 SOCKET s_socket;
@@ -60,15 +63,19 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 
 #ifdef USE_SERVER
-	wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
+	string ip;
+	std::cout << "IP를 입력하세요:";
+	std::cin >> ip;
+
+	std::wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData); // 소켓 네트워킹 시작 - 윈도우만
 	s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server_addr;
-	ZeroMemory(&server_addr, sizeof(server_addr));
+	std::ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
-	inet_pton(AF_INET, SERVER_ADDR, &server_addr.sin_addr);
+	inet_pton(AF_INET, ip.c_str(), &server_addr.sin_addr);
 	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 
 	CS_LOGIN_PACKET* p = new CS_LOGIN_PACKET;
@@ -95,18 +102,23 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
 	send_packet(p);
+	std::cout << "상대 클라 대기중" << endl;
+
 	//thread serverThread{ Server_PosRecv };
 	Server_PosRecv();
-
 	while (1)
 	{
 		if (::PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
 		{
+			
 			if (msg.message == WM_QUIT) break;
 			if (!::TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
 			{
 				::TranslateMessage(&msg);
 				::DispatchMessage(&msg);
+			
+
+
 			}
 		}
 		else
@@ -172,9 +184,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
 	if (!hMainWnd) return(FALSE);
 
+	// 클라 2명 연결전 윈도우 안보이게 (임시)
+	ShowWindow(hMainWnd, false);
+	g_hWnd = hMainWnd;
+
 	gGameFramework.OnCreate(hInstance, hMainWnd);
 
-	::ShowWindow(hMainWnd, nCmdShow);
+	//::ShowWindow(hMainWnd, nCmdShow);
 	::UpdateWindow(hMainWnd);
 	
 
@@ -270,6 +286,9 @@ int Process_Packet(char* ptr)
 		SC_ADD_PLAYER_PACKET* p = reinterpret_cast<SC_ADD_PLAYER_PACKET*>(ptr);
 		gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
 		gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(true);
+		std::cout << "상대 클라 접속!" << endl;
+		ShowWindow(g_hWnd, true);
+
 		return p->size;
 	}
 	case SC_MOVE_PLAYER:
@@ -357,10 +376,10 @@ void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
 
 		if (cbTransferred < msg_size)
 		{
-			cout << "recv_callback Error" << endl;
-			cout << msg_size << endl;
-			cout << cbTransferred << endl;
-			cout << m_start[0] << endl;
+			std::cout << "recv_callback Error" << endl;
+			std::cout << msg_size << endl;
+			std::cout << cbTransferred << endl;
+			std::cout << m_start[0] << endl;
 			break;
 		}
 
@@ -393,7 +412,7 @@ void Server_PosRecv()
 	wsabuf_r.buf = recv_buf; wsabuf_r.len = BUFSIZE;
 	DWORD recv_flag = 0;
 	WSAOVERLAPPED* r_over = new WSAOVERLAPPED;
-	ZeroMemory(r_over, sizeof(WSAOVERLAPPED));
+	std::ZeroMemory(r_over, sizeof(WSAOVERLAPPED));
 
 	int ret = WSARecv(s_socket, &wsabuf_r, 1, 0, &recv_flag, r_over, recv_callback);
 
@@ -418,7 +437,7 @@ void send_packet(void* packet)
 	mybuf.len = static_cast<unsigned char>(p[0]);
 	send_buf = p;
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
-	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
+	std::ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
 
 	//SleepEx(0, true);
 
