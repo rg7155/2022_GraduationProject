@@ -139,8 +139,17 @@ void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
 
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
-		float fWeight = (float)_player_anim[i].sWeight / 1000.f;
-		float fPosition = (float)_player_anim[i].sPosition / 1000.f;
+
+		float fWeight, fPosition;
+		if (_player_anim[i].sWeight != 0)
+			fWeight = (float)_player_anim[i].sWeight / 10000.f;
+		else
+			fWeight = 0.f;
+
+		if (_player_anim[i].sPosition != 0)
+			fPosition = (float)_player_anim[i].sPosition / 10000.f;
+		else
+			fPosition = 0.f;
 
 		m_pSkinnedAnimationController->SetTrackWeight(i, fWeight);
 		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);

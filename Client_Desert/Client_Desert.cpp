@@ -20,7 +20,7 @@ LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 // Server
-char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*//*"210.99.123.127"*/ "127.0.0.1";
+char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*/"210.99.123.127"/* "127.0.0.1"*/;
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
@@ -75,10 +75,11 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	p->size = sizeof(CS_LOGIN_PACKET);
 	p->type = CS_LOGIN;
 	strcpy_s(p->name, "PLAYER");
-	send_packet(p);
+
 
 	//// 위치 받기
-	Server_PosRecv();
+	//Server_PosRecv();
+
 
 #endif // USE_SERVER
 
@@ -93,6 +94,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
+	send_packet(p);
+	//thread serverThread{ Server_PosRecv };
+	Server_PosRecv();
 
 	while (1)
 	{
@@ -132,7 +136,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		//ImGui::NewFrame();
 	}
 	gGameFramework.OnDestroy();
-
+	//serverThread.join();
 	return((int)msg.wParam);
 }
 
@@ -255,7 +259,7 @@ int Process_Packet(char* ptr)
 		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
 		g_myid = p->id;
 		gGameFramework.m_iId = g_myid;
-		gGameFramework.BuildObjects();
+		//gGameFramework.BuildObjects();
 		gGameFramework.m_pPlayer->m_iId = g_myid;
 		CGameMgr::GetInstance()->SetId(g_myid);
 		return p->size;
@@ -387,6 +391,8 @@ void Server_PosRecv()
 
 	int ret = WSARecv(s_socket, &wsabuf_r, 1, 0, &recv_flag, r_over, recv_callback);
 
+	//SleepEx(0, true);
+
 	if (0 != ret)
 	{
 		int err_no = WSAGetLastError();
@@ -407,6 +413,8 @@ void send_packet(void* packet)
 	send_buf = p;
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
 	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
+
+	//SleepEx(0, true);
 
 	int ret = WSASend(s_socket, &mybuf, 1, 0, 0, s_over, send_callback);
 	if (0 != ret)

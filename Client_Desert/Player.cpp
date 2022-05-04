@@ -593,9 +593,9 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 	_duoPlayer->eCurAnim = m_eCurAnim;
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
-		_duoPlayer->animInfo[i].sWeight = m_pSkinnedAnimationController->GetTrackWeight(i) * 1000.f;
+		_duoPlayer->animInfo[i].sWeight = m_pSkinnedAnimationController->GetTrackWeight(i) * 10000.f;
 		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
-		_duoPlayer->animInfo[i].sPosition = m_pSkinnedAnimationController->m_fPosition[i] * 1000.f;
+		_duoPlayer->animInfo[i].sPosition = m_pSkinnedAnimationController->m_fPosition[i] * 10000.f;
 	}
 	_duoPlayer->eCurAnim = m_eCurAnim;
 	return _duoPlayer;
