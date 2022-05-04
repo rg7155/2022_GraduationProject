@@ -126,7 +126,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 
 
 
-			/SleepEx(0, true);
+			SleepEx(0, true);
 			// Sleep -> recv_callback -> send_callback 순으로 실행된다.
 #endif // USE_SERVER
 		}
