@@ -22,10 +22,11 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
-		if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT || m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
+		if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT || m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT ||
+			m_eCurAnim == GOLEM::ANIM::ATTACK1 || m_eCurAnim == GOLEM::ANIM::ATTACK2)
 		{
 			// 플레이어를 공격 -> 클라에서 처리
-			Change_Animation(GOLEM::ANIM::ATTACK1);
+			Change_Animation(GOLEM::ANIM::IDLE);
 
 		}
 
@@ -34,6 +35,12 @@ void CGolemMonster::Update(float fTimeElapsed)
 			Change_Animation(GOLEM::ANIM::RUN);
 		}
 	}
+
+	// 아이들 -> 피격 -> 아이들 -> 런 -> 공격 -> 아이들 -> 런
+	// 피격 -> 아이들 -> 런
+	if(m_fDamagedCoolTime > 1.5f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE)
+		Change_Animation(GOLEM::ANIM::RUN);
+
 
 
 
@@ -54,9 +61,12 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 		// 타겟과 일정거리 내로 좁혀지면 공격
 		float fDis = Vector3::Distance(mf3TargetPos, m_xmf3Position);
-		if (fDis < ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !m_pTarget->IsNowAttack())
+		if (fDis < GOLEM_ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !m_pTarget->IsNowAttack())
 		{
-			Change_Animation(GOLEM::ANIM::ATTACK2);
+			// 두 개 중 랜덤하게
+			int iAttackRand = rand() % 2;
+			GOLEM::ANIM eAnim = iAttackRand == 0 ? GOLEM::ANIM::ATTACK1 : GOLEM::ANIM::ATTACK2;
+			Change_Animation(eAnim);
 			m_fAttackAnimTime = 0.f;
 			// 공격 후 타겟 바꾸기
 			CPlayer* pPlayer = Get_Player(1 - m_pTarget->m_id);
@@ -110,7 +120,7 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 		fAngle = 0.f;
 
 
-	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 2.f && abs(fAngle) < 90.f)
+	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 1.5f && abs(fAngle) < 90.f)
 	{
 		m_iHp -= 20.f;
 		if(m_iHp <= 0.f)

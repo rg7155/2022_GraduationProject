@@ -233,7 +233,6 @@ void send_GolemMonster()
 	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
 	p.target_id = g_pGolemMonster->m_pTarget->m_id;
 	p.hp = static_cast<short>(g_pGolemMonster->GetHp());
-	cout << p.hp << endl;
 	for (auto& cl : clients)
 	{
 		//if (cl.first == c_id) continue;

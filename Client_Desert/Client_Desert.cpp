@@ -295,7 +295,7 @@ int Process_Packet(char* ptr)
 		pGolem->SetPosition(p->xmf3Position);
 		pGolem->m_targetId = p->target_id;
 		pGolem->SetHp(static_cast<int>(p->hp));
-		cout << static_cast<int>(p->hp) << endl;
+		//cout << static_cast<int>(p->hp) << endl;
 		return p->size;
 	}
 	case SC_REMOVE_PLAYER:
