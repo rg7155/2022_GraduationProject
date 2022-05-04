@@ -85,13 +85,13 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 	// 애니메이션 position 계산해서 검사
 	if (m_eCurAnim == GOLEM::ATTACK1)
 	{
-		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.8f)
+		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition < 800)
 			return;
 	}
 	else
 	{
-		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.5f ||
-			pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition > 1.f)
+		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition < 500 ||
+			pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition > 1000)
 			return;
 	}
 

@@ -136,11 +136,15 @@ void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
 	m_xmf4x4ToParent = packet->xmf4x4World;
 	player_anim* _player_anim = packet->animInfo;
 	m_eCurAnim = packet->eCurAnim;
+
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
-		m_pSkinnedAnimationController->SetTrackWeight(i, _player_anim[i].fWeight);
+		float fWeight = (float)_player_anim[i].sWeight / 1000.f;
+		float fPosition = (float)_player_anim[i].sPosition / 1000.f;
+
+		m_pSkinnedAnimationController->SetTrackWeight(i, _player_anim[i].sWeight);
 		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
-		m_pSkinnedAnimationController->m_fPosition[i] = _player_anim[i].fPosition;
+		m_pSkinnedAnimationController->m_fPosition[i] = _player_anim[i].sPosition;
 	}
 }
 
