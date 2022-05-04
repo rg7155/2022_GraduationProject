@@ -59,6 +59,8 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 	CoInitialize(NULL);
 
+	BuildObjects();
+
 #ifndef USE_SERVER
 	BuildObjects();
 
