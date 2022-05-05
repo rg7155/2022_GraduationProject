@@ -86,6 +86,7 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 			xmf3Pos.y += 0.1f;
 			xmf3Pos.z += xmf3Look.z;
 			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(false);
 		}
 		m_bSkill1EffectOn = true;
 

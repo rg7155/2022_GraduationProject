@@ -65,6 +65,8 @@ public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
 
+	void SetColor(bool isHero = true);
+
 public:
 	XMFLOAT4			m_xmf4Color;
 

@@ -279,6 +279,14 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 	}
 }
 
+void CMultiSpriteObject::SetColor(bool isHero /*= true*/)
+{
+	if (CGameMgr::GetInstance()->GetId() == 0)
+		isHero ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
+	else
+		isHero ? m_xmf4Color = { GREEN_COLOR4 } : m_xmf4Color = { BLUE_COLOR4 };
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
@@ -688,6 +696,7 @@ void CTexturedObject::Animate(float fTimeElapsed)
 	switch (m_eTextureType)
 	{
 	case TEXTURE_TYPE::TEXTURE_QUAKE:
+		//cout << "a" << endl;
 		//2초동안 생성, 1초는 서서히 사라짐
 		m_fAlpha -= fTimeElapsed;
 		if (m_fAlpha < 0.f)
