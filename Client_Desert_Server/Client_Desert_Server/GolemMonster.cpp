@@ -2,6 +2,7 @@
 #include "GolemMonster.h"
 #include "Player.h"
 
+#define FOLLOW_DISTANCE 1.f
 
 CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	:m_pTarget(_pTarget)
@@ -49,7 +50,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 		// 타겟을 쫓아가는 걸로 이동 & 회전
 		XMFLOAT3 mf3TargetPos = m_pTarget->GetPosition();
 
-		if (m_eCurAnim == GOLEM::ANIM::RUN)
+		if (m_eCurAnim == GOLEM::ANIM::RUN && Vector3::Distance(mf3TargetPos, m_xmf3Position) > FOLLOW_DISTANCE)
 		{
 			XMFLOAT3 subVectorNormal = Vector3::Subtract(mf3TargetPos, m_xmf3Position, true, true);
 			XMVECTOR xmVecNormal = { subVectorNormal.x,subVectorNormal.y, subVectorNormal.z };

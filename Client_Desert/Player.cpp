@@ -139,6 +139,13 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
+	if (abs(fDistance - 0.f) < EPSILON)
+	{
+		//cout << "dis는 0입니다." << endl;
+		return;
+
+	}
+
 	// 대기동작이나 이동중일때만 움직이기 가능
 	if (m_eCurAnim != PLAYER::ANIM::IDLE && m_eCurAnim != PLAYER::ANIM::IDLE_RELAXED && m_eCurAnim != PLAYER::ANIM::RUN)
 	{
@@ -146,6 +153,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 	}
 	// 속도 보간
+	
 	if (m_eCurAnim == PLAYER::ANIM::RUN)
 	{
 		m_fLerpSpeed += fDistance / PLAYER_SPEED;
@@ -321,8 +329,11 @@ void CPlayer::Update(float fTimeElapsed)
 	//Nan값 이면
 	if (isnan(GetPosition().x) != 0)
 	{
-		XMFLOAT3 xmf3Pos = { START_POS };
-		SetPosition(xmf3Pos);
+		XMFLOAT3 xmf3Pos = { 25, 0, 25 };
+
+		//SetPosition(xmf3Pos);
+		m_xmf3Position = {};
+
 		cout << "Position is Nan!" << endl;
 	}
 
@@ -502,6 +513,10 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 
 XMFLOAT3 CPlayer::MoveByDir(float fDistance)
 {
+	if (isnan(fDistance) != 0)
+	{
+		fDistance = 0.f;
+	}
 	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 
