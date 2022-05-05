@@ -309,7 +309,9 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	//이걸 먼저 해야 그려짐?? 
 	for (auto& iter : m_listAlphaObject)
-		iter->Render(pd3dCommandList, pCamera, true);
+		//iter->Render(pd3dCommandList, pCamera, true);
+		iter->AlphaRender(pd3dCommandList, pCamera, true);
+		
 	m_listAlphaObject.clear();
 	
 

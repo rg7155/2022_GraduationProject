@@ -526,6 +526,11 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, pShader);
 }
 
+void CGameObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
 
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)

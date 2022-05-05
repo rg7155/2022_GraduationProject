@@ -206,7 +206,6 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_fSpeed = 0.001f;
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
-	(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
 }
 
 
@@ -244,7 +243,7 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	//UpdateShaderVariables(pd3dCommandList);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_TEX_ANIM, &m_xmf4x4Texture);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
-
+	cout << m_xmf4Color.x << endl;
 	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
@@ -660,6 +659,7 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 		SetScale(2.f, 1.f, 2.f); 
 		m_fAlpha = 1.5f;
+		m_isAlphaObject = true;
 		break;
 
 	case CTexturedObject::TEXTURE_HP:
@@ -696,7 +696,8 @@ void CTexturedObject::Animate(float fTimeElapsed)
 	switch (m_eTextureType)
 	{
 	case TEXTURE_TYPE::TEXTURE_QUAKE:
-		//cout << "a" << endl;
+		CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(this);
+
 		//2초동안 생성, 1초는 서서히 사라짐
 		m_fAlpha -= fTimeElapsed;
 		if (m_fAlpha < 0.f)
@@ -719,7 +720,17 @@ void CTexturedObject::Animate(float fTimeElapsed)
 
 void CTexturedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
-	//투명 오브젝트는 CScene의 AddAlphaObjectToList를 통해 렌더해야하지만, 어차피 바닥에 있으니 뭐 이건 나중에..
+	if (!m_isActive || m_isAlphaObject)
+		return;
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	// CTexturedShader의 2번째 파이프라인 쓰겠다. PSAlphaTextured, 알파가 변하는
+	CGameObject::Render(pd3dCommandList, pCamera, true);
+}
+
+void CTexturedObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
 	if (!m_isActive)
 		return;
 

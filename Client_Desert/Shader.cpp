@@ -896,6 +896,8 @@ D3D12_BLEND_DESC CTexturedShader::CreateBlendState(int nPipelineState)
 
 D3D12_DEPTH_STENCIL_DESC CTexturedShader::CreateDepthStencilState(int nPipelineState)
 {
+	//return CStandardObjectsShader::CreateDepthStencilState(nPipelineState);
+
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
 	d3dDepthStencilDesc.DepthEnable = TRUE;
