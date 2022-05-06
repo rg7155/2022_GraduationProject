@@ -380,6 +380,7 @@ void CPlayer::Update(float fTimeElapsed)
 			xmf3Pos.y += 0.1f;
 			xmf3Pos.z += m_xmf3Look.z;
 			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
 		}
 		m_bSkill1EffectOn = true;
 
