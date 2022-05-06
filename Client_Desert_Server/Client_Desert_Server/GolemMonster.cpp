@@ -14,6 +14,7 @@ CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	m_targetId = _pTarget->m_id;
 	m_fDamagedCoolTime = 0.f;
 	m_iHp = 100.f;
+	m_bFollowStart = false;
 }
 
 void CGolemMonster::Update(float fTimeElapsed)
@@ -39,7 +40,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 	// 아이들 -> 피격 -> 아이들 -> 런 -> 공격 -> 아이들 -> 런
 	// 피격 -> 아이들 -> 런
-	if(m_fDamagedCoolTime > 1.5f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE)
+	if (m_fDamagedCoolTime > 1.5f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE && m_bFollowStart)
 		Change_Animation(GOLEM::ANIM::RUN);
 
 
@@ -62,6 +63,11 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 		// 타겟과 일정거리 내로 좁혀지면 공격
 		float fDis = Vector3::Distance(mf3TargetPos, m_xmf3Position);
+		if (fDis < 15.f && !m_bFollowStart)
+		{
+			m_bFollowStart = true;
+			Change_Animation(GOLEM::ANIM::RUN);
+		}
 		if (fDis < GOLEM_ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !m_pTarget->IsNowAttack())
 		{
 			// 두 개 중 랜덤하게
