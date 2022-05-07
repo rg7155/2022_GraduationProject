@@ -8,7 +8,7 @@
 
 #define EPSILON					1.0e-10f
 
-#define USE_SERVER 1
+//#define USE_SERVER 1
 
 #define PLAYER_SPEED					10.f
 #define BLENDING_TIME					0.3f
@@ -41,8 +41,8 @@
 #define SPOT_LIGHT						2
 #define DIRECTIONAL_LIGHT				3
 
-#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 2)
-#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 2)
+#define _DEPTH_BUFFER_WIDTH		(FRAME_BUFFER_WIDTH * 4)
+#define _DEPTH_BUFFER_HEIGHT	(FRAME_BUFFER_HEIGHT * 4)
 
 #define DELTA_X					(1.0f / _DEPTH_BUFFER_WIDTH)
 #define DELTA_Y					(1.0f / _DEPTH_BUFFER_HEIGHT)

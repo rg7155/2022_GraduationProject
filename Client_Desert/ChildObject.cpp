@@ -82,6 +82,11 @@ void CMapObject::CreateComponent()
 		m_pComCollision->m_isCollisionIgnore = true;
 	}
 
+	//건물 파고들지 않게끔 좀 키워둠?
+	m_pComCollision->m_xmLocalOOBB.Extents = Vector3::ScalarProduct(m_pComCollision->m_xmLocalOOBB.Extents, 1.1f, false);
+	//XMFLOAT3 xmf3Add = { 1.f, 1.f, 1.f };
+	//m_pComCollision->m_xmLocalOOBB.Extents = Vector3::Add(m_pComCollision->m_xmLocalOOBB.Extents, xmf3Add);
+
 	m_pComCollision->UpdateBoundingBox();
 }
 
@@ -500,6 +505,7 @@ void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPo
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PARTICLE_POS 80.f, 0.01f, 23.f
 CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 	CParticleMesh* pMesh = m_pParticleMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f), 1.0f);
@@ -527,7 +533,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(80.f, 0.f, 20.f);
+	SetPosition(PARTICLE_POS);
 }
 
 CParticleObject::~CParticleObject()
@@ -581,7 +587,7 @@ CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(80.f, 0.1f, 20.f);
+	SetPosition(PARTICLE_POS);
 
 	SetScale(3.f, 1.f, 3.f);
 

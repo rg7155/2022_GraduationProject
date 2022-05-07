@@ -384,7 +384,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	m_pLights[0].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
+	//m_pLights[0].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
 
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 150.0f, (_PLANE_WIDTH * 0.5f));
 	//m_pLights[0].m_xmf3Position = XMFLOAT3(-0.f, 50.0f, 0.f);

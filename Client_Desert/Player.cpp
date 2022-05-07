@@ -248,6 +248,7 @@ void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	}
 	else
 	{
+		m_xmf3PrePosition = m_xmf3Position;
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
@@ -573,8 +574,8 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 		//OnPrepareRender();
 
 		//방법2. 오브젝트 밀어주기
-		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3Position, pObj->GetPosition(), true, true);
-		//xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, PLAYER_SPEED * CGameMgr::GetInstance()->m_fElapsedTime);
+		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3PrePosition, pObj->GetPosition(), true, true);
+
 		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, m_fTempShift);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
 

@@ -24,6 +24,7 @@ protected:
 	float           			m_fYaw = 0.0f;
 	float           			m_fRoll = 0.0f;
 
+	XMFLOAT3					m_xmf3PrePosition = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Velocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3PreVelocity = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3     				m_xmf3Gravity = XMFLOAT3(0.0f, 0.0f, 0.0f);

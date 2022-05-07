@@ -206,7 +206,9 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
+                //fShadowFactor *= 0.5f;
                 cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
+                //cColor += DirectionalLight(i, vNormal, vToCamera);
             }
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{
