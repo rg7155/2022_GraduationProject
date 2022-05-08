@@ -35,6 +35,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	if (pPlayerModel) delete pPlayerModel;
 
 	SetPosition(15.f, 0.f, 15.f);
+	m_pComTrail->SetRenderingTrail(false);
 
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);

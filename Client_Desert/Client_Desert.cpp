@@ -23,7 +23,7 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 HWND g_hWnd = NULL;
 
 // Server
-char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*/"210.99.123.127"/* "127.0.0.1"*/;
+char SERVER_ADDR[BUFSIZE] = /*"211.109.112.11"*//*"210.99.123.127"*/ "127.0.0.1";
 SOCKET s_socket;
 WSABUF wsabuf_r;
 char recv_buf[BUFSIZE];
