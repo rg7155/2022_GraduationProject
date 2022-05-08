@@ -36,9 +36,9 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetPosition(15.f, 0.f, 15.f);
 
-
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	
+	m_pComTrail->SetRenderingTrail(false);
+
 	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
 
 	SetEffectsType(EFFECT_FOG, true);

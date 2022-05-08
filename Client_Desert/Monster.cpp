@@ -37,7 +37,7 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 
 	//각 몬스터에 따라 변경할 것
 	m_fHpOffsetY = 3.f;
-	m_iHp = 50;
+	m_iHp = 100;
 	m_iMaxHp = m_iHp;
 
 	m_fDissolve = 0.f; //1에 가까울수록 사라짐
@@ -183,9 +183,9 @@ void CMonsterObject::UpdateHpBar(float fTimeElapsed)
 
 }
 
-void CMonsterObject::SetDamaged(int iDamage)
+void CMonsterObject::SetHp(int hp)
 {
-	m_iHp -= iDamage;
+	m_iHp= hp;
 	if (m_iHp < 0)
 		m_iHp = 0;
 
@@ -255,6 +255,8 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	SetLookAt(XMFLOAT3(0.f, 0.f, -1.f));
 	SetPosition(XMFLOAT3(23.f, 0.f, 114.f));
 
+	m_isActive = false;
+
 }
 
 CGolemObject::~CGolemObject()
@@ -299,7 +301,10 @@ void CGolemObject::Animate(float fTimeElapsed)
 		{
 			m_fDissolve += fTimeElapsed * 0.5f;
 			if (m_fDissolve > 1.f)
+			{
 				m_fDissolve = 1.f;
+				m_isActive = false;
+			}
 		}
 	}
 

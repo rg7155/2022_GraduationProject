@@ -8,6 +8,9 @@
 #include "InputDev.h"
 #include "Animation.h"
 #include "Scene.h"
+
+#define START_POS 25.0f, 0, 25.0f
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
@@ -136,6 +139,13 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
+	if (abs(fDistance - 0.f) < EPSILON)
+	{
+		//cout << "dis는 0입니다." << endl;
+		return;
+
+	}
+
 	// 대기동작이나 이동중일때만 움직이기 가능
 	if (m_eCurAnim != PLAYER::ANIM::IDLE && m_eCurAnim != PLAYER::ANIM::IDLE_RELAXED && m_eCurAnim != PLAYER::ANIM::RUN)
 	{
@@ -143,6 +153,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 	}
 	// 속도 보간
+	
 	if (m_eCurAnim == PLAYER::ANIM::RUN)
 	{
 		m_fLerpSpeed += fDistance / PLAYER_SPEED;
@@ -330,20 +341,6 @@ void CPlayer::Update(float fTimeElapsed)
 
 	m_pCamera->Update(GetLook(), fTimeElapsed);
 
-	////////////////////////////////////////////////////////////////////////
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
-	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = m_fMaxVelocityXZ;
-	if (fLength > m_fMaxVelocityXZ)
-	{
-		//m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
-		//m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
-	}
-	float fMaxVelocityY = m_fMaxVelocityY;
-	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
-
-	//XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
 	Move(m_xmf3Velocity, false);
 
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
@@ -354,11 +351,7 @@ void CPlayer::Update(float fTimeElapsed)
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
 
-	fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (m_fFriction * fTimeElapsed);
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-
+	m_xmf3Velocity = {0.00f,0.00f ,0.00f };
 	LerpRotate(fTimeElapsed);
 
 	Blending_Animation(fTimeElapsed);
@@ -521,6 +514,10 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 
 XMFLOAT3 CPlayer::MoveByDir(float fDistance)
 {
+	if (isnan(fDistance) != 0)
+	{
+		fDistance = 0.f;
+	}
 	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 

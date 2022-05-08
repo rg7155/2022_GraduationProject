@@ -22,8 +22,8 @@
 
 // Monster
 #define GOLEMSPEED						4.f
-#define ATTACK_DISTANCE					2.f
-#define GOLEM_ATTACK1_DISTANCE			2.f
+#define GOLEM_ATTACK_DISTANCE			3.f
+#define GOLEM_ATTACK1_DISTANCE			3.f
 
 // Player
 #define PLAYER_INIT_POSITION_X			10.f
