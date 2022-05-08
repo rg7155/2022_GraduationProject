@@ -34,8 +34,8 @@ public:
 	short		m_targetId;
 
 private:
+	float		m_fRunCoolTime;
 	float		m_fDamagedCoolTime;
-
 private:
 	int			m_iHp;
 
