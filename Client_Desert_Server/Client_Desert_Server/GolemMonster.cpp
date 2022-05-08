@@ -12,6 +12,7 @@ CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	m_xmf3Look = m_pTarget->GetPosition();
 	m_fAttackAnimTime = 0.f;
 	m_targetId = _pTarget->m_id;
+	m_fRunCoolTime = 0.f;
 	m_fDamagedCoolTime = 0.f;
 	m_iHp = 100.f;
 	m_bFollowStart = false;
@@ -20,6 +21,7 @@ CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 void CGolemMonster::Update(float fTimeElapsed)
 {
 	m_fAnimElapsedTime += fTimeElapsed;
+	m_fRunCoolTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
 
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -40,7 +42,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 	// 아이들 -> 피격 -> 아이들 -> 런 -> 공격 -> 아이들 -> 런
 	// 피격 -> 아이들 -> 런
-	if (m_fDamagedCoolTime > 1.5f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE && m_bFollowStart)
+	if (m_fRunCoolTime > 1.5f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE && m_bFollowStart)
 		Change_Animation(GOLEM::ANIM::RUN);
 
 
@@ -127,18 +129,25 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 		fAngle = 0.f;
 
 
-	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 1.5f && abs(fAngle) < 90.f)
+	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 0.8f && abs(fAngle) < 90.f)
 	{
 		m_iHp -= 20.f;
-		if(m_iHp <= 0.f)
-			Change_Animation(GOLEM::ANIM::DIE);
-		else
-			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
-		cout << fAngle << endl;
-
-		m_targetId = rand() % 2;
-		m_pTarget = Get_Player(m_targetId);
 		m_fDamagedCoolTime = 0.f;
+
+		if (m_iHp <= 0.f)
+		{
+			Change_Animation(GOLEM::ANIM::DIE);
+			m_fRunCoolTime = 0.f;
+			return;
+		}
+		else if (m_fRunCoolTime > 1.5f)
+		{
+			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
+			m_fRunCoolTime = 0.f;
+			m_targetId = rand() % 2;
+			m_pTarget = Get_Player(m_targetId);
+		}
+
 	}
 }
 
@@ -147,7 +156,7 @@ void CGolemMonster::Change_Animation(GOLEM::ANIM eNewAnim)
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 1.f;
 	m_eCurAnim = eNewAnim;
-	m_fDamagedCoolTime = 0.f;
+	m_fRunCoolTime = 0.f;
 
 }
 

@@ -113,7 +113,7 @@ public:
 		p.size = sizeof(SC_MOVE_PLAYER_PACKET);
 		p.type = SC_MOVE_PLAYER;
 		p.xmf4x4World = clients[c_id].pPlayer->m_xmf4x4World;
-		p.eCurAnim = pPlayer->m_eCurAnim;
+		p.eCurAnim = clients[c_id].pPlayer->m_eCurAnim;
 		for (int i = 0; i < PLAYER::ANIM::END; i++)
 		{
 			p.animInfo[i] = clients[c_id].pPlayer->m_eAnimInfo[i];
