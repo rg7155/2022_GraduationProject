@@ -490,7 +490,7 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::ProcessInput()
 {
 	//마우스 커서 고정
-	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_M))
 	{
 		m_isCursorFix = !m_isCursorFix;
 		ShowCursor(!m_isCursorFix);

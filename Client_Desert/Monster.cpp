@@ -92,15 +92,15 @@ void CMonsterObject::Animate(float fTimeElapsed)
 
 	//cout << m_fDissolve << endl;
 
-	static bool bToggle = false;
-	if (!bToggle)
-	{
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");
-		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
-		xmf3Pos.y += 0.01f;
-		pObj->SetPosition(xmf3Pos);
-		bToggle = true;
-	}
+	//static bool bToggle = false;
+	//if (!bToggle)
+	//{
+	//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Quake");
+	//	XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+	//	xmf3Pos.y += 0.01f;
+	//	pObj->SetPosition(xmf3Pos);
+	//	bToggle = true;
+	//}
 
 
 	//LerpRotate(fTimeElapsed);

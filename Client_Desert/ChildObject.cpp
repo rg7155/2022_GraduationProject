@@ -83,8 +83,8 @@ void CMapObject::CreateComponent()
 	}
 
 	//건물 파고들지 않게끔 좀 키워둠?
-	m_pComCollision->m_xmLocalOOBB.Extents = Vector3::ScalarProduct(m_pComCollision->m_xmLocalOOBB.Extents, 1.1f, false);
-	//XMFLOAT3 xmf3Add = { 1.f, 1.f, 1.f };
+	//m_pComCollision->m_xmLocalOOBB.Extents = Vector3::ScalarProduct(m_pComCollision->m_xmLocalOOBB.Extents, 1.1f, false);
+	//XMFLOAT3 xmf3Add = { 0.1f, 0.0f, 0.1f };
 	//m_pComCollision->m_xmLocalOOBB.Extents = Vector3::Add(m_pComCollision->m_xmLocalOOBB.Extents, xmf3Add);
 
 	m_pComCollision->UpdateBoundingBox();
@@ -248,7 +248,6 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	//UpdateShaderVariables(pd3dCommandList);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_TEX_ANIM, &m_xmf4x4Texture);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
-	cout << m_xmf4Color.x << endl;
 	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
