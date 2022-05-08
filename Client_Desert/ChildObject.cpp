@@ -611,7 +611,7 @@ void CPortalObject::Animate(float fTimeElapsed)
 	float fDistanceToDuo = 0.f;
 #ifdef USE_SERVER
 	CGameObject* pObj = CGameMgr::GetInstance()->GetDuoPlayer();
-	if(pObj)
+	if (pObj)
 		fDistanceToDuo = Vector3::Distance(pObj->GetPosition(), GetPosition());
 #endif // USE_SERVER
 
