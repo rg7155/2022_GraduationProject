@@ -201,12 +201,14 @@ float4 Lighting(float3 vPosition, float3 vNormal, bool bShadow, float4 uvs[MAX_L
 			//그림자인지 판단하는 0~1사이 값, 1은 현재 픽셀이 그림자 아님
             float fShadowFactor = 1.0f;
 			//pcf
-			//if (bShadow) fShadowFactor = Compute5x5ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
-            if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+			if (bShadow) fShadowFactor = Compute5x5ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
+            //if (bShadow) fShadowFactor = Compute3x3ShadowFactor(uvs[i].xy / uvs[i].ww, uvs[i].z / uvs[i].w, i);
 			
 			if (gLights[i].m_nType == DIRECTIONAL_LIGHT)
 			{
+                //fShadowFactor *= 0.5f;
                 cColor += DirectionalLight(i, vNormal, vToCamera) * fShadowFactor;
+                //cColor += DirectionalLight(i, vNormal, vToCamera);
             }
 			else if (gLights[i].m_nType == POINT_LIGHT)
 			{

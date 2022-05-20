@@ -75,15 +75,17 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	int iIndex = 0;
 	
+	//따로 쉐이더를 만들지 않는 오브젝트
+	m_pStandardObjectShader = new CStandardObjectsShader(0); //파이프라인 안씀
+	m_ppShaders[iIndex++] = m_pStandardObjectShader;
+	CreateStandardObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
+	
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMapObjectShader = new CMapObjectsShader(), iIndex++);
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMonsterObjectShader = new CMonsterObjectsShader(), iIndex++);
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pNPCObjectShader = new CNPCObjectsShader(), iIndex++);
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pParticleObjectShader = new CParticleShader(), iIndex++);
 
-	//따로 쉐이더를 만들지 않는 오브젝트
-	m_pStandardObjectShader = new CStandardObjectsShader(0); //파이프라인 안씀
-	m_ppShaders[iIndex++] = m_pStandardObjectShader;
-	CreateStandardObjects(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
+
 
 	m_nAlphaShaderStartIndex = iIndex;
 	CreateShaderAndBuildObjects(pd3dDevice, pd3dCommandList, m_pMultiSpriteObjectShader = new CMultiSpriteObjectsShader(), iIndex++);
@@ -116,12 +118,24 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pStandardObjectShader->AddObject(L"Portal", pObj);
 
 	//몬스터 바닥 이펙트
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_QUAKE);
 		pObj->SetActiveState(false);
 		m_pStandardObjectShader->AddObject(L"Quake", pObj);
 	}
+
+	////hp,hpFrame
+	//for (int i = 0; i < 5; ++i)
+	//{
+	//	pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
+	//	pObj->SetActiveState(false);
+	//	m_pStandardObjectShader->AddObject(L"Hp", pObj);
+
+	//	pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
+	//	pObj->SetActiveState(false);
+	//	m_pStandardObjectShader->AddObject(L"HpFrame", pObj);
+	//}
 }
 
 
@@ -229,9 +243,26 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_C))
 	//{
-	//	//static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front())->SetFadeState(true);
-	//	ChangeScene(SCENE_2);
+
+	//	//ChangeScene(SCENE_2);
 	//}
+	
+	//TCHAR szTest[32] = L"";
+	//float f = 0.f;
+	//XMFLOAT3 xmf3Dir;
+	//GetPrivateProfileString(L"Light", L"DirX", nullptr, szTest, 32, L"Ini/TestIni.ini");
+	//f = _ttof(szTest);
+	//xmf3Dir.x = f;
+
+	//GetPrivateProfileString(L"Light", L"DirY", nullptr, szTest, 32, L"Ini/TestIni.ini");
+	//f = _ttof(szTest);
+	//xmf3Dir.y = f;
+
+	//GetPrivateProfileString(L"Light", L"DirZ", nullptr, szTest, 32, L"Ini/TestIni.ini");
+	//f = _ttof(szTest);
+	//xmf3Dir.z = f;
+	//m_pLights[0].m_xmf3Direction = xmf3Dir;
+
 
 	m_fElapsedTime = fTimeElapsed;
 	CGameMgr::GetInstance()->m_fElapsedTime = fTimeElapsed;
@@ -295,7 +326,9 @@ void CScene::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera
 
 	//이걸 먼저 해야 그려짐?? 
 	for (auto& iter : m_listAlphaObject)
-		iter->Render(pd3dCommandList, pCamera, true);
+		//iter->Render(pd3dCommandList, pCamera, true);
+		iter->AlphaRender(pd3dCommandList, pCamera, true);
+		
 	m_listAlphaObject.clear();
 	
 
@@ -353,6 +386,7 @@ void CScene::AddAlphaObjectToList(CGameObject* pObj)
 	m_listAlphaObject.emplace_back(pObj);
 }
 
+
 void CScene::BuildDefaultLightsAndMaterials()
 {
 	m_nLights = 2;
@@ -367,10 +401,9 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf4Diffuse = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	m_pLights[0].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
 	m_pLights[0].m_xmf3Direction = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	m_pLights[0].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
-
+	//m_pLights[0].m_xmf3Direction = XMFLOAT3(0.5f, -1.0f, 0.5f);
+	//m_pLights[0].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 150.0f, (_PLANE_WIDTH * 0.5f));
-	//m_pLights[0].m_xmf3Position = XMFLOAT3(-0.f, 50.0f, 0.f);
 	m_pLights[0].m_fRange = 700.0f;
 
 	m_pLights[1].m_bEnable = false;

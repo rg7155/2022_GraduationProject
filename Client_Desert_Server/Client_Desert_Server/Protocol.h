@@ -29,8 +29,8 @@ constexpr char SC_MOVE_MONSTER = 6;
 struct player_anim
 {
 
-	float	fPosition;
-	float	fWeight;
+	short	sPosition;
+	short	sWeight;
 	bool	bEnable;
 
 };

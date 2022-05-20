@@ -8,6 +8,9 @@
 #include "InputDev.h"
 #include "Animation.h"
 #include "Scene.h"
+
+#define START_POS 25.0f, 0, 25.0f
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
@@ -90,7 +93,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	//SetCameraUpdatedContext(pContext);
 
 
-
 	if (pPlayerModel) delete pPlayerModel;
 
 
@@ -137,6 +139,13 @@ void CPlayer::ReleaseShaderVariables()
 
 void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 {
+	if (abs(fDistance - 0.f) < EPSILON)
+	{
+		//cout << "dis는 0입니다." << endl;
+		return;
+
+	}
+
 	// 대기동작이나 이동중일때만 움직이기 가능
 	if (m_eCurAnim != PLAYER::ANIM::IDLE && m_eCurAnim != PLAYER::ANIM::IDLE_RELAXED && m_eCurAnim != PLAYER::ANIM::RUN)
 	{
@@ -144,6 +153,7 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 	}
 	// 속도 보간
+	
 	if (m_eCurAnim == PLAYER::ANIM::RUN)
 	{
 		m_fLerpSpeed += fDistance / PLAYER_SPEED;
@@ -249,6 +259,7 @@ void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 	}
 	else
 	{
+		m_xmf3PrePosition = m_xmf3Position;
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 		m_pCamera->Move(xmf3Shift);
 	}
@@ -314,21 +325,22 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
 }
 
+#define START_POS 25.0f, 0, 25.0f
+
 void CPlayer::Update(float fTimeElapsed)
 {
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, m_xmf3Gravity);
-	float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
-	float fMaxVelocityXZ = m_fMaxVelocityXZ;
-	if (fLength > m_fMaxVelocityXZ)
+	//Nan값 이면
+	if (isnan(GetPosition().x) != 0)
 	{
-		//m_xmf3Velocity.x *= (fMaxVelocityXZ / fLength);
-		//m_xmf3Velocity.z *= (fMaxVelocityXZ / fLength);
+		XMFLOAT3 xmf3Pos = { START_POS };
+		SetPosition(xmf3Pos);
+		cout << "Position is Nan!" << endl;
 	}
-	float fMaxVelocityY = m_fMaxVelocityY;
-	fLength = sqrtf(m_xmf3Velocity.y * m_xmf3Velocity.y);
-	if (fLength > m_fMaxVelocityY) m_xmf3Velocity.y *= (fMaxVelocityY / fLength);
 
-	//XMFLOAT3 xmf3Velocity = Vector3::ScalarProduct(m_xmf3Velocity, fTimeElapsed, false);
+	Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
+
+	m_pCamera->Update(GetLook(), fTimeElapsed);
+
 	Move(m_xmf3Velocity, false);
 
 	if (m_pPlayerUpdatedContext) OnPlayerUpdateCallback(fTimeElapsed);
@@ -339,20 +351,13 @@ void CPlayer::Update(float fTimeElapsed)
 	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
 	m_pCamera->RegenerateViewMatrix();
 
-	fLength = Vector3::Length(m_xmf3Velocity);
-	float fDeceleration = (m_fFriction * fTimeElapsed);
-	if (fDeceleration > fLength) fDeceleration = fLength;
-	m_xmf3Velocity = Vector3::Add(m_xmf3Velocity, Vector3::ScalarProduct(m_xmf3Velocity, -fDeceleration, true));
-
+	m_xmf3Velocity = {0.00f,0.00f ,0.00f };
 	LerpRotate(fTimeElapsed);
 
 	Blending_Animation(fTimeElapsed);
 
 	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
-	if (IsNowAttack())
-		m_pComTrail->SetRenderingTrail(true);
-	else
-		m_pComTrail->SetRenderingTrail(false);
+	m_pComTrail->SetRenderingTrail(IsNowAttack());
 
 	////////////////////////////////////////////
 	UpdateComponent(fTimeElapsed);
@@ -369,6 +374,7 @@ void CPlayer::Update(float fTimeElapsed)
 			xmf3Pos.y += 0.1f;
 			xmf3Pos.z += m_xmf3Look.z;
 			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
 		}
 		m_bSkill1EffectOn = true;
 
@@ -508,6 +514,10 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 
 XMFLOAT3 CPlayer::MoveByDir(float fDistance)
 {
+	if (isnan(fDistance) != 0)
+	{
+		fDistance = 0.f;
+	}
 	XMFLOAT3 xmf3Shift = XMFLOAT3(0, 0, 0);
 	xmf3Shift = Vector3::Add(xmf3Shift, m_xmf3Look, fDistance);
 
@@ -527,8 +537,7 @@ void CPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
-
-
+	m_pComTrail->SetColor(true);
 }
 
 void CPlayer::UpdateComponent(float fTimeElapsed)
@@ -562,8 +571,8 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 		//OnPrepareRender();
 
 		//방법2. 오브젝트 밀어주기
-		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3Position, pObj->GetPosition(), true, true);
-		//xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, PLAYER_SPEED * CGameMgr::GetInstance()->m_fElapsedTime);
+		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3PrePosition, pObj->GetPosition(), true, true);
+
 		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, m_fTempShift);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
 
@@ -593,9 +602,9 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 	_duoPlayer->eCurAnim = m_eCurAnim;
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
-		_duoPlayer->animInfo[i].fWeight = m_pSkinnedAnimationController->GetTrackWeight(i);
+		_duoPlayer->animInfo[i].sWeight = m_pSkinnedAnimationController->GetTrackWeight(i) * 10000.f;
 		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
-		_duoPlayer->animInfo[i].fPosition = m_pSkinnedAnimationController->m_fPosition[i];
+		_duoPlayer->animInfo[i].sPosition = m_pSkinnedAnimationController->m_fPosition[i] * 10000.f;
 	}
 	_duoPlayer->eCurAnim = m_eCurAnim;
 	return _duoPlayer;

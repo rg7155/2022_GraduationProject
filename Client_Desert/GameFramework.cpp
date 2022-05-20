@@ -61,10 +61,7 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 #ifndef USE_SERVER
 	BuildObjects();
-
 #endif // !USE_SERVER
-
-
 
 	CreateImgui();
 
@@ -493,7 +490,7 @@ void CGameFramework::ReleaseObjects()
 void CGameFramework::ProcessInput()
 {
 	//마우스 커서 고정
-	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_M))
 	{
 		m_isCursorFix = !m_isCursorFix;
 		ShowCursor(!m_isCursorFix);
@@ -505,15 +502,20 @@ void CGameFramework::ProcessInput()
 		ClientToScreen(m_hWnd, &pt);
 		SetCursorPos(pt.x, pt.y);
 	}
+
+	POINT pt;
+	GetCursorPos(&pt);
+	ScreenToClient(m_hWnd, &pt);
+	CGameMgr::GetInstance()->m_xmf2CursorPos = XMFLOAT2(pt.x, pt.y);
 }
 
 void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-	m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
+	//m_pPlayer->Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
 
-	m_pCamera->Update(m_pPlayer->GetLook(), fTimeElapsed);
+	//m_pCamera->Update(m_pPlayer->GetLook(), fTimeElapsed);
 	m_pPlayer->Update(fTimeElapsed);
 
 	m_pPlayer->Animate(fTimeElapsed);
@@ -599,8 +601,8 @@ void CGameFramework::FrameAdvance()
 
 	m_GameTimer.GetFrameRate(m_pszFrameRate + 15, 37);
 	size_t nLength = _tcslen(m_pszFrameRate);
-	XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
-	_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
+	//XMFLOAT3 xmf3Position = m_pPlayer->GetPosition();
+	//_stprintf_s(m_pszFrameRate + nLength, 70 - nLength, _T("(%4f, %4f, %4f)"), xmf3Position.x, xmf3Position.y, xmf3Position.z);
 	::SetWindowText(m_hWnd, m_pszFrameRate);
 }
 

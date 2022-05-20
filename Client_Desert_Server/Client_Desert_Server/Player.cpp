@@ -7,8 +7,8 @@ void CPlayer::Initialize()
 	SetPosition(PLAYER_INIT_POSITION_X, PLAYER_INIT_POSITION_Z);
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
-		m_eAnimInfo[i].fPosition = 0.f;
-		m_eAnimInfo[i].fWeight = 0.f;
+		m_eAnimInfo[i].sWeight = 0;
+		m_eAnimInfo[i].sPosition = 0;
 		m_eAnimInfo[i].bEnable = false;
 
 	}

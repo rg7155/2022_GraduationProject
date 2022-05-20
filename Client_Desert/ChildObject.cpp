@@ -82,6 +82,11 @@ void CMapObject::CreateComponent()
 		m_pComCollision->m_isCollisionIgnore = true;
 	}
 
+	//건물 파고들지 않게끔 좀 키워둠?
+	//m_pComCollision->m_xmLocalOOBB.Extents = Vector3::ScalarProduct(m_pComCollision->m_xmLocalOOBB.Extents, 1.1f, false);
+	//XMFLOAT3 xmf3Add = { 0.1f, 0.0f, 0.1f };
+	//m_pComCollision->m_xmLocalOOBB.Extents = Vector3::Add(m_pComCollision->m_xmLocalOOBB.Extents, xmf3Add);
+
 	m_pComCollision->UpdateBoundingBox();
 }
 
@@ -172,7 +177,7 @@ CTrailObject::CTrailObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	SetMaterial(0, pMaterial);
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
-	(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
+	//(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
 }
 
 CTrailObject::~CTrailObject()
@@ -187,6 +192,15 @@ void CTrailObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
+void CTrailObject::SetColor(bool isHero)
+{
+	//제로
+	if (CGameMgr::GetInstance()->GetId() == 0)
+		isHero ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
+	else
+		isHero ? m_xmf4Color = { GREEN_COLOR4 } : m_xmf4Color = { BLUE_COLOR4 };
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CGameObject(1)
@@ -197,7 +211,6 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	m_fSpeed = 0.001f;
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
-	(CGameMgr::GetInstance()->GetId() == 0) ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
 }
 
 
@@ -235,7 +248,6 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	//UpdateShaderVariables(pd3dCommandList);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_TEX_ANIM, &m_xmf4x4Texture);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
-
 	CGameObject::Render(pd3dCommandList, pCamera);
 }
 
@@ -268,6 +280,14 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 			m_nCol = 0;
 		}
 	}
+}
+
+void CMultiSpriteObject::SetColor(bool isHero /*= true*/)
+{
+	if (CGameMgr::GetInstance()->GetId() == 0)
+		isHero ? m_xmf4Color = { BLUE_COLOR4 } : m_xmf4Color = { GREEN_COLOR4 };
+	else
+		isHero ? m_xmf4Color = { GREEN_COLOR4 } : m_xmf4Color = { BLUE_COLOR4 };
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -309,6 +329,12 @@ CNPCObject::~CNPCObject()
 
 void CNPCObject::Animate(float fTimeElapsed)
 {
+	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+	//{
+	//	XMFLOAT3 xmf3Offset = { 0.f, 3.f, 5.f };
+	//	static_cast<CThirdPersonCamera*>(CGameMgr::GetInstance()->GetCamera())->SetFocusOnTarget(true, GetPosition(), xmf3Offset);
+	//}
+
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
 	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
 	else SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = true);
@@ -373,7 +399,13 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_PROFILE:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
-		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.9f); break;
+		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.9f); 
+		break;
+	case CUIObject::UI_READY:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		SetOrthoWorld(100, 100, FRAME_BUFFER_WIDTH - 100.f, FRAME_BUFFER_HEIGHT - 100.f);
+		m_isClickedAble = true;
+		break;
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -415,6 +447,15 @@ void CUIObject::Animate(float fTimeElapsed)
 			}
 		}
 		break;
+	case CUIObject::UI_READY:
+		if (CInputDev::GetInstance()->LButtonDown())
+		{
+			XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
+			if (Cursor.x > m_xmf2Pos.x - m_xmf2Size.x && Cursor.x < m_xmf2Pos.x + m_xmf2Size.x &&
+				Cursor.y > m_xmf2Pos.y - m_xmf2Size.y && Cursor.y < m_xmf2Pos.y + m_xmf2Size.y)
+				cout << "Cliked" << endl;
+		}
+		break;
 	}
 
 	CGameObject::Animate(fTimeElapsed);
@@ -451,6 +492,9 @@ void CUIObject::SetFadeState(bool isIn)
 
 void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY)
 {
+	m_xmf2Size.x = fSizeX, m_xmf2Size.y = fSizeY;
+	m_xmf2Pos.x = fPosX, m_xmf2Pos.y = fPosY;
+
 	// 직교투영
 	m_xmf4x4ToParent._11 = fSizeX;
 	m_xmf4x4ToParent._22 = fSizeY;
@@ -460,6 +504,7 @@ void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPo
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#define PARTICLE_POS 80.f, 0.01f, 23.f
 CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
 	CParticleMesh* pMesh = m_pParticleMesh = new CParticleMesh(pd3dDevice, pd3dCommandList, XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(1.0f, 0.0f, 0.0f), XMFLOAT2(0.5f, 0.5f), 1.0f);
@@ -487,7 +532,7 @@ CParticleObject::CParticleObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(80.f, 0.f, 20.f);
+	SetPosition(PARTICLE_POS);
 }
 
 CParticleObject::~CParticleObject()
@@ -541,7 +586,7 @@ CPortalObject::CPortalObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	SetMaterial(0, pMaterial);
 
-	SetPosition(80.f, 0.1f, 20.f);
+	SetPosition(PARTICLE_POS);
 
 	SetScale(3.f, 1.f, 3.f);
 
@@ -552,6 +597,7 @@ CPortalObject::~CPortalObject()
 {
 }
 
+#define RANGE 2.5f
 void CPortalObject::Animate(float fTimeElapsed)
 {
 	if (!m_isActive)
@@ -561,9 +607,15 @@ void CPortalObject::Animate(float fTimeElapsed)
 	if (m_fAlpha <= 0.f)
 		m_fAlpha = 1.f;
 
+	float fDistanceToPlayer = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
+	float fDistanceToDuo = 0.f;
+#ifdef USE_SERVER
+	CGameObject* pObj = CGameMgr::GetInstance()->GetDuoPlayer();
+	if (pObj)
+		fDistanceToDuo = Vector3::Distance(pObj->GetPosition(), GetPosition());
+#endif // USE_SERVER
 
-	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
-	if (fDistance < 2.5f && !m_isOverlap)
+	if (fDistanceToPlayer < RANGE && fDistanceToDuo < RANGE && !m_isOverlap)
 	{
 		m_isOverlap = true;
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Info").back();
@@ -595,31 +647,45 @@ void CPortalObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommand
 CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType)
 	: CGameObject(1)
 {
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
-	SetMesh(pMesh);
-
+	CMesh* pMesh = NULL;
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 	CMaterial* pMaterial = new CMaterial(1);
 
 	m_eTextureType = eType;
 	switch (eType)
 	{
-	case TEXTURE_TYPE::TEXTURE_QUAKE:
-		m_fAlpha = 1.5f;
+	case CTexturedObject::TEXTURE_QUAKE:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Earthquake.dds", 0);
 		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_ImpactCrack_A.dds", 0);
 
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		pMaterial->m_iPipelineState = 1;
 
-		SetScale(2.f, 1.f, 2.f);
+		SetScale(2.f, 1.f, 2.f); 
+		m_fAlpha = 1.5f;
+		m_isAlphaObject = true;
+		break;
+
+	case CTexturedObject::TEXTURE_HP:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Hp.dds", 0);
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		SetActiveState(true);
+		break;
+
+	case CTexturedObject::TEXTURE_HP_FRAME:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HpFrame.dds", 0); 
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		SetActiveState(true);
 		break;
 	}
 
+	SetMesh(pMesh);
+
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
-
 	pMaterial->SetTexture(pTexture);
-
 	SetMaterial(0, pMaterial);
 }
 
@@ -635,6 +701,8 @@ void CTexturedObject::Animate(float fTimeElapsed)
 	switch (m_eTextureType)
 	{
 	case TEXTURE_TYPE::TEXTURE_QUAKE:
+		CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(this);
+
 		//2초동안 생성, 1초는 서서히 사라짐
 		m_fAlpha -= fTimeElapsed;
 		if (m_fAlpha < 0.f)
@@ -643,6 +711,13 @@ void CTexturedObject::Animate(float fTimeElapsed)
 			m_isActive = false;
 		}
 		break;
+
+	case CTexturedObject::TEXTURE_HP:
+
+	case CTexturedObject::TEXTURE_HP_FRAME:
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		UpdateTransform(NULL); 
+		break;
 	}
 
 	CGameObject::Animate(fTimeElapsed);
@@ -650,7 +725,17 @@ void CTexturedObject::Animate(float fTimeElapsed)
 
 void CTexturedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
-	//투명 오브젝트는 CScene의 AddAlphaObjectToList를 통해 렌더해야하지만, 어차피 바닥에 있으니 뭐 이건 나중에..
+	if (!m_isActive || m_isAlphaObject)
+		return;
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	// CTexturedShader의 2번째 파이프라인 쓰겠다. PSAlphaTextured, 알파가 변하는
+	CGameObject::Render(pd3dCommandList, pCamera, true);
+}
+
+void CTexturedObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
 	if (!m_isActive)
 		return;
 

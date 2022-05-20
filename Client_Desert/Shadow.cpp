@@ -341,6 +341,8 @@ void CDepthRenderShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	else if (iIndex == DYNAMIC_SHADOW)
 	{
 		m_pPlayer->ShadowRender(pd3dCommandList, pCamera, this);//ÇÃ·¹ÀÌ¾î´Â ¾Ö´Ô½¦ÀÌ´õ, Ä®Àº ½ºÅÄ´Ùµå ½¦ÀÌ´õ
+		CGameObject* pObj = CGameMgr::GetInstance()->GetDuoPlayer();
+		if (pObj) pObj->ShadowRender(pd3dCommandList, pCamera, this);
 		pScene->m_pMonsterObjectShader->ShadowRender(pd3dCommandList, pCamera, this);// ShadowRender(pd3dCommandList, pCamera, this);
 	}
 

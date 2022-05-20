@@ -306,6 +306,11 @@ void CTrail::SetRenderingTrail(bool isOn)
 	}
 }
 
+void CTrail::SetColor(bool isHero)
+{
+	m_pTrailObject->SetColor(isHero);
+}
+
 CTrail* CTrail::Create(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	CTrail* pInstance = new CTrail();

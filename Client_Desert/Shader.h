@@ -123,6 +123,7 @@ public:
 	virtual HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag) { return S_OK; }
 	CGameObject*		SetActive(const wchar_t* pObjTag);
 	void				SetInactiveAllObject();
+	void				UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 public:
 	map<const wchar_t*, list<CGameObject*>>		m_mapObject;
 };
@@ -226,6 +227,7 @@ public:
 
 	virtual D3D12_RASTERIZER_DESC CreateRasterizerState(int nPipelineState) override;
 	virtual D3D12_BLEND_DESC CreateBlendState(int nPipelineState) override;
+	D3D12_DEPTH_STENCIL_DESC CreateDepthStencilState(int nPipelineState) override;
 
 	virtual D3D12_SHADER_BYTECODE CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;
 	virtual D3D12_SHADER_BYTECODE CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState) override;

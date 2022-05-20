@@ -526,6 +526,11 @@ void CGameObject::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCame
 	if (m_pChild) m_pChild->ShadowRender(pd3dCommandList, pCamera, pShader);
 }
 
+void CGameObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
 
 
 void CGameObject::CreateShaderVariables(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
@@ -718,6 +723,8 @@ void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, bool isYFix /*= false*/)
 	m_xmf4x4ToParent._21 = xmf3Up.x; m_xmf4x4ToParent._22 = xmf3Up.y; m_xmf4x4ToParent._23 = xmf3Up.z;
 	m_xmf4x4ToParent._31 = xmf3Look.x; m_xmf4x4ToParent._32 = xmf3Look.y; m_xmf4x4ToParent._33 = xmf3Look.z;
 
+	SetScale(m_xmf3Scale);
+	//SetPosition(GetPosition());
 }
 
 //#define _WITH_DEBUG_FRAME_HIERARCHY

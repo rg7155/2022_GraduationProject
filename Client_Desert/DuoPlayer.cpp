@@ -16,6 +16,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	SetChild(pPlayerModel->m_pModelRootObject, true);
 
 	m_pSword = FindFrame("Sword");
+	m_pSwordTail = FindFrame("SwordTail");
 
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, PLAYER::ANIM::END, pPlayerModel);
 
@@ -35,17 +36,15 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetPosition(15.f, 0.f, 15.f);
 
-
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-	//·»´õ¸µ ²°´Ù Ä×´Ù-> °ø°ÝÇÒ¶§¸¸ ³ª¿À°Ô º¯°æ
-	if (IsNowAttack())
-		m_pComTrail->SetRenderingTrail(true);
-	else
-		m_pComTrail->SetRenderingTrail(false);
+	m_pComTrail->SetRenderingTrail(false);
+
 	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
 
 	SetEffectsType(EFFECT_FOG, true);
 	m_bSkill1EffectOn = false;
+
+	CGameMgr::GetInstance()->SetDuoPlayer(this);
 }
 
 CDuoPlayer::~CDuoPlayer()
@@ -74,10 +73,7 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 
 	UpdateComponent(fTimeElapsed);
 	//·»´õ¸µ ²°´Ù Ä×´Ù-> °ø°ÝÇÒ¶§¸¸ ³ª¿À°Ô º¯°æ
-	if (IsNowAttack())
-		m_pComTrail->SetRenderingTrail(true);
-	else
-		m_pComTrail->SetRenderingTrail(false);
+	m_pComTrail->SetRenderingTrail(IsNowAttack());
 
 	// ¹Ù´Ú ÀÌÆåÆ®
 
@@ -92,6 +88,7 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 			xmf3Pos.y += 0.1f;
 			xmf3Pos.z += xmf3Look.z;
 			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(false);
 		}
 		m_bSkill1EffectOn = true;
 
@@ -115,6 +112,7 @@ void CDuoPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 {
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
+	m_pComTrail->SetColor(false);
 }
 
 void CDuoPlayer::UpdateComponent(float fTimeElapsed)
@@ -124,10 +122,7 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 			m_pComponent[i]->Update_Component(fTimeElapsed);
 
 	if (m_pComTrail)
-	{
-		XMFLOAT3 xmf3Top = Vector3::Add(m_pSword->GetPosition(), m_pSword->GetUp(), -1.f);
-		m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition());
-	}
+		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 }
 
 void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
@@ -136,11 +131,24 @@ void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
 	m_xmf4x4ToParent = packet->xmf4x4World;
 	player_anim* _player_anim = packet->animInfo;
 	m_eCurAnim = packet->eCurAnim;
+
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
-		m_pSkinnedAnimationController->SetTrackWeight(i, _player_anim[i].fWeight);
+
+		float fWeight, fPosition;
+		if (_player_anim[i].sWeight != 0)
+			fWeight = (float)_player_anim[i].sWeight / 10000.f;
+		else
+			fWeight = 0.f;
+
+		if (_player_anim[i].sPosition != 0)
+			fPosition = (float)_player_anim[i].sPosition / 10000.f;
+		else
+			fPosition = 0.f;
+
+		m_pSkinnedAnimationController->SetTrackWeight(i, fWeight);
 		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
-		m_pSkinnedAnimationController->m_fPosition[i] = _player_anim[i].fPosition;
+		m_pSkinnedAnimationController->m_fPosition[i] = fPosition;
 	}
 }
 

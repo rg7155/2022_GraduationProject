@@ -585,6 +585,19 @@ void CStandardObjectsShader::SetInactiveAllObject()
 			iterSec->SetActiveState(false);
 }
 
+void CStandardObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	for (auto& iter : m_mapObject)
+	{
+		for (auto& iterSec : iter.second)
+		{
+			if (!iterSec->m_isActive)
+				continue;
+			iterSec->UpdateShaderVariables(pd3dCommandList);
+		}
+	}
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -729,7 +742,6 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_mapModelInfo.emplace(L"Golem", pModel);
 
 	CMonsterObject* pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
-	pObj->SetActiveState(true);
 	AddObject(L"Golem", pObj);
 
 }
@@ -881,6 +893,29 @@ D3D12_BLEND_DESC CTexturedShader::CreateBlendState(int nPipelineState)
 	return(d3dBlendDesc);
 }
 
+D3D12_DEPTH_STENCIL_DESC CTexturedShader::CreateDepthStencilState(int nPipelineState)
+{
+	//return CStandardObjectsShader::CreateDepthStencilState(nPipelineState);
+
+	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
+	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
+	d3dDepthStencilDesc.DepthEnable = TRUE;
+	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; //±íÀÌ ¾²±âx, ´Ù¸¥°Å °¡¸®Áö ¾Ê°Ô²û
+	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+	d3dDepthStencilDesc.StencilEnable = FALSE;
+	d3dDepthStencilDesc.StencilReadMask = 0x00;
+	d3dDepthStencilDesc.StencilWriteMask = 0x00;
+	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+
+	return(d3dDepthStencilDesc);
+}
 
 D3D12_SHADER_BYTECODE CTexturedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
@@ -942,8 +977,6 @@ D3D12_DEPTH_STENCIL_DESC CTrailShader::CreateDepthStencilState(int nPipelineStat
 	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 
 	return(d3dDepthStencilDesc);
-
-
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1100,6 +1133,11 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	AddObject(L"UI_Info", pObject); 
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PLAYER);
 	AddObject(L"UI_Info", pObject);
+
+	//Äù½ºÆ®
+
+	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY);
+	//AddObject(L"UI_Ready", pObject);
 
 	//Á© ¸¶Áö¸·¿¡ »ðÀÔ
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);

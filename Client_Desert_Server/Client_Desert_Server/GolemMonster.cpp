@@ -2,6 +2,7 @@
 #include "GolemMonster.h"
 #include "Player.h"
 
+#define FOLLOW_DISTANCE 1.f
 
 CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	:m_pTarget(_pTarget)
@@ -11,21 +12,25 @@ CGolemMonster::CGolemMonster(CPlayer* _pTarget)
 	m_xmf3Look = m_pTarget->GetPosition();
 	m_fAttackAnimTime = 0.f;
 	m_targetId = _pTarget->m_id;
+	m_fRunCoolTime = 0.f;
 	m_fDamagedCoolTime = 0.f;
 	m_iHp = 100.f;
+	m_bFollowStart = false;
 }
 
 void CGolemMonster::Update(float fTimeElapsed)
 {
 	m_fAnimElapsedTime += fTimeElapsed;
+	m_fRunCoolTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
 
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
-		if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT || m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
+		if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT || m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT ||
+			m_eCurAnim == GOLEM::ANIM::ATTACK1 || m_eCurAnim == GOLEM::ANIM::ATTACK2)
 		{
 			// 플레이어를 공격 -> 클라에서 처리
-			Change_Animation(GOLEM::ANIM::ATTACK1);
+			Change_Animation(GOLEM::ANIM::IDLE);
 
 		}
 
@@ -35,6 +40,12 @@ void CGolemMonster::Update(float fTimeElapsed)
 		}
 	}
 
+	// 아이들 -> 피격 -> 아이들 -> 런 -> 공격 -> 아이들 -> 런
+	// 피격 -> 아이들 -> 런
+	if (m_fRunCoolTime > 1.5f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE && m_bFollowStart)
+		Change_Animation(GOLEM::ANIM::RUN);
+
+
 
 
 	if (m_pTarget)
@@ -42,7 +53,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 		// 타겟을 쫓아가는 걸로 이동 & 회전
 		XMFLOAT3 mf3TargetPos = m_pTarget->GetPosition();
 
-		if (m_eCurAnim == GOLEM::ANIM::RUN)
+		if (m_eCurAnim == GOLEM::ANIM::RUN && Vector3::Distance(mf3TargetPos, m_xmf3Position) > FOLLOW_DISTANCE)
 		{
 			XMFLOAT3 subVectorNormal = Vector3::Subtract(mf3TargetPos, m_xmf3Position, true, true);
 			XMVECTOR xmVecNormal = { subVectorNormal.x,subVectorNormal.y, subVectorNormal.z };
@@ -54,9 +65,17 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 		// 타겟과 일정거리 내로 좁혀지면 공격
 		float fDis = Vector3::Distance(mf3TargetPos, m_xmf3Position);
-		if (fDis < ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !m_pTarget->IsNowAttack())
+		if (fDis < 15.f && !m_bFollowStart)
 		{
-			Change_Animation(GOLEM::ANIM::ATTACK2);
+			m_bFollowStart = true;
+			Change_Animation(GOLEM::ANIM::RUN);
+		}
+		if (fDis < GOLEM_ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !m_pTarget->IsNowAttack())
+		{
+			// 두 개 중 랜덤하게
+			int iAttackRand = rand() % 2;
+			GOLEM::ANIM eAnim = iAttackRand == 0 ? GOLEM::ANIM::ATTACK1 : GOLEM::ANIM::ATTACK2;
+			Change_Animation(eAnim);
 			m_fAttackAnimTime = 0.f;
 			// 공격 후 타겟 바꾸기
 			CPlayer* pPlayer = Get_Player(1 - m_pTarget->m_id);
@@ -85,13 +104,13 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 	// 애니메이션 position 계산해서 검사
 	if (m_eCurAnim == GOLEM::ATTACK1)
 	{
-		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.8f)
+		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition < 8000)
 			return;
 	}
 	else
 	{
-		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition < 0.5f ||
-			pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].fPosition > 1.f)
+		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition < 5000 ||
+			pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition > 10000)
 			return;
 	}
 
@@ -110,18 +129,25 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 		fAngle = 0.f;
 
 
-	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 2.f && abs(fAngle) < 90.f)
+	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 0.8f && abs(fAngle) < 90.f)
 	{
 		m_iHp -= 20.f;
-		if(m_iHp <= 0.f)
-			Change_Animation(GOLEM::ANIM::DIE);
-		else
-			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
-		cout << fAngle << endl;
-
-		m_targetId = rand() % 2;
-		m_pTarget = Get_Player(m_targetId);
 		m_fDamagedCoolTime = 0.f;
+
+		if (m_iHp <= 0.f)
+		{
+			Change_Animation(GOLEM::ANIM::DIE);
+			m_fRunCoolTime = 0.f;
+			return;
+		}
+		else if (m_fRunCoolTime > 1.5f)
+		{
+			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
+			m_fRunCoolTime = 0.f;
+			m_targetId = rand() % 2;
+			m_pTarget = Get_Player(m_targetId);
+		}
+
 	}
 }
 
@@ -130,7 +156,7 @@ void CGolemMonster::Change_Animation(GOLEM::ANIM eNewAnim)
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 1.f;
 	m_eCurAnim = eNewAnim;
-	m_fDamagedCoolTime = 0.f;
+	m_fRunCoolTime = 0.f;
 
 }
 

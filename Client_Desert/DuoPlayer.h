@@ -26,6 +26,8 @@ private:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;
 	CGameObject* m_pSword = NULL;
+	CGameObject* m_pSwordTail = NULL;
+
 	bool	m_bSkill1EffectOn;
 public:
 	bool IsNowAttack();

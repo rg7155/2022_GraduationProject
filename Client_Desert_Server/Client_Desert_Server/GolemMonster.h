@@ -25,7 +25,7 @@ public:
 
 private:
 	float			m_fAttackAnimTime;
-
+	bool			m_bFollowStart;
 private:
 	float		m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
 	float		m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
@@ -34,8 +34,8 @@ public:
 	short		m_targetId;
 
 private:
+	float		m_fRunCoolTime;
 	float		m_fDamagedCoolTime;
-
 private:
 	int			m_iHp;
 

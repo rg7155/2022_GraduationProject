@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "Object.h"
 
+class CTexturedObject;
 class CMonsterObject : public CGameObject
 {
 public:
@@ -12,12 +13,15 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, CShader* pShader = NULL) override;
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 public:
 	void LerpRotate(float fTimeElapsed);
 	virtual void OnPrepareRender();
+	void UpdateHpBar(float fTimeElapsed);
+	void SetHp(int iDamage);
 
 protected:
 	float	m_fDissolve = 0.f; //0~1»çÀÌ °ª
@@ -31,6 +35,11 @@ protected:
 	XMVECTOR m_xmVecSrc;
 	float	m_fLerpSpeed;
 
+	int							m_iHp = 0;
+	int							m_iMaxHp = 0;
+	CTexturedObject				*m_pHp = NULL;
+	CTexturedObject				*m_pHpFrame = NULL;
+	float						m_fHpOffsetY = 0.f;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

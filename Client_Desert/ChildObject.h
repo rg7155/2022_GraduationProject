@@ -47,6 +47,7 @@ public:
 
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
+	void		SetColor(bool isPlayerZero);
 public:
 	CTrailMesh* m_pTrailMesh = nullptr;
 	XMFLOAT4	m_xmf4Color;
@@ -63,6 +64,8 @@ public:
 
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
+
+	void SetColor(bool isHero = true);
 
 public:
 	XMFLOAT4			m_xmf4Color;
@@ -102,7 +105,7 @@ private:
 class CUIObject : public CGameObject
 {
 public:
-	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_END };
+	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY, UI_END };
 
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
@@ -125,6 +128,11 @@ private:
 	bool	m_isFadeIn = false;
 	bool	m_isStartFade = false;
 	bool	m_isChangeScene = false;
+
+	XMFLOAT2	m_xmf2Size = { 0.f, 0.f };
+	XMFLOAT2	m_xmf2Pos = { 0.f, 0.f };
+
+	bool		m_isClickedAble = false;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -164,7 +172,7 @@ private:
 class CTexturedObject : public CGameObject
 {
 public:
-	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_END };
+	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_END };
 
 	CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType);
 	virtual ~CTexturedObject();
@@ -172,6 +180,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
@@ -180,5 +189,5 @@ public:
 
 private:
 	float	m_fAlpha = 0.f;
-
+	bool	m_isAlphaObject = false;
 };

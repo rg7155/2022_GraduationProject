@@ -113,7 +113,7 @@ public:
 		p.size = sizeof(SC_MOVE_PLAYER_PACKET);
 		p.type = SC_MOVE_PLAYER;
 		p.xmf4x4World = clients[c_id].pPlayer->m_xmf4x4World;
-		p.eCurAnim = pPlayer->m_eCurAnim;
+		p.eCurAnim = clients[c_id].pPlayer->m_eCurAnim;
 		for (int i = 0; i < PLAYER::ANIM::END; i++)
 		{
 			p.animInfo[i] = clients[c_id].pPlayer->m_eAnimInfo[i];
@@ -130,6 +130,7 @@ public:
 			monsterpacket.xmf3Position = g_pGolemMonster->m_xmf3Position;
 			monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
 			monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
+			monsterpacket.hp = static_cast<short>(g_pGolemMonster->GetHp());
 
 			char buf[BUFSIZE];
 			memcpy(buf, &p, p.size);
@@ -162,7 +163,7 @@ void TimerThread_func()
 		if(clients.size() >= 1)
 			fGolemCreateTime += fTimeElapsed;
 
-		if (!bGolemCreateOn && fGolemCreateTime > 10.f && clients.size() >= 2)
+		if (!bGolemCreateOn && clients.size() >= 2)
 		{
 			g_pGolemMonster = new CGolemMonster(clients[0].pPlayer);
 			bGolemCreateOn = true;
@@ -230,6 +231,7 @@ void send_GolemMonster()
 	p.xmf3Position = g_pGolemMonster->m_xmf3Position;
 	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
 	p.target_id = g_pGolemMonster->m_pTarget->m_id;
+	p.hp = static_cast<short>(g_pGolemMonster->GetHp());
 	for (auto& cl : clients)
 	{
 		//if (cl.first == c_id) continue;

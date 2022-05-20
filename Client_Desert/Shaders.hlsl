@@ -303,7 +303,6 @@ float4 PSAlphaTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
     cColor.a *= gfDissolve;
-    
     return (cColor);
 }
 
