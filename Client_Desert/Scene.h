@@ -73,6 +73,7 @@ public:
 	CGameObject* SetActiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag);
 	void ChangeScene(SCENE eScene);
 	void AddAlphaObjectToList(CGameObject* pObj);
+	void SetPointLightPos(XMFLOAT3& xmf3Pos);
 	////////////////////////////////////////////////////////////////////////
 	void SetDescriptorRange(D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[], int iIndex, D3D12_DESCRIPTOR_RANGE_TYPE RangeType, UINT NumDescriptors, UINT BaseShaderRegister, UINT RegisterSpace);
 	void SetRootParameterCBV(D3D12_ROOT_PARAMETER pd3dRootParameter[], int iIndex, UINT ShaderRegister, UINT RegisterSpace, D3D12_SHADER_VISIBILITY ShaderVisibility);

@@ -308,6 +308,9 @@ void CGolemObject::Animate(float fTimeElapsed)
 		}
 	}
 
+	//포인트 라이트
+	//CGameMgr::GetInstance()->GetScene()->SetPointLightPos(GetPosition());
+
 
 	//cout << m_fDissolve << endl;
 	

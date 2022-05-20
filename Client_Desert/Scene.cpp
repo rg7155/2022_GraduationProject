@@ -386,6 +386,11 @@ void CScene::AddAlphaObjectToList(CGameObject* pObj)
 	m_listAlphaObject.emplace_back(pObj);
 }
 
+void CScene::SetPointLightPos(XMFLOAT3& xmf3Pos)
+{
+	m_pLights[1].m_xmf3Position = xmf3Pos;
+}
+
 
 void CScene::BuildDefaultLightsAndMaterials()
 {
@@ -406,15 +411,15 @@ void CScene::BuildDefaultLightsAndMaterials()
 	m_pLights[0].m_xmf3Position = XMFLOAT3(-(_PLANE_WIDTH * 0.5f), 150.0f, (_PLANE_WIDTH * 0.5f));
 	m_pLights[0].m_fRange = 700.0f;
 
-	m_pLights[1].m_bEnable = false;
-	m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
-	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
-	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
-	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
-	m_pLights[1].m_xmf3Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f);
-	m_pLights[1].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
-	m_pLights[1].m_xmf3Position = XMFLOAT3((_PLANE_WIDTH * 1.f), 350.0f, (_PLANE_WIDTH * 0.5f));
-	m_pLights[1].m_fRange = 1700.0f;
+	//m_pLights[1].m_bEnable = false;
+	//m_pLights[1].m_nType = DIRECTIONAL_LIGHT;
+	//m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	//m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.9f, 0.9f, 0.9f, 1.0f);
+	//m_pLights[1].m_xmf4Specular = XMFLOAT4(0.1f, 0.1f, 0.1f, 0.0f);
+	//m_pLights[1].m_xmf3Direction = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	//m_pLights[1].m_xmf3Direction = Vector3::Normalize(m_pLights[0].m_xmf3Direction);
+	//m_pLights[1].m_xmf3Position = XMFLOAT3((_PLANE_WIDTH * 1.f), 350.0f, (_PLANE_WIDTH * 0.5f));
+	//m_pLights[1].m_fRange = 1700.0f;
 
 	//m_pLights[1].m_bEnable = false;
 	//m_pLights[1].m_nType = SPOT_LIGHT;
@@ -428,6 +433,15 @@ void CScene::BuildDefaultLightsAndMaterials()
 	//m_pLights[1].m_fFalloff = 8.0f;
 	//m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	//m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
+
+	m_pLights[1].m_bEnable = true;
+	m_pLights[1].m_nType = POINT_LIGHT;
+	m_pLights[1].m_fRange = 30.0f;
+	m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	m_pLights[1].m_xmf4Diffuse = XMFLOAT4(0.3f, 0.3f, 0.8f, 1.0f);
+	m_pLights[1].m_xmf4Specular = XMFLOAT4(0.0f, 0.0f, 0.0f, 0.0f);
+	m_pLights[1].m_xmf3Position = XMFLOAT3(25.0f, 0, 25.0f);
+	m_pLights[1].m_xmf3Attenuation = XMFLOAT3(1.0f, 0.001f, 0.0001f);
 }
 
 
