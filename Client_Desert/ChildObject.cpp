@@ -335,9 +335,14 @@ void CNPCObject::Animate(float fTimeElapsed)
 	//	static_cast<CThirdPersonCamera*>(CGameMgr::GetInstance()->GetCamera())->SetFocusOnTarget(true, GetPosition(), xmf3Offset);
 	//}
 
+	
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
 	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
 	else SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = true);
+
+	if (!m_pUIQuest)
+		m_pUIQuest = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+	m_pUIQuest->SetActiveState(m_isAbleInteraction);
 
 	CGameObject::Animate(fTimeElapsed);
 
@@ -406,6 +411,9 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		SetOrthoWorld(100, 100, FRAME_BUFFER_WIDTH - 100.f, FRAME_BUFFER_HEIGHT - 100.f);
 		m_isClickedAble = true;
 		break;
+	case CUIObject::UI_QUEST:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		SetOrthoWorld(200, 200, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);

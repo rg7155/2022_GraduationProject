@@ -1135,6 +1135,8 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	AddObject(L"UI_Info", pObject);
 
 	//Äù½ºÆ®
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_QUEST);
+	AddObject(L"UI_Quest", pObject);
 
 	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY);
 	//AddObject(L"UI_Ready", pObject);

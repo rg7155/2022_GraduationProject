@@ -99,13 +99,16 @@ public:
 private:
 	CGameObject* m_pInteractionUI = NULL;
 	bool		m_isAbleInteraction = false;
+
+	CGameObject* m_pUIQuest = NULL;
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class CUIObject : public CGameObject
 {
 public:
-	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY, UI_END };
+	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY, UI_QUEST, UI_END };
 
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
@@ -133,6 +136,7 @@ private:
 	XMFLOAT2	m_xmf2Pos = { 0.f, 0.f };
 
 	bool		m_isClickedAble = false;
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
