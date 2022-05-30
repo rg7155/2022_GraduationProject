@@ -185,12 +185,33 @@ void CMonsterObject::UpdateHpBar(float fTimeElapsed)
 
 void CMonsterObject::SetHp(int hp)
 {
-	m_iHp= hp;
+	//피격 상태
+	if (m_iHp != hp)
+		MakeHitEffect();
+
+	m_iHp = hp;
 	if (m_iHp < 0)
 		m_iHp = 0;
 
 	float fRatio = (m_iHp / (float)m_iMaxHp);
 	m_pHp->SetScale(fRatio, 1.f, 1.f);
+}
+
+
+void CMonsterObject::MakeHitEffect()
+{
+	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"HitEffect");
+	if (!pObj)
+		return;
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	XMFLOAT3 xmf3Look = GetLook();
+	xmf3Pos.x += xmf3Look.x;
+	xmf3Pos.y += 1.f;
+	xmf3Pos.z += xmf3Look.z;
+	pObj->SetPosition(xmf3Pos);
+
+	cout << "MakeEff" << endl;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -309,7 +330,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 	}
 
 	//포인트 라이트
-	//CGameMgr::GetInstance()->GetScene()->SetPointLightPos(GetPosition());
+	CGameMgr::GetInstance()->GetScene()->SetPointLightPos(GetPosition());
 
 
 	//cout << m_fDissolve << endl;

@@ -22,6 +22,7 @@ public:
 	virtual void OnPrepareRender();
 	void UpdateHpBar(float fTimeElapsed);
 	void SetHp(int iDamage);
+	void MakeHitEffect();
 
 protected:
 	float	m_fDissolve = 0.f; //0~1»çÀÌ °ª

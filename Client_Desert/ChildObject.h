@@ -57,7 +57,10 @@ public:
 class CMultiSpriteObject : public CGameObject
 {
 public:
-	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	enum SPRITE_TYPE { SPRITE_WAVE, SPRITE_HIT, SPRITE_END };
+
+public:
+	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, SPRITE_TYPE eType);
 	virtual ~CMultiSpriteObject();
 public:
 	void		AnimateRowColumn(float fTime);
@@ -68,6 +71,8 @@ public:
 	void SetColor(bool isHero = true);
 
 public:
+	SPRITE_TYPE			m_eType = SPRITE_END;
+
 	XMFLOAT4			m_xmf4Color;
 
 	int 				m_nRow = 0; //시간에 의해 바뀌는

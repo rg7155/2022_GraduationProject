@@ -1015,7 +1015,15 @@ HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12
 	CMaterial* pMaterial = m_mapObjectInfo.find(pObjTag)->second.second;
 
 	//분기문 태우기
-	CMultiSpriteObject* pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList);
+	CGameObject* pObject = nullptr;
+	CMultiSpriteObject::SPRITE_TYPE eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_END;
+
+	if (!wcscmp(pObjTag, L"Shockwave"))
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_WAVE;
+	else if (!wcscmp(pObjTag, L"HitEffect"))
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_HIT;
+
+	pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, eType);
 	pObject->SetMesh(pMesh);
 	pObject->SetMaterial(0, pMaterial);
 
@@ -1029,9 +1037,8 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	//방법1-오브젝트를 미리 만들어둔다-오브젝트풀링
 	//방법2-텍스쳐와 매쉬만 미리 만들고, 오브젝트는 런타임중에 만든다
 
+	//쇼크웨이브
 	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList,5.f, 0.f, 5.f);
-	//SetMesh(pMesh);
-
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 8, 8);
 	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_shockwave_B-x8.dds", 0);
 
@@ -1041,9 +1048,20 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	pMaterial->SetTexture(pTexture);
 
 	m_mapObjectInfo.emplace(L"Shockwave", make_pair(pMesh, pMaterial));
+	for(int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Shockwave");
 
-	for(int i = 0; i < 5; ++i)
-		CreateObject(pd3dDevice, pd3dCommandList, L"Shockwave");
+	//히트 이펙트
+	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 5.f, 0.f);
+	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 8, 8);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_shockwave_B-x8.dds", 0);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	m_mapObjectInfo.emplace(L"HitEffect", make_pair(pMesh, pMaterial));
+	for (int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"HitEffect");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
