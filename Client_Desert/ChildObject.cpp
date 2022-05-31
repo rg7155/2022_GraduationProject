@@ -773,3 +773,102 @@ void CTexturedObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CDamageFontObject::CDamageFontObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+	: CGameObject(1)
+{
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	SetMesh(pMesh);
+
+	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	CMaterial* pMaterial = new CMaterial(1);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Number.dds", 0);
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+	pMaterial->SetTexture(pTexture);
+	SetMaterial(0, pMaterial);
+
+	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+	pMaterial->m_iPipelineState = 2;
+
+	SetPosition(25.0f, 1.f, 25.0f);
+	SetDamageFont(321);
+	//SetActiveState(true);
+
+	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
+}
+
+CDamageFontObject::~CDamageFontObject()
+{
+	ReleaseShaderVariables_Sub();
+}
+
+void CDamageFontObject::Animate(float fTimeElapsed)
+{
+//	WorldToViewPort();
+	if (!m_isActive)
+		return;
+
+	CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(this);
+
+	SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CDamageFontObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	return;
+}
+
+void CDamageFontObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	if (!m_isActive)
+		return;
+
+	UpdateShaderVariables(pd3dCommandList);
+
+	//for 자릿수만큼, 월드는 Right축만큼 이동시키고
+	XMFLOAT4X4 xmf4x4WorldTemp = m_xmf4x4ToParent;
+	for (int i = 0; i < m_strDamage.size(); ++i)
+	{
+		int iNum = m_strDamage[i] - '0';
+		SetCBVInfo(pd3dCommandList, CGameObject::CBV_DAMAGE_NUMBER, &iNum);
+
+		XMFLOAT4X4 xmf4x4World = m_xmf4x4ToParent;
+//		XMFLOAT3 xmf3Right = Vector3::ScalarProduct(GetRight(), 1.f, true);
+		XMFLOAT3 xmf3Pos = Vector3::Add(GetPosition(), GetRight());
+		SetPosition(xmf3Pos);
+
+		//UpdateTransform(NULL);
+
+		//TODO-바뀐 월드 넘기게끔
+		CGameObject::Render(pd3dCommandList, pCamera, true);
+	}
+
+	m_xmf4x4ToParent = xmf4x4WorldTemp;
+	UpdateTransform(NULL);
+}
+
+
+void CDamageFontObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	//PSAlphaTextured의 gfDissolve값 설정
+	m_fAlpha = 1.f;
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
+}
+
+void CDamageFontObject::SetDamageFont(int iDamage)
+{
+	m_iDamage = iDamage;
+	m_strDamage = to_string(m_iDamage);
+}
+
+void CDamageFontObject::WorldToViewPort()
+{
+	XMFLOAT4X4 xmf4x4View = CGameMgr::GetInstance()->GetCamera()->GetViewMatrix();
+	XMFLOAT4X4 xmf4x4Proj = CGameMgr::GetInstance()->GetCamera()->GetProjectionMatrix();
+
+	XMFLOAT4X4 WorldViewProj = Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4World, xmf4x4View) , xmf4x4Proj);
+}
+

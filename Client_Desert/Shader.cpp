@@ -899,34 +899,56 @@ D3D12_DEPTH_STENCIL_DESC CTexturedShader::CreateDepthStencilState(int nPipelineS
 
 	D3D12_DEPTH_STENCIL_DESC d3dDepthStencilDesc;
 	::ZeroMemory(&d3dDepthStencilDesc, sizeof(D3D12_DEPTH_STENCIL_DESC));
-	d3dDepthStencilDesc.DepthEnable = TRUE;
-	d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; //깊이 쓰기x, 다른거 가리지 않게끔
-	d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
-	d3dDepthStencilDesc.StencilEnable = FALSE;
-	d3dDepthStencilDesc.StencilReadMask = 0x00;
-	d3dDepthStencilDesc.StencilWriteMask = 0x00;
-	d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
-	d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
-	d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
-
+	if (nPipelineState == 2) //데미지 폰트
+	{
+		d3dDepthStencilDesc.DepthEnable = FALSE; //깊이 검사x
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ALL; 
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		d3dDepthStencilDesc.StencilEnable = FALSE; //스텐실 검사x
+		d3dDepthStencilDesc.StencilReadMask = 0x00;
+		d3dDepthStencilDesc.StencilWriteMask = 0x00;
+		d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+		d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+	}
+	else
+	{
+		d3dDepthStencilDesc.DepthEnable = TRUE;
+		d3dDepthStencilDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO; //깊이 쓰기x, 다른거 가리지 않게끔
+		d3dDepthStencilDesc.DepthFunc = D3D12_COMPARISON_FUNC_LESS;
+		d3dDepthStencilDesc.StencilEnable = FALSE;
+		d3dDepthStencilDesc.StencilReadMask = 0x00;
+		d3dDepthStencilDesc.StencilWriteMask = 0x00;
+		d3dDepthStencilDesc.FrontFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+		d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+		d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
+	}
 	return(d3dDepthStencilDesc);
 }
 
 D3D12_SHADER_BYTECODE CTexturedShader::CreateVertexShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", ppd3dShaderBlob));
+	if (nPipelineState == 2) //데미지 폰트
+		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSDamageFontTextured", "vs_5_1", ppd3dShaderBlob));
+	else
+		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "VSTextured", "vs_5_1", ppd3dShaderBlob));
 }
 
 D3D12_SHADER_BYTECODE CTexturedShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	if(nPipelineState == 0)
+	if(nPipelineState == 0 )
 		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSTextured", "ps_5_1", ppd3dShaderBlob));
-	else if (nPipelineState == 1)
+	else if (nPipelineState == 1 || nPipelineState == 2)
 		return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSAlphaTextured", "ps_5_1", ppd3dShaderBlob));
 	else
 		return(CShader::CreatePixelShader(ppd3dShaderBlob, nPipelineState));
@@ -935,11 +957,7 @@ D3D12_SHADER_BYTECODE CTexturedShader::CreatePixelShader(ID3DBlob** ppd3dShaderB
 
 void CTexturedShader::CreateShader(ID3D12Device* pd3dDevice, ID3D12RootSignature* pd3dGraphicsRootSignature, int nPipelineState /*= 0*/)
 {
-	//분기문 타야지!
-	if(nPipelineState == 0)
-		CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 0);
-	else if (nPipelineState == 1)
-		CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, 1);//알파값 변하는
+	CShader::CreateShader(pd3dDevice, pd3dGraphicsRootSignature, nPipelineState);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1145,7 +1163,11 @@ D3D12_DEPTH_STENCIL_DESC CUIObjectsShader::CreateDepthStencilState(int nPipeline
 
 void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
-	CUIObject* pObject = NULL;
+	CGameObject* pObject = nullptr;
+
+	//pObject = new CDamageFontObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	//pObject->SetPosition(25.0f, 0, 25.0f);
+	//AddObject(L"DamageFont", pObject);
 
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PROFILE);
 	AddObject(L"UI_Info", pObject); 
