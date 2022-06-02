@@ -66,14 +66,14 @@ void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, f
 	m_d3dViewport.MinDepth = fMinZ;
 	m_d3dViewport.MaxDepth = fMaxZ;
 
-	//m_xmf4x4ViewPort = Matrix4x4::Identity();
-	//m_xmf4x4ViewPort._11 = nWidth / 2.f;
-	//m_xmf4x4ViewPort._22 = -nHeight / 2.f;
-	//m_xmf4x4ViewPort._32 = fMinZ - fMaxZ;
+	m_xmf4x4ViewPort = Matrix4x4::Identity();
+	m_xmf4x4ViewPort._11 = nWidth / 2.f;
+	m_xmf4x4ViewPort._22 = -nHeight / 2.f;
+	m_xmf4x4ViewPort._32 = fMinZ - fMaxZ;
 
-	//m_xmf4x4ViewPort._41 = nWidth / 2.f;
-	//m_xmf4x4ViewPort._42 = nHeight / 2.f;
-	//m_xmf4x4ViewPort._43 = fMinZ;
+	m_xmf4x4ViewPort._41 = nWidth / 2.f;
+	m_xmf4x4ViewPort._42 = nHeight / 2.f;
+	m_xmf4x4ViewPort._43 = fMinZ;
 }
 
 void CCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
@@ -87,6 +87,9 @@ void CCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
 void CCamera::GenerateProjectionMatrix(float fNearPlaneDistance, float fFarPlaneDistance, float fAspectRatio, float fFOVAngle)
 {
 	m_xmf4x4Projection = Matrix4x4::PerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
+
+	m_xmf4x4OrthoProjection = Matrix4x4::OrthographicLH(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, 1.f);
+
 //	XMMATRIX xmmtxProjection = XMMatrixPerspectiveFovLH(XMConvertToRadians(fFOVAngle), fAspectRatio, fNearPlaneDistance, fFarPlaneDistance);
 //	XMStoreFloat4x4(&m_xmf4x4Projection, xmmtxProjection);
 }
@@ -139,7 +142,7 @@ void CCamera::UpdateShaderVariables(ID3D12GraphicsCommandList *pd3dCommandList)
 
 	::memcpy(&m_pcbMappedCamera->m_xmf3Position, &m_xmf3Position, sizeof(XMFLOAT3));
 
-	m_xmf4x4OrthoProjection = Matrix4x4::OrthographicLH(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, 1.f);
+	//m_xmf4x4OrthoProjection = Matrix4x4::OrthographicLH(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.f, 1.f);
 	XMFLOAT4X4 xmf4x4OrthoProjection;
 	XMStoreFloat4x4(&xmf4x4OrthoProjection, XMMatrixTranspose(XMLoadFloat4x4(&m_xmf4x4OrthoProjection)));
 	::memcpy(&m_pcbMappedCamera->m_xmf4x4OrthoProjection, &xmf4x4OrthoProjection, sizeof(XMFLOAT4X4));

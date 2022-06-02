@@ -219,7 +219,7 @@ public:
 	void		SetDamageFont(int iDamage);
 
 private:
-	void		WorldToViewPort();
+	void		WorldToViewPort(XMFLOAT3 xmf3Pos);
 
 
 private:

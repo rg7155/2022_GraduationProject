@@ -791,8 +791,9 @@ CDamageFontObject::CDamageFontObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 	pMaterial->m_iPipelineState = 2;
 
-	SetPosition(25.0f, 1.f, 25.0f);
-	SetDamageFont(9);
+	SetPosition(25.0f, 2.f, 25.0f);
+	SetDamageFont(3);
+
 	//SetActiveState(true);
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
@@ -810,7 +811,11 @@ CDamageFontObject::~CDamageFontObject()
 {
 	ReleaseShaderVariables_Sub();
 	for (auto& i : vecSubObject)
+	{
 		i->ReleaseShaderVariables_Sub();
+		i->ReleaseUploadBuffers();
+		i->Release();
+	}
 }
 
 void CDamageFontObject::Animate(float fTimeElapsed)
@@ -821,7 +826,7 @@ void CDamageFontObject::Animate(float fTimeElapsed)
 
 	CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(this);
 
-	SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+	//SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
 
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -840,28 +845,33 @@ void CDamageFontObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 	//for 자릿수만큼, 월드는 Right축만큼 이동시키고
 	XMFLOAT4X4 xmf4x4WorldTemp = m_xmf4x4ToParent;
-	for (int i = 0; i < m_strDamage.size(); ++i)
+	for (int i = 0; i < (int)(m_strDamage.size()); ++i)
 	{
 		float iNum = m_strDamage[i] - '0';
 
 		CGameObject* pObj = nullptr;
-		i == 0 ? pObj = this : pObj = vecSubObject[i-1];
+		i == 0 ? pObj = this : pObj = vecSubObject[i - 1];
 		pObj->SetCBVInfo(pd3dCommandList, CGameObject::CBV_DAMAGE_NUMBER, &iNum);
 
 		//XMFLOAT4X4 xmf4x4World = m_xmf4x4ToParent;
-		XMFLOAT3 xmf3Left = Vector3::ScalarProduct(GetRight(), -1.f, true);
+		XMFLOAT3 xmf3Left = Vector3::ScalarProduct(GetRight(), -1.f * i, true);
 		XMFLOAT3 xmf3Pos = Vector3::Add(GetPosition(), xmf3Left);
 		SetPosition(xmf3Pos);
 
-		WorldToViewPort();
-		//UpdateTransform(NULL);
+		WorldToViewPort(xmf3Pos);
 
-		//TODO-바뀐 월드 넘기게끔
+		//TODO-한번의 렌더링으로 VS에서 바꿔주기, 거리에 따라 스케일 조절?
+
+		XMFLOAT3 xmf3Scale = { 3.f, 1.f, 1.f };
+		SetScale(xmf3Scale);
+
 		CGameObject::Render(pd3dCommandList, pCamera, true);
+
+		m_xmf4x4ToParent = xmf4x4WorldTemp;
+		UpdateTransform(NULL);
 	}
 
-	m_xmf4x4ToParent = xmf4x4WorldTemp;
-	UpdateTransform(NULL);
+
 }
 
 
@@ -878,21 +888,30 @@ void CDamageFontObject::SetDamageFont(int iDamage)
 	m_strDamage = to_string(m_iDamage);
 }
 
-void CDamageFontObject::WorldToViewPort()
+void CDamageFontObject::WorldToViewPort(XMFLOAT3 xmf3Pos)
 {
 	XMFLOAT4X4 xmf4x4View = CGameMgr::GetInstance()->GetCamera()->GetViewMatrix();
-	XMFLOAT4X4 xmf4x4OrthoProj = CGameMgr::GetInstance()->GetCamera()->GetOrthoProjectionMatrix();
+	XMFLOAT4X4 xmf4x4OrthoProj = CGameMgr::GetInstance()->GetCamera()->GetProjectionMatrix();
 	XMFLOAT4X4 xmf4x4ViewPort = CGameMgr::GetInstance()->GetCamera()->GetViewPortMatrix();
-
-
 	XMFLOAT4X4 WorldViewProj = Matrix4x4::Multiply(Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4World, xmf4x4View), xmf4x4OrthoProj), xmf4x4ViewPort);
+
+	XMFLOAT4X4 temp = Matrix4x4::Identity();
+	XMFLOAT3 xmf3Project;
+	XMVECTOR vecPos = XMLoadFloat3(&xmf3Pos);
+	XMStoreFloat3(&xmf3Project, XMVector3Project(vecPos, 0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT, 0.f, 1.f,
+		XMLoadFloat4x4(&xmf4x4OrthoProj), XMLoadFloat4x4(&xmf4x4View), XMLoadFloat4x4(&temp)));
+
+	float x = xmf3Project.x , y = xmf3Project.y, z = xmf3Project.z;
+	cout << x << "," << y <<  "," << z << endl;
 
 	m_xmf4x4ToParent = Matrix4x4::Identity();
 	m_xmf4x4ToParent._11 = 50.f;
 	m_xmf4x4ToParent._22 = 50.f;
 	m_xmf4x4ToParent._33 = 1.f;
-	m_xmf4x4ToParent._41 = WorldViewProj._41;
-	m_xmf4x4ToParent._42 = WorldViewProj._42;
+	m_xmf4x4ToParent._41 = x - FRAME_BUFFER_WIDTH * 0.5f;
+	m_xmf4x4ToParent._42 = -y + FRAME_BUFFER_HEIGHT * 0.5f;
+	m_xmf4x4ToParent._43 = z; //뷰포트 z값 넣어줘야함
+
 
 	UpdateTransform(NULL);
 }

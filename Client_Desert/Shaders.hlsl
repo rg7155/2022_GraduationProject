@@ -296,11 +296,11 @@ VS_TEXTURED_OUTPUT VSOrthoTextured(VS_TEXTURED_INPUT input)
 VS_TEXTURED_OUTPUT VSDamageFontTextured(VS_TEXTURED_INPUT input)
 {
     VS_TEXTURED_OUTPUT output;
-    output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
-    //output.position = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxOrthoProjection);
+    //output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
+    output.position = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxOrthoProjection);
     
-    //output.uv.x = (input.uv.x + gfDamageNum) * 0.1; // 0~0.1, 0.1~0.2, ... 0.9~1.0
-    output.uv.x = (input.uv.x + 1) * 0.1; // 0~0.1, 0.1~0.2, ... 0.9~1.0
+    output.uv.x = (input.uv.x + gfDamageNum) * 0.3; // 0~0.1, 0.1~0.2, ... 0.9~1.0
+    //output.uv.x = (input.uv.x + 1) * 0.1; // 0~0.1, 0.1~0.2, ... 0.9~1.0
     output.uv.y = input.uv.y; 
     
     return (output);
