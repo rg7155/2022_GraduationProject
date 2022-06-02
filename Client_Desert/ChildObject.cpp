@@ -792,15 +792,25 @@ CDamageFontObject::CDamageFontObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pMaterial->m_iPipelineState = 2;
 
 	SetPosition(25.0f, 1.f, 25.0f);
-	SetDamageFont(321);
+	SetDamageFont(9);
 	//SetActiveState(true);
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
+
+	//CBV Set을 위한 오브젝트, 데미지 최대 3자릿수
+	for (int i = 0; i < 2; ++i)
+	{
+		CGameObject* pObj = new CGameObject();
+		pObj->CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
+		vecSubObject.emplace_back(pObj);
+	}
 }
 
 CDamageFontObject::~CDamageFontObject()
 {
 	ReleaseShaderVariables_Sub();
+	for (auto& i : vecSubObject)
+		i->ReleaseShaderVariables_Sub();
 }
 
 void CDamageFontObject::Animate(float fTimeElapsed)
@@ -832,14 +842,18 @@ void CDamageFontObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 	XMFLOAT4X4 xmf4x4WorldTemp = m_xmf4x4ToParent;
 	for (int i = 0; i < m_strDamage.size(); ++i)
 	{
-		int iNum = m_strDamage[i] - '0';
-		SetCBVInfo(pd3dCommandList, CGameObject::CBV_DAMAGE_NUMBER, &iNum);
+		float iNum = m_strDamage[i] - '0';
 
-		XMFLOAT4X4 xmf4x4World = m_xmf4x4ToParent;
-//		XMFLOAT3 xmf3Right = Vector3::ScalarProduct(GetRight(), 1.f, true);
-		XMFLOAT3 xmf3Pos = Vector3::Add(GetPosition(), GetRight());
+		CGameObject* pObj = nullptr;
+		i == 0 ? pObj = this : pObj = vecSubObject[i-1];
+		pObj->SetCBVInfo(pd3dCommandList, CGameObject::CBV_DAMAGE_NUMBER, &iNum);
+
+		//XMFLOAT4X4 xmf4x4World = m_xmf4x4ToParent;
+		XMFLOAT3 xmf3Left = Vector3::ScalarProduct(GetRight(), -1.f, true);
+		XMFLOAT3 xmf3Pos = Vector3::Add(GetPosition(), xmf3Left);
 		SetPosition(xmf3Pos);
 
+		WorldToViewPort();
 		//UpdateTransform(NULL);
 
 		//TODO-바뀐 월드 넘기게끔
@@ -867,8 +881,19 @@ void CDamageFontObject::SetDamageFont(int iDamage)
 void CDamageFontObject::WorldToViewPort()
 {
 	XMFLOAT4X4 xmf4x4View = CGameMgr::GetInstance()->GetCamera()->GetViewMatrix();
-	XMFLOAT4X4 xmf4x4Proj = CGameMgr::GetInstance()->GetCamera()->GetProjectionMatrix();
+	XMFLOAT4X4 xmf4x4OrthoProj = CGameMgr::GetInstance()->GetCamera()->GetOrthoProjectionMatrix();
+	XMFLOAT4X4 xmf4x4ViewPort = CGameMgr::GetInstance()->GetCamera()->GetViewPortMatrix();
 
-	XMFLOAT4X4 WorldViewProj = Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4World, xmf4x4View) , xmf4x4Proj);
+
+	XMFLOAT4X4 WorldViewProj = Matrix4x4::Multiply(Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4World, xmf4x4View), xmf4x4OrthoProj), xmf4x4ViewPort);
+
+	m_xmf4x4ToParent = Matrix4x4::Identity();
+	m_xmf4x4ToParent._11 = 50.f;
+	m_xmf4x4ToParent._22 = 50.f;
+	m_xmf4x4ToParent._33 = 1.f;
+	m_xmf4x4ToParent._41 = WorldViewProj._41;
+	m_xmf4x4ToParent._42 = WorldViewProj._42;
+
+	UpdateTransform(NULL);
 }
 

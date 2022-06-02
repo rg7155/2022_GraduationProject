@@ -226,5 +226,6 @@ private:
 	float		m_fAlpha = 0.f;
 	int			m_iDamage = 0;
 	string		m_strDamage = "";
+	vector<CGameObject*> vecSubObject;
 
 };

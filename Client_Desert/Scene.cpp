@@ -36,7 +36,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
 	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+55); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+75); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -126,6 +126,7 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pStandardObjectShader->AddObject(L"Quake", pObj);
 	}
 
+	//데미지 폰트
 	for (int i = 0; i < 5; ++i)
 	{
 		pObj = new CDamageFontObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -133,7 +134,6 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pStandardObjectShader->AddObject(L"DamgeFont", pObj);
 	}
 
-	//데미지 폰트
 
 
 	////hp,hpFrame

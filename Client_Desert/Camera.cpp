@@ -65,6 +65,15 @@ void CCamera::SetViewport(int xTopLeft, int yTopLeft, int nWidth, int nHeight, f
 	m_d3dViewport.Height = float(nHeight);
 	m_d3dViewport.MinDepth = fMinZ;
 	m_d3dViewport.MaxDepth = fMaxZ;
+
+	//m_xmf4x4ViewPort = Matrix4x4::Identity();
+	//m_xmf4x4ViewPort._11 = nWidth / 2.f;
+	//m_xmf4x4ViewPort._22 = -nHeight / 2.f;
+	//m_xmf4x4ViewPort._32 = fMinZ - fMaxZ;
+
+	//m_xmf4x4ViewPort._41 = nWidth / 2.f;
+	//m_xmf4x4ViewPort._42 = nHeight / 2.f;
+	//m_xmf4x4ViewPort._43 = fMinZ;
 }
 
 void CCamera::SetScissorRect(LONG xLeft, LONG yTop, LONG xRight, LONG yBottom)
