@@ -6,6 +6,7 @@
 #include "GameFramework.h"
 #include "InputDev.h"
 #include "GameMgr.h"
+#include "UILayer.h"
 
 #define FRAME 60.f
 
@@ -435,6 +436,11 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::BuildObjects()
 {
+	m_pUILayer = new UILayer(m_nSwapChainBuffers, m_pd3dDevice, m_pd3dCommandQueue);
+	m_pUILayer->Resize(m_ppd3dSwapChainBackBuffers, m_nWndClientWidth, m_nWndClientHeight);
+
+
+
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	CGameMgr::GetInstance()->SetDevice(m_pd3dDevice);
@@ -460,6 +466,14 @@ void CGameFramework::BuildObjects()
 	
 	m_pScene->m_pDepthRenderShader->m_pPlayer = m_pPlayer;
 	//m_pScene->m_pShadowShader->m_pPlayer = m_pPlayer;
+
+		//
+	XMFLOAT3 xmf3Pos = { 25.f, 1.f, 25.f };
+	for (int i = 0; i < 4; ++i)
+	{
+		xmf3Pos.x += i;
+		m_pUILayer->AddDamageFont(xmf3Pos, L"123");
+	}
 	/// ///////////////////
 
 	CreateShaderVariables();
@@ -480,6 +494,9 @@ void CGameFramework::BuildObjects()
 void CGameFramework::ReleaseObjects()
 {
 	ReleaseShaderVariables();
+
+	if (m_pUILayer) m_pUILayer->ReleaseResources();
+	if (m_pUILayer) delete m_pUILayer;
 
 	if (m_pPlayer) m_pPlayer->Release();
 
@@ -581,6 +598,8 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
+
+	m_pUILayer->Render(m_nSwapChainBufferIndex);
 
 #ifdef _WITH_PRESENT_PARAMETERS
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;
