@@ -792,7 +792,7 @@ CDamageFontObject::CDamageFontObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	pMaterial->m_iPipelineState = 2;
 
 	SetPosition(25.0f, 2.f, 25.0f);
-	SetDamageFont(3);
+	SetDamageFont(973);
 
 	//SetActiveState(true);
 
@@ -854,7 +854,10 @@ void CDamageFontObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 		pObj->SetCBVInfo(pd3dCommandList, CGameObject::CBV_DAMAGE_NUMBER, &iNum);
 
 		//XMFLOAT4X4 xmf4x4World = m_xmf4x4ToParent;
-		XMFLOAT3 xmf3Left = Vector3::ScalarProduct(GetRight(), -1.f * i, true);
+		//XMFLOAT3 xmf3CameraRight = CGameMgr::GetInstance()->GetCamera()->GetRightVector();
+		XMFLOAT3 xmf3CameraRight = GetRight();
+
+		XMFLOAT3 xmf3Left = Vector3::ScalarProduct(xmf3CameraRight, 0.3f * i, true);
 		XMFLOAT3 xmf3Pos = Vector3::Add(GetPosition(), xmf3Left);
 		SetPosition(xmf3Pos);
 
@@ -862,8 +865,8 @@ void CDamageFontObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, 
 
 		//TODO-한번의 렌더링으로 VS에서 바꿔주기, 거리에 따라 스케일 조절?
 
-		XMFLOAT3 xmf3Scale = { 3.f, 1.f, 1.f };
-		SetScale(xmf3Scale);
+		//XMFLOAT3 xmf3Scale = { 3.f, 1.f, 1.f };
+		//SetScale(xmf3Scale);
 
 		CGameObject::Render(pd3dCommandList, pCamera, true);
 
@@ -895,6 +898,10 @@ void CDamageFontObject::WorldToViewPort(XMFLOAT3 xmf3Pos)
 	XMFLOAT4X4 xmf4x4ViewPort = CGameMgr::GetInstance()->GetCamera()->GetViewPortMatrix();
 	XMFLOAT4X4 WorldViewProj = Matrix4x4::Multiply(Matrix4x4::Multiply(Matrix4x4::Multiply(m_xmf4x4World, xmf4x4View), xmf4x4OrthoProj), xmf4x4ViewPort);
 
+
+
+
+
 	XMFLOAT4X4 temp = Matrix4x4::Identity();
 	XMFLOAT3 xmf3Project;
 	XMVECTOR vecPos = XMLoadFloat3(&xmf3Pos);
@@ -907,7 +914,7 @@ void CDamageFontObject::WorldToViewPort(XMFLOAT3 xmf3Pos)
 	m_xmf4x4ToParent = Matrix4x4::Identity();
 	m_xmf4x4ToParent._11 = 50.f;
 	m_xmf4x4ToParent._22 = 50.f;
-	m_xmf4x4ToParent._33 = 1.f;
+	m_xmf4x4ToParent._33 = 0.f;
 	m_xmf4x4ToParent._41 = x - FRAME_BUFFER_WIDTH * 0.5f;
 	m_xmf4x4ToParent._42 = -y + FRAME_BUFFER_HEIGHT * 0.5f;
 	m_xmf4x4ToParent._43 = z; //뷰포트 z값 넣어줘야함
