@@ -468,12 +468,7 @@ void CGameFramework::BuildObjects()
 	//m_pScene->m_pShadowShader->m_pPlayer = m_pPlayer;
 
 		//
-	XMFLOAT3 xmf3Pos = { 25.f, 1.f, 25.f };
-	for (int i = 0; i < 4; ++i)
-	{
-		xmf3Pos.x += i;
-		m_pUILayer->AddDamageFont(xmf3Pos, L"123");
-	}
+
 	/// ///////////////////
 
 	CreateShaderVariables();
@@ -539,6 +534,14 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
+
+	if(CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
+	{
+		XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
+		int iDamage = rand() % 999 + 1;
+		m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
+	}
+	m_pUILayer->Update(fTimeElapsed);
 }
 
 //#define _WITH_PLAYER_TOP
@@ -587,10 +590,10 @@ void CGameFramework::FrameAdvance()
 #endif
 	//if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
-	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+	//d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	//d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	//m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 	hResult = m_pd3dCommandList->Close();
 

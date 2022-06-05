@@ -14,6 +14,12 @@ UILayer::UILayer(UINT nFrame, ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3d
     Initialize(pd3dDevice, pd3dCommandQueue);
 }
 
+UILayer::~UILayer()
+{
+    for (auto& it : m_listDamageFont)
+        delete (it);
+}
+
 void UILayer::Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue)
 {
     UINT d3d11DeviceFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
@@ -83,8 +89,8 @@ void UILayer::UpdateLabels(const wstring& strUIText, int n)
 
 void UILayer::Render(UINT nFrame)
 {
-    UpdateLabels(L"77", 0);
-    UpdateLabels(L"123", 1);
+    //UpdateLabels(L"77", 0);
+    //UpdateLabels(L"123", 1);
 
 
     ID3D11Resource* ppResources[] = { m_vWrappedRenderTargets[nFrame] };
@@ -101,7 +107,7 @@ void UILayer::Render(UINT nFrame)
 
     for (auto i : m_listDamageFont)
     {
-        m_pd2dDeviceContext->DrawText(i.strText.c_str(), static_cast<UINT>(i.strText.length()), i.pdwFormat, i.d2dLayoutRect, m_pd2dTextBrush);
+        m_pd2dDeviceContext->DrawText(i->m_strText.c_str(), static_cast<UINT>(i->m_strText.length()), i->m_pdwFormat, i->m_d2dLayoutRect, m_pd2dTextBrush);
     }
     
     m_pd2dDeviceContext->EndDraw();
@@ -132,6 +138,8 @@ void UILayer::ReleaseResources()
     m_pd2dFactory->Release();
     m_pd3d11DeviceContext->Release();
     m_pd3d11On12Device->Release();
+
+
 }
 
 void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHeight)
@@ -160,7 +168,7 @@ void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHei
     const float fFontSize = m_fHeight / 25.0f;
     const float fSmallFontSize = m_fHeight / 40.0f;
 
-    m_pd2dWriteFactory->CreateTextFormat(L"궁서체", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize, L"en-us", &m_pdwTextFormat);
+    m_pd2dWriteFactory->CreateTextFormat(L"궁서체", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"en-us", &m_pdwTextFormat);
 
     m_pdwTextFormat->SetTextAlignment(/*DWRITE_TEXT_ALIGNMENT_CENTER*/DWRITE_TEXT_ALIGNMENT_LEADING);
     m_pdwTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
@@ -174,8 +182,46 @@ void UILayer::Update(const float& fTimeElapsed)
 
 void UILayer::AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText)
 {
-    XMFLOAT4X4 xmf4x4View = CGameMgr::GetInstance()->GetCamera()->GetViewMatrix();
-    XMFLOAT4X4 xmf4x4Proj = CGameMgr::GetInstance()->GetCamera()->GetProjectionMatrix();
+    CDamageTextBlock* pTb = new CDamageTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
+    m_listDamageFont.emplace_back(pTb);
+
+}
+
+void UILayer::UpdateDamageFont(const float& fTimeElapsed)
+{
+    auto it = m_listDamageFont.begin();
+    while (it != m_listDamageFont.end())
+	{
+        (*it)->Update(fTimeElapsed);
+
+		if ((*it)->m_fLifeTime < 0.f)
+		{
+			delete (*it);
+            it = m_listDamageFont.erase(it);
+		}
+		else
+			++it;
+	}
+}
+
+XMFLOAT3 UILayer::WorldToScreen(XMFLOAT3& xmf3WorldPos)
+{
+    CCamera* pCamera = CGameMgr::GetInstance()->GetCamera();
+    XMFLOAT4X4 xmf4x4View = pCamera->GetViewMatrix();
+    XMFLOAT4X4 xmf4x4Proj = pCamera->GetProjectionMatrix();
+
+    //카메라 거리 항상 같게-> 똑같음??
+    XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+    XMFLOAT3 xmf3ToCamera = Vector3::Subtract(xmf3CameraPos, xmf3WorldPos, true);
+    xmf3ToCamera = Vector3::ScalarProduct(xmf3ToCamera, 1.f);
+    xmf3CameraPos = Vector3::Add(xmf3WorldPos, xmf3ToCamera);
+
+    XMFLOAT4X4 xmf4x4ViewTemp = xmf4x4View;
+
+   // xmf4x4ViewTemp = Matrix4x4::LookAtLH(xmf3CameraPos, pCamera->m_xmf, m_xmf3Up);
+    xmf4x4ViewTemp._41 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetRightVector());
+    xmf4x4ViewTemp._42 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetUpVector());
+    xmf4x4ViewTemp._43 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetLookVector());
 
 
     XMFLOAT4X4 temp = Matrix4x4::Identity();
@@ -184,15 +230,60 @@ void UILayer::AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText)
     XMStoreFloat3(&xmf3ScreenPos, XMVector3Project(vecPos, 0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT, 0.f, 1.f,
         XMLoadFloat4x4(&xmf4x4Proj), XMLoadFloat4x4(&xmf4x4View), XMLoadFloat4x4(&temp)));
 
-    DamF df = { strText, D2D1::RectF(xmf3ScreenPos.x, xmf3ScreenPos.y, m_fWidth, m_fHeight), m_pdwTextFormat, 2.f };
-    m_listDamageFont.emplace_back(df);
+    float x = xmf3ScreenPos.x, y = xmf3ScreenPos.y, z = xmf3ScreenPos.z;
+    //cout << x << "," << y <<  "," << z << endl;
 
+    if (z <= 0.f || z >= 1.f) xmf3ScreenPos.x = -100.f;
+
+
+    return xmf3ScreenPos;
 }
 
-void UILayer::UpdateDamageFont(const float& fTimeElapsed)
+////////////////////////////////////////////////////////////////////////
+
+CTextBlock::CTextBlock()
 {
-    for (auto& i : m_listDamageFont)
-    {
-        i.fLifeTime -= fTimeElapsed;
-    }
+}
+
+CTextBlock::CTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText)
+{
+    m_pdwFormat = pdwFormat;
+    m_d2dLayoutRect = d2dLayoutRect;
+    m_strText = strText;
+}
+
+CTextBlock::~CTextBlock()
+{
+}
+
+CDamageTextBlock::CDamageTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText, XMFLOAT3& xmf3WorldPos)
+    :CTextBlock(pdwFormat, d2dLayoutRect, strText)
+{
+    m_xmf3WorldPos = xmf3WorldPos;
+    m_fLifeTime = 2.f;
+}
+
+CDamageTextBlock::~CDamageTextBlock()
+{
+}
+
+void CDamageTextBlock::Update(const float& fTimeElapsed)
+{
+    m_fLifeTime -= fTimeElapsed;
+
+    //m_xmf3WorldPos.y += fTimeElapsed * 1.f;
+    m_fTime += fTimeElapsed;
+    float t = m_fTime, tt = t * t * 0.5f;
+    static XMFLOAT3 xmf3Velocity = { 0.2f, 0.5f, 0.3f };
+    static XMFLOAT3 xmf3Accel = { 0.f, -2.f, 0.f };
+
+    m_xmf3WorldPos = Vector3::Add(m_xmf3WorldPos, Vector3::Add(Vector3::ScalarProduct(xmf3Accel, tt, false), Vector3::ScalarProduct(xmf3Velocity, t, false)));
+    //m_xmf3WorldPos = Vector3::ScalarProduct(xmf3Velocity, t, false);
+
+
+    //newPos = newPos + (t * a_Velocity) + (0.5 * u_Accel * tt);
+
+    XMFLOAT3 xmf3ScreenPos = UILayer::WorldToScreen(m_xmf3WorldPos);
+    m_d2dLayoutRect.left = xmf3ScreenPos.x;
+    m_d2dLayoutRect.top = xmf3ScreenPos.y;
 }
