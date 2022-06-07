@@ -426,8 +426,8 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		m_isClickedAble = true;
 		break;
 	case CUIObject::UI_QUEST:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
-		SetOrthoWorld(200, 200, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/TextBox.dds", 0);
+		SetOrthoWorld(1000, 300, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f);
 		SetActiveState(false);
 	}
 

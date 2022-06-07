@@ -16,9 +16,14 @@ struct TextBlock
 //    XMFLOAT3            xmf3WorldPos;
 //};
 
-class CDamageTextBlock;
+class CTextBlock;
 class UILayer
 {
+public:
+    enum TEXT_TYPE
+    {
+        TEXT_DAMAGE, TEXT_NPC, TEXT_END
+    };
 public:
     UILayer(UINT nFrame, ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue);
     ~UILayer();
@@ -37,8 +42,6 @@ private:
     UINT GetRenderTargetsCount() { return static_cast<UINT>(m_vWrappedRenderTargets.size()); }
     void Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue);
 
-    void UpdateDamageFont(const float& fTimeElapsed);
-
     float m_fWidth;
     float m_fHeight;
 
@@ -53,8 +56,8 @@ private:
 
     std::vector<ID3D11Resource*>    m_vWrappedRenderTargets;
     std::vector<ID2D1Bitmap1*>      m_vd2dRenderTargets;
-    std::vector<TextBlock>          m_vTextBlocks;
-    std::list<CDamageTextBlock*>    m_listDamageFont;
+    vector<list<CTextBlock*>>         m_vecTextBlocks;
+    //std::list<CDamageTextBlock*>    m_listDamageFont;
 
 };
 
@@ -73,6 +76,8 @@ public:
     IDWriteTextFormat*  m_pdwFormat;
     D2D1_RECT_F         m_d2dLayoutRect;
     wstring             m_strText;
+    bool                m_isDead = false;
+
 };
 
 
@@ -87,6 +92,26 @@ public:
 
 public:
     XMFLOAT3            m_xmf3WorldPos;
-    float               m_fLifeTime = 0.f;
+    XMFLOAT3            m_xmf3Velocity;
+    XMFLOAT3            m_xmf3Accel;
     float               m_fTime = 0.f;
+    float               m_fLifeTime = 0.f;
+
+};
+
+class CNPCTextBlock : public CTextBlock
+{
+public:
+    CNPCTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText);
+    virtual ~CNPCTextBlock();
+
+public:
+    virtual void Update(const float& fTimeElapsed) override;
+
+public:
+    wstring             m_strTotalText;
+    float               m_fTime = 0.f;
+    int                 m_iIndex = 0;
+
+
 };

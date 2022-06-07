@@ -10,14 +10,15 @@ UILayer::UILayer(UINT nFrame, ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3d
     m_fHeight = 0.0f;
     m_vWrappedRenderTargets.resize(nFrame);
     m_vd2dRenderTargets.resize(nFrame);
-    m_vTextBlocks.resize(2);
+    m_vecTextBlocks.resize(TEXT_END);
     Initialize(pd3dDevice, pd3dCommandQueue);
 }
 
 UILayer::~UILayer()
 {
-    for (auto& it : m_listDamageFont)
-        delete (it);
+    for (int j = 0; j < TEXT_TYPE::TEXT_END; ++j)
+        for (auto& it : m_vecTextBlocks[j])
+            delete (it);
 }
 
 void UILayer::Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue)
@@ -74,25 +75,23 @@ void UILayer::Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dComma
 
     DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown **)&m_pd2dWriteFactory);
     pdxgiDevice->Release();
+
+
 }
 
 
 
 void UILayer::UpdateLabels(const wstring& strUIText, int n)
 {
-    if(n == 0)
-        m_vTextBlocks[0] = { strUIText, D2D1::RectF(30.0f, 30.0f, m_fWidth, m_fHeight), m_pdwTextFormat };
-    else
-        m_vTextBlocks[1] = { strUIText, D2D1::RectF(35.0f, 35.0f, m_fWidth, m_fHeight), m_pdwTextFormat };
+    //if(n == 0)
+    //    m_vTextBlocks[0] = { strUIText, D2D1::RectF(30.0f, 30.0f, m_fWidth, m_fHeight), m_pdwTextFormat };
+    //else
+    //    m_vTextBlocks[1] = { strUIText, D2D1::RectF(35.0f, 35.0f, m_fWidth, m_fHeight), m_pdwTextFormat };
 
 }
 
 void UILayer::Render(UINT nFrame)
 {
-    //UpdateLabels(L"77", 0);
-    //UpdateLabels(L"123", 1);
-
-
     ID3D11Resource* ppResources[] = { m_vWrappedRenderTargets[nFrame] };
 
     m_pd2dDeviceContext->SetTarget(m_vd2dRenderTargets[nFrame]);
@@ -100,14 +99,11 @@ void UILayer::Render(UINT nFrame)
     m_pd3d11On12Device->AcquireWrappedResources(ppResources, _countof(ppResources));
 
     m_pd2dDeviceContext->BeginDraw();
-    //for (auto textBlock : m_vTextBlocks)
-    //{
-    //    m_pd2dDeviceContext->DrawText(textBlock.strText.c_str(), static_cast<UINT>(textBlock.strText.length()), textBlock.pdwFormat, textBlock.d2dLayoutRect, m_pd2dTextBrush);
-    //}
 
-    for (auto i : m_listDamageFont)
+    for (int j = 0; j < TEXT_TYPE::TEXT_END; ++j)
     {
-        m_pd2dDeviceContext->DrawText(i->m_strText.c_str(), static_cast<UINT>(i->m_strText.length()), i->m_pdwFormat, i->m_d2dLayoutRect, m_pd2dTextBrush);
+        for (auto i : m_vecTextBlocks[j])
+            m_pd2dDeviceContext->DrawText(i->m_strText.c_str(), static_cast<UINT>(i->m_strText.length()), i->m_pdwFormat, i->m_d2dLayoutRect, m_pd2dTextBrush);
     }
     
     m_pd2dDeviceContext->EndDraw();
@@ -173,36 +169,41 @@ void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHei
     m_pdwTextFormat->SetTextAlignment(/*DWRITE_TEXT_ALIGNMENT_CENTER*/DWRITE_TEXT_ALIGNMENT_LEADING);
     m_pdwTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 //    m_pd2dWriteFactory->CreateTextFormat(L"Arial", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"en-us", &m_pdwTextFormat);
+
+
+        /////////////
+    wstring str = L"";
+    CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT), str);
+    m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
 }
 
 void UILayer::Update(const float& fTimeElapsed)
 {
-    UpdateDamageFont(fTimeElapsed);
+    for (int j = 0; j < TEXT_TYPE::TEXT_END; ++j)
+    {
+        auto it = m_vecTextBlocks[j].begin();
+        while (it != m_vecTextBlocks[j].end())
+        {
+            (*it)->Update(fTimeElapsed);
+
+            if ((*it)->m_isDead)
+            {
+                delete (*it);
+                it = m_vecTextBlocks[j].erase(it);
+            }
+            else
+                ++it;
+        }
+    }
 }
 
 void UILayer::AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText)
 {
-    CDamageTextBlock* pTb = new CDamageTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
-    m_listDamageFont.emplace_back(pTb);
+    CTextBlock* pTb = new CDamageTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
+    m_vecTextBlocks[TEXT_DAMAGE].emplace_back(pTb);
 
 }
 
-void UILayer::UpdateDamageFont(const float& fTimeElapsed)
-{
-    auto it = m_listDamageFont.begin();
-    while (it != m_listDamageFont.end())
-	{
-        (*it)->Update(fTimeElapsed);
-
-		if ((*it)->m_fLifeTime < 0.f)
-		{
-			delete (*it);
-            it = m_listDamageFont.erase(it);
-		}
-		else
-			++it;
-	}
-}
 
 XMFLOAT3 UILayer::WorldToScreen(XMFLOAT3& xmf3WorldPos)
 {
@@ -210,18 +211,18 @@ XMFLOAT3 UILayer::WorldToScreen(XMFLOAT3& xmf3WorldPos)
     XMFLOAT4X4 xmf4x4View = pCamera->GetViewMatrix();
     XMFLOAT4X4 xmf4x4Proj = pCamera->GetProjectionMatrix();
 
-    //카메라 거리 항상 같게-> 똑같음??
-    XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
-    XMFLOAT3 xmf3ToCamera = Vector3::Subtract(xmf3CameraPos, xmf3WorldPos, true);
-    xmf3ToCamera = Vector3::ScalarProduct(xmf3ToCamera, 1.f);
-    xmf3CameraPos = Vector3::Add(xmf3WorldPos, xmf3ToCamera);
+   // //카메라 거리 항상 같게-> 똑같음??
+   // XMFLOAT3 xmf3CameraPos = pCamera->GetPosition();
+   // XMFLOAT3 xmf3ToCamera = Vector3::Subtract(xmf3CameraPos, xmf3WorldPos, true);
+   // xmf3ToCamera = Vector3::ScalarProduct(xmf3ToCamera, 1.f);
+   // xmf3CameraPos = Vector3::Add(xmf3WorldPos, xmf3ToCamera);
 
-    XMFLOAT4X4 xmf4x4ViewTemp = xmf4x4View;
+   // XMFLOAT4X4 xmf4x4ViewTemp = xmf4x4View;
 
-   // xmf4x4ViewTemp = Matrix4x4::LookAtLH(xmf3CameraPos, pCamera->m_xmf, m_xmf3Up);
-    xmf4x4ViewTemp._41 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetRightVector());
-    xmf4x4ViewTemp._42 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetUpVector());
-    xmf4x4ViewTemp._43 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetLookVector());
+   //// xmf4x4ViewTemp = Matrix4x4::LookAtLH(xmf3CameraPos, pCamera->m_xmf, m_xmf3Up);
+   // xmf4x4ViewTemp._41 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetRightVector());
+   // xmf4x4ViewTemp._42 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetUpVector());
+   // xmf4x4ViewTemp._43 = -Vector3::DotProduct(xmf3CameraPos, pCamera->GetLookVector());
 
 
     XMFLOAT4X4 temp = Matrix4x4::Identity();
@@ -261,6 +262,11 @@ CDamageTextBlock::CDamageTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2
 {
     m_xmf3WorldPos = xmf3WorldPos;
     m_fLifeTime = 2.f;
+
+    m_xmf3Velocity = { RandomValue(-0.1f, 0.1f), 0.3f, RandomValue(-0.1f, 0.1f) };
+   // m_xmf3Velocity = Vector3::Normalize(m_xmf3Velocity);
+
+    m_xmf3Accel = { 0.f, -1.f, 0.f };
 }
 
 CDamageTextBlock::~CDamageTextBlock()
@@ -270,14 +276,17 @@ CDamageTextBlock::~CDamageTextBlock()
 void CDamageTextBlock::Update(const float& fTimeElapsed)
 {
     m_fLifeTime -= fTimeElapsed;
+    if (m_fLifeTime < 0.f)
+    {
+        m_isDead = true; 
+        return;
+    }
 
     //m_xmf3WorldPos.y += fTimeElapsed * 1.f;
     m_fTime += fTimeElapsed;
     float t = m_fTime, tt = t * t * 0.5f;
-    static XMFLOAT3 xmf3Velocity = { 0.2f, 0.5f, 0.3f };
-    static XMFLOAT3 xmf3Accel = { 0.f, -2.f, 0.f };
 
-    m_xmf3WorldPos = Vector3::Add(m_xmf3WorldPos, Vector3::Add(Vector3::ScalarProduct(xmf3Accel, tt, false), Vector3::ScalarProduct(xmf3Velocity, t, false)));
+    m_xmf3WorldPos = Vector3::Add(m_xmf3WorldPos, Vector3::Add(Vector3::ScalarProduct(m_xmf3Accel, tt, false), Vector3::ScalarProduct(m_xmf3Velocity, t, false)));
     //m_xmf3WorldPos = Vector3::ScalarProduct(xmf3Velocity, t, false);
 
 
@@ -286,4 +295,30 @@ void CDamageTextBlock::Update(const float& fTimeElapsed)
     XMFLOAT3 xmf3ScreenPos = UILayer::WorldToScreen(m_xmf3WorldPos);
     m_d2dLayoutRect.left = xmf3ScreenPos.x;
     m_d2dLayoutRect.top = xmf3ScreenPos.y;
+}
+
+
+CNPCTextBlock::CNPCTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText)
+    :CTextBlock(pdwFormat, d2dLayoutRect, strText)
+{
+    m_strTotalText = L"안녕. 나는 NPC야. 이건 Test글씨야 123412341234 ㅋㅋㅋㅋㅋ";
+
+    m_d2dLayoutRect.left = FRAME_BUFFER_WIDTH * 0.5f;
+    m_d2dLayoutRect.top = FRAME_BUFFER_HEIGHT * 0.5f;
+}
+
+CNPCTextBlock::~CNPCTextBlock()
+{
+}
+
+void CNPCTextBlock::Update(const float& fTimeElapsed)
+{
+    m_fTime += fTimeElapsed;
+    if (m_fTime > 0.1f && m_iIndex < m_strTotalText.size())
+    {
+        //m_strText.assign(m_strTotalText, 0, ++m_iIndex);
+        m_strText.append(m_strTotalText, m_iIndex++, 1);
+
+        m_fTime = 0.f;
+    }
 }
