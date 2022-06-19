@@ -501,3 +501,64 @@ void CGolemObject::Check_Collision()
 		}
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+CCactiBulletObject::CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	//TODO - 파일이름 바꾸기
+	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map/SM_bush_01.bin", nullptr);
+	SetChild(pModel->m_pModelRootObject, true);
+
+	SetScale(XMFLOAT3{ 0.2f, 0.2f, 0.2f });
+
+	//TODO - 캣티가 만들 것
+	/*if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+	{
+		CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
+		XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition(), xmf3Target = m_pPlayer->GetPosition();
+		xmf3Pos.y += 1;
+		xmf3Target.z += 1;
+		pObj->SetTarget(xmf3Pos, xmf3Target);
+		pObj->SetActiveState(true);
+	}*/
+}
+
+CCactiBulletObject::~CCactiBulletObject()
+{
+}
+
+#define CACTI_BULLET_TIME 3.f
+void CCactiBulletObject::Animate(float fTimeElapsed)
+{
+	if (!m_isActive) return;
+
+	m_fTime -= fTimeElapsed;
+	if (m_fTime < 0)
+	{
+		m_isActive = false;
+		return;
+	}
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed, false));
+	SetPosition(xmf3Pos);
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CCactiBulletObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	if (!m_isActive) return;
+
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target)
+{
+	m_fTime = CACTI_BULLET_TIME;
+
+	SetPosition(xmf3Start);
+
+	m_xmf3Target = Vector3::Subtract(xmf3Target, xmf3Start, true, true);
+}

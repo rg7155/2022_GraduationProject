@@ -5,6 +5,7 @@
 #include "stdafx.h"
 #include "Scene.h"
 #include "CollsionMgr.h"
+#include "Monster.h"
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -61,13 +62,16 @@ void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_ppPipelineShaders = new CShader * [m_nPipelineShaders];
 
 	//파이프라인 3개!!!!!!!!
-	pShader = new CTexturedShader(3);
+	pShader = new CTexturedShader(2);
 	pShader->AddRef(); //다른 오브젝트에서도 참조하기 때문에
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
 	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 1); //알파값 변하는
-	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 2); //데미지 폰트
-
 	m_ppPipelineShaders[PIPE_TEXTURE] = pShader;
+
+	pShader = new CStandardShader(1); //일반 오브젝트용 ex)선인장 가시
+	pShader->AddRef(); 
+	pShader->CreateShader(pd3dDevice, m_pd3dGraphicsRootSignature, 0);
+	m_ppPipelineShaders[PIPE_STANDARD] = pShader;
 
 	//////////////////////////////////////////////////
 
@@ -126,27 +130,14 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pStandardObjectShader->AddObject(L"Quake", pObj);
 	}
 
-	//데미지 폰트
-	for (int i = 0; i < 5; ++i)
+	//캣티 총알
+	for (int i = 0; i < 10; ++i)
 	{
-		pObj = new CDamageFontObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
-		i == 0 ? pObj->SetActiveState(true) : pObj->SetActiveState(false);
-		m_pStandardObjectShader->AddObject(L"DamgeFont", pObj);
+		pObj = new CCactiBulletObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+		pObj->SetActiveState(false);
+		m_pStandardObjectShader->AddObject(L"CactiBullet", pObj);
 	}
 
-
-
-	////hp,hpFrame
-	//for (int i = 0; i < 5; ++i)
-	//{
-	//	pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
-	//	pObj->SetActiveState(false);
-	//	m_pStandardObjectShader->AddObject(L"Hp", pObj);
-
-	//	pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
-	//	pObj->SetActiveState(false);
-	//	m_pStandardObjectShader->AddObject(L"HpFrame", pObj);
-	//}
 }
 
 

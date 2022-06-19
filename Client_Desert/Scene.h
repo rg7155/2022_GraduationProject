@@ -40,7 +40,7 @@ class CTextureToViewportShader;
 class CScene
 {
 public:
-	enum PIPELINE { PIPE_TEXTURE, PIPE_END };
+	enum PIPELINE { PIPE_TEXTURE, PIPE_STANDARD, PIPE_END };
 
 	CShader* GetPipelineShader(PIPELINE ePipe) { return m_ppPipelineShaders[ePipe]; }
 

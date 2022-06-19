@@ -98,3 +98,24 @@ private:
 public:
 	short	m_targetId;
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+class CCactiBulletObject : public CGameObject
+{
+public:
+	CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual ~CCactiBulletObject();
+
+public:
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+
+public:
+	void	SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target);
+
+private:
+	XMFLOAT3	m_xmf3Target = {};
+	float		m_fTime = 0;
+
+};

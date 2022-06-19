@@ -201,31 +201,3 @@ private:
 	bool	m_isAlphaObject = false;
 };
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-class CDamageFontObject : public CGameObject
-{
-public:
-	CDamageFontObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
-	virtual ~CDamageFontObject();
-
-public:
-	virtual void Animate(float fTimeElapsed) override;
-	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
-	virtual void AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline) override;
-
-public:
-	void		SetDamageFont(int iDamage);
-
-private:
-	void		WorldToViewPort(XMFLOAT3 xmf3Pos);
-
-
-private:
-	float		m_fAlpha = 0.f;
-	int			m_iDamage = 0;
-	string		m_strDamage = "";
-	vector<CGameObject*> vecSubObject;
-	XMFLOAT3	m_xmf3ScreenPos;
-
-};
