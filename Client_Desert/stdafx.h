@@ -30,6 +30,7 @@
 #include <fstream>
 #include <vector>
 #include <map>
+#include <unordered_map>
 #include <list>
 #include <queue>
 #include <stack>
@@ -42,6 +43,11 @@
 #include <DirectXPackedVector.h>
 #include <DirectXColors.h>
 #include <DirectXCollision.h>
+
+#include <dxgi1_6.h>
+#include <d2d1_3.h>
+#include <d3d11on12.h>
+#include <dwrite.h>
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>
@@ -79,6 +85,11 @@ extern HINSTANCE						ghAppInstance;
 #pragma comment(lib, "dxguid.lib")
 #pragma comment(lib, "dinput8.lib")
 #pragma comment(lib, "Winmm.lib")
+
+#pragma comment(lib, "d3d11.lib")
+#pragma comment(lib, "d2d1.lib")
+#pragma comment(lib, "dwrite.lib")
+
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 

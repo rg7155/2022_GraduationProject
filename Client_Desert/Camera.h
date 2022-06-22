@@ -46,6 +46,7 @@ public:
 	XMFLOAT4X4						m_xmf4x4View;
 	XMFLOAT4X4						m_xmf4x4Projection;
 	XMFLOAT4X4						m_xmf4x4OrthoProjection;
+	XMFLOAT4X4						m_xmf4x4ViewPort;
 
 public:
 	CCamera();
@@ -96,6 +97,9 @@ public:
 
 	XMFLOAT4X4 GetViewMatrix() { return(m_xmf4x4View); }
 	XMFLOAT4X4 GetProjectionMatrix() { return(m_xmf4x4Projection); }
+	XMFLOAT4X4 GetOrthoProjectionMatrix() { return(m_xmf4x4OrthoProjection); }
+	XMFLOAT4X4 GetViewPortMatrix() { return(m_xmf4x4ViewPort); }
+
 	D3D12_VIEWPORT GetViewport() { return(m_d3dViewport); }
 	D3D12_RECT GetScissorRect() { return(m_d3dScissorRect); }
 

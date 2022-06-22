@@ -125,7 +125,9 @@ public:
 	void				SetInactiveAllObject();
 	void				UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 public:
-	map<const wchar_t*, list<CGameObject*>>		m_mapObject;
+	//map<const wchar_t*, list<CGameObject*>>		m_mapObject;
+	unordered_map<const wchar_t*, list<CGameObject*>>		m_mapObject;
+	
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

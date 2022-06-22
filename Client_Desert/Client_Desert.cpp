@@ -68,6 +68,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	std::cout << "IP를 입력하세요:";
 	std::cin >> ip;
 
+	if (ip == "1")
+		ip= "127.0.0.1";
+
 	std::wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData); // 소켓 네트워킹 시작 - 윈도우만

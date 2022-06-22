@@ -14,6 +14,7 @@ struct CB_FRAMEWORK_INFO
 	float					m_fShadowMapIndex;
 };
 
+class UILayer;
 class CGameFramework
 {
 public:
@@ -105,6 +106,8 @@ private:
 	float						m_fShadowMapIndex = 0;
 
 	bool						m_isCursorFix = false;
+
+	UILayer						*m_pUILayer = NULL;
 
 public:
 	int							m_iId;

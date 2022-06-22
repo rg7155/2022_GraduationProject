@@ -76,6 +76,9 @@
     <Filter Include="소스 파일\03. GameObject\01. Child">
       <UniqueIdentifier>{70875fbc-5eaf-4262-b4b0-34462e36488b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="소스 파일\10. UILayer">
+      <UniqueIdentifier>{1561ed29-1a1b-4c26-968a-604fad4142f1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Client_Desert.h">
@@ -189,6 +192,9 @@
     <ClInclude Include="DirectX_option.h">
       <Filter>소스 파일\98. Header</Filter>
     </ClInclude>
+    <ClInclude Include="UILayer.h">
+      <Filter>소스 파일\10. UILayer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -277,6 +283,9 @@
     </ClCompile>
     <ClCompile Include="ChildObject.cpp">
       <Filter>소스 파일\03. GameObject\01. Child</Filter>
+    </ClCompile>
+    <ClCompile Include="UILayer.cpp">
+      <Filter>소스 파일\10. UILayer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

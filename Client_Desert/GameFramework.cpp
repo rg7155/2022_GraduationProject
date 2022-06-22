@@ -6,6 +6,7 @@
 #include "GameFramework.h"
 #include "InputDev.h"
 #include "GameMgr.h"
+#include "UILayer.h"
 
 #define FRAME 60.f
 
@@ -435,6 +436,11 @@ void CGameFramework::OnDestroy()
 
 void CGameFramework::BuildObjects()
 {
+	m_pUILayer = new UILayer(m_nSwapChainBuffers, m_pd3dDevice, m_pd3dCommandQueue);
+	m_pUILayer->Resize(m_ppd3dSwapChainBackBuffers, m_nWndClientWidth, m_nWndClientHeight);
+
+
+
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	CGameMgr::GetInstance()->SetDevice(m_pd3dDevice);
@@ -460,6 +466,9 @@ void CGameFramework::BuildObjects()
 	
 	m_pScene->m_pDepthRenderShader->m_pPlayer = m_pPlayer;
 	//m_pScene->m_pShadowShader->m_pPlayer = m_pPlayer;
+
+		//
+
 	/// ///////////////////
 
 	CreateShaderVariables();
@@ -480,6 +489,9 @@ void CGameFramework::BuildObjects()
 void CGameFramework::ReleaseObjects()
 {
 	ReleaseShaderVariables();
+
+	if (m_pUILayer) m_pUILayer->ReleaseResources();
+	if (m_pUILayer) delete m_pUILayer;
 
 	if (m_pPlayer) m_pPlayer->Release();
 
@@ -522,6 +534,14 @@ void CGameFramework::AnimateObjects()
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
+
+	if(CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
+	{
+		XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
+		int iDamage = rand() % 999 + 1;
+		m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
+	}
+	m_pUILayer->Update(fTimeElapsed);
 }
 
 //#define _WITH_PLAYER_TOP
@@ -570,10 +590,10 @@ void CGameFramework::FrameAdvance()
 #endif
 	//if (m_pPlayer) m_pPlayer->Render(m_pd3dCommandList, m_pCamera);
 
-	d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
-	d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
-	d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-	m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
+	//d3dResourceBarrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;
+	//d3dResourceBarrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PRESENT;
+	//d3dResourceBarrier.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
+	//m_pd3dCommandList->ResourceBarrier(1, &d3dResourceBarrier);
 
 	hResult = m_pd3dCommandList->Close();
 
@@ -581,6 +601,8 @@ void CGameFramework::FrameAdvance()
 	m_pd3dCommandQueue->ExecuteCommandLists(1, ppd3dCommandLists);
 
 	WaitForGpuComplete();
+
+	m_pUILayer->Render(m_nSwapChainBufferIndex);
 
 #ifdef _WITH_PRESENT_PARAMETERS
 	DXGI_PRESENT_PARAMETERS dxgiPresentParameters;

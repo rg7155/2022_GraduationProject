@@ -608,6 +608,9 @@ void CGameObject::SetCBVInfo(ID3D12GraphicsCommandList* pd3dCommandList, CBV_TYP
 	case CGameObject::CBV_COLOR:
 		memcpy(&m_pcbMappedSubInfo->m_xmf4Color, pArg, sizeof(XMFLOAT4));
 		break;
+	case CGameObject::CBV_DAMAGE_NUMBER:
+		memcpy(&m_pcbMappedSubInfo->m_fDamageNumber, pArg, sizeof(float));
+		break;
 	}
 
 	UpdateShaderVariables_Sub(pd3dCommandList);

@@ -203,12 +203,24 @@ void CTrailObject::SetColor(bool isHero)
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList) : CGameObject(1)
+CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, SPRITE_TYPE eType) : CGameObject(1)
 {
 	//m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
 
 	m_xmf4x4Texture = Matrix4x4::Identity();
 	m_fSpeed = 0.001f;
+	//m_xmf4Color = { 1.f, 1.f, 1.f, 1.f };
+
+	m_eType = eType;
+	switch (eType)
+	{
+	case CMultiSpriteObject::SPRITE_WAVE:
+		break;
+	case CMultiSpriteObject::SPRITE_HIT:
+		m_isBiliboard = true;
+		m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
+		break;
+	}
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
 }
@@ -230,11 +242,11 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 
 	AnimateRowColumn(m_fTime);
 
-	//if (m_isBiliboard)
-	//{
-	//	XMFLOAT3 xmf3Target = CGameMgr::GetInstance()->GetCamera()->GetPosition();
-	//	SetLookAt(xmf3Target);
-	//}
+	if (m_isBiliboard)
+	{
+		XMFLOAT3 xmf3Target = CGameMgr::GetInstance()->GetCamera()->GetPosition();
+		SetLookAt(xmf3Target);
+	}
 
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -335,9 +347,15 @@ void CNPCObject::Animate(float fTimeElapsed)
 	//	static_cast<CThirdPersonCamera*>(CGameMgr::GetInstance()->GetCamera())->SetFocusOnTarget(true, GetPosition(), xmf3Offset);
 	//}
 
+	
 	float fDistance = Vector3::Distance(CGameMgr::GetInstance()->GetPlayer()->GetPosition(), GetPosition());
 	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
 	else SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = true);
+
+	if (!m_pUIQuest)
+		m_pUIQuest = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+	if (m_isAbleInteraction && CInputDev::GetInstance()->KeyDown(DIKEYBOARD_R))
+		m_pUIQuest->SetActiveState(true);
 
 	CGameObject::Animate(fTimeElapsed);
 
@@ -386,6 +404,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	m_eUIType = eType;
 	m_fAlpha = 1.f;
+	SetActiveState(true);
 	switch (eType)
 	{
 	case CUIObject::UI_FADE:
@@ -406,6 +425,10 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		SetOrthoWorld(100, 100, FRAME_BUFFER_WIDTH - 100.f, FRAME_BUFFER_HEIGHT - 100.f);
 		m_isClickedAble = true;
 		break;
+	case CUIObject::UI_QUEST:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/TextBox.dds", 0);
+		SetOrthoWorld(1000, 300, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f);
+		SetActiveState(false);
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -415,7 +438,6 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	SetMaterial(0, pMaterial);
 
-	SetActiveState(true);
 }
 
 CUIObject::~CUIObject()
@@ -750,4 +772,3 @@ void CTexturedObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	//PSAlphaTextured의 gfDissolve값 설정
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
 }
-
