@@ -3,6 +3,8 @@
 #include "stdafx.h"
 #include "Object.h"
 
+
+
 class CTexturedObject;
 class CMonsterObject : public CGameObject
 {
@@ -133,6 +135,39 @@ public:
 
 };
 
+class CCactusObject : public CMonsterObject
+{
+private:
+
+public:
+	CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
+	virtual ~CCactusObject();
+
+public:
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+
+private:
+	CACTUS::ANIM	m_ePrevAnim;			// 이전 애니메이션
+	CACTUS::ANIM	m_eCurAnim;				// 현재 애니메이션
+	float		m_fBlendingTime;		// 블렌딩 시간
+	float		m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
+	float		m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
+	float		m_fLerpSpeed;
+	bool		m_bLerpSpeedOn;
+
+private:
+	bool	m_bBlendingOn;
+
+public:
+	void Change_Animation(CACTUS::ANIM eNewAnim);
+	void Blending_Animation(float fTimeElapsed);
+	void SetNewRotate(XMFLOAT3 xmf3Look);
+
+public:
+	void Check_Collision();
+
+};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CCactiBulletObject : public CGameObject

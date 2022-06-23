@@ -738,18 +738,39 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	//pObj->SetActiveState(true);
 
 
-	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ms01_Golem_5.bin", NULL);
-	m_mapModelInfo.emplace(L"Golem", pModel);
+	//CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/ms01_Golem_5.bin", NULL);
+	//m_mapModelInfo.emplace(L"Golem", pModel);
 
-	CMonsterObject* pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
-	AddObject(L"Golem", pObj);
+	//CMonsterObject* pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	////pObj->SetActiveState(true);
+	//AddObject(L"Golem", pObj);
+	//
 
-	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cacti.bin", NULL);
-	m_mapModelInfo.emplace(L"Cacti", pModel);
+	//// Cacti
+	//pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cacti.bin", NULL);
+	//m_mapModelInfo.emplace(L"Cacti", pModel);
 
-	pObj = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
-	pObj->SetActiveState(true);
-	AddObject(L"Cacti", pObj);
+	//pObj = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//pObj->SetActiveState(true);
+	//pObj->SetPosition(CACTI_POS_INIT1);
+	//pObj->SetLookAt(XMFLOAT3(CACTI_POS_AFTER1));
+	//AddObject(L"Cacti", pObj);
+
+	//pObj = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//pObj->SetActiveState(true);
+	//pObj->SetPosition(CACTI_POS_INIT2);
+	//pObj->SetLookAt(XMFLOAT3(CACTI_POS_AFTER2));
+	//AddObject(L"Cacti", pObj);
+
+	//// Cactus
+	//pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cactus.bin", NULL);
+	//m_mapModelInfo.emplace(L"Cactus", pModel);
+
+	//pObj = new CCactusObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//pObj->SetActiveState(false);
+	//pObj->SetPosition(CACTUS_POS_INIT);
+	//AddObject(L"Cactus", pObj);
+
 }
 
 void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState/* = 0*/, bool isChangePipeline /*= true*/)

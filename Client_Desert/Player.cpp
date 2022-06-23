@@ -46,7 +46,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
+	//SetPosition(CACTI_POS_INIT1);
 	
 	char fileName[2048];
 	m_iId = *((int*)pContext);
