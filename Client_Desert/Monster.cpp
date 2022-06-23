@@ -571,13 +571,12 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	{
 		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
-
 	}
 
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
-	m_eCurAnim = CACTI::ANIM::IDLE;
-	m_ePrevAnim = CACTI::ANIM::IDLE;
+	m_eCurAnim = CACTI::ANIM::WALK;
+	m_ePrevAnim = CACTI::ANIM::WALK;
 
 	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
 	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
@@ -586,7 +585,9 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_fAnimMaxTime = 0.f;
 	m_fBlendingTime = 0.f;
 
-	SetLookAt(XMFLOAT3(0.f, 0.f, -1.f));
+	//SetLookAt(XMFLOAT3(0.f, 0.f, -0.f));
+	//SetLookAt(XMFLOAT3(0.f, 0.f, 0.f));
+	Rotate(90.f, 0.f, 0.f);
 	SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
 
 	m_isActive = false;
@@ -599,6 +600,15 @@ CCactiObject::~CCactiObject()
 void CCactiObject::Animate(float fTimeElapsed)
 {
 	CMonsterObject::Animate(fTimeElapsed);
+	XMFLOAT3 xmf3Pos = GetPosition();
+	XMFLOAT3 xmf3Look = GetLook();
+	xmf3Pos.x += xmf3Look.x;
+	//xmf3Pos.y += 0.1f;
+	xmf3Pos.z += fTimeElapsed * 10.f;
+	SetPosition(xmf3Pos);
+	xmf3Pos = GetPosition();
+	if (xmf3Pos.z > 100.f)
+		xmf3Pos.z = 100.f;
 
 }
 

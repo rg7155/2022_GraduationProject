@@ -29,8 +29,16 @@ namespace GOLEM
 namespace CACTI
 {
 	enum ANIM {
-		IDLE = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3,
-		DAMAGED_RIGHT = 4, DAMAGED_LEFT = 5, DIE = 6, GETUP = 7, END = 8
+		WALK = 0, IDLE = 1, ATTACK1 = 2, ATTACK2 = 3,
+		DIE = 4, BITE = 5, END = 6
+	};
+}
+
+namespace CACTUS
+{
+	enum ANIM {
+		SPAWN = 0, IDLE = 1, ATTACK1 = 2, ATTACK2 = 3,
+		ATTACK3 = 4, DIE = 5, END = 6
 	};
 }
 //string COM_FRUSTUM = "Frustum";
