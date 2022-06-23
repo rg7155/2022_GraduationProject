@@ -12,6 +12,11 @@ constexpr auto CACTUS_POS_INIT = XMFLOAT3(127.f, 0.f, 100.f);
 constexpr char CACTI1 = 1;
 constexpr char CACTI2 = 2;
 
+constexpr char VERSE1 = 0;
+constexpr char VERSE2 = 1;
+constexpr char VERSE3 = 2;
+constexpr char VERSE4 = 3;
+
 class CTexturedObject;
 class CMonsterObject : public CGameObject
 {
@@ -114,7 +119,7 @@ private:
 
 public:
 	CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		CLoadedModelInfo* pModel, char type);
+		CLoadedModelInfo* pModel, char type, CGameObject* pCactusObject = nullptr);
 	virtual ~CCactiObject();
 
 public:
@@ -134,7 +139,10 @@ private:
 	bool		m_bBlendingOn;
 
 public:
-	XMFLOAT3	m_AfterPos;
+	XMFLOAT3		m_AfterPos;
+	CGameObject*	m_pCactusObject;
+	char			m_nowVerse;
+
 
 public:
 	void Change_Animation(CACTI::ANIM eNewAnim);

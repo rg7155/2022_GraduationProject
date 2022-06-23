@@ -564,7 +564,7 @@ void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target)
 }
 
 CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-	ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, char type)
+	ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, char type, CGameObject* pCactusObject)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, CACTI::ANIM::END, pModel);
@@ -597,6 +597,8 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_AfterPos = CACTI_POS_AFTER2;
 	}
 	
+	m_pCactusObject = pCactusObject;
+	m_nowVerse = VERSE1;
 }
 
 CCactiObject::~CCactiObject()
@@ -605,20 +607,33 @@ CCactiObject::~CCactiObject()
 
 void CCactiObject::Animate(float fTimeElapsed)
 {
+	//Blending_Animation(fTimeElapsed);
+
 	CMonsterObject::Animate(fTimeElapsed);
 	XMFLOAT3 xmf3Pos = GetPosition();
 	XMFLOAT3 xmf3Look = GetLook();
 
-	XMFLOAT3 moveSize = xmf3Look;
-	moveSize.x *= fTimeElapsed * 4.f;
-	moveSize.z *= fTimeElapsed * 4.f;
+	if (VERSE1 == m_nowVerse) {
+		XMFLOAT3 moveSize = xmf3Look;
+		moveSize.x *= fTimeElapsed * 4.f;
+		moveSize.z *= fTimeElapsed * 4.f;
 
-	XMFLOAT3 newPos = Vector3::Add(xmf3Pos, moveSize);
-	SetPosition(newPos);
-	xmf3Pos = GetPosition();
-	float dis = Vector3::Distance(xmf3Pos, m_AfterPos);
-	if (dis < 0.1f)
-		SetPosition(m_AfterPos);
+		XMFLOAT3 newPos = Vector3::Add(xmf3Pos, moveSize);
+		SetPosition(newPos);
+		xmf3Pos = GetPosition();
+		float dis = Vector3::Distance(xmf3Pos, m_AfterPos);
+		if (dis < 0.1f) {
+
+			SetPosition(m_AfterPos);
+			m_nowVerse = VERSE2;
+
+			if(nullptr != m_pCactusObject)
+				m_pCactusObject->SetActiveState(true);
+
+			//Change_Animation(CACTI::IDLE);
+		}
+	}
+	
 }
 
 void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
@@ -630,10 +645,50 @@ void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 
 void CCactiObject::Change_Animation(CACTI::ANIM eNewAnim)
 {
+	if (m_eCurAnim == eNewAnim)
+		return;
+
+	m_ePrevAnim = m_eCurAnim;
+	m_eCurAnim = eNewAnim;
+
+	m_fAnimElapsedTime = 0.f;
+	m_fBlendingTime = 0.f;
+	m_bBlendingOn = true;
+	for (int i = 0; i < CACTI::ANIM::END; i++)
+	{
+		if (i == m_ePrevAnim || i == m_eCurAnim)
+			continue;
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+		m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
+	}
+	// 애니메이션 진행시간 
+	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
+
+
 }
 
 void CCactiObject::Blending_Animation(float fTimeElapsed)
 {
+	if (!m_bBlendingOn)
+		return;
+
+	m_fBlendingTime += fTimeElapsed * 2.f;
+
+	if (m_fBlendingTime >= 1.f)
+	{
+		m_bBlendingOn = false;
+		m_pSkinnedAnimationController->SetTrackEnable(m_ePrevAnim, false);
+		m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 0.f);
+		m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 1.f);
+
+		return;
+	}
+
+
+	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f - m_fBlendingTime);
+	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fBlendingTime);
 }
 
 void CCactiObject::SetNewRotate(XMFLOAT3 xmf3Look)
@@ -682,7 +737,8 @@ CCactusObject::~CCactusObject()
 
 void CCactusObject::Animate(float fTimeElapsed)
 {
-	CMonsterObject::Animate(fTimeElapsed);
+	if(m_isActive)
+		CMonsterObject::Animate(fTimeElapsed);
 
 }
 
