@@ -3,7 +3,14 @@
 #include "stdafx.h"
 #include "Object.h"
 
+constexpr auto CACTI_POS_INIT1 = XMFLOAT3(84.f, 0.f, 96.f);
+constexpr auto CACTI_POS_INIT2 = XMFLOAT3(100.f, 0.f, 85.f);
+constexpr auto CACTI_POS_AFTER1 = XMFLOAT3(127.f, 0.f, 105.f);
+constexpr auto CACTI_POS_AFTER2 = XMFLOAT3(127.f, 0.f, 95.f);
+constexpr auto CACTUS_POS_INIT = XMFLOAT3(127.f, 0.f, 100.f);
 
+constexpr char CACTI1 = 1;
+constexpr char CACTI2 = 2;
 
 class CTexturedObject;
 class CMonsterObject : public CGameObject
@@ -106,7 +113,8 @@ class CCactiObject : public CMonsterObject
 private:
 
 public:
-	CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
+	CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
+		CLoadedModelInfo* pModel, char type);
 	virtual ~CCactiObject();
 
 public:
@@ -123,7 +131,10 @@ private:
 	bool		m_bLerpSpeedOn;
 
 private:
-	bool	m_bBlendingOn;
+	bool		m_bBlendingOn;
+
+public:
+	XMFLOAT3	m_AfterPos;
 
 public:
 	void Change_Animation(CACTI::ANIM eNewAnim);

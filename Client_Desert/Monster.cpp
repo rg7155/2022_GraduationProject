@@ -563,7 +563,8 @@ void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target)
 	m_xmf3Target = Vector3::Subtract(xmf3Target, xmf3Start, true, true);
 }
 
-CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, char type)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, CACTI::ANIM::END, pModel);
@@ -585,12 +586,17 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	m_fAnimMaxTime = 0.f;
 	m_fBlendingTime = 0.f;
 
-	//SetLookAt(XMFLOAT3(0.f, 0.f, -0.f));
-	//SetLookAt(XMFLOAT3(0.f, 0.f, 0.f));
-	Rotate(90.f, 0.f, 0.f);
-	//SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
+	if (type == CACTI1) {
+		SetPosition(CACTI_POS_INIT1);
+		SetLookAt(XMFLOAT3(CACTI_POS_AFTER1));
+		m_AfterPos = CACTI_POS_AFTER1;
+	}
+	else {
+		SetPosition(CACTI_POS_INIT2);
+		SetLookAt(XMFLOAT3(CACTI_POS_AFTER2));
+		m_AfterPos = CACTI_POS_AFTER2;
+	}
 	
-	//m_isActive = false;
 }
 
 CCactiObject::~CCactiObject()
@@ -603,16 +609,16 @@ void CCactiObject::Animate(float fTimeElapsed)
 	XMFLOAT3 xmf3Pos = GetPosition();
 	XMFLOAT3 xmf3Look = GetLook();
 
-	xmf3Pos.x += xmf3Look.x;
-	//xmf3Pos.y += 0.1f;
-	xmf3Pos.z += fTimeElapsed * 10.f;
-	SetPosition(xmf3Pos);
-	xmf3Pos = GetPosition();
-	if (xmf3Pos.z > 50.f) {
-		xmf3Pos.z = 100.f;
-		SetPosition(xmf3Pos);
-	}
+	XMFLOAT3 moveSize = xmf3Look;
+	moveSize.x *= fTimeElapsed * 4.f;
+	moveSize.z *= fTimeElapsed * 4.f;
 
+	XMFLOAT3 newPos = Vector3::Add(xmf3Pos, moveSize);
+	SetPosition(newPos);
+	xmf3Pos = GetPosition();
+	float dis = Vector3::Distance(xmf3Pos, m_AfterPos);
+	if (dis < 0.1f)
+		SetPosition(m_AfterPos);
 }
 
 void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
@@ -650,6 +656,9 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTUS::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTUS::ANIM::SPAWN]->m_nType = ANIMATION_TYPE_ONCE;
+
+	
 	m_eCurAnim = CACTUS::ANIM::SPAWN;
 	m_ePrevAnim = CACTUS::ANIM::SPAWN;
 
@@ -662,7 +671,6 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	//SetLookAt(XMFLOAT3(0.f, 0.f, -0.f));
 	//SetLookAt(XMFLOAT3(0.f, 0.f, 0.f));
-	Rotate(90.f, 0.f, 0.f);
 	//SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
 
 	//m_isActive = false;
