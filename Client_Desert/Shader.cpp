@@ -744,6 +744,12 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	CMonsterObject* pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
 	AddObject(L"Golem", pObj);
 
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cacti.bin", NULL);
+	m_mapModelInfo.emplace(L"Cacti", pModel);
+
+	pObj = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	pObj->SetActiveState(true);
+	AddObject(L"Cacti", pObj);
 }
 
 void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState/* = 0*/, bool isChangePipeline /*= true*/)

@@ -562,3 +562,65 @@ void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target)
 
 	m_xmf3Target = Vector3::Subtract(xmf3Target, xmf3Start, true, true);
 }
+
+CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
+{
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, CACTI::ANIM::END, pModel);
+	for (int i = 0; i < CACTI::ANIM::END; i++)
+	{
+		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+
+	}
+
+
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
+	m_eCurAnim = CACTI::ANIM::IDLE;
+	m_ePrevAnim = CACTI::ANIM::IDLE;
+
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
+	m_bBlendingOn = false;
+	m_fAnimElapsedTime = 0.f;
+	m_fAnimMaxTime = 0.f;
+	m_fBlendingTime = 0.f;
+
+	SetLookAt(XMFLOAT3(0.f, 0.f, -1.f));
+	SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
+
+	m_isActive = false;
+}
+
+CCactiObject::~CCactiObject()
+{
+}
+
+void CCactiObject::Animate(float fTimeElapsed)
+{
+	CMonsterObject::Animate(fTimeElapsed);
+
+}
+
+void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	//if (!m_isActive) return;
+
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CCactiObject::Change_Animation(CACTI::ANIM eNewAnim)
+{
+}
+
+void CCactiObject::Blending_Animation(float fTimeElapsed)
+{
+}
+
+void CCactiObject::SetNewRotate(XMFLOAT3 xmf3Look)
+{
+}
+
+void CCactiObject::Check_Collision()
+{
+}

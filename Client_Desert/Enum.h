@@ -26,6 +26,12 @@ namespace GOLEM
 	};
 }
 
-
+namespace CACTI
+{
+	enum ANIM {
+		IDLE = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3,
+		DAMAGED_RIGHT = 4, DAMAGED_LEFT = 5, DIE = 6, GETUP = 7, END = 8
+	};
+}
 //string COM_FRUSTUM = "Frustum";
 #endif // Eunm_h__
