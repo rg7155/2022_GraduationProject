@@ -17,6 +17,8 @@ constexpr char VERSE2 = 1;
 constexpr char VERSE3 = 2;
 constexpr char VERSE4 = 3;
 
+constexpr float ATTACK_COOLTIME = 1.5f;
+
 class CTexturedObject;
 class CMonsterObject : public CGameObject
 {
@@ -36,8 +38,19 @@ public:
 	virtual void OnPrepareRender();
 	void UpdateHpBar(float fTimeElapsed);
 	void SetHp(int iDamage);
-	void MakeHitEffect();
+	void MakeHitEffect();	
+	
+	virtual void	CollsionDetection(CGameObject* pObj) override;
+	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void	UpdateComponent(float fTimeElapsed);
 
+public:
+	void ResetAttackCoolTime(bool bIgnore=true);
+	void UpdateAttackCoolTime(float fTimeElapsed);
+
+protected:
+	float	fAttackCoolTime = 0.f;
+	bool	bAttackInvalid = false;
 protected:
 	float	m_fDissolve = 0.f; //0~1사이 값
 
@@ -55,6 +68,10 @@ protected:
 	CTexturedObject				*m_pHp = NULL;
 	CTexturedObject				*m_pHpFrame = NULL;
 	float						m_fHpOffsetY = 0.f;
+
+protected:
+	CCollision* m_pComCollision = nullptr;
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -83,6 +100,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void	CollsionDetection(CGameObject* pObj) override;
 
 private:
 	GOLEM::ANIM	m_ePrevAnim;			// 이전 애니메이션
@@ -125,6 +143,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void	CollsionDetection(CGameObject* pObj) override;
 
 private:
 	CACTI::ANIM	m_ePrevAnim;			// 이전 애니메이션
@@ -142,15 +161,13 @@ public:
 	XMFLOAT3		m_AfterPos;
 	CGameObject*	m_pCactusObject;
 	char			m_nowVerse;
+	CCollision*		m_pComCollision = nullptr;
 
 
 public:
 	void Change_Animation(CACTI::ANIM eNewAnim);
 	void Blending_Animation(float fTimeElapsed);
 	void SetNewRotate(XMFLOAT3 xmf3Look);
-
-public:
-	void Check_Collision();
 
 };
 
@@ -161,6 +178,7 @@ private:
 public:
 	CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
 	virtual ~CCactusObject();
+	virtual void	CollsionDetection(CGameObject* pObj) override;
 
 public:
 	virtual void Animate(float fTimeElapsed) override;
@@ -182,9 +200,6 @@ public:
 	void Change_Animation(CACTUS::ANIM eNewAnim);
 	void Blending_Animation(float fTimeElapsed);
 	void SetNewRotate(XMFLOAT3 xmf3Look);
-
-public:
-	void Check_Collision();
 
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

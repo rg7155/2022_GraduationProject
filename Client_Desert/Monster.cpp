@@ -46,8 +46,11 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	m_xmf3Look = { 0.f, 0.f, 1.f };
 	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_eObjId = OBJ_MONSTER;
 
 	//SetPosition(XMFLOAT3(10.f, 0.f, 20.f));
+
+	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 }
 
 CMonsterObject::~CMonsterObject()
@@ -72,7 +75,8 @@ void CMonsterObject::Animate(float fTimeElapsed)
 		return; 
 
 	UpdateHpBar(fTimeElapsed);
-
+	UpdateComponent(fTimeElapsed);
+	UpdateAttackCoolTime(fTimeElapsed);
 	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
 	//{
 	//	SetDamaged(10);
@@ -212,6 +216,60 @@ void CMonsterObject::MakeHitEffect()
 	pObj->SetPosition(xmf3Pos);
 
 	cout << "MakeEff" << endl;
+}
+
+void CMonsterObject::CollsionDetection(CGameObject* pObj)
+{
+	OBJ_ID eObjId = pObj->m_eObjId;
+
+	switch (eObjId)
+	{
+	case OBJ_SWORD:
+		cout << "칼과 충돌 했다!" << endl;
+		ResetAttackCoolTime();
+		break;
+	default:
+		break;
+	}
+
+}
+
+void CMonsterObject::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_pComponent[COM_COLLISION] = CCollision::Create();
+
+	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
+	m_pComCollision->m_isStaticOOBB = false;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	m_pComCollision->UpdateBoundingBox();
+}
+
+void CMonsterObject::UpdateComponent(float fTimeElapsed)
+{
+	for (int i = 0; i < COM_END; ++i)
+		if (m_pComponent[i])
+			m_pComponent[i]->Update_Component(fTimeElapsed);
+
+	if (m_pComCollision)
+		m_pComCollision->UpdateBoundingBox();
+}
+
+void CMonsterObject::ResetAttackCoolTime(bool bIgnore /*= true*/)
+{
+	m_pComCollision->m_isCollisionIgnore = bIgnore;
+	bAttackInvalid = bIgnore;
+	fAttackCoolTime = 0.f;
+}
+
+void CMonsterObject::UpdateAttackCoolTime(float fTimeElapsed)
+{
+	fAttackCoolTime += fTimeElapsed;
+	if (fAttackCoolTime > ATTACK_COOLTIME)
+	{
+		ResetAttackCoolTime(false);
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -367,6 +425,21 @@ void CGolemObject::Animate(float fTimeElapsed)
 void CGolemObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
 	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CGolemObject::CollsionDetection(CGameObject* pObj)
+{
+	OBJ_ID eObjId = pObj->m_eObjId;
+
+	switch (eObjId)
+	{
+	case OBJ_SWORD:
+		cout << "칼과 충돌 했다!" << endl;
+		ResetAttackCoolTime();
+		break;
+	default:
+		break;
+	}
 }
 
 void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
@@ -576,8 +649,10 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
-	m_eCurAnim = CACTI::ANIM::WALK;
-	m_ePrevAnim = CACTI::ANIM::WALK;
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::BITE]->m_nType = ANIMATION_TYPE_ONCE;
+
+	m_eCurAnim = CACTI::ANIM::IDLE;
+	m_ePrevAnim = CACTI::ANIM::IDLE;
 
 	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
 	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
@@ -613,7 +688,7 @@ void CCactiObject::Animate(float fTimeElapsed)
 	XMFLOAT3 xmf3Pos = GetPosition();
 	XMFLOAT3 xmf3Look = GetLook();
 
-	if (VERSE1 == m_nowVerse) {
+	if (VERSE2 == m_nowVerse) {
 		XMFLOAT3 moveSize = xmf3Look;
 		moveSize.x *= fTimeElapsed * 4.f;
 		moveSize.z *= fTimeElapsed * 4.f;
@@ -641,6 +716,21 @@ void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	//if (!m_isActive) return;
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CCactiObject::CollsionDetection(CGameObject* pObj)
+{
+	OBJ_ID eObjId = pObj->m_eObjId;
+
+	switch (eObjId)
+	{
+	case OBJ_SWORD:
+		cout << "칼과 충돌 했다!" << endl;
+		ResetAttackCoolTime();
+		break;
+	default:
+		break;
+	}
 }
 
 void CCactiObject::Change_Animation(CACTI::ANIM eNewAnim)
@@ -695,10 +785,6 @@ void CCactiObject::SetNewRotate(XMFLOAT3 xmf3Look)
 {
 }
 
-void CCactiObject::Check_Collision()
-{
-}
-
 CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
@@ -735,6 +821,21 @@ CCactusObject::~CCactusObject()
 {
 }
 
+void CCactusObject::CollsionDetection(CGameObject* pObj)
+{
+	OBJ_ID eObjId = pObj->m_eObjId;
+
+	switch (eObjId)
+	{
+	case OBJ_SWORD:
+		cout << "칼과 충돌 했다!" << endl;
+		ResetAttackCoolTime();
+		break;
+	default:
+		break;
+	}
+}
+
 void CCactusObject::Animate(float fTimeElapsed)
 {
 	if(m_isActive)
@@ -757,9 +858,5 @@ void CCactusObject::Blending_Animation(float fTimeElapsed)
 }
 
 void CCactusObject::SetNewRotate(XMFLOAT3 xmf3Look)
-{
-}
-
-void CCactusObject::Check_Collision()
 {
 }

@@ -9,6 +9,7 @@
 #include "InputDev.h"
 #include "Monster.h"
 
+
 CShader::CShader(int nPipelineStates /*= 1*/)
 {
 	m_nPipelineStates = nPipelineStates;

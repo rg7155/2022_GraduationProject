@@ -70,7 +70,6 @@
 
 
 
-
 #define NO_COPY(CLASSNAME)							\
 	private:										\
 	CLASSNAME(const CLASSNAME&);					\

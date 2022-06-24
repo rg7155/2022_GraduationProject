@@ -111,8 +111,15 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_eObjId = OBJ_PLAYER;
 	///////////////////////////////////////////////
 
+	m_pSword->m_pComponent[COM_COLLISION] = CCollision::Create();
 
-
+	CCollision* pCol = static_cast<CCollision*>(m_pSword->m_pComponent[COM_COLLISION]);
+	pCol->m_isStaticOOBB = false;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		pCol->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	pCol->m_pxmf4x4World = &m_xmf4x4World;
+	pCol->UpdateBoundingBox();
+	m_pSword->m_eObjId = OBJ_SWORD;
 }
 
 CPlayer::~CPlayer()
@@ -555,6 +562,17 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		//m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition()); 
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 	}
+
+	m_pSword->m_pComponent[COM_COLLISION]->Update_Component(fTimeElapsed);
+	CCollision* pCol = static_cast<CCollision*>(m_pSword->m_pComponent[COM_COLLISION]);
+	if (pCol)
+		pCol->UpdateBoundingBox();
+
+	// 공격일때만 체크
+	if (IsNowAttack())
+		pCol->m_isCollisionIgnore = false;
+	else
+		pCol->m_isCollisionIgnore = true;
 }
 
 void CPlayer::CollsionDetection(CGameObject* pObj)
