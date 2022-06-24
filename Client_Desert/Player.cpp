@@ -115,9 +115,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	CCollision* pCol = static_cast<CCollision*>(m_pSword->m_pComponent[COM_COLLISION]);
 	pCol->m_isStaticOOBB = false;
-	if (m_pChild && m_pChild->m_isRootModelObject)
-		pCol->m_xmLocalOOBB = m_pChild->m_xmOOBB;
-	pCol->m_pxmf4x4World = &m_xmf4x4World;
+	if (m_pSword->m_pChild && m_pSword->m_pChild->m_isRootModelObject)
+		pCol->m_xmLocalOOBB = m_pSword->m_pChild->m_xmOOBB;
+	pCol->m_pxmf4x4World = &m_pSword->m_xmf4x4World;
 	pCol->UpdateBoundingBox();
 	m_pSword->m_eObjId = OBJ_SWORD;
 }
