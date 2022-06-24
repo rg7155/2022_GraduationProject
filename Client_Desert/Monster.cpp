@@ -639,7 +639,7 @@ void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target)
 }
 
 CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
-	ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, char type, CGameObject* pCactusObject)
+	ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, char type)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, CACTI::ANIM::END, pModel);
@@ -649,9 +649,7 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
 
-
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
-	//m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::BITE]->m_nType = ANIMATION_TYPE_ONCE;
 
 	m_eCurAnim = CACTI::ANIM::IDLE;
 	m_ePrevAnim = CACTI::ANIM::IDLE;
@@ -673,8 +671,6 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		SetLookAt(XMFLOAT3(CACTI_POS_AFTER2));
 		m_AfterPos = CACTI_POS_AFTER2;
 	}
-	
-	m_pCactusObject = pCactusObject;
 	m_nowVerse = VERSE1;
 }
 
@@ -720,8 +716,6 @@ void CCactiObject::Animate(float fTimeElapsed)
 			m_nowVerse = VERSE3;
 			Change_Animation(CACTI::IDLE);
 			Rotate(0.f, 180.f, 0.f);
-			if(nullptr != m_pCactusObject)
-				m_pCactusObject->SetActiveState(true);
 
 			//Change_Animation(CACTI::IDLE);
 		}
@@ -805,7 +799,8 @@ void CCactiObject::SetNewRotate(XMFLOAT3 xmf3Look)
 {
 }
 
-CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
+	ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, CGameObject* pCacti1, CGameObject* pCacti2)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
 	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, CACTUS::ANIM::END, pModel);
@@ -836,6 +831,9 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	//SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
 
 	//m_isActive = false;
+
+	m_pCacti1 = pCacti1;
+	m_pCacti2 = pCacti2;
 }
 
 CCactusObject::~CCactusObject()

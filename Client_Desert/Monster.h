@@ -140,7 +140,7 @@ private:
 
 public:
 	CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, 
-		CLoadedModelInfo* pModel, char type, CGameObject* pCactusObject = nullptr);
+		CLoadedModelInfo* pModel, char type);
 	virtual ~CCactiObject();
 
 public:
@@ -162,9 +162,6 @@ private:
 
 public:
 	XMFLOAT3		m_AfterPos;
-	CGameObject*	m_pCactusObject;
-
-
 
 public:
 	void Change_Animation(CACTI::ANIM eNewAnim);
@@ -178,7 +175,8 @@ class CCactusObject : public CMonsterObject
 private:
 
 public:
-	CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
+	CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel,
+		CGameObject* pCacti1, CGameObject* pCacti2);
 	virtual ~CCactusObject();
 	virtual void	CollsionDetection(CGameObject* pObj) override;
 
@@ -203,6 +201,9 @@ public:
 	void Blending_Animation(float fTimeElapsed);
 	void SetNewRotate(XMFLOAT3 xmf3Look);
 
+public:
+	CGameObject* m_pCacti1;
+	CGameObject* m_pCacti2;
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
