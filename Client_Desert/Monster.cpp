@@ -716,8 +716,9 @@ void CCactiObject::Animate(float fTimeElapsed)
 			m_nowVerse = VERSE3;
 			Change_Animation(CACTI::IDLE);
 			Rotate(0.f, 180.f, 0.f);
-
-			//Change_Animation(CACTI::IDLE);
+			if (m_pCacti && VERSE3 == static_cast<CMonsterObject*>(m_pCacti)->m_nowVerse) {
+				m_pCactus->SetActiveState(true);
+			}
 		}
 	}
 
@@ -857,9 +858,6 @@ void CCactusObject::CollsionDetection(CGameObject* pObj)
 
 void CCactusObject::Animate(float fTimeElapsed)
 {
-	if (!m_isActive)
-		return;
-
 	m_fAnimElapsedTime += fTimeElapsed;
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{

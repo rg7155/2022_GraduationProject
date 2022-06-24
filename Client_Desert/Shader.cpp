@@ -778,6 +778,12 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	pCactus->SetPosition(CACTUS_POS_INIT);
 	AddObject(L"Cactus", pCactus);
 
+	// Cactic ¼¼ÆÃ
+	static_cast<CCactiObject*>(pCacti1)->m_pCactus = pCactus;
+	static_cast<CCactiObject*>(pCacti2)->m_pCactus = pCactus;
+	static_cast<CCactiObject*>(pCacti1)->m_pCacti = pCacti2;
+	static_cast<CCactiObject*>(pCacti2)->m_pCacti = pCacti1;
+
 }
 
 void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState/* = 0*/, bool isChangePipeline /*= true*/)

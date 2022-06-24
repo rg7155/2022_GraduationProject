@@ -71,7 +71,7 @@ protected:
 protected:
 	CCollision* m_pComCollision = nullptr;
 
-protected:
+public:
 	char			m_nowVerse;
 
 
@@ -167,6 +167,10 @@ public:
 	void Change_Animation(CACTI::ANIM eNewAnim);
 	void Blending_Animation(float fTimeElapsed);
 	void SetNewRotate(XMFLOAT3 xmf3Look);
+
+public:
+	CGameObject*	m_pCactus;
+	CGameObject*	m_pCacti;
 
 };
 
