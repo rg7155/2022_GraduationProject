@@ -744,8 +744,14 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 
 	CMonsterObject* pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
 	//pObj->SetActiveState(true);
+	//pObj->SetPosition(CACTI_POS_AFTER1);
 	AddObject(L"Golem", pObj);
 	
+	//pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//pObj->SetActiveState(true);
+	//pObj->SetPosition(CACTI_POS_AFTER2);
+	//AddObject(L"Golem", pObj);
+
 	// Cactus
 	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cactus.bin", NULL);
 	m_mapModelInfo.emplace(L"Cactus", pModel);
@@ -763,9 +769,9 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	pObj->SetActiveState(true);
 	AddObject(L"Cacti", pObj);
 
-	pObj = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel, CACTI2);
-	pObj->SetActiveState(true);
-	AddObject(L"Cacti", pObj);
+	//pObj = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel, CACTI2);
+	//pObj->SetActiveState(true);
+	//AddObject(L"Cacti", pObj);
 
 
 

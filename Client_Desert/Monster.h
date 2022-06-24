@@ -53,7 +53,6 @@ protected:
 	bool	bAttackInvalid = false;
 protected:
 	float	m_fDissolve = 0.f; //0~1»çÀÌ °ª
-
 protected:
 	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);
@@ -71,6 +70,10 @@ protected:
 
 protected:
 	CCollision* m_pComCollision = nullptr;
+
+protected:
+	char			m_nowVerse;
+
 
 };
 
@@ -160,8 +163,7 @@ private:
 public:
 	XMFLOAT3		m_AfterPos;
 	CGameObject*	m_pCactusObject;
-	char			m_nowVerse;
-	CCollision*		m_pComCollision = nullptr;
+
 
 
 public:

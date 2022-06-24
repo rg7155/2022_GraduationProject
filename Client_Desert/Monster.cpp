@@ -77,6 +77,8 @@ void CMonsterObject::Animate(float fTimeElapsed)
 	UpdateHpBar(fTimeElapsed);
 	UpdateComponent(fTimeElapsed);
 	UpdateAttackCoolTime(fTimeElapsed);
+
+
 	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
 	//{
 	//	SetDamaged(10);
@@ -225,7 +227,7 @@ void CMonsterObject::CollsionDetection(CGameObject* pObj)
 	switch (eObjId)
 	{
 	case OBJ_SWORD:
-		cout << "칼과 충돌 했다!" << endl;
+		//cout << "칼과 충돌 했다!" << endl;
 		ResetAttackCoolTime();
 		break;
 	default:
@@ -649,7 +651,7 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
-	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::BITE]->m_nType = ANIMATION_TYPE_ONCE;
+	//m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTI::ANIM::BITE]->m_nType = ANIMATION_TYPE_ONCE;
 
 	m_eCurAnim = CACTI::ANIM::IDLE;
 	m_ePrevAnim = CACTI::ANIM::IDLE;
@@ -684,11 +686,26 @@ void CCactiObject::Animate(float fTimeElapsed)
 {
 	//Blending_Animation(fTimeElapsed);
 
+
+	m_fAnimElapsedTime += fTimeElapsed;
+	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+	{
+		m_fAnimElapsedTime = 0.f;
+		if (m_eCurAnim == CACTI::ANIM::BITE)
+		{
+			Change_Animation(CACTI::ANIM::WALK);
+			m_nowVerse = VERSE2;
+		}
+
+
+	}
+	
 	CMonsterObject::Animate(fTimeElapsed);
-	XMFLOAT3 xmf3Pos = GetPosition();
-	XMFLOAT3 xmf3Look = GetLook();
+
 
 	if (VERSE2 == m_nowVerse) {
+		XMFLOAT3 xmf3Pos = GetPosition();
+		XMFLOAT3 xmf3Look = GetLook();
 		XMFLOAT3 moveSize = xmf3Look;
 		moveSize.x *= fTimeElapsed * 4.f;
 		moveSize.z *= fTimeElapsed * 4.f;
@@ -700,15 +717,16 @@ void CCactiObject::Animate(float fTimeElapsed)
 		if (dis < 0.1f) {
 
 			SetPosition(m_AfterPos);
-			m_nowVerse = VERSE2;
-
+			m_nowVerse = VERSE3;
+			Change_Animation(CACTI::IDLE);
+			Rotate(0.f, 180.f, 0.f);
 			if(nullptr != m_pCactusObject)
 				m_pCactusObject->SetActiveState(true);
 
 			//Change_Animation(CACTI::IDLE);
 		}
 	}
-	
+
 }
 
 void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
@@ -726,6 +744,8 @@ void CCactiObject::CollsionDetection(CGameObject* pObj)
 	{
 	case OBJ_SWORD:
 		cout << "칼과 충돌 했다!" << endl;
+		if(m_nowVerse == VERSE1)
+			Change_Animation(CACTI::BITE);
 		ResetAttackCoolTime();
 		break;
 	default:
@@ -742,14 +762,14 @@ void CCactiObject::Change_Animation(CACTI::ANIM eNewAnim)
 	m_eCurAnim = eNewAnim;
 
 	m_fAnimElapsedTime = 0.f;
-	m_fBlendingTime = 0.f;
-	m_bBlendingOn = true;
+	//m_fBlendingTime = 0.f;
+	//m_bBlendingOn = true;
 	for (int i = 0; i < CACTI::ANIM::END; i++)
 	{
-		if (i == m_ePrevAnim || i == m_eCurAnim)
-			continue;
+		//if (i == m_ePrevAnim || i == m_eCurAnim)
+		//	continue;
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
-		m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
+		//m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
 	}
 	// 애니메이션 진행시간 
 	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
@@ -797,7 +817,7 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTUS::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
-	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTUS::ANIM::SPAWN]->m_nType = ANIMATION_TYPE_ONCE;
+	//m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTUS::ANIM::SPAWN]->m_nType = ANIMATION_TYPE_ONCE;
 
 	
 	m_eCurAnim = CACTUS::ANIM::SPAWN;
@@ -807,7 +827,8 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
 	m_bBlendingOn = false;
 	m_fAnimElapsedTime = 0.f;
-	m_fAnimMaxTime = 0.f;
+	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
+
 	m_fBlendingTime = 0.f;
 
 	//SetLookAt(XMFLOAT3(0.f, 0.f, -0.f));
@@ -838,8 +859,25 @@ void CCactusObject::CollsionDetection(CGameObject* pObj)
 
 void CCactusObject::Animate(float fTimeElapsed)
 {
-	if(m_isActive)
-		CMonsterObject::Animate(fTimeElapsed);
+	if (!m_isActive)
+		return;
+
+	m_fAnimElapsedTime += fTimeElapsed;
+	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+	{
+		m_fAnimElapsedTime = 0.f;
+		if (m_eCurAnim == CACTUS::ANIM::SPAWN)
+		{
+			Change_Animation(CACTUS::ANIM::IDLE);
+			//m_nowVerse = VERSE2;
+		}
+
+
+	}
+
+	CMonsterObject::Animate(fTimeElapsed);
+
+
 
 }
 
@@ -851,6 +889,27 @@ void CCactusObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* 
 
 void CCactusObject::Change_Animation(CACTUS::ANIM eNewAnim)
 {
+	if (m_eCurAnim == eNewAnim)
+		return;
+
+	m_ePrevAnim = m_eCurAnim;
+	m_eCurAnim = eNewAnim;
+
+	m_fAnimElapsedTime = 0.f;
+	//m_fBlendingTime = 0.f;
+	//m_bBlendingOn = true;
+	for (int i = 0; i < CACTUS::ANIM::END; i++)
+	{
+		//if (i == m_ePrevAnim || i == m_eCurAnim)
+		//	continue;
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+		//m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
+	}
+	// 애니메이션 진행시간 
+	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
+
 }
 
 void CCactusObject::Blending_Animation(float fTimeElapsed)

@@ -396,7 +396,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 	if (m_pSkinnedAnimationController)
 	{
-		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		//float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 
 		if (Check_Input(fTimeElapsed))
 			return;
