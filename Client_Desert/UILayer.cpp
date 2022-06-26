@@ -2,6 +2,7 @@
 #include "UILayer.h"
 #include "GameMgr.h"
 #include "Camera.h"
+#include "Scene.h"
 using namespace std;
 
 UILayer::UILayer(UINT nFrame, ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue)
@@ -171,10 +172,10 @@ void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHei
 //    m_pd2dWriteFactory->CreateTextFormat(L"Arial", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"en-us", &m_pdwTextFormat);
 
 
-        /////////////
-    wstring str = L"";
-    CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT), str);
-    m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
+    /////////////
+    //wstring str = L"";
+    //CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT), str);
+    //m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
 }
 
 void UILayer::Update(const float& fTimeElapsed)
@@ -202,6 +203,15 @@ void UILayer::AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText)
     CTextBlock* pTb = new CDamageTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
     m_vecTextBlocks[TEXT_DAMAGE].emplace_back(pTb);
 
+}
+
+void UILayer::AddTextFont(wstring strText)
+{
+    if (!m_vecTextBlocks[TEXT_NPC].empty()) //NPC Text는 1개 씩
+        m_vecTextBlocks[TEXT_NPC].front()->m_isDead = true;
+
+    CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText);
+    m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
 }
 
 
@@ -299,12 +309,12 @@ void CDamageTextBlock::Update(const float& fTimeElapsed)
 
 
 CNPCTextBlock::CNPCTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText)
-    :CTextBlock(pdwFormat, d2dLayoutRect, strText)
 {
-    m_strTotalText = L"안녕. 나는 NPC야. 이건 Test글씨야 123412341234 ㅋㅋㅋㅋㅋ";
-
-    m_d2dLayoutRect.left = FRAME_BUFFER_WIDTH * 0.5f;
-    m_d2dLayoutRect.top = FRAME_BUFFER_HEIGHT * 0.5f;
+    m_pdwFormat = pdwFormat;
+    m_d2dLayoutRect = d2dLayoutRect;
+    m_strTotalText = strText;
+    m_d2dLayoutRect.left = FRAME_BUFFER_WIDTH * 0.2f;
+    m_d2dLayoutRect.top = FRAME_BUFFER_HEIGHT * 0.8f;
 }
 
 CNPCTextBlock::~CNPCTextBlock()
@@ -320,5 +330,11 @@ void CNPCTextBlock::Update(const float& fTimeElapsed)
         m_strText.append(m_strTotalText, m_iIndex++, 1);
 
         m_fTime = 0.f;
+    }
+    else if(m_fTime > 3.f)
+    {
+        m_isDead = true;
+        CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+        pObj->SetActiveState(false);
     }
 }

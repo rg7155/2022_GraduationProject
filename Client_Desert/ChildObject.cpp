@@ -352,10 +352,10 @@ void CNPCObject::Animate(float fTimeElapsed)
 	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
 	else SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = true);
 
-	if (!m_pUIQuest)
-		m_pUIQuest = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+	//if (!m_pUIQuest)
+	//	m_pUIQuest = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
 	if (m_isAbleInteraction && CInputDev::GetInstance()->KeyDown(DIKEYBOARD_R))
-		m_pUIQuest->SetActiveState(true);
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(NPC_TEXT_0);
 
 	CGameObject::Animate(fTimeElapsed);
 
@@ -414,11 +414,11 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_PLAYER:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
-		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.85f);
+		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.15f);
 		break;
 	case CUIObject::UI_PROFILE:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
-		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.9f); 
+		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f); 
 		break;
 	case CUIObject::UI_READY:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
@@ -429,6 +429,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/TextBox.dds", 0);
 		SetOrthoWorld(1000, 300, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f);
 		SetActiveState(false);
+		m_fAlpha = 0.2;
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);

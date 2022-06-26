@@ -36,8 +36,9 @@ public:
     void Update(const float& fTimeElapsed);
 
     void AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText);
-    static XMFLOAT3 WorldToScreen(XMFLOAT3& xmf3WorldPos);
+    void AddTextFont(wstring strText);
 
+    static XMFLOAT3 WorldToScreen(XMFLOAT3& xmf3WorldPos);
 private:
     UINT GetRenderTargetsCount() { return static_cast<UINT>(m_vWrappedRenderTargets.size()); }
     void Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue);

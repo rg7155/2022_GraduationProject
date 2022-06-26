@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "CollsionMgr.h"
 #include "Monster.h"
+#include "UILayer.h"
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -48,6 +49,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 }
 
 void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -394,6 +396,25 @@ void CScene::SetPointLightPos(XMFLOAT3& xmf3Pos)
 }
 
 
+
+void CScene::AddTextToUILayer(int iIndex)
+{
+	CGameObject *pObj = m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+	pObj->SetActiveState(true);
+
+	wstring str = L"";
+	if (iIndex == NPC_TEXT_0)
+		str = L"잡아줘....선인장 보스...그리고..가져와...전리품...";
+	else if(iIndex == NPC_TEXT_1)
+		str = L"전리품? 나한텐 그런거 없다고!!";
+	else if (iIndex == NPC_TEXT_2)
+		str = L"너가 나보다 강해도 과연 우리 아빠보다 강할까?? 넌 이제 죽은 목숨이라고 후후..";
+	else if (iIndex == NPC_TEXT_3)
+		str = L"강하구나 용사여...강자는 전리품을 얻을수 있는 자격이 있다..";
+	m_pUILayer->AddTextFont(str);
+}
+
+
 void CScene::BuildDefaultLightsAndMaterials()
 {
 	m_nLights = 2;
@@ -436,7 +457,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	//m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	//m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
-	m_pLights[1].m_bEnable = true;
+	m_pLights[1].m_bEnable = false;
 	m_pLights[1].m_nType = POINT_LIGHT;
 	m_pLights[1].m_fRange = 30.0f;
 	//m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);

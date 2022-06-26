@@ -68,6 +68,11 @@
 #define RP_TEXTURE2			6
 #define RP_RANDOM_BUFFER	7
 
+//NPCText
+#define NPC_TEXT_0 0
+#define NPC_TEXT_1 1
+#define NPC_TEXT_2 2
+#define NPC_TEXT_3 3
 
 
 #define NO_COPY(CLASSNAME)							\
