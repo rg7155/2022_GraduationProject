@@ -402,16 +402,29 @@ void CScene::AddTextToUILayer(int iIndex)
 	CGameObject *pObj = m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
 	pObj->SetActiveState(true);
 
-	wstring str = L"";
-	if (iIndex == NPC_TEXT_0)
-		str = L"잡아줘....선인장 보스...그리고..가져와...전리품...";
-	else if(iIndex == NPC_TEXT_1)
-		str = L"전리품? 나한텐 그런거 없다고!!";
-	else if (iIndex == NPC_TEXT_2)
-		str = L"너가 나보다 강해도 과연 우리 아빠보다 강할까?? 넌 이제 죽은 목숨이라고 후후..";
-	else if (iIndex == NPC_TEXT_3)
-		str = L"강하구나 용사여...강자는 전리품을 얻을수 있는 자격이 있다..";
-	m_pUILayer->AddTextFont(str);
+	queue<wstring> queueStr;
+	if (iIndex == NPC_TEXT)
+	{
+		queueStr.emplace(L"용사여..드디어 왔구나..");
+		queueStr.emplace(L"잡아줘....선인장 보스...그리고..가져와...전리품...");
+	}
+	else if (iIndex == GOLEM_TEXT) //돌덩이 죽을때
+	{
+		queueStr.emplace(L"전리품? 나한텐 그런거 없다..");
+		queueStr.emplace(L"선인장에게 힌트를 얻을수도...");
+	}
+	else if (iIndex == CACTUS_TEXT) //선인장 죽을때
+	{
+		queueStr.emplace(L"너가 나보다 강해도 과연 우리 아빠보다 강할까?!");
+		queueStr.emplace(L"넌 이제 죽은 목숨이라고!!!");
+	}
+	else if (iIndex == BOSS_TEXT) //보스 죽을때
+	{
+		queueStr.emplace(L"강하구나 용사여...");
+		queueStr.emplace(L"강자는 전리품을 얻을수 있는 자격이 있다..");
+		queueStr.emplace(L"받고 떠나라");
+	}
+	m_pUILayer->AddTextFont(queueStr);
 }
 
 

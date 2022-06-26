@@ -69,10 +69,10 @@
 #define RP_RANDOM_BUFFER	7
 
 //NPCText
-#define NPC_TEXT_0 0
-#define NPC_TEXT_1 1
-#define NPC_TEXT_2 2
-#define NPC_TEXT_3 3
+#define NPC_TEXT 0
+#define GOLEM_TEXT 1
+#define CACTUS_TEXT 2
+#define BOSS_TEXT 3
 
 
 #define NO_COPY(CLASSNAME)							\
