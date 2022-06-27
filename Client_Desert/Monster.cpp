@@ -672,6 +672,11 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 		m_AfterPos = CACTI_POS_AFTER2;
 	}
 	m_nowVerse = VERSE1;
+
+	m_pAttackPos1 = FindFrame("AttackPos1");
+	m_pAttackPos2 = FindFrame("AttackPos2");
+	m_pAttackPos3 = FindFrame("AttackPos3");
+
 }
 
 CCactiObject::~CCactiObject()

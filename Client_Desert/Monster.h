@@ -172,6 +172,11 @@ public:
 	CGameObject*	m_pCactus;
 	CGameObject*	m_pCacti;
 
+public:
+	CGameObject*	m_pAttackPos1;
+	CGameObject*	m_pAttackPos2;
+	CGameObject*	m_pAttackPos3;
+
 };
 
 class CCactusObject : public CMonsterObject
