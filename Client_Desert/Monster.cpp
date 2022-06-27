@@ -835,6 +835,9 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_pCacti1 = pCacti1;
 	m_pCacti2 = pCacti2;
+
+	m_nowVerse = VERSE1;
+	m_ePreAttack = CACTUS::IDLE;
 }
 
 CCactusObject::~CCactusObject()
@@ -862,12 +865,14 @@ void CCactusObject::Animate(float fTimeElapsed)
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
-		if (m_eCurAnim == CACTUS::ANIM::SPAWN)
-		{
-			Change_Animation(CACTUS::ANIM::IDLE);
-			//m_nowVerse = VERSE2;
-		}
+		Change_Animation(CACTUS::ANIM::IDLE);
+	}
 
+	if (m_fAttackCoolTime > 3.f)
+	{
+		m_fAttackCoolTime = 0.f;
+		CACTUS::ANIM eNext = m_ePreAttack == CACTUS::ATTACK3 ? CACTUS::ATTACK1 : (CACTUS::ANIM)(m_ePreAttack + 1);
+		Change_Animation(eNext);
 
 	}
 
