@@ -843,6 +843,7 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_nowVerse = VERSE1;
 	m_ePreAttack = CACTUS::IDLE;
+	m_fAttackCoolTime = 0.f;
 }
 
 CCactusObject::~CCactusObject()
@@ -871,15 +872,20 @@ void CCactusObject::Animate(float fTimeElapsed)
 	{
 		m_fAnimElapsedTime = 0.f;
 		Change_Animation(CACTUS::ANIM::IDLE);
+		m_nowVerse = VERSE2;
 	}
+	if (m_nowVerse == VERSE2) {
+		m_fAttackCoolTime += fTimeElapsed;
+		if (m_fAttackCoolTime > 3.f)
+		{
+			m_fAttackCoolTime = 0.f;
+			CACTUS::ANIM eNext = m_ePreAttack == CACTUS::ATTACK3 ? CACTUS::ATTACK1 : (CACTUS::ANIM)(m_ePreAttack + 1);
+			Change_Animation(eNext);
+			m_ePreAttack = eNext;
 
-	if (m_fAttackCoolTime > 3.f)
-	{
-		m_fAttackCoolTime = 0.f;
-		CACTUS::ANIM eNext = m_ePreAttack == CACTUS::ATTACK3 ? CACTUS::ATTACK1 : (CACTUS::ANIM)(m_ePreAttack + 1);
-		Change_Animation(eNext);
-
+		}
 	}
+	
 
 	CMonsterObject::Animate(fTimeElapsed);
 
