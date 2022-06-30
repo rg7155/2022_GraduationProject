@@ -662,6 +662,9 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			{
 				//»ðÀÔ
 				char pName[64] = "Model/Map/";
+				if (!isActive)
+					strcat_s(pName, "Scene2/");
+
 				strcat_s(pName, pstrToken);
 				strcat_s(pName, ".bin");
 

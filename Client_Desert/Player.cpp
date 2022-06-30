@@ -111,7 +111,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_eObjId = OBJ_PLAYER;
 	///////////////////////////////////////////////
 
-
+	//SetScale(XMFLOAT3(0.2, 1, 1));
 
 }
 
