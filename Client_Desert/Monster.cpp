@@ -585,6 +585,9 @@ CCactiBulletObject::CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Thorn_Projectile.bin", nullptr);
 	SetChild(pModel->m_pModelRootObject, true);
 	Rotate(0.f, -90.f, 0.f);
+
+	SetScale(2.f, 2.f, 2.f);
+	m_xmOOBB.Extents = Vector3::ScalarProduct(m_xmOOBB.Extents, 2.f, false);
 	//SetScale(XMFLOAT3{ 0.2f, 0.2f, 0.2f });
 
 	//TODO - Ä¹Æ¼°¡ ¸¸µé °Í
@@ -607,6 +610,9 @@ CCactiBulletObject::~CCactiBulletObject()
 void CCactiBulletObject::Animate(float fTimeElapsed)
 {
 	if (!m_isActive) return;
+	m_fCreateTime -= fTimeElapsed;
+	if (m_fCreateTime > 0)
+		return;
 
 	m_fTime -= fTimeElapsed;
 	if (m_fTime < 0)
@@ -616,8 +622,10 @@ void CCactiBulletObject::Animate(float fTimeElapsed)
 	}
 
 	XMFLOAT3 xmf3Pos = GetPosition();
-	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed*5.f, false));
+	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed*m_fSpeed, false));
 	SetPosition(xmf3Pos);
+
+
 
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -625,17 +633,19 @@ void CCactiBulletObject::Animate(float fTimeElapsed)
 void CCactiBulletObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
 	if (!m_isActive) return;
+	if (m_fCreateTime > 0)
+		return;
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
-void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target)
+void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target, bool isYFix/*=true*/)
 {
 	m_fTime = CACTI_BULLET_TIME;
 
 	SetPosition(xmf3Start);
 
-	m_xmf3Target = Vector3::Subtract(xmf3Target, xmf3Start, true, true);
+	m_xmf3Target = Vector3::Subtract(xmf3Target, xmf3Start, true, isYFix);
 }
 
 CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
@@ -673,10 +683,8 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 	m_nowVerse = VERSE1;
 
-	m_pAttackPos[0] = FindFrame("AttackPos1");
-	m_pAttackPos[1] = FindFrame("AttackPos2");
-	m_pAttackPos[2] = FindFrame("AttackPos3");
-
+	SetScale(2.f, 2.f, 2.f);
+	m_xmOOBB.Extents = Vector3::ScalarProduct(m_xmOOBB.Extents, 2.f, false);
 
 }
 
@@ -817,14 +825,18 @@ void CCactiObject::AttackProcess(CACTUS::ANIM eAnim)
 
 	switch (eAnim)
 	{
-	case CACTUS::ATTACK1:
+	case CACTUS::ATTACK1: {
 		Change_Animation(CACTI::ATTACK1);
+
 		AddBullet();
 		break;
-	case CACTUS::ATTACK2:
+	}
+	case CACTUS::ATTACK2: {
 		Change_Animation(CACTI::ATTACK2);
-		AddBullet();
+		for (int i = 0; i < 5; i++)
+			AddBullet();
 		break;
+	}
 	case CACTUS::ATTACK3:
 	default:
 		break;
@@ -836,11 +848,20 @@ void CCactiObject::AddBullet()
 	CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
 	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
 	XMFLOAT3 xmf3Target = pPlayer->GetPosition();
-	xmf3Target.z += 1;
 	pObj->SetActiveState(true);
-	pObj->SetPosition(m_pAttackPos[0]->GetPosition());
+
+	XMFLOAT3 regenPos;
+	regenPos.x = (float)(rand() % 20) * 0.05f * 2.f;
+	regenPos.y = (float)(rand() % 10) * 0.05f + 0.5f;
+	regenPos.z = (float)(rand() % 20) * 0.05f * 2.f;
+	regenPos = Vector3::Add(GetPosition(), regenPos);
+	pObj->SetPosition(regenPos);
 	pObj->SetTarget(pObj->GetPosition(), xmf3Target);
 
+	// look º¤ÅÍ ¼³Á¤
+	pObj->SetLookAt(xmf3Target, false);
+	pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
+	pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 5.f;
 }
 
 CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
@@ -882,6 +903,9 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 	m_nowVerse = VERSE1;
 	m_ePreAttack = CACTUS::IDLE;
 	m_fAttackCoolTime = 0.f;
+
+	SetScale(2.f, 2.f, 2.f);
+	m_xmOOBB.Extents = Vector3::ScalarProduct(m_xmOOBB.Extents, 2.f, false);
 }
 
 CCactusObject::~CCactusObject()
@@ -923,6 +947,12 @@ void CCactusObject::Animate(float fTimeElapsed)
 			if (eNext != CACTUS::ATTACK3) {
 				static_cast<CCactiObject*>(m_pCacti1)->AttackProcess(eNext);
 				static_cast<CCactiObject*>(m_pCacti2)->AttackProcess(eNext);
+			}
+			else {
+				for (int i = 0; i < 20; i++)
+				{
+					AddBullet();
+				}
 			}
 
 
@@ -973,4 +1003,26 @@ void CCactusObject::Blending_Animation(float fTimeElapsed)
 
 void CCactusObject::SetNewRotate(XMFLOAT3 xmf3Look)
 {
+}
+
+void CCactusObject::AddBullet()
+{
+	CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
+	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+	XMFLOAT3 xmf3Target = pPlayer->GetPosition();
+	pObj->SetActiveState(true);
+
+	XMFLOAT3 regenPos;
+	regenPos.x = (float)(rand() % 40) * 0.5f - 10.f;
+	regenPos.y = (float)(rand() % 10) * 0.1f + 10.f;
+	regenPos.z = (float)(rand() % 40) * 0.5f - 10.f;
+	regenPos = Vector3::Add(xmf3Target, regenPos);
+	pObj->SetPosition(regenPos);
+	xmf3Target = regenPos;
+	xmf3Target.y = -1.f;
+	pObj->SetTarget(pObj->GetPosition(), xmf3Target, false);
+	pObj->Rotate(90.f, 0.f, 0.f);
+	pObj->SetScale(4.f, 4.f, 4.f);
+	//pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
+	pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 4.f;
 }

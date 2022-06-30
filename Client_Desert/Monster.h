@@ -175,9 +175,6 @@ public:
 	CGameObject*	m_pCactus;
 	CGameObject*	m_pCacti;
 
-public:
-	CGameObject*	m_pAttackPos[3];
-
 };
 
 class CCactusObject : public CMonsterObject
@@ -210,7 +207,7 @@ public:
 	void Change_Animation(CACTUS::ANIM eNewAnim);
 	void Blending_Animation(float fTimeElapsed);
 	void SetNewRotate(XMFLOAT3 xmf3Look);
-
+	void AddBullet();
 public:
 	CGameObject* m_pCacti1;
 	CGameObject* m_pCacti2;
@@ -232,10 +229,12 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 
 public:
-	void	SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target);
+	void	SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target, bool IsYFix=true);
 
-private:
+public:
 	XMFLOAT3	m_xmf3Target = {};
 	float		m_fTime = 0;
+	float		m_fSpeed;
+	float		m_fCreateTime = 0.f;
 
 };

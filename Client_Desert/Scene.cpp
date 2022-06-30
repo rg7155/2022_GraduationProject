@@ -131,7 +131,7 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	//Ä¹Æ¼ ÃÑ¾Ë
-	for (int i = 0; i < 10; ++i)
+	for (int i = 0; i < 30; ++i)
 	{
 		pObj = new CCactiBulletObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 		pObj->SetActiveState(false);
