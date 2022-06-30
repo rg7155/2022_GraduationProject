@@ -582,10 +582,10 @@ void CGolemObject::Check_Collision()
 CCactiBulletObject::CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
 	//TODO - 파일이름 바꾸기
-	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map/SM_bush_01.bin", nullptr);
+	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Thorn_Projectile.bin", nullptr);
 	SetChild(pModel->m_pModelRootObject, true);
-
-	SetScale(XMFLOAT3{ 0.2f, 0.2f, 0.2f });
+	Rotate(0.f, -90.f, 0.f);
+	//SetScale(XMFLOAT3{ 0.2f, 0.2f, 0.2f });
 
 	//TODO - 캣티가 만들 것
 	/*if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
@@ -616,7 +616,7 @@ void CCactiBulletObject::Animate(float fTimeElapsed)
 	}
 
 	XMFLOAT3 xmf3Pos = GetPosition();
-	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed, false));
+	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed*5.f, false));
 	SetPosition(xmf3Pos);
 
 	CGameObject::Animate(fTimeElapsed);
@@ -673,9 +673,10 @@ CCactiObject::CCactiObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 	}
 	m_nowVerse = VERSE1;
 
-	m_pAttackPos1 = FindFrame("AttackPos1");
-	m_pAttackPos2 = FindFrame("AttackPos2");
-	m_pAttackPos3 = FindFrame("AttackPos3");
+	m_pAttackPos[0] = FindFrame("AttackPos1");
+	m_pAttackPos[1] = FindFrame("AttackPos2");
+	m_pAttackPos[2] = FindFrame("AttackPos3");
+
 
 }
 
@@ -695,8 +696,14 @@ void CCactiObject::Animate(float fTimeElapsed)
 		if (m_eCurAnim == CACTI::ANIM::BITE)
 		{
 			Change_Animation(CACTI::ANIM::WALK);
+			
 			m_nowVerse = VERSE2;
 		}
+		if (m_nowVerse == VERSE3) {
+			Change_Animation(CACTI::ANIM::IDLE);
+
+		}
+
 
 
 	}
@@ -805,6 +812,37 @@ void CCactiObject::SetNewRotate(XMFLOAT3 xmf3Look)
 {
 }
 
+void CCactiObject::AttackProcess(CACTUS::ANIM eAnim)
+{
+
+	switch (eAnim)
+	{
+	case CACTUS::ATTACK1:
+		Change_Animation(CACTI::ATTACK1);
+		AddBullet();
+		break;
+	case CACTUS::ATTACK2:
+		Change_Animation(CACTI::ATTACK2);
+		AddBullet();
+		break;
+	case CACTUS::ATTACK3:
+	default:
+		break;
+	}
+}
+
+void CCactiObject::AddBullet()
+{
+	CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
+	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+	XMFLOAT3 xmf3Target = pPlayer->GetPosition();
+	xmf3Target.z += 1;
+	pObj->SetActiveState(true);
+	pObj->SetPosition(m_pAttackPos[0]->GetPosition());
+	pObj->SetTarget(pObj->GetPosition(), xmf3Target);
+
+}
+
 CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
 	ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel, CGameObject* pCacti1, CGameObject* pCacti2)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
@@ -882,6 +920,11 @@ void CCactusObject::Animate(float fTimeElapsed)
 			CACTUS::ANIM eNext = m_ePreAttack == CACTUS::ATTACK3 ? CACTUS::ATTACK1 : (CACTUS::ANIM)(m_ePreAttack + 1);
 			Change_Animation(eNext);
 			m_ePreAttack = eNext;
+			if (eNext != CACTUS::ATTACK3) {
+				static_cast<CCactiObject*>(m_pCacti1)->AttackProcess(eNext);
+				static_cast<CCactiObject*>(m_pCacti2)->AttackProcess(eNext);
+			}
+
 
 		}
 	}
