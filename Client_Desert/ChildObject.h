@@ -36,6 +36,38 @@ public:
 	CCollision* m_pComCollision = nullptr;
 };
 
+class CStoneDoorMapObject;
+class CFootHoldMapObject : public CMapObject
+{
+public:
+	CFootHoldMapObject();
+	virtual ~CFootHoldMapObject();
+
+public:
+	//virtual void Ready() override;
+	virtual void Animate(float fTimeElapsed) override;
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
+
+public:
+	vector<CStoneDoorMapObject*> m_vecStoneDoor;
+	bool	m_isBeginOverlap = false;
+
+};
+
+class CStoneDoorMapObject : public CMapObject
+{
+public:
+	CStoneDoorMapObject();
+	virtual ~CStoneDoorMapObject();
+
+public:
+	//virtual void Ready() override;
+	virtual void Animate(float fTimeElapsed) override;
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
+
+public:
+	int		m_iState = 0;
+};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //재질이 쉐이더를 가지는 오브젝트 - ex)스카이박스

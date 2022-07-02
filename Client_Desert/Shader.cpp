@@ -639,6 +639,9 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	int nObjects = ReadIntegerFromFile(pInFile);
 
+	vector<CStoneDoorMapObject*> vecStoneDoor;
+	vector<CFootHoldMapObject*> vecFootHold;
+
 	for (int i = 0; i < nObjects; ++i)
 	{
 		if (ReadStringFromFile(pInFile, pstrToken))
@@ -676,7 +679,20 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				pMapModel = iter->second;
 			}
 
-			CGameObject* pGameObject = new CMapObject();
+			CGameObject* pGameObject = nullptr;
+			if (str.find("foothold") != string::npos)
+			{
+				pGameObject = new CFootHoldMapObject();
+				vecFootHold.emplace_back(static_cast<CFootHoldMapObject*>(pGameObject));
+			}
+			else if (str.find("stonedoor") != string::npos)
+			{
+				pGameObject = new CStoneDoorMapObject();
+				vecStoneDoor.emplace_back(static_cast<CStoneDoorMapObject*>(pGameObject));
+			}
+			else
+				pGameObject = new CMapObject();
+
 			pGameObject->SetChild(pMapModel->m_pModelRootObject, true);
 
 			//크자이로 읽어옴
@@ -701,6 +717,12 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				AddObject(L"Map2", pGameObject); 
 		}
 	}
+
+	//발판과 돌문 연결
+	for (auto& iter1 : vecFootHold)
+		for (auto& iter2 : vecStoneDoor)
+			iter1->m_vecStoneDoor.emplace_back(iter2);
+
 }
 
 void CMapObjectsShader::ChangeMap(SCENE eScene)

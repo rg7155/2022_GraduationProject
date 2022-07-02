@@ -74,7 +74,9 @@ void CMapObject::CreateComponent()
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
 
-	if (m_strName.find("tree") != string::npos || m_strName.find("grass") != string::npos)
+	if (m_strName.find("tree") != string::npos || m_strName.find("grass") != string::npos ||
+		m_strName.find("tile") != string::npos || m_strName.find("circle") != string::npos ||
+		m_strName.find("foothold") != string::npos)
 		m_pComCollision->m_isCollisionIgnore = true;
 	else if (m_strName.find("Plane") != string::npos)
 	{
@@ -141,7 +143,71 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	}
 }
 
+#define DOOR_NORMAL 0
+#define DOOR_UP		1
+#define DOOR_DOWN	2
 
+
+
+CFootHoldMapObject::CFootHoldMapObject()
+{
+}
+
+CFootHoldMapObject::~CFootHoldMapObject()
+{
+}
+
+void CFootHoldMapObject::Animate(float fTimeElapsed)
+{
+	XMFLOAT3 xmf3PlayerPos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+	float fDis = Vector3::Distance(xmf3PlayerPos, GetPosition());
+
+	if (!m_isBeginOverlap && fDis < 1.f)
+	{
+		m_isBeginOverlap = true;
+		for (auto& iter : m_vecStoneDoor)
+			iter->m_iState = DOOR_DOWN;
+	}
+	else if (m_isBeginOverlap && fDis > 1.f)
+	{
+		m_isBeginOverlap = false;
+		for (auto& iter : m_vecStoneDoor)
+			iter->m_iState = DOOR_UP;
+	}
+
+	CMapObject::Animate(fTimeElapsed);
+}
+
+#define DOOR_MAX_Y 2.39
+#define DOOR_MIN_Y -2.39
+
+CStoneDoorMapObject::CStoneDoorMapObject()
+{
+	//2.39
+}
+
+CStoneDoorMapObject::~CStoneDoorMapObject()
+{
+}
+
+void CStoneDoorMapObject::Animate(float fTimeElapsed)
+{
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	if (m_iState == DOOR_UP)
+	{
+		if (xmf3Pos.y < DOOR_MAX_Y)
+			xmf3Pos.y += fTimeElapsed * 10.f;
+	}
+	else if (m_iState == DOOR_DOWN)
+	{
+		if (xmf3Pos.y > DOOR_MIN_Y)
+			xmf3Pos.y -= fTimeElapsed * 10.f;
+	}
+	SetPosition(xmf3Pos);
+
+	CMapObject::Animate(fTimeElapsed);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define BLUE_COLOR4 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f
 //#define BLUE_COLOR4 1.f / 255.f, 102.f / 255.f, 200.f / 255.f, 0.f
@@ -773,3 +839,5 @@ void CTexturedObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	//PSAlphaTextured의 gfDissolve값 설정
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
 }
+
+
