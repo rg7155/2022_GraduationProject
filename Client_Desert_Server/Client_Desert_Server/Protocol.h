@@ -12,12 +12,12 @@ constexpr int MAX_USER = 10;
 
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
+constexpr char CS_ATTACK = 2;
 
 constexpr char SC_LOGIN_INFO = 2;
-constexpr char SC_ADD_PLAYER = 3;
-constexpr char SC_REMOVE_PLAYER = 4;
-constexpr char SC_MOVE_PLAYER = 5;
-constexpr char SC_MOVE_MONSTER = 6;
+constexpr char SC_ADD_OBJECT = 3;
+constexpr char SC_REMOVE_OBJECT = 4;
+constexpr char SC_MOVE_OBJECT = 5;
 
 #define DISCONNECT -99.f
 #include "../../Client_Desert/Enum.h"
@@ -25,30 +25,25 @@ constexpr char SC_MOVE_MONSTER = 6;
 // 프로토콜 정의
 #pragma pack(push, 1) // 전체 프로그램에 영향을 미치지 않도록
 
-
-struct player_anim
-{
-
-	short	sPosition;
-	short	sWeight;
-	bool	bEnable;
-
-};
-
 struct CS_LOGIN_PACKET
 {
 	unsigned char size;
 	char type;
-	char name[NAME_SIZE];
 };
 
 struct CS_MOVE_PACKET
 {
 	unsigned char size;
-	char type;
-	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[PLAYER::ANIM::END];
-	PLAYER::ANIM eCurAnim;
+	char type; 
+	float x, y, z;
+	char direction;
+	unsigned int client_time;
+};
+
+struct CS_ATTACK_PACKET {
+	unsigned char size;
+	char	type;
+	int		skill;
 };
 
 struct SC_LOGIN_INFO_PACKET
@@ -56,56 +51,44 @@ struct SC_LOGIN_INFO_PACKET
 	unsigned char size;
 	char type;
 	char id;
-	short x, z;
+	float x, y, z;
 };
 
-struct SC_ADD_PLAYER_PACKET
+struct SC_ADD_OBJECT_PACKET
 {
 	unsigned char size;
 	char type;
 	char id;
-	char name[NAME_SIZE];
-	short x, z;
+	float x, y, z;
+	short race;		// 몬스터 판별용
+	int hp, hpmax;
 };
 
-struct SC_REMOVE_PLAYER_PACKET
+struct SC_REMOVE_OBJECT_PACKET
+{
+	unsigned char size;
+	char type;
+	short race;		// 몬스터 판별용
+	short id;
+};
+
+struct SC_MOVE_OBJECT_PACKET
 {
 	unsigned char size;
 	char type;
 	short id;
+	short race;		// 몬스터 판별용
+	float x, y, z;
+	char direction;
+	unsigned int client_time;
 };
 
-struct SC_MOVE_PLAYER_PACKET
-{
+struct SC_STAT_CHANGE_PACKET {
 	unsigned char size;
-	char type;
-	short id;
-	XMFLOAT4X4	xmf4x4World;
-	player_anim animInfo[PLAYER::ANIM::END];
-	PLAYER::ANIM eCurAnim;
-};
-
-struct SC_ADD_MONSTER_PACKET
-{
-	unsigned char size;
-	char type;
-	char id;
-	XMFLOAT4X4	xmf4x4World;
-	char name[NAME_SIZE];
-
-};
-
-struct SC_MOVE_MONSTER_PACKET
-{
-	// 타입추가
-	unsigned char size;
-	char type;
-	short id;
-	XMFLOAT3 xmf3Look;
-	XMFLOAT3 xmf3Position;
-	GOLEM::ANIM eCurAnim;
-	short target_id;
-	short hp;
-	//float	fElapsedTime;
+	char	type;
+	short	race;		// 몬스터 판별용
+	int		id;
+	int		hp, hpmax;
+	char	anim;
 };
 #pragma pack (pop)
