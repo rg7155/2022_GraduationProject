@@ -19,8 +19,10 @@ bool CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2)
 
 	if (pCom1->Check_Collision(pCom2))
 	{
-		pObj1->CollsionDetection(pObj2);
-		pObj2->CollsionDetection(pObj1);
+		//XMFLOAT3* xmf3Line[2] = { CheckLineCloseToPoint(pObj1, pCom2) , CheckLineCloseToPoint(pObj2, pCom1) };
+
+		pObj1->CollsionDetection(pObj2, CheckLineCloseToPoint(pObj1, pCom2));
+		pObj2->CollsionDetection(pObj1, CheckLineCloseToPoint(pObj2, pCom1));
 
 		//pCom1->m_isCollision = true; //자기것만 체크
 		return true;
@@ -59,6 +61,44 @@ void CCollsionMgr::CheckCollsion(list<CGameObject*> listObj1, list<CGameObject*>
 			CheckCollsion(iter1, iter2);
 		}
 	}
+}
+
+XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(CGameObject* pObj1, CCollision* pCol2)
+{
+	XMFLOAT3 xmf3Corners[8];
+	pCol2->m_xmOOBB.GetCorners(xmf3Corners);
+
+	return CheckLineCloseToPoint(pObj1->GetPosition(), xmf3Corners);
+}
+
+XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(XMFLOAT3& xmf3Point, XMFLOAT3* xmf3Corners)
+{
+	//바운딩 박스의 밑면으로 검사, 코너-0,1,4,5
+	XMFLOAT3 xmf3Line[4][2];
+	xmf3Line[0][0] = xmf3Corners[0], xmf3Line[0][1] = xmf3Corners[1];
+	xmf3Line[1][0] = xmf3Corners[1], xmf3Line[1][1] = xmf3Corners[5];
+	xmf3Line[2][0] = xmf3Corners[5], xmf3Line[2][1] = xmf3Corners[4];
+	xmf3Line[3][0] = xmf3Corners[4], xmf3Line[3][1] = xmf3Corners[0];
+
+
+	//선분, 선분 중점과 점과 거리 - 불정확,
+	//두점을 지나는 직선과 점의 거리 공식 이용
+	vector<float> vecDis;
+	for (int i = 0; i < 4; ++i)
+	{
+		//XMFLOAT3 xmf3Mid = Vector3::ScalarProduct(Vector3::Add(xmf3Line[i][0], xmf3Line[i][1]), 0.5f, false); //선분 중점
+		//float fDis = Vector3::Distance(xmf3Point, xmf3Mid);
+		//vecDis.emplace_back(fDis);
+		
+		float x0 = xmf3Point.x, y0 = xmf3Point.z;
+		float x1 = xmf3Line[i][0].x, y1 = xmf3Line[i][0].z;
+		float x2 = xmf3Line[i][1].x, y2 = xmf3Line[i][1].z;
+		float fDis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+		vecDis.emplace_back(fDis);
+	}
+	int iMinIndex = int(min_element(vecDis.begin(), vecDis.end()) - vecDis.begin());
+	//cout << iMinIndex << endl;
+	return xmf3Line[iMinIndex];
 }
 
 

@@ -111,7 +111,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_eObjId = OBJ_PLAYER;
 	///////////////////////////////////////////////
 
-	//SetScale(XMFLOAT3(0.2, 1, 1));
+	//SetScale(XMFLOAT3(0.2, 1, 1.8));
 
 }
 
@@ -533,6 +533,7 @@ void CPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	if (m_pChild && m_pChild->m_isRootModelObject)
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	m_pComCollision->m_xmf3OBBScale = { 10.f, 1.f, 10.f }; // 바운딩박스 스케일 키움
 	m_pComCollision->UpdateBoundingBox();
 
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -546,8 +547,12 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		if (m_pComponent[i])
 			m_pComponent[i]->Update_Component(fTimeElapsed);
 
+	XMFLOAT3 xmf3Corners[8];
 	if (m_pComCollision)
+	{
 		m_pComCollision->UpdateBoundingBox();
+		m_pComCollision->m_xmOOBB.GetCorners(xmf3Corners);
+	}
 
 	if (m_pComTrail)
 	{
@@ -555,9 +560,10 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		//m_pComTrail->AddTrail(xmf3Top, m_pSword->GetPosition()); 
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 	}
+
 }
 
-void CPlayer::CollsionDetection(CGameObject* pObj)
+void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 {
 	OBJ_ID eObjId = pObj->m_eObjId;
 	switch (eObjId)
@@ -570,15 +576,34 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 		//m_pCamera->RegenerateViewMatrix();
 		//OnPrepareRender();
 
-		//방법2. 오브젝트 밀어주기
-		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3PrePosition, pObj->GetPosition(), true, true);
+		//방법2. 충동한 오브젝트 원점에서 밀어주기
+		//XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3PrePosition, pObj->GetPosition(), true, true);
+		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
 
-		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, m_fTempShift);
-		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
+		//m_pCamera->Move(xmf3ToPlayer);
+		//m_pCamera->RegenerateViewMatrix();
+		//OnPrepareRender();
 
-		m_pCamera->Move(xmf3ToPlayer);
+		//방법3. 충돌한 선분의 법선벡터 방향으로 밀어주기
+		XMFLOAT3 xmf3Temp(0,0,0), xmf3Normal(0, 0, 0);
+		XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
+		xmf3Temp = Vector3::Subtract(xmf3Point0, xmf3Point1, true, false);
+		xmf3Normal.z = -xmf3Temp.x;
+		xmf3Normal.x = xmf3Temp.z;
+
+		
+		//XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
+
+		XMFLOAT3 xmf3Dir = xmf3Normal/*xmf3Reflect*/;
+		xmf3Dir = Vector3::ScalarProduct(xmf3Dir, m_fTempShift, false);
+		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Dir);
+
+		m_pCamera->Move(xmf3Dir);
 		m_pCamera->RegenerateViewMatrix();
 		OnPrepareRender();
+
+		//cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
+
 		break;
 	case OBJ_END:
 		break;

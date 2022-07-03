@@ -322,7 +322,7 @@ public:
 	static void PrintFrameInfo(CGameObject *pGameObject, CGameObject *pParent);
 
 public:
-	virtual void	CollsionDetection(CGameObject* pObj) {};
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) {};
 
 protected:
 	virtual void	CreateComponent() {};

@@ -109,7 +109,7 @@ private:
 	virtual void	UpdateComponent(float fTimeElapsed);
 
 public:
-	virtual void	CollsionDetection(CGameObject* pObj) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 
 public:
 	bool IsNowAttack();

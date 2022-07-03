@@ -135,7 +135,11 @@ void CCollision::UpdateBoundingBox()
 		m_isOneUpdate = true;
 	}
 	
-	m_xmLocalOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(m_pxmf4x4World));
+	XMMATRIX mtxScale = XMMatrixScaling(m_xmf3OBBScale.x, m_xmf3OBBScale.y, m_xmf3OBBScale.z);
+	XMFLOAT4X4 m_xmf4x4World = *m_pxmf4x4World;
+	m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4World);
+
+	m_xmLocalOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
 	XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
 }
 
