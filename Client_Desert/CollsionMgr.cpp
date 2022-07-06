@@ -20,7 +20,11 @@ bool CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2)
 	if (pCom1->Check_Collision(pCom2))
 	{
 		//XMFLOAT3* xmf3Line[2] = { CheckLineCloseToPoint(pObj1, pCom2) , CheckLineCloseToPoint(pObj2, pCom1) };
-
+		//if (pObj2->m_eObjId == OBJ_ID::OBJ_MAP)
+		//{
+		//	XMFLOAT3 xmf3Pos = pObj2->GetPosition();
+		//	cout << xmf3Pos.x << "," << xmf3Pos.z << " - ";
+		//}
 		pObj1->CollsionDetection(pObj2, CheckLineCloseToPoint(pObj1, pCom2));
 		pObj2->CollsionDetection(pObj1, CheckLineCloseToPoint(pObj2, pCom1));
 
@@ -73,12 +77,62 @@ XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(CGameObject* pObj1, CCollision* pC
 
 XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(XMFLOAT3& xmf3Point, XMFLOAT3* xmf3Corners)
 {
-	//바운딩 박스의 밑면으로 검사, 코너-0,1,4,5
+	//바운딩 박스의 밑면으로 검사, 코너-0,1,4,5 ->회전시 인덱스 달라짐
+	vector<XMFLOAT3> vecTemp(4);
+	vector<XMFLOAT3> vecSortY(8);
+
+	for (int i = 0; i < 8; ++i)
+		vecSortY[i] = xmf3Corners[i];
+
+	sort(vecSortY.begin(), vecSortY.end(), [](auto& a, auto& b) { return a.y < b.y; });
+
+
+	//밑면 점 4개
+	for (int i = 0; i < 4; ++i)
+		vecTemp[i] = vecSortY[i];
+
+	//if (vecTemp.size() != 4)
+	//	cout << "CheckLine Fuc Something Wrong!" << endl;
+
+	sort(vecTemp.begin(), vecTemp.end(), [](auto& a, auto& b) { return a.x < b.x; });
+
+	//밑면 점 사각형으로 만들기
+	vector<XMFLOAT3> vecBottom(4);
+	if(vecTemp[0].z < vecTemp[1].z)
+	{
+		vecBottom[0] = vecTemp[0];
+		vecBottom[1] = vecTemp[1];
+	}
+	else
+	{
+		vecBottom[0] = vecTemp[1];
+		vecBottom[1] = vecTemp[0];
+	}
+
+	float dis2 = Vector3::Distance(vecBottom[1], vecTemp[2]);
+	float dis3 = Vector3::Distance(vecBottom[1], vecTemp[3]);
+	if (dis2 < dis3)
+	{
+		vecBottom[2] = vecTemp[2];
+		vecBottom[3] = vecTemp[3];
+	}
+	else
+	{
+		vecBottom[2] = vecTemp[3];
+		vecBottom[3] = vecTemp[2];
+	}
+
+
 	XMFLOAT3 xmf3Line[4][2];
-	xmf3Line[0][0] = xmf3Corners[0], xmf3Line[0][1] = xmf3Corners[1];
-	xmf3Line[1][0] = xmf3Corners[1], xmf3Line[1][1] = xmf3Corners[5];
-	xmf3Line[2][0] = xmf3Corners[5], xmf3Line[2][1] = xmf3Corners[4];
-	xmf3Line[3][0] = xmf3Corners[4], xmf3Line[3][1] = xmf3Corners[0];
+	//xmf3Line[0][0] = xmf3Corners[0], xmf3Line[0][1] = xmf3Corners[1];
+	//xmf3Line[1][0] = xmf3Corners[1], xmf3Line[1][1] = xmf3Corners[5];
+	//xmf3Line[2][0] = xmf3Corners[5], xmf3Line[2][1] = xmf3Corners[4];
+	//xmf3Line[3][0] = xmf3Corners[4], xmf3Line[3][1] = xmf3Corners[0];
+
+	xmf3Line[0][0] = vecBottom[0], xmf3Line[0][1] = vecBottom[1];
+	xmf3Line[1][0] = vecBottom[1], xmf3Line[1][1] = vecBottom[2];
+	xmf3Line[2][0] = vecBottom[2], xmf3Line[2][1] = vecBottom[3];
+	xmf3Line[3][0] = vecBottom[3], xmf3Line[3][1] = vecBottom[0];
 
 
 	//선분, 선분 중점과 점과 거리 - 불정확,
