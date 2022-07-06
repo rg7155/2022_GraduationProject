@@ -125,31 +125,31 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 }
 
-void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
+void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_OBJECT_PACKET* packet)
 {
-	// 행렬
-	m_xmf4x4ToParent = packet->xmf4x4World;
-	player_anim* _player_anim = packet->animInfo;
-	m_eCurAnim = packet->eCurAnim;
+	//// 행렬
+	//m_xmf4x4ToParent = packet->xmf4x4World;
+	//player_anim* _player_anim = packet->animInfo;
+	//m_eCurAnim = packet->eCurAnim;
 
-	for (int i = 0; i < PLAYER::ANIM::END; i++)
-	{
+	//for (int i = 0; i < PLAYER::ANIM::END; i++)
+	//{
 
-		float fWeight, fPosition;
-		if (_player_anim[i].sWeight != 0)
-			fWeight = (float)_player_anim[i].sWeight / 10000.f;
-		else
-			fWeight = 0.f;
+	//	float fWeight, fPosition;
+	//	if (_player_anim[i].sWeight != 0)
+	//		fWeight = (float)_player_anim[i].sWeight / 10000.f;
+	//	else
+	//		fWeight = 0.f;
 
-		if (_player_anim[i].sPosition != 0)
-			fPosition = (float)_player_anim[i].sPosition / 10000.f;
-		else
-			fPosition = 0.f;
+	//	if (_player_anim[i].sPosition != 0)
+	//		fPosition = (float)_player_anim[i].sPosition / 10000.f;
+	//	else
+	//		fPosition = 0.f;
 
-		m_pSkinnedAnimationController->SetTrackWeight(i, fWeight);
-		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
-		m_pSkinnedAnimationController->m_fPosition[i] = fPosition;
-	}
+	//	m_pSkinnedAnimationController->SetTrackWeight(i, fWeight);
+	//	m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
+	//	m_pSkinnedAnimationController->m_fPosition[i] = fPosition;
+	//}
 }
 
 bool CDuoPlayer::IsNowAttack()

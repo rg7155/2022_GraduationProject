@@ -195,6 +195,9 @@
     <ClInclude Include="UILayer.h">
       <Filter>소스 파일\10. UILayer</Filter>
     </ClInclude>
+    <ClInclude Include="ServerManager.h">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -286,6 +289,9 @@
     </ClCompile>
     <ClCompile Include="UILayer.cpp">
       <Filter>소스 파일\10. UILayer</Filter>
+    </ClCompile>
+    <ClCompile Include="ServerManager.cpp">
+      <Filter>소스 파일\99. Mgr</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -20,7 +20,7 @@ private:
 	virtual void	UpdateComponent(float fTimeElapsed);
 
 public:
-	void Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet);
+	void Server_SetParentAndAnimation(SC_MOVE_OBJECT_PACKET* packet);
 
 private:
 	CCollision* m_pComCollision = nullptr;

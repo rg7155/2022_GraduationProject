@@ -37,14 +37,13 @@ public:
 	WSABUF _wsabuf;
 	char send_buf[BUFSIZE];
 
-	SEND_DATA(int size, int client_id, char* n_data )
+	SEND_DATA(int size, char* n_data )
 	{
 		// size id data 순으로 보낸다.
 		_wsabuf.len = size;
 		_wsabuf.buf = send_buf;
 		ZeroMemory(&_over, sizeof(_over));
 		ZeroMemory(&send_buf, BUFSIZE);
-		//send_buf[0] = client_id;
 		memcpy(send_buf, n_data, size);
 	}
 };
@@ -88,9 +87,9 @@ public:
 		WSARecv(_socket, _c_wsabuf, 1, 0, &recv_flag, &_c_over, recv_callback);
 	}
 
-	void do_send(int num_bytes, int client_id, char* mess)
+	void do_send(int num_bytes, char* mess)
 	{
-		SEND_DATA* sdata = new SEND_DATA{ num_bytes, client_id, mess };
+		SEND_DATA* sdata = new SEND_DATA{ num_bytes, mess };
 		WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
 
 	}
@@ -101,10 +100,10 @@ public:
 		p.id = _id;
 		p.size = sizeof(SC_LOGIN_INFO_PACKET);
 		p.type = SC_LOGIN_INFO;
-		//p.x = pPlayer->GetPosition().x;
-		//p.y = pPlayer->GetPosition().y;
-		//p.z = pPlayer->GetPosition().z;
-		do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+		p.x = x = 25.f;
+		p.y = y = 0.f;
+		p.z = z = 25.f;
+		do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 
 	void send_move_packet(int c_id)
@@ -262,7 +261,7 @@ void process_packet(int c_id)
 			p.race = clients[c_id].race;
 			p.hp = clients[c_id].hp;
 			p.hpmax = clients[c_id].hpmax;
-			cl.second.do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+			cl.second.do_send(p.size, reinterpret_cast<char*>(&p));
 		}
 
 		// 다른 플레이어 가져옴
@@ -280,14 +279,14 @@ void process_packet(int c_id)
 			p.race = cl.second.race;
 			p.hp = cl.second.hp;
 			p.hpmax = cl.second.hpmax;
-			clients[c_id].do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+			clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 		}
 		break;
 
 	}
 	case CS_MOVE:
 	{
-		// 받은 데이터로 클라 갱신
+		// 받은 데이터로 서버 갱신
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
 		clients[c_id].x = p->x; 
 		clients[c_id].y = p->y; 
@@ -331,7 +330,7 @@ void disconnect(int c_id)
 		p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 		p.type = SC_REMOVE_OBJECT;
 		p.race = clients[c_id].race;
-		cl.second.do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+		cl.second.do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 	cout << c_id << "Client Disconnection\n";
 	clients.erase(c_id);

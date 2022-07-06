@@ -20,6 +20,7 @@ constexpr char SC_REMOVE_OBJECT = 4;
 constexpr char SC_MOVE_OBJECT = 5;
 
 #define DISCONNECT -99.f
+
 #include "../../Client_Desert/Enum.h"
 
 // 프로토콜 정의

@@ -9,11 +9,10 @@
 #include "Animation.h"
 #include "Scene.h"
 
-#define START_POS 25.0f, 0, 25.0f
-
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
+#define START_POS 25.0f, 0, 25.0f
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
@@ -249,6 +248,8 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (m_eCurAnim != PLAYER::ANIM::RUN)
 		Change_Animation(PLAYER::ANIM::RUN);
 
+	Server_GetParentAndAnimation();
+
 }
 
 void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
@@ -330,8 +331,6 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Right = Vector3::CrossProduct(m_xmf3Up, m_xmf3Look, true);
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
 }
-
-#define START_POS 25.0f, 0, 25.0f
 
 void CPlayer::Update(float fTimeElapsed)
 {
@@ -615,7 +614,7 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 {
 	// За·Д
 	CS_MOVE_PACKET* _duoPlayer = new CS_MOVE_PACKET;
-	_duoPlayer->xmf4x4World = m_xmf4x4ToParent;
+	/*_duoPlayer->xmf4x4World = m_xmf4x4ToParent;
 	_duoPlayer->eCurAnim = m_eCurAnim;
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
@@ -623,7 +622,7 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
 		_duoPlayer->animInfo[i].sPosition = m_pSkinnedAnimationController->m_fPosition[i] * 10000.f;
 	}
-	_duoPlayer->eCurAnim = m_eCurAnim;
+	_duoPlayer->eCurAnim = m_eCurAnim;*/
 	return _duoPlayer;
 }
 
