@@ -2,6 +2,16 @@
 
 IMPLEMENT_SINGLETON(CServerManager)
 
+SOCKET	CServerManager::m_s_socket;
+WSABUF	CServerManager::m_wsabuf_r;
+char	CServerManager::m_recv_buf[BUFSIZE];
+WSABUF	CServerManager::m_wsabuf_s;
+char*	CServerManager::m_send_buf = nullptr;
+char	CServerManager::m_prev_buf[BUFSIZE];
+int		CServerManager::m_prev_bytes = 0;
+bool	CServerManager::m_isWindow = false;
+int		CServerManager::m_myid = -1;
+
 CServerManager::CServerManager()
 {
 }
@@ -12,7 +22,7 @@ CServerManager::~CServerManager()
 void CServerManager::send_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	delete lpOverlapped;
-	delete send_buf;
+	delete m_send_buf;
 }
 
 void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
@@ -54,7 +64,7 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	//	cout << "cut"<< remain_data << endl;
 	//}
 
-	char* m_start = recv_buf;
+	char* m_start = m_recv_buf;
 	while (true)
 	{
 		int msg_size = static_cast<unsigned char>(m_start[0]);
@@ -103,13 +113,13 @@ void CServerManager::Connect()
 	std::wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData); // 소켓 네트워킹 시작 - 윈도우만
-	s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, 0, 0, WSA_FLAG_OVERLAPPED);
+	m_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server_addr;
 	std::ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, ip.c_str(), &server_addr.sin_addr);
-	int ret = connect(s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
+	int ret = connect(m_s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 
 	CS_LOGIN_PACKET* p = new CS_LOGIN_PACKET;
 	p->size = sizeof(CS_LOGIN_PACKET);
@@ -121,30 +131,30 @@ void CServerManager::Connect()
 	//Server_PosRecv();
 }
 
-void CServerManager::ProcessPacket(char* packet)
+int CServerManager::ProcessPacket(char* packet)
 {
 	// type을 비교
-	switch (ptr[1])
+	switch (packet[1])
 	{
 	case SC_LOGIN_INFO:
 	{
-		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(ptr);
-		g_myid = p->id;
-		gGameFramework.m_iId = g_myid;
+		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
+		m_myid = p->id;
+	/*	gGameFramework.m_iId = g_myid;
 		CGameMgr::GetInstance()->SetId(g_myid);
 		gGameFramework.BuildObjects();
-		CGameMgr::GetInstance()->GetPlayer()->m_iId = g_myid;
+		CGameMgr::GetInstance()->GetPlayer()->m_iId = g_myid;*/
 		return p->size;
 
 	}
 	case SC_ADD_OBJECT:
 	{
-		SC_ADD_OBJECT_PACKET* p = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(ptr);
-		gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
+		SC_ADD_OBJECT_PACKET* p = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet);
+		/*gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
 		gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(true);
 		std::cout << "상대 클라 접속!" << endl;
 		isWindow = true;
-		ShowWindow(g_hWnd, isWindow);
+		ShowWindow(g_hWnd, isWindow);*/
 
 		return p->size;
 	}
@@ -152,8 +162,8 @@ void CServerManager::ProcessPacket(char* packet)
 	{
 		// id에 해당하는 플레이어를 옮겨야하는데 1명 밖에 없으니 그냥 확인 안하고 넣기?
 		SC_MOVE_OBJECT_PACKET* p;
-		p = reinterpret_cast<SC_MOVE_OBJECT_PACKET*>(ptr);
-		gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(p);
+		p = reinterpret_cast<SC_MOVE_OBJECT_PACKET*>(packet);
+		//gGameFramework.m_pScene->m_pDuoPlayer->Server_SetParentAndAnimation(p);
 		return p->size;
 	}
 	//case SC_MOVE_MONSTER:
@@ -176,8 +186,8 @@ void CServerManager::ProcessPacket(char* packet)
 	//}
 	case SC_REMOVE_OBJECT:
 	{
-		SC_REMOVE_OBJECT_PACKET* p = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(ptr);
-		gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(false);
+		SC_REMOVE_OBJECT_PACKET* p = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
+		//gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(false);
 		return p->size;
 	}
 	default:

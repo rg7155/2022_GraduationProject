@@ -23,11 +23,24 @@ public:
 
 public:
 	static void Connect();
-	static void ProcessPacket(char* packet);
+	static int ProcessPacket(char* packet);
 public:
 	static void error_display(const char* msg, int err_no);
 
-private:
-	SOCKET s_socket;
+public:
+	static SOCKET	m_s_socket;
+	// Server
+	static WSABUF	m_wsabuf_r;
+	static char		m_recv_buf[BUFSIZE];
+
+	static WSABUF	m_wsabuf_s;
+	static char*	m_send_buf;
+
+	static char		m_prev_buf[BUFSIZE];
+	static int		m_prev_bytes;
+
+	static bool		m_isWindow;
+
+	static int		m_myid;
 };
 

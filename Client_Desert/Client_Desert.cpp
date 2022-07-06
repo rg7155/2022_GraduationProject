@@ -24,38 +24,6 @@ INT_PTR CALLBACK About(HWND, UINT, WPARAM, LPARAM);
 
 HWND g_hWnd = NULL;
 
-// Server
-WSABUF wsabuf_r;
-char recv_buf[BUFSIZE];
-WSABUF wsabuf_s;
-int g_myid = -1;
-char* send_buf = nullptr;
-char prev_buf[BUFSIZE];
-int prev_bytes = 0;
-bool isWindow = false;
-
-void Server_PosSend();
-void Server_PosRecv();
-void CALLBACK send_callback(DWORD dwError, DWORD cbTransferred,
-	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
-void CALLBACK recv_callback(DWORD dwError, DWORD cbTransferred,
-	LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
-void send_packet(void* packet);
-
-void error_display(const char* msg, int err_no)
-{
-	WCHAR* lpMsgBuf;
-	FormatMessage(
-		FORMAT_MESSAGE_ALLOCATE_BUFFER |
-		FORMAT_MESSAGE_FROM_SYSTEM,
-		NULL, err_no,
-		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-		(LPTSTR)&lpMsgBuf, 0, NULL);
-	std::cout << msg;
-	std::wcout << L"에러 " << lpMsgBuf << std::endl;
-	while (true);
-	LocalFree(lpMsgBuf);
-}
 
 int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
@@ -79,11 +47,9 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
 #ifdef USE_SERVER
-	send_packet(p);
-	std::cout << "상대 클라 대기중" << endl;
-
-	//thread serverThread{ Server_PosRecv };
-	Server_PosRecv();
+	//send_packet(p);
+	//std::cout << "상대 클라 대기중" << endl;
+	//Server_PosRecv();
 #endif // USE_SERVER
 
 	while (1)
@@ -105,10 +71,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		{
 #ifdef USE_SERVER
 			
-			if (isWindow)
+		/*	if (isWindow)
 			{
 				gGameFramework.FrameAdvance();
-			}
+			}*/
 #else
 			gGameFramework.FrameAdvance();
 
@@ -163,8 +129,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	if (!hMainWnd) return(FALSE);
 
 #ifdef USE_SERVER
-	// 클라 2명 연결전 윈도우 안보이게 (임시)
-	ShowWindow(hMainWnd, isWindow);
+	//// 클라 2명 연결전 윈도우 안보이게 (임시)
+	//ShowWindow(hMainWnd, isWindow);
 #else
 	::ShowWindow(hMainWnd, nCmdShow);
 #endif
@@ -246,57 +212,3 @@ INT_PTR CALLBACK About(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 	}
 	return((INT_PTR)FALSE);
 }
-
-void Server_PosRecv()
-{
-	// 위치 recv
-	wsabuf_r.buf = recv_buf; wsabuf_r.len = BUFSIZE;
-	DWORD recv_flag = 0;
-	WSAOVERLAPPED* r_over = new WSAOVERLAPPED;
-	std::ZeroMemory(r_over, sizeof(WSAOVERLAPPED));
-
-	int ret = WSARecv(s_socket, &wsabuf_r, 1, 0, &recv_flag, r_over, recv_callback);
-
-	//SleepEx(0, true);
-
-	if (0 != ret)
-	{
-		int err_no = WSAGetLastError();
-		if (err_no != WSA_IO_PENDING)
-			error_display("WSARecv", err_no);
-		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
-	}
-
-}
-
-void send_packet(void* packet)
-{
-	char* p = reinterpret_cast<char*>(packet);
-	size_t sent = 0;
-	WSABUF mybuf;
-	mybuf.buf = p;
-	mybuf.len = static_cast<unsigned char>(p[0]);
-	send_buf = p;
-	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
-	std::ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
-
-	//SleepEx(0, true);
-
-	int ret = WSASend(s_socket, &mybuf, 1, 0, 0, s_over, send_callback);
-	if (0 != ret)
-	{
-		int err_no = WSAGetLastError();
-		if (err_no != WSA_IO_PENDING)
-			error_display("WSASend", err_no);
-		//WSARecv에러 겹친 I/O 작업이 진행 중입니다. 는 에러로 판정하지 않아야함
-	}
-}
-void Server_PosSend()
-{	
-	// 버퍼에 duoPlayer 넣기
-	CS_MOVE_PACKET *p = gGameFramework.m_pPlayer->Server_GetParentAndAnimation();
-	p->size = sizeof(CS_MOVE_PACKET);
-	p->type = CS_MOVE;
-	send_packet(p);
-}
-
