@@ -46,7 +46,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	SetPosition(XMFLOAT3(25.0f, 0, 25.0f));
+	SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
 	
 	char fileName[2048];
 	m_iId = *((int*)pContext);
@@ -113,6 +113,14 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	//SetScale(XMFLOAT3(0.2, 1, 1.8));
 
+	m_pSword->m_pComponent[COM_COLLISION] = CCollision::Create();
+
+	CCollision* pCol = static_cast<CCollision*>(m_pSword->m_pComponent[COM_COLLISION]);
+	pCol->m_isStaticOOBB = false;
+	pCol->m_xmLocalOOBB = m_pSword->m_xmOOBB;
+	pCol->m_pxmf4x4World = &m_pSword->m_xmf4x4World;
+	pCol->UpdateBoundingBox();
+	m_pSword->m_eObjId = OBJ_SWORD;
 }
 
 CPlayer::~CPlayer()
@@ -389,7 +397,7 @@ void CPlayer::Update(float fTimeElapsed)
 
 	if (m_pSkinnedAnimationController)
 	{
-		float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
+		//float fLength = sqrtf(m_xmf3Velocity.x * m_xmf3Velocity.x + m_xmf3Velocity.z * m_xmf3Velocity.z);
 
 		if (Check_Input(fTimeElapsed))
 			return;
@@ -561,6 +569,16 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 	}
 
+	m_pSword->m_pComponent[COM_COLLISION]->Update_Component(fTimeElapsed);
+	CCollision* pCol = static_cast<CCollision*>(m_pSword->m_pComponent[COM_COLLISION]);
+	if (pCol)
+		pCol->UpdateBoundingBox();
+
+	// 공격일때만 체크
+	if (IsNowAttack())
+		pCol->m_isCollisionIgnore = false;
+	else
+		pCol->m_isCollisionIgnore = true;
 }
 
 void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
@@ -585,22 +603,22 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		//OnPrepareRender();
 
 		//방법3. 충돌한 선분의 법선벡터 방향으로 밀어주기
-		XMFLOAT3 xmf3Temp(0,0,0), xmf3Normal(0, 0, 0);
-		XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
-		xmf3Temp = Vector3::Subtract(xmf3Point0, xmf3Point1, true, false);
-		xmf3Normal.z = -xmf3Temp.x;
-		xmf3Normal.x = xmf3Temp.z;
+		//XMFLOAT3 xmf3Temp(0,0,0), xmf3Normal(0, 0, 0);
+		//XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
+		//xmf3Temp = Vector3::Subtract(xmf3Point0, xmf3Point1, true, false);
+		//xmf3Normal.z = -xmf3Temp.x;
+		//xmf3Normal.x = xmf3Temp.z;
 
-		
-		//XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
+		//
+		////XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
 
-		XMFLOAT3 xmf3Dir = xmf3Normal/*xmf3Reflect*/;
-		xmf3Dir = Vector3::ScalarProduct(xmf3Dir, m_fTempShift, false);
-		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Dir);
+		//XMFLOAT3 xmf3Dir = xmf3Normal/*xmf3Reflect*/;
+		//xmf3Dir = Vector3::ScalarProduct(xmf3Dir, m_fTempShift, false);
+		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Dir);
 
-		m_pCamera->Move(xmf3Dir);
-		m_pCamera->RegenerateViewMatrix();
-		OnPrepareRender();
+		//m_pCamera->Move(xmf3Dir);
+		//m_pCamera->RegenerateViewMatrix();
+		//OnPrepareRender();
 
 		//cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
 

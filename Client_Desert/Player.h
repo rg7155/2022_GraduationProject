@@ -39,7 +39,8 @@ protected:
 	CCamera						*m_pCamera = NULL;
 	CGameObject					*m_pSword = NULL;
 	CGameObject					*m_pSwordTail = NULL;
-
+public:
+	CGameObject* GetSword() { return m_pSword; }
 public:
 	CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext);
 	~CPlayer();
@@ -109,7 +110,7 @@ private:
 	virtual void	UpdateComponent(float fTimeElapsed);
 
 public:
-	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line = nullptr) override;
 
 public:
 	bool IsNowAttack();

@@ -9,6 +9,7 @@
 #include "InputDev.h"
 #include "Monster.h"
 
+
 CShader::CShader(int nPipelineStates /*= 1*/)
 {
 	m_nPipelineStates = nPipelineStates;
@@ -767,7 +768,46 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_mapModelInfo.emplace(L"Golem", pModel);
 
 	CMonsterObject* pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//pObj->SetActiveState(true);
+	//pObj->SetPosition(CACTI_POS_AFTER1);
 	AddObject(L"Golem", pObj);
+	
+	//pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//pObj->SetActiveState(true);
+	//pObj->SetPosition(CACTI_POS_AFTER2);
+	//AddObject(L"Golem", pObj);
+
+
+
+	// Cacti
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cacti.bin", NULL);
+	m_mapModelInfo.emplace(L"Cacti", pModel);
+
+	CGameObject* pCacti1 = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel, CACTI1);
+	pCacti1->SetActiveState(true);
+	AddObject(L"Cacti", pCacti1);
+
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cacti.bin", NULL);
+	m_mapModelInfo.emplace(L"Cacti", pModel);
+
+	CGameObject* pCacti2 = new CCactiObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel, CACTI2);
+	pCacti2->SetActiveState(true);
+	AddObject(L"Cacti", pCacti2);
+
+	// Cactus
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cactus.bin", NULL);
+	m_mapModelInfo.emplace(L"Cactus", pModel);
+
+	CGameObject* pCactus = new CCactusObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel, pCacti1, pCacti2);
+	pCactus->SetActiveState(false);
+	pCactus->SetPosition(CACTUS_POS_INIT);
+	AddObject(L"Cactus", pCactus);
+
+	// Cactic ¼¼ÆÃ
+	static_cast<CCactiObject*>(pCacti1)->m_pCactus = pCactus;
+	static_cast<CCactiObject*>(pCacti2)->m_pCactus = pCactus;
+	static_cast<CCactiObject*>(pCacti1)->m_pCacti = pCacti2;
+	static_cast<CCactiObject*>(pCacti2)->m_pCacti = pCacti1;
 
 }
 

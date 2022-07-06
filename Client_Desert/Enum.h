@@ -6,7 +6,7 @@ enum MOUSEMOVESTATE { DIMS_X, DIMS_Y, DIMS_Z, DIMS_END };
 
 enum COMPONENT { COM_FRUSTUM, COM_COLLISION, COM_TRAIL, COM_END };
 
-enum OBJ_ID { OBJ_PLAYER, OBJ_MAP, OBJ_END };
+enum OBJ_ID { OBJ_PLAYER, OBJ_MAP, OBJ_SWORD, OBJ_MONSTER, OBJ_END };
 
 enum SCENE { SCENE_1, SCENE_2, SCENE_END};
 
@@ -26,6 +26,20 @@ namespace GOLEM
 	};
 }
 
+namespace CACTI
+{
+	enum ANIM {
+		WALK = 0, IDLE = 1, ATTACK1 = 2, ATTACK2 = 3,
+		DIE = 4, BITE = 5, END = 6
+	};
+}
 
+namespace CACTUS
+{
+	enum ANIM {
+		SPAWN = 0, IDLE = 1, ATTACK1 = 2, ATTACK2 = 3,
+		ATTACK3 = 4, DIE = 5, END = 6
+	};
+}
 //string COM_FRUSTUM = "Frustum";
 #endif // Eunm_h__

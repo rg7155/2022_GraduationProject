@@ -231,8 +231,8 @@ void CAnimationController::SetTrackAnimationSet(int nAnimationTrack, int nAnimat
 	if (m_pAnimationTracks)
 	{
 		m_pAnimationTracks[nAnimationTrack].m_nAnimationSet = nAnimationSet;
-		//		m_pAnimationTracks[nAnimationTrack].m_fPosition = 0.0f;
-		//		if (m_pAnimationSets) m_pAnimationSets->m_pAnimationSets[nAnimationSet]->m_fPosition = 0.0f;
+		m_pAnimationTracks[nAnimationTrack].m_fPosition = 0.0f;
+		if (m_pAnimationSets) m_pAnimationSets->m_pAnimationSets[nAnimationSet]->m_fPosition = 0.0f;
 	}
 }
 

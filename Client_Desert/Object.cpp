@@ -935,8 +935,11 @@ CGameObject *CGameObject::LoadFrameHierarchyFromFile(ID3D12Device *pd3dDevice, I
 			CStandardMesh *pMesh = new CStandardMesh(pd3dDevice, pd3dCommandList);
 			pMesh->LoadMeshFromFile(pd3dDevice, pd3dCommandList, pInFile);//oobb
 			pGameObject->SetMesh(pMesh);
-
-			pRootModelObj->m_xmOOBB = pMesh->m_xmOOBB;
+			if (!strcmp(pGameObject->m_pstrFrameName, "Sword")) {
+				pGameObject->m_xmOOBB = pMesh->m_xmOOBB;
+			}
+			else
+				pRootModelObj->m_xmOOBB = pMesh->m_xmOOBB;
 		}
 		else if (!strcmp(pstrToken, "<SkinningInfo>:"))
 		{
