@@ -245,11 +245,10 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_C))
-	//{
-
-	//	//ChangeScene(SCENE_2);
-	//}
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
+	{
+		ChangeScene(SCENE_2);
+	}
 	
 	//TCHAR szTest[32] = L"";
 	//float f = 0.f;
@@ -371,7 +370,7 @@ void CScene::ChangeScene(SCENE eScene)
 	case SCENE_1:
 		break;
 	case SCENE_2:
-		m_pPlayer->SetPosition(XMFLOAT3(70.f, 0.f, 70.f));
+		m_pPlayer->SetPosition(XMFLOAT3(10.f, 0.f ,15.f));
 
 		m_pMapObjectShader->ChangeMap(eScene);
 
