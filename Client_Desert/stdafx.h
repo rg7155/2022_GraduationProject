@@ -75,6 +75,7 @@ using Microsoft::WRL::ComPtr;
 
 
 extern HINSTANCE						ghAppInstance;
+extern HWND								g_hWnd;
 
 //#define _WITH_SWAPCHAIN_FULLSCREEN_STATE
 

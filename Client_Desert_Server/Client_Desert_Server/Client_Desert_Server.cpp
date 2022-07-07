@@ -106,6 +106,21 @@ public:
 		do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 
+	void send_add_object(int c_id)
+	{
+		SC_ADD_OBJECT_PACKET p;
+		p.id = c_id;
+		p.size = sizeof(SC_ADD_OBJECT_PACKET);
+		p.type = SC_ADD_OBJECT;
+		p.x = x;
+		p.y = y;
+		p.z = z;
+		p.race = clients[c_id].race;
+		p.hp = clients[c_id].hp;
+		p.hpmax = clients[c_id].hpmax;
+		do_send(p.size, reinterpret_cast<char*>(&p));
+	}
+
 	void send_move_packet(int c_id)
 	{
 		// 위치, 이동방향만 보내는걸루
@@ -250,36 +265,14 @@ void process_packet(int c_id)
 		for (auto& cl : clients)
 		{
 			if (cl.first == c_id) continue;
-
-			SC_ADD_OBJECT_PACKET p;
-			p.id = c_id;
-			p.size = sizeof(SC_ADD_OBJECT_PACKET);
-			p.type = SC_ADD_OBJECT;
-			p.x = clients[c_id].x;
-			p.y = clients[c_id].y;
-			p.z = clients[c_id].z;
-			p.race = clients[c_id].race;
-			p.hp = clients[c_id].hp;
-			p.hpmax = clients[c_id].hpmax;
-			cl.second.do_send(p.size, reinterpret_cast<char*>(&p));
+			cl.second.send_add_object(c_id);
 		}
 
 		// 다른 플레이어 가져옴
 		for (auto& cl : clients)
 		{
 			if (cl.first == c_id) continue;
-
-			SC_ADD_OBJECT_PACKET p;
-			p.id = c_id;
-			p.size = sizeof(SC_ADD_OBJECT_PACKET);
-			p.type = SC_ADD_OBJECT;
-			p.x = cl.second.x;
-			p.y = cl.second.y;
-			p.z = cl.second.z;
-			p.race = cl.second.race;
-			p.hp = cl.second.hp;
-			p.hpmax = cl.second.hpmax;
-			clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
+			clients[c_id].send_add_object(cl.first);
 		}
 		break;
 

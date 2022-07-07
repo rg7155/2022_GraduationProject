@@ -1,8 +1,10 @@
 #include "ServerManager.h"
+#include "GameMgr.h"
+#include "GameFramework.h"
 
 IMPLEMENT_SINGLETON(CServerManager)
 
-SOCKET	CServerManager::m_s_socket;
+SOCKET	CServerManager::m_socket;
 WSABUF	CServerManager::m_wsabuf_r;
 char	CServerManager::m_recv_buf[BUFSIZE];
 WSABUF	CServerManager::m_wsabuf_s;
@@ -11,6 +13,7 @@ char	CServerManager::m_prev_buf[BUFSIZE];
 int		CServerManager::m_prev_bytes = 0;
 bool	CServerManager::m_isWindow = false;
 int		CServerManager::m_myid = -1;
+CGameFramework* CServerManager::gameFramework;
 
 CServerManager::CServerManager()
 {
@@ -22,7 +25,7 @@ CServerManager::~CServerManager()
 void CServerManager::send_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	delete lpOverlapped;
-	delete m_send_buf;
+	//delete m_send_buf;
 }
 
 void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
@@ -86,19 +89,52 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	}
 	delete lpOverlapped;
 
-	RecvProcess();
+	recv_packet();
 }
 
-void CServerManager::RecvProcess()
+void CServerManager::recv_packet()
 {
-}
+	m_wsabuf_r.buf = m_recv_buf;
+	m_wsabuf_r.len = BUFSIZE;
+	DWORD recv_flag = 0;
+	WSAOVERLAPPED* r_over = new WSAOVERLAPPED;
+	ZeroMemory(r_over, sizeof(WSAOVERLAPPED));
 
-void CServerManager::SendProcess()
-{
+	int ret = WSARecv(m_socket, &m_wsabuf_r, 1, 0, &recv_flag, r_over, recv_callback);
+
+	if (0 != ret) {
+		int err = WSAGetLastError();
+		if (err != WSA_IO_PENDING)
+			error_display("WSASend", err);
+	}
 }
 
 void CServerManager::send_packet(void* packet)
 {
+	char* p = reinterpret_cast<char*>(packet);
+	size_t sent = 0;
+	WSABUF wsabuf;
+	wsabuf.buf = p;
+	wsabuf.len = static_cast<unsigned char>(p[0]);
+	m_send_buf = p;
+	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
+	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
+
+	int ret = WSASend(m_socket, &wsabuf, 1, 0, 0, s_over, send_callback);
+	if (0 != ret) {
+		int err = WSAGetLastError();
+		if (err != WSA_IO_PENDING)
+			error_display("WSASend", err);
+	}
+}
+
+void CServerManager::send_login_packet()
+{
+	CS_LOGIN_PACKET p;
+	p.size = sizeof(CS_LOGIN_PACKET);
+	p.type = CS_LOGIN;
+	std::cout << "상대 클라 대기중" << endl;
+	send_packet(&p);
 }
 
 void CServerManager::Connect()
@@ -113,22 +149,13 @@ void CServerManager::Connect()
 	std::wcout.imbue(locale("korean")); // 에러 메세지 한글로 출력
 	WSADATA WSAData;
 	WSAStartup(MAKEWORD(2, 2), &WSAData); // 소켓 네트워킹 시작 - 윈도우만
-	m_s_socket = WSASocket(AF_INET, SOCK_STREAM, 0, 0, 0, WSA_FLAG_OVERLAPPED);
+	m_socket = WSASocket(AF_INET, SOCK_STREAM, 0, 0, 0, WSA_FLAG_OVERLAPPED);
 	SOCKADDR_IN server_addr;
 	std::ZeroMemory(&server_addr, sizeof(server_addr));
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(SERVER_PORT);
 	inet_pton(AF_INET, ip.c_str(), &server_addr.sin_addr);
-	int ret = connect(m_s_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
-
-	CS_LOGIN_PACKET* p = new CS_LOGIN_PACKET;
-	p->size = sizeof(CS_LOGIN_PACKET);
-	p->type = CS_LOGIN;
-	//strcpy_s(p->name, "PLAYER");
-
-
-	//// 위치 받기
-	//Server_PosRecv();
+	int ret = connect(m_socket, reinterpret_cast<sockaddr*>(&server_addr), sizeof(server_addr));
 }
 
 int CServerManager::ProcessPacket(char* packet)
@@ -140,21 +167,19 @@ int CServerManager::ProcessPacket(char* packet)
 	{
 		SC_LOGIN_INFO_PACKET* p = reinterpret_cast<SC_LOGIN_INFO_PACKET*>(packet);
 		m_myid = p->id;
-	/*	gGameFramework.m_iId = g_myid;
-		CGameMgr::GetInstance()->SetId(g_myid);
-		gGameFramework.BuildObjects();
-		CGameMgr::GetInstance()->GetPlayer()->m_iId = g_myid;*/
+		CGameMgr::GetInstance()->SetId(m_myid);
+		gameFramework->BuildObjects();
 		return p->size;
 
 	}
 	case SC_ADD_OBJECT:
 	{
 		SC_ADD_OBJECT_PACKET* p = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet);
-		/*gGameFramework.m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
-		gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(true);
+		gameFramework->m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, 0.f, p->z));
+		gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(true);
 		std::cout << "상대 클라 접속!" << endl;
-		isWindow = true;
-		ShowWindow(g_hWnd, isWindow);*/
+		m_isWindow = true;
+		ShowWindow(g_hWnd, m_isWindow);
 
 		return p->size;
 	}

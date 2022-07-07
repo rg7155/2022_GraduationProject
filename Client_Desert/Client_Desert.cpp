@@ -30,11 +30,7 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	UNREFERENCED_PARAMETER(hPrevInstance);
 	UNREFERENCED_PARAMETER(lpCmdLine);
 
-
-#ifdef USE_SERVER
-	CServerManager::GetInstance()->Connect();
-#endif // USE_SERVER
-
+	CServerManager::GetInstance()->gameFramework = &gGameFramework;
 	MSG msg;
 	HACCEL hAccelTable;
 
@@ -47,9 +43,10 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 	hAccelTable = ::LoadAccelerators(hInstance, MAKEINTRESOURCE(IDC_CLIENTDESERT));
 
 #ifdef USE_SERVER
-	//send_packet(p);
-	//std::cout << "상대 클라 대기중" << endl;
-	//Server_PosRecv();
+	CServerManager::GetInstance()->Connect();
+	CServerManager::GetInstance()->send_login_packet();
+	CServerManager::GetInstance()->recv_packet();
+
 #endif // USE_SERVER
 
 	while (1)
@@ -62,19 +59,16 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 			{
 				::TranslateMessage(&msg);
 				::DispatchMessage(&msg);
-			
-
-
 			}
 		}
 		else
 		{
 #ifdef USE_SERVER
 			
-		/*	if (isWindow)
+			if (CServerManager::GetInstance()->m_isWindow)
 			{
 				gGameFramework.FrameAdvance();
-			}*/
+			}
 #else
 			gGameFramework.FrameAdvance();
 
@@ -92,7 +86,6 @@ int APIENTRY _tWinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCm
 		//ImGui::NewFrame();
 	}
 	gGameFramework.OnDestroy();
-	//serverThread.join();
 	return((int)msg.wParam);
 }
 
@@ -129,16 +122,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	if (!hMainWnd) return(FALSE);
 
 #ifdef USE_SERVER
-	//// 클라 2명 연결전 윈도우 안보이게 (임시)
-	//ShowWindow(hMainWnd, isWindow);
+	// 클라 2명 연결전 윈도우 안보이게 (임시)
+	ShowWindow(hMainWnd, CServerManager::GetInstance()->m_isWindow);
 #else
 	::ShowWindow(hMainWnd, nCmdShow);
 #endif
 
 	g_hWnd = hMainWnd;
-
 	gGameFramework.OnCreate(hInstance, hMainWnd);
-
 	::UpdateWindow(hMainWnd);
 	
 

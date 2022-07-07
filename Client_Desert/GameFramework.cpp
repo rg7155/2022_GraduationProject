@@ -439,8 +439,6 @@ void CGameFramework::BuildObjects()
 	m_pUILayer = new UILayer(m_nSwapChainBuffers, m_pd3dDevice, m_pd3dCommandQueue);
 	m_pUILayer->Resize(m_ppd3dSwapChainBackBuffers, m_nWndClientWidth, m_nWndClientHeight);
 
-
-
 	m_pd3dCommandList->Reset(m_pd3dCommandAllocator, NULL);
 
 	CGameMgr::GetInstance()->SetDevice(m_pd3dDevice);
