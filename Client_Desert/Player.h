@@ -122,12 +122,9 @@ private:
 	XMVECTOR m_xmVecSrc;
 
 public:
-	CS_MOVE_PACKET* Server_GetParentAndAnimation();
-
-public:
 	PLAYER::ANIM GetCurAnim() { return m_eCurAnim; }
 
-private:
+protected:
 	PLAYER::ANIM	m_ePrevAnim;			// 이전 애니메이션
 	PLAYER::ANIM	m_eCurAnim;				// 현재 애니메이션
 	float	m_fBlendingTime;		// 블렌딩 시간
@@ -143,9 +140,8 @@ private:
 public:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;
-
 public:
-	int		m_iId;
+	char	m_dir;
 
 };
 

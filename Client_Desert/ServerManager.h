@@ -21,6 +21,8 @@ public:
 	static void send_packet(void* packet);
 
 	static void send_login_packet();
+	static void send_move_packet(char dir);
+	static void send_anim_change_packet();
 
 public:
 	static void Connect();
@@ -34,15 +36,15 @@ public:
 	static WSABUF	m_wsabuf_r;
 	static char		m_recv_buf[BUFSIZE];
 
-	static WSABUF	m_wsabuf_s;
-	static char*	m_send_buf;
-
-	static char		m_prev_buf[BUFSIZE];
-	static int		m_prev_bytes;
-
 	static bool		m_isWindow;
 
 	static int		m_myid;
 	static CGameFramework* gameFramework;
+	
+
+public:
+
+	// send 여러 개 할 수 있으니 map으로 버퍼 관리하자
+	//static queue<char*> m_queueSendBuf;
 };
 

@@ -1,6 +1,7 @@
 #include "Monster.h"
 #include "Scene.h"
 #include "ChildObject.h"
+#include "ServerManager.h"
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CGameObject(1)
@@ -455,7 +456,7 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 
 	// 플레이어가 공격 중이면 공격하지 않음
 	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
-
+	int id = CServerManager::GetInstance()->m_myid;
 
 	if (!pPlayer->IsNowAttack())
 	{
@@ -465,7 +466,7 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 		{
 			// 타겟이면
 
-			if (pPlayer->m_iId == m_targetId)
+			if (id == m_targetId)
 			{
 				pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
 
@@ -564,13 +565,12 @@ void CGolemObject::SetNewRotate(XMFLOAT3 xmf3Look)
 void CGolemObject::Check_Collision()
 {
 	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+	int id = CServerManager::GetInstance()->m_myid;
 	float fDis = Vector3::Distance(pPlayer->GetPosition(), GetPosition());
 	if (fDis < GOLEM_ATTACK1_DISTANCE)
 	{
 		// 타겟이면
-		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
-
-		if (pPlayer->m_iId == m_targetId)
+		if (id == m_targetId)
 		{
 			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
 		}

@@ -59,7 +59,7 @@ public:
 	float	x, y, z;
 	char	direction;
 	int		hp, hpmax;
-	//char	anim;
+	int		anim;
 
 public:
 	SOCKET	_socket;
@@ -132,6 +132,7 @@ public:
 		p.y = y;
 		p.z = z;
 		p.direction = direction;
+		do_send(p.size, reinterpret_cast<char*>(&p));
 
 		//// 몬스터 패킷
 		//if (g_pGolemMonster)
@@ -140,7 +141,7 @@ public:
 		//	monsterpacket.id = 0;
 		//	monsterpacket.type = SC_MOVE_MONSTER;
 		//	monsterpacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
-		//	monsterpacket.eCurAnim = g_pGolemMonster->m_eCurAnim;
+		//	monsterpacket.eCurAnim = g_pGolemMmonster->m_eCurAnim;
 		//	monsterpacket.xmf3Position = g_pGolemMonster->m_xmf3Position;
 		//	monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
 		//	monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
@@ -157,6 +158,20 @@ public:
 		//	do_send(p.size, p.id, reinterpret_cast<char*>(&p));
 
 	
+	}
+
+	void send_stat_change_packet(int c_id)
+	{
+		// 위치, 이동방향만 보내는걸루
+		SC_STAT_CHANGE_PACKET p;
+		p.id = c_id; // _id로 해서 오류 났었음
+		p.size = sizeof(SC_STAT_CHANGE_PACKET);
+		p.type = SC_STAT_CHANGE;
+		p.hp = clients[c_id].hp;
+		p.hpmax = clients[c_id].hpmax;
+		p.race = clients[c_id].race;
+		p.anim = clients[c_id].anim;
+		do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 };
 
@@ -305,7 +320,20 @@ void process_packet(int c_id)
 		}
 		break;
 	}
-		
+	case CS_ANIM_CHANGE:
+	{
+		// 받은 데이터로 서버 갱신
+		CS_ANIM_CHANGE_PACKET* p = reinterpret_cast<CS_ANIM_CHANGE_PACKET*>(packet);
+		clients[c_id].anim = p->anim;
+
+		// 모든 클라에게 애님 전송
+		for (auto& cl : clients)
+		{
+			if (cl.first == c_id) continue;
+			cl.second.send_stat_change_packet(c_id);
+		}
+		break;
+	}
 	default:
 		break;
 	}

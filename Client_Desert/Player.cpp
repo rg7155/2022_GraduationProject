@@ -8,6 +8,7 @@
 #include "InputDev.h"
 #include "Animation.h"
 #include "Scene.h"
+#include "ServerManager.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
@@ -48,8 +49,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
 	
 	char fileName[2048];
-	m_iId = *((int*)pContext);
-	if (m_iId == 0)
+	int id = *(int*)pContext;
+
+	if (id == 0)
 		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
 	else
 		strcpy(fileName, "Model/Adventurer_Aland_Green.bin");
@@ -118,6 +120,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	pCol->m_pxmf4x4World = &m_pSword->m_xmf4x4World;
 	pCol->UpdateBoundingBox();
 	m_pSword->m_eObjId = OBJ_SWORD;
+
+	m_dir = DIR_UP;
 }
 
 CPlayer::~CPlayer()
@@ -185,38 +189,52 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))	// 위오
 	{
 		xmDstVec = xmVecCamRight + xmVecCamLook;
-		
+		m_dir = DIR_UPRIGHT;
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))	// 오아
 	{
 		xmDstVec = xmVecCamRight - xmVecCamLook;
+		m_dir = DIR_DOWNRIGHT;
+
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))	// 아왼
 	{
 		xmDstVec = -xmVecCamRight - xmVecCamLook;
+		m_dir = DIR_DOWNLEFT;
+
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A) &&
 		CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))	// 왼위
 	{
 		xmDstVec = -xmVecCamRight + xmVecCamLook;
+		m_dir = DIR_UPLEFT;
+
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_D))
 	{
 		xmDstVec = xmVecCamRight;
+		m_dir = DIR_RIGHT;
+
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_A))
 	{
 		xmDstVec = -xmVecCamRight;
+		m_dir = DIR_LEFT;
+
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_W))
 	{
 		xmDstVec = xmVecCamLook;
+		m_dir = DIR_UP;
+
 	}
 	else if (CInputDev::GetInstance()->KeyPressing(DIKEYBOARD_S))
 	{
 		xmDstVec = -xmVecCamLook;
+		m_dir = DIR_DOWN;
+
 	}
 	else
 	{
@@ -248,7 +266,6 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	if (m_eCurAnim != PLAYER::ANIM::RUN)
 		Change_Animation(PLAYER::ANIM::RUN);
 
-	Server_GetParentAndAnimation();
 
 }
 
@@ -260,15 +277,14 @@ void CPlayer::Move(XMFLOAT3& xmf3Shift, bool bUpdateVelocity)
 		//cout << "After" << xmf3Temp.x << xmf3Temp.y << xmf3Temp.z << endl;
 
 		m_xmf3PreVelocity = m_xmf3Velocity;
-
-
-
 	}
 	else
 	{
 		m_xmf3PrePosition = m_xmf3Position;
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
-		m_pCamera->Move(xmf3Shift);
+		if(m_pCamera)
+			m_pCamera->Move(xmf3Shift);
+		// 이동했으므로 보낸다.
 	}
 }
 
@@ -411,7 +427,6 @@ void CPlayer::Update(float fTimeElapsed)
 				Change_Animation(PLAYER::ANIM::IDLE_RELAXED);
 		}
 	}
-
 
 }
 
@@ -609,23 +624,6 @@ bool CPlayer::IsNowAttack()
 
 	return false;
 }
-
-CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
-{
-	// 행렬
-	CS_MOVE_PACKET* _duoPlayer = new CS_MOVE_PACKET;
-	/*_duoPlayer->xmf4x4World = m_xmf4x4ToParent;
-	_duoPlayer->eCurAnim = m_eCurAnim;
-	for (int i = 0; i < PLAYER::ANIM::END; i++)
-	{
-		_duoPlayer->animInfo[i].sWeight = m_pSkinnedAnimationController->GetTrackWeight(i) * 10000.f;
-		_duoPlayer->animInfo[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
-		_duoPlayer->animInfo[i].sPosition = m_pSkinnedAnimationController->m_fPosition[i] * 10000.f;
-	}
-	_duoPlayer->eCurAnim = m_eCurAnim;*/
-	return _duoPlayer;
-}
-
 
 CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {

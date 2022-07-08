@@ -7,6 +7,7 @@
 #include "InputDev.h"
 #include "GameMgr.h"
 #include "UILayer.h"
+#include "ServerManager.h"
 
 #define FRAME 60.f
 
@@ -448,7 +449,8 @@ void CGameFramework::BuildObjects()
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 
 #ifdef _WITH_TERRAIN_PLAYER
-	CPlayer *pPlayer = new CPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), (void*)&m_iId);
+	int id = CServerManager::GetInstance()->m_myid;
+	CPlayer *pPlayer = new CPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), (void*)&id);
 #else
 	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
 	pPlayer->SetPosition(XMFLOAT3(425.0f, 240.0f, 640.0f));
@@ -457,7 +459,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
-	m_pScene->CreateDuoPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), m_iId);
+	m_pScene->CreateDuoPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), 1-id);
 	/// ///////////////////
 	CGameMgr::GetInstance()->SetPlayer(m_pPlayer);
 	CGameMgr::GetInstance()->SetCamera(m_pCamera); 

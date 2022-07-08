@@ -671,8 +671,6 @@ void CScene::SetRootParameterConstants(D3D12_ROOT_PARAMETER pd3dRootParameter[],
 
 void CScene::CreateDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int id)
 {
-	int duo_id;
-	duo_id = 1 - id;
-
-	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (void*)&duo_id);
+	
+	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (void*)&id);
 }

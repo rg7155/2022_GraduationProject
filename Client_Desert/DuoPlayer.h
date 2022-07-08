@@ -1,6 +1,6 @@
 #pragma once
 #include "stdafx.h"
-#include "Object.h"
+#include "Player.h"
 
 class CDuoPlayer : public CGameObject
 {
@@ -19,8 +19,12 @@ private:
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void	UpdateComponent(float fTimeElapsed);
 
+	
 public:
-	void Server_SetParentAndAnimation(SC_MOVE_OBJECT_PACKET* packet);
+	void set_stat_change(SC_STAT_CHANGE_PACKET* p);
+
+public:
+	void Change_Animation(PLAYER::ANIM eNewAnim);
 
 private:
 	CCollision* m_pComCollision = nullptr;
@@ -31,11 +35,9 @@ private:
 	bool	m_bSkill1EffectOn;
 public:
 	bool IsNowAttack();
-
-public:
-	int				m_iId;
 	
 	PLAYER::ANIM	m_eCurAnim;				// 현재 애니메이션
+	PLAYER::ANIM	m_ePrevAnim;				// 현재 애니메이션
 
 };
 

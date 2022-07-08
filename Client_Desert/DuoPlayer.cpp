@@ -5,8 +5,8 @@
 CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	char fileName[2048];
-	m_iId = *((int*)pContext);
-	if (m_iId == 0)
+	int id = *(int*)pContext;
+	if (id == 0)
 		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
 	else
 		strcpy(fileName, "Model/Adventurer_Aland_Green.bin");
@@ -125,31 +125,60 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 }
 
-void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_OBJECT_PACKET* packet)
+void CDuoPlayer::set_stat_change(SC_STAT_CHANGE_PACKET* p)
 {
-	//// 행렬
-	//m_xmf4x4ToParent = packet->xmf4x4World;
-	//player_anim* _player_anim = packet->animInfo;
-	//m_eCurAnim = packet->eCurAnim;
+	 
+}
 
+void CDuoPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
+{
+	//m_ePrevAnim = m_eCurAnim;
+	//m_eCurAnim = eNewAnim;
+
+
+	//if (m_eCurAnim != PLAYER::SKILL1)
+	//	m_bSkill1EffectOn = false;
+
+
+	//m_fAnimElapsedTime = 0.f;
+	//m_fBlendingTime = 0.f;
+	//m_bBlendingOn = true;
+
+	//// Prev, Cur 빼고 Enable
 	//for (int i = 0; i < PLAYER::ANIM::END; i++)
 	//{
-
-	//	float fWeight, fPosition;
-	//	if (_player_anim[i].sWeight != 0)
-	//		fWeight = (float)_player_anim[i].sWeight / 10000.f;
-	//	else
-	//		fWeight = 0.f;
-
-	//	if (_player_anim[i].sPosition != 0)
-	//		fPosition = (float)_player_anim[i].sPosition / 10000.f;
-	//	else
-	//		fPosition = 0.f;
-
-	//	m_pSkinnedAnimationController->SetTrackWeight(i, fWeight);
-	//	m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
-	//	m_pSkinnedAnimationController->m_fPosition[i] = fPosition;
+	//	if (i == m_ePrevAnim || i == m_eCurAnim)
+	//		continue;
+	//	m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	//	m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
 	//}
+
+	//// 애니메이션 진행시간 
+	//m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+
+
+	//m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	//m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
+
+	//////	// 1 2 3 순으로 애니메이션 진행된다하면. 1,2 블렌딩 중에 3으로 바뀌면 2의 블렌딩값과 3의 1-2의블렌딩값으로 세팅되어야 함
+	//if (m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim) < 0.8f)
+	//{
+	//	m_fBlendingTime = m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim);
+
+	//	m_fAnimElapsedTime = 1.f - m_fBlendingTime;
+
+	//	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, m_fBlendingTime);
+
+	//	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fAnimElapsedTime);
+	//	m_fBlendingTime = m_fAnimElapsedTime;
+	//	m_fAnimElapsedTime = 0.f;
+	//}
+	//else
+	//{
+	//	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f);	// 애니메이션 3개중첩 방지
+	//	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 0.f);
+	//}
+	//// 이전 애니메이션의 가중치가 1보다 작으면 1로 바꾸지말고 그때부터 보간해야함
 }
 
 bool CDuoPlayer::IsNowAttack()
