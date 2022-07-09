@@ -614,10 +614,11 @@ CMapObjectsShader::~CMapObjectsShader()
 void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	
-	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform_Test.bin", true);
 
-	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform.bin", true);
-	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform2.bin", false);
+	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/SceneTest_Transform.bin", true);
+	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene1_Transform_NoCol.bin", true);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene1_Transform.bin", true);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene2_Transform.bin", false);
 
 }
 
@@ -648,7 +649,6 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 		if (ReadStringFromFile(pInFile, pstrToken))
 		{
 			CLoadedModelInfo* pMapModel = NULL;
-			bool bLoad = true;
 			int iLength = (int)strlen(pstrToken);
 
 			for (int j = 0; j < iLength; j++)
@@ -662,12 +662,10 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 			string str(pstrToken);
 			auto iter = m_mapModelInfo.find(str);
-			if (bLoad && iter == m_mapModelInfo.end())
+			if (iter == m_mapModelInfo.end())
 			{
 				//»ðÀÔ
 				char pName[64] = "Model/Map/";
-				if (!isActive)
-					strcat_s(pName, "Scene2/");
 
 				strcat_s(pName, pstrToken);
 				strcat_s(pName, ".bin");
@@ -698,7 +696,6 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 			//Å©ÀÚÀÌ·Î ÀÐ¾î¿È
 			XMFLOAT3 xmf3Scale = ReadVectorFromFile(pInFile, 3);
-
 			XMFLOAT3 xmf3Rotaion = ReadVectorFromFile(pInFile, 3);
 			pGameObject->Rotate(xmf3Rotaion.x, xmf3Rotaion.y, xmf3Rotaion.z);
 			pGameObject->SetScale(xmf3Scale);

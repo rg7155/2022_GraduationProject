@@ -86,13 +86,9 @@ XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(XMFLOAT3& xmf3Point, XMFLOAT3* xmf
 
 	sort(vecSortY.begin(), vecSortY.end(), [](auto& a, auto& b) { return a.y < b.y; });
 
-
 	//밑면 점 4개
 	for (int i = 0; i < 4; ++i)
 		vecTemp[i] = vecSortY[i];
-
-	//if (vecTemp.size() != 4)
-	//	cout << "CheckLine Fuc Something Wrong!" << endl;
 
 	sort(vecTemp.begin(), vecTemp.end(), [](auto& a, auto& b) { return a.x < b.x; });
 
@@ -106,7 +102,7 @@ XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(XMFLOAT3& xmf3Point, XMFLOAT3* xmf
 	else
 	{
 		vecBottom[0] = vecTemp[1];
-		vecBottom[1] = vecTemp[0];
+		vecBottom[1] = vecTemp[0];                                     
 	}
 
 	float dis2 = Vector3::Distance(vecBottom[1], vecTemp[2]);
@@ -124,11 +120,6 @@ XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(XMFLOAT3& xmf3Point, XMFLOAT3* xmf
 
 
 	XMFLOAT3 xmf3Line[4][2];
-	//xmf3Line[0][0] = xmf3Corners[0], xmf3Line[0][1] = xmf3Corners[1];
-	//xmf3Line[1][0] = xmf3Corners[1], xmf3Line[1][1] = xmf3Corners[5];
-	//xmf3Line[2][0] = xmf3Corners[5], xmf3Line[2][1] = xmf3Corners[4];
-	//xmf3Line[3][0] = xmf3Corners[4], xmf3Line[3][1] = xmf3Corners[0];
-
 	xmf3Line[0][0] = vecBottom[0], xmf3Line[0][1] = vecBottom[1];
 	xmf3Line[1][0] = vecBottom[1], xmf3Line[1][1] = vecBottom[2];
 	xmf3Line[2][0] = vecBottom[2], xmf3Line[2][1] = vecBottom[3];
@@ -140,10 +131,6 @@ XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(XMFLOAT3& xmf3Point, XMFLOAT3* xmf
 	vector<float> vecDis;
 	for (int i = 0; i < 4; ++i)
 	{
-		//XMFLOAT3 xmf3Mid = Vector3::ScalarProduct(Vector3::Add(xmf3Line[i][0], xmf3Line[i][1]), 0.5f, false); //선분 중점
-		//float fDis = Vector3::Distance(xmf3Point, xmf3Mid);
-		//vecDis.emplace_back(fDis);
-		
 		float x0 = xmf3Point.x, y0 = xmf3Point.z;
 		float x1 = xmf3Line[i][0].x, y1 = xmf3Line[i][0].z;
 		float x2 = xmf3Line[i][1].x, y2 = xmf3Line[i][1].z;

@@ -74,15 +74,19 @@ void CMapObject::CreateComponent()
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
 
-	if (m_strName.find("tree") != string::npos || m_strName.find("grass") != string::npos ||
-		m_strName.find("tile") != string::npos || m_strName.find("circle") != string::npos ||
-		m_strName.find("foothold") != string::npos)
-		m_pComCollision->m_isCollisionIgnore = true;
-	else if (m_strName.find("Plane") != string::npos)
+	m_pComCollision->m_isCollisionIgnore = true;
+
+	if (m_strName.find("stonedoor") != string::npos)
 	{
-		m_isPlane = true;
-		m_pComCollision->m_isCollisionIgnore = true;
+		m_pComCollision->m_isCollisionIgnore = false;
 	}
+	else if (m_strName.find("CollisionBox") != string::npos)
+	{
+		m_pComCollision->m_isCollisionIgnore = false;
+		m_isCollisionBox = true;
+	}
+	else if (m_strName.find("Plane") != string::npos)
+		m_isPlane = true;
 
 	//건물 파고들지 않게끔 좀 키워둠?
 	//m_pComCollision->m_xmLocalOOBB.Extents = Vector3::ScalarProduct(m_pComCollision->m_xmLocalOOBB.Extents, 1.1f, false);
@@ -116,7 +120,7 @@ void CMapObject::Animate(float fTimeElapsed)
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
-	if (!m_isActive)
+	if (!m_isActive/* || m_isCollisionBox*/)
 		return;
 
 	UpdateShaderVariables(pd3dCommandList);
@@ -133,7 +137,7 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 		float fRadi = fMaxRadius * fMaxExtents; 
 
 		//임시로
-		fRadi *= 1.51f;
+		//fRadi *= 1.51f;
 
 		//포지션 축이 다르면 이상함
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))

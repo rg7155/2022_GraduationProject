@@ -31,6 +31,7 @@ public:
 
 public:
 	bool		m_isPlane = false;
+	bool		m_isCollisionBox = false;
 
 	string		m_strName = "";
 	CCollision* m_pComCollision = nullptr;

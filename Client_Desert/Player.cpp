@@ -587,6 +587,7 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 	switch (eObjId)
 	{
 	case OBJ_MAP:
+	{
 		////방법1. 이동한값 취소
 		//XMFLOAT3 xmf3Shift = Vector3::ScalarProduct(m_xmf3PreVelocity, -1, false);
 		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
@@ -604,17 +605,26 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		//OnPrepareRender();
 
 		//방법3. 충돌한 선분의 법선벡터 방향으로 밀어주기
-		XMFLOAT3 xmf3Temp(0,0,0), xmf3Normal(0, 0, 0);
+		XMFLOAT3 xmf3Temp(0, 0, 0), xmf3Normal(0, 0, 0);
 		XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
 		xmf3Temp = Vector3::Subtract(xmf3Point0, xmf3Point1, true, false);
 		xmf3Normal.z = -xmf3Temp.x;
 		xmf3Normal.x = xmf3Temp.z;
 
-		
-		//XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
 
+		//XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
+		XMFLOAT3 xmf3Pos = GetPosition();
+		float x0 = xmf3Pos.x, y0 = xmf3Pos.z;
+		float x1 = xmf3Point0.x, y1 = xmf3Point0.z;
+		float x2 = xmf3Point1.x, y2 = xmf3Point1.z;
+		//직선과 점 사이 거리
+		float fDis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / (float)sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+		//fDis -= m_pComCollision->m_xmOOBB.Extents.z;
+		float fShift = m_pComCollision->m_xmOOBB.Extents.z - fDis;
+		if (fShift < 0.f) fShift = 0.f;
+		//cout << fShift << endl;
 		XMFLOAT3 xmf3Dir = xmf3Normal/*xmf3Reflect*/;
-		xmf3Dir = Vector3::ScalarProduct(xmf3Dir, m_fTempShift, false);
+		xmf3Dir = Vector3::ScalarProduct(xmf3Dir, fShift/*m_fTempShift*/, false);
 		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Dir);
 
 		m_pCamera->Move(xmf3Dir);
@@ -622,7 +632,7 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		OnPrepareRender();
 
 		//cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
-
+	}
 		break;
 	case OBJ_END:
 		break;
