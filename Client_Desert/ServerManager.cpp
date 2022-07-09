@@ -207,7 +207,7 @@ int CServerManager::ProcessPacket(char* packet)
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* p = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
-		//gGameFramework.m_pScene->m_pDuoPlayer->SetActiveState(false);
+		gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(false);
 		return p->size;
 	}
 	default:
