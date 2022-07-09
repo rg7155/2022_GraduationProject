@@ -13,7 +13,6 @@ constexpr int MAX_USER = 10;
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_ATTACK = 2;
-constexpr char CS_ANIM_CHANGE = 3;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_ADD_OBJECT = 3;
@@ -40,6 +39,13 @@ constexpr char DIR_DOWN = 8;
 // 프로토콜 정의
 #pragma pack(push, 1) // 전체 프로그램에 영향을 미치지 않도록
 
+struct object_anim
+{
+	float	fPosition;
+	float	fWeight;
+	bool	bEnable;
+};
+
 struct CS_LOGIN_PACKET
 {
 	unsigned char size;
@@ -48,24 +54,18 @@ struct CS_LOGIN_PACKET
 
 struct CS_MOVE_PACKET
 {
-	unsigned char size;
-	char type; 
-	float x, y, z;
-	char direction;
-	unsigned int client_time;
+	unsigned char	size;
+	char			type; 
+	XMFLOAT4X4		xmf4x4World;
+	object_anim		animInfo[10];
+	int				eCurAnim;
+	unsigned int	client_time;
 };
 
 struct CS_ATTACK_PACKET {
 	unsigned char size;
 	char	type;
 	int		skill;
-};
-
-struct CS_ANIM_CHANGE_PACKET
-{
-	unsigned char size;
-	char type;
-	int anim;
 };
 
 struct SC_LOGIN_INFO_PACKET
@@ -78,12 +78,14 @@ struct SC_LOGIN_INFO_PACKET
 
 struct SC_ADD_OBJECT_PACKET
 {
-	unsigned char size;
-	char type;
-	char id;
-	float x, y, z;
-	short race;		// 몬스터 판별용
-	int hp, hpmax;
+	unsigned char	size;
+	char			type;
+	char			id;
+	XMFLOAT4X4		xmf4x4World;
+	object_anim		animInfo[10];
+	int				eCurAnim;
+	short			race;		// 몬스터 판별용
+	int				hp, hpmax;
 };
 
 struct SC_REMOVE_OBJECT_PACKET
@@ -96,13 +98,14 @@ struct SC_REMOVE_OBJECT_PACKET
 
 struct SC_MOVE_OBJECT_PACKET
 {
-	unsigned char size;
-	char type;
-	short id;
-	short race;		// 몬스터 판별용
-	float x, y, z;
-	char direction;
-	unsigned int client_time;
+	unsigned char	size;
+	char			type;
+	short			id;
+	short			race;		// 몬스터 판별용
+	XMFLOAT4X4		xmf4x4World;
+	object_anim		animInfo[10];
+	int				eCurAnim;
+	unsigned int	client_time;
 };
 
 struct SC_STAT_CHANGE_PACKET {

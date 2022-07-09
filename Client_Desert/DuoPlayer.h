@@ -19,13 +19,9 @@ private:
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void	UpdateComponent(float fTimeElapsed);
 
+public:
+	virtual void	Update_object_anim(object_anim* _object_anim);
 	
-public:
-	void set_stat_change(SC_STAT_CHANGE_PACKET* p);
-
-public:
-	void Change_Animation(PLAYER::ANIM eNewAnim);
-
 private:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;

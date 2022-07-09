@@ -625,6 +625,16 @@ bool CPlayer::IsNowAttack()
 	return false;
 }
 
+void CPlayer::Set_object_anim(object_anim* _object_anim)
+{
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
+	{
+		_object_anim[i].fWeight = m_pSkinnedAnimationController->GetTrackWeight(i);
+		_object_anim[i].bEnable = m_pSkinnedAnimationController->GetTrackEnable(i);
+		_object_anim[i].fPosition = m_pSkinnedAnimationController->m_fPosition[i];
+	}
+}
+
 CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
 	DWORD nCurrentCameraMode = (m_pCamera) ? m_pCamera->GetMode() : 0x00;

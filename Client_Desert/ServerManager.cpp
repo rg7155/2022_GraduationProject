@@ -31,43 +31,6 @@ void CServerManager::send_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 
 void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
-	//// 패킷 잘려오는거 처리해야함.
-	//
-	//if (m_prev_bytes)
-	//{
-	//	//memcpy(recv_buf,prev_buf, prev_bytes);
-	//	char* p = m_recv_buf;
-
-	//	memcpy(m_recv_buf, m_prev_buf, m_prev_bytes);
-	//	memcpy(m_recv_buf + m_prev_bytes, p, cbTransferred);
-	//}
-	//int remain_data = cbTransferred + m_prev_bytes;
-
-	//char* p = m_recv_buf;
-	//while (remain_data > 0)
-	//{
-	//	int packet_size = static_cast<unsigned char>(p[0]);
-	//	if (packet_size == 0)
-	//	{
-	//		int a;
-	//		a = packet_size;
-	//	}
-	//	cout << packet_size << endl;
-	//	if (packet_size <= remain_data)
-	//	{
-	//		ProcessPacket(p);
-	//		p = p + packet_size;
-	//		remain_data -= packet_size;
-	//	}
-	//	else break;
-	//}
-	//m_prev_bytes = remain_data;
-	//if (remain_data > 0)
-	//{
-	//	memcpy(m_prev_buf, p, remain_data);
-	//	cout << "cut"<< remain_data << endl;
-	//}
-
 	char* m_start = m_recv_buf;
 	while (true)
 	{
@@ -91,7 +54,7 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	delete lpOverlapped;
 	char dir = CGameMgr::GetInstance()->GetPlayer()->m_dir;
 	CServerManager::GetInstance()->send_move_packet(dir);
-	CServerManager::GetInstance()->send_anim_change_packet();
+	//CServerManager::GetInstance()->send_anim_change_packet();
 
 	recv_packet();
 }
@@ -142,25 +105,14 @@ void CServerManager::send_login_packet()
 
 void CServerManager::send_move_packet(char dir)
 {
-	XMFLOAT3 pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
 
 	CS_MOVE_PACKET p;
 	p.size = sizeof(CS_MOVE_PACKET);
 	p.type = CS_MOVE;
-	p.direction = dir;
-	p.x = pos.x;
-	p.y = pos.y;
-	p.z = pos.z;
-
-	send_packet(&p);
-}
-
-void CServerManager::send_anim_change_packet()
-{
-	CS_ANIM_CHANGE_PACKET p;
-	p.size = sizeof(CS_ANIM_CHANGE_PACKET);
-	p.type = CS_ANIM_CHANGE;
-	p.anim = CGameMgr::GetInstance()->GetPlayer()->GetCurAnim();
+	p.xmf4x4World = pPlayer->m_xmf4x4ToParent;
+	p.eCurAnim = pPlayer->GetCurAnim();
+	pPlayer->Set_object_anim(p.animInfo);
 	send_packet(&p);
 }
 
@@ -202,19 +154,29 @@ int CServerManager::ProcessPacket(char* packet)
 	case SC_ADD_OBJECT:
 	{
 		SC_ADD_OBJECT_PACKET* p = reinterpret_cast<SC_ADD_OBJECT_PACKET*>(packet);
-		gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(true);
-		std::cout << "상대 클라 접속!" << endl;
-		m_isWindow = true;
-		ShowWindow(g_hWnd, m_isWindow);
+		// 플레이어
+		if (p->id < 2) {
+			gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(true);
+			std::cout << "상대 클라 접속!" << endl;
+			m_isWindow = true;
+			ShowWindow(g_hWnd, m_isWindow);
+		}
+		// 몬스터
+		
 
 		return p->size;
 	}
 	case SC_MOVE_OBJECT:
 	{
 		// id에 해당하는 플레이어를 옮겨야하는데 1명 밖에 없으니 그냥 확인 안하고 넣기?
-		SC_MOVE_OBJECT_PACKET* p;
-		p = reinterpret_cast<SC_MOVE_OBJECT_PACKET*>(packet);
-		gameFramework->m_pScene->m_pDuoPlayer->SetPosition(XMFLOAT3(p->x, p->y, p->z));
+		SC_MOVE_OBJECT_PACKET* p = reinterpret_cast<SC_MOVE_OBJECT_PACKET*>(packet);
+		if (p->id < 2) {
+			CDuoPlayer* pDuoPlayer = gameFramework->m_pScene->m_pDuoPlayer;
+			pDuoPlayer->m_xmf4x4ToParent = p->xmf4x4World;
+			pDuoPlayer->Update_object_anim(p->animInfo);
+			pDuoPlayer->m_eCurAnim = (PLAYER::ANIM)p->eCurAnim;
+		}
+
 		return p->size;
 	}
 	case SC_STAT_CHANGE:

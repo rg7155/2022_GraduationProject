@@ -125,60 +125,14 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 }
 
-void CDuoPlayer::set_stat_change(SC_STAT_CHANGE_PACKET* p)
+void CDuoPlayer::Update_object_anim(object_anim* _object_anim)
 {
-	 
-}
-
-void CDuoPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
-{
-	//m_ePrevAnim = m_eCurAnim;
-	//m_eCurAnim = eNewAnim;
-
-
-	//if (m_eCurAnim != PLAYER::SKILL1)
-	//	m_bSkill1EffectOn = false;
-
-
-	//m_fAnimElapsedTime = 0.f;
-	//m_fBlendingTime = 0.f;
-	//m_bBlendingOn = true;
-
-	//// Prev, Cur 빼고 Enable
-	//for (int i = 0; i < PLAYER::ANIM::END; i++)
-	//{
-	//	if (i == m_ePrevAnim || i == m_eCurAnim)
-	//		continue;
-	//	m_pSkinnedAnimationController->SetTrackEnable(i, false);
-	//	m_pSkinnedAnimationController->SetTrackWeight(i, 0.f);
-	//}
-
-	//// 애니메이션 진행시간 
-	//m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
-
-
-	//m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
-	//m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
-
-	//////	// 1 2 3 순으로 애니메이션 진행된다하면. 1,2 블렌딩 중에 3으로 바뀌면 2의 블렌딩값과 3의 1-2의블렌딩값으로 세팅되어야 함
-	//if (m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim) < 0.8f)
-	//{
-	//	m_fBlendingTime = m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim);
-
-	//	m_fAnimElapsedTime = 1.f - m_fBlendingTime;
-
-	//	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, m_fBlendingTime);
-
-	//	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, m_fAnimElapsedTime);
-	//	m_fBlendingTime = m_fAnimElapsedTime;
-	//	m_fAnimElapsedTime = 0.f;
-	//}
-	//else
-	//{
-	//	m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f);	// 애니메이션 3개중첩 방지
-	//	m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 0.f);
-	//}
-	//// 이전 애니메이션의 가중치가 1보다 작으면 1로 바꾸지말고 그때부터 보간해야함
+	for (int i = 0; i < PLAYER::ANIM::END; i++)
+	{
+		m_pSkinnedAnimationController->SetTrackWeight(i, _object_anim[i].fWeight);
+		m_pSkinnedAnimationController->SetTrackEnable(i, _object_anim[i].bEnable);
+		m_pSkinnedAnimationController->m_fPosition[i] = _object_anim[i].fPosition;
+	}
 }
 
 bool CDuoPlayer::IsNowAttack()

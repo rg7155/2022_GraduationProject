@@ -123,7 +123,7 @@ private:
 
 public:
 	PLAYER::ANIM GetCurAnim() { return m_eCurAnim; }
-
+	void Set_object_anim(object_anim* _object_anim);
 protected:
 	PLAYER::ANIM	m_ePrevAnim;			// 이전 애니메이션
 	PLAYER::ANIM	m_eCurAnim;				// 현재 애니메이션

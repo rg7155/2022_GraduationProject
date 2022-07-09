@@ -1,10 +1,9 @@
 #include "Client_Desert_Server.h"
-#include "Protocol.h"
-#include "Timer.h"
+#include "GameObject.h"
+
 class SESSION;
 
-unordered_map<int, SESSION>			clients;
-unordered_map<int, SESSION>			monsters;
+unordered_map<int, SESSION>			clients; // players + monsters  [0][1]->Player
 unordered_map<WSAOVERLAPPED*, int>	over_to_session;
 CGameTimer m_GameTimer;
 mutex timer_lock;
@@ -54,12 +53,8 @@ class SESSION
 	WSABUF	_c_wsabuf[1];
 
 public:
-	int		_id;
-	char	race;
-	float	x, y, z;
-	char	direction;
-	int		hp, hpmax;
-	int		anim;
+	int				_id;
+	CGameObject*	_pObject;
 
 public:
 	SOCKET	_socket;
@@ -72,6 +67,7 @@ public:
 		_c_wsabuf[0].buf = _c_mess;
 		_c_wsabuf[0].len = sizeof(_c_mess);
 		over_to_session[&_c_over] = id;
+
 	}
 	~SESSION() {}
 
@@ -96,68 +92,49 @@ public:
 
 	void send_login_packet()
 	{
+		_pObject = new CGameObject;
+		_pObject->Initialize();
+		XMFLOAT3 pos = _pObject->GetPosition();
 		SC_LOGIN_INFO_PACKET p;
 		p.id = _id;
 		p.size = sizeof(SC_LOGIN_INFO_PACKET);
 		p.type = SC_LOGIN_INFO;
-		p.x = x = 25.f;
-		p.y = y = 0.f;
-		p.z = z = 25.f;
+		p.x = pos.x;
+		p.y = pos.y;
+		p.z = pos.z;
 		do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 
 	void send_add_object(int c_id)
 	{
+		CGameObject* pObject = clients[c_id]._pObject;
+
 		SC_ADD_OBJECT_PACKET p;
 		p.id = c_id;
 		p.size = sizeof(SC_ADD_OBJECT_PACKET);
 		p.type = SC_ADD_OBJECT;
-		p.x = x;
-		p.y = y;
-		p.z = z;
-		p.race = clients[c_id].race;
-		p.hp = clients[c_id].hp;
-		p.hpmax = clients[c_id].hpmax;
+		p.xmf4x4World = pObject->m_xmf4x4World;
+		p.eCurAnim = pObject->m_eCurAnim;
+		memcpy(p.animInfo, pObject->m_eAnimInfo, sizeof(p.animInfo));
+		p.race = clients[c_id]._pObject->race;
+		p.hp = clients[c_id]._pObject->hp;
+		p.hpmax = clients[c_id]._pObject->hpmax;
 		do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 
 	void send_move_packet(int c_id)
 	{
-		// 위치, 이동방향만 보내는걸루
+		CGameObject* pObject = clients[c_id]._pObject;
+
 		SC_MOVE_OBJECT_PACKET p;
 		p.id = c_id; // _id로 해서 오류 났었음
 		p.size = sizeof(SC_MOVE_OBJECT_PACKET);
 		p.type = SC_MOVE_OBJECT;
-		p.x = x;
-		p.y = y;
-		p.z = z;
-		p.direction = direction;
+		p.xmf4x4World = pObject->m_xmf4x4World;
+		p.eCurAnim = pObject->m_eCurAnim;
+		memcpy(p.animInfo, pObject->m_eAnimInfo, sizeof(p.animInfo));
+		p.race = pObject->race;
 		do_send(p.size, reinterpret_cast<char*>(&p));
-
-		//// 몬스터 패킷
-		//if (g_pGolemMonster)
-		//{
-		//	SC_MOVE_MONSTER_PACKET monsterpacket;
-		//	monsterpacket.id = 0;
-		//	monsterpacket.type = SC_MOVE_MONSTER;
-		//	monsterpacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
-		//	monsterpacket.eCurAnim = g_pGolemMmonster->m_eCurAnim;
-		//	monsterpacket.xmf3Position = g_pGolemMonster->m_xmf3Position;
-		//	monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
-		//	monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
-		//	monsterpacket.hp = static_cast<short>(g_pGolemMonster->GetHp());
-
-		//	char buf[BUFSIZE];
-		//	memcpy(buf, &p, p.size);
-		//	memcpy(buf + p.size, &monsterpacket, monsterpacket.size);
-		//	int bufSize = p.size + monsterpacket.size;
-
-		//	do_send(bufSize, p.id, buf);
-		//}
-		//else
-		//	do_send(p.size, p.id, reinterpret_cast<char*>(&p));
-
-	
 	}
 
 	void send_stat_change_packet(int c_id)
@@ -167,10 +144,10 @@ public:
 		p.id = c_id; // _id로 해서 오류 났었음
 		p.size = sizeof(SC_STAT_CHANGE_PACKET);
 		p.type = SC_STAT_CHANGE;
-		p.hp = clients[c_id].hp;
+		/*p.hp = clients[c_id].hp;
 		p.hpmax = clients[c_id].hpmax;
 		p.race = clients[c_id].race;
-		p.anim = clients[c_id].anim;
+		p.anim = clients[c_id].anim;*/
 		do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 };
@@ -183,21 +160,6 @@ void TimerThread_func()
 		float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
 		// 몬스터 로직짜기
-
-	/*	if(clients.size() >= 1)
-			fGolemCreateTime += fTimeElapsed;
-
-		if (!bGolemCreateOn && clients.size() >= 2)
-		{
-			g_pGolemMonster = new CGolemMonster(clients[0].pPlayer);
-			bGolemCreateOn = true;
-		}
-
-		if (g_pGolemMonster)
-		{
-			g_pGolemMonster->Update(fTimeElapsed);
-
-		}*/
 	}
 
 }
@@ -245,27 +207,6 @@ int main()
 	WSACleanup();
 }
 
-//void send_GolemMonster()
-//{
-//	SC_MOVE_MONSTER_PACKET p;
-//	p.id = 0;
-//	p.type = SC_MOVE_MONSTER;
-//	p.size = sizeof(SC_MOVE_MONSTER_PACKET);
-//	p.eCurAnim = g_pGolemMonster->m_eCurAnim;
-//	p.xmf3Position = g_pGolemMonster->m_xmf3Position;
-//	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
-//	p.target_id = g_pGolemMonster->m_pTarget->m_id;
-//	p.hp = static_cast<short>(g_pGolemMonster->GetHp());
-//	for (auto& cl : clients)
-//	{
-//		//if (cl.first == c_id) continue;
-//		mylock.lock();
-//		cl.second.do_send(p.size, cl.first, reinterpret_cast<char*>(&p));
-//		mylock.unlock();
-//
-//	}
-//}
-
 void process_packet(int c_id)
 {
 	char* packet = clients[c_id]._c_mess;
@@ -296,41 +237,15 @@ void process_packet(int c_id)
 	{
 		// 받은 데이터로 서버 갱신
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		clients[c_id].x = p->x; 
-		clients[c_id].y = p->y; 
-		clients[c_id].z = p->z;
-		clients[c_id].direction = p->direction;
+		clients[c_id]._pObject->m_xmf4x4World = p->xmf4x4World;
+		clients[c_id]._pObject->m_eCurAnim = p->eCurAnim;
+		memcpy(clients[c_id]._pObject->m_eAnimInfo, p->animInfo, sizeof(p->animInfo));
 
-		//// 플레이어가 공격하면 몬스터랑 충돌체크
-		//if (g_pGolemMonster && g_pGolemMonster->GetHp() > 0.f)
-		//{
-		//	if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
-		//		p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
-		//	{
-		//		g_pGolemMonster->CheckCollision(clients[c_id].pPlayer);
-		//	}
-
-		//}
-		
-		// 모든 클라에게 클라의 위치 전송 (나를 제외-> 클라에서 이동하니까)
+		// 모든 클라에게 클라의 위치 전송
 		for (auto& cl : clients)
 		{
 			if (cl.first == c_id) continue;
 			cl.second.send_move_packet(c_id);
-		}
-		break;
-	}
-	case CS_ANIM_CHANGE:
-	{
-		// 받은 데이터로 서버 갱신
-		CS_ANIM_CHANGE_PACKET* p = reinterpret_cast<CS_ANIM_CHANGE_PACKET*>(packet);
-		clients[c_id].anim = p->anim;
-
-		// 모든 클라에게 애님 전송
-		for (auto& cl : clients)
-		{
-			if (cl.first == c_id) continue;
-			cl.second.send_stat_change_packet(c_id);
 		}
 		break;
 	}
@@ -350,7 +265,7 @@ void disconnect(int c_id)
 		p.id = c_id;
 		p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 		p.type = SC_REMOVE_OBJECT;
-		p.race = clients[c_id].race;
+		p.race = clients[c_id]._pObject->race;
 		cl.second.do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 	cout << c_id << "Client Disconnection\n";

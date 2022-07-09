@@ -316,7 +316,7 @@ public:
 
 public:
 	virtual void	CollsionDetection(CGameObject* pObj) {};
-
+	virtual void	Update_object_anim(object_anim* _object_anim) {};
 protected:
 	virtual void	CreateComponent() {};
 

@@ -15,11 +15,10 @@ using namespace DirectX;
 
 #include "../../Client_Desert/Define.h"
 #include "../../Client_Desert/Enum.h"
-
 #include "../../Client_Desert/DirectX_option.h"
+#include "Protocol.h"
+#include "Timer.h"
 
 void error_display(const char* msg, int err_no);
 
-class CPlayer;
-CPlayer* Get_Player(int c_id);
 
