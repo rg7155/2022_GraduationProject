@@ -1,25 +1,31 @@
 #include "Client_Desert_Server.h"
+#include "GameObject.h"
 #include "GolemMonster.h"
-#include "Player.h"
-
+#include "Session.h"
 #define FOLLOW_DISTANCE 1.f
+#define VERSE1 1
+#define VERSE2 2
 
-CGolemMonster::CGolemMonster(CPlayer* _pTarget)
-	:m_pTarget(_pTarget)
+CGolemMonster::CGolemMonster(int _targetId)
 {
+	
 	m_eCurAnim = GOLEM::ANIM::IDLE;
 	m_xmf3Position = XMFLOAT3(13.f, 0.f, 134.f);
-	m_xmf3Look = m_pTarget->GetPosition();
+	m_xmf3Look = clients[_targetId]._pObject->GetPosition();
 	m_fAttackAnimTime = 0.f;
-	m_targetId = _pTarget->m_id;
+	m_targetId = clients[_targetId]._id;
 	m_fRunCoolTime = 0.f;
 	m_fDamagedCoolTime = 0.f;
 	m_iHp = 100.f;
 	m_bFollowStart = false;
+	m_iVerse = VERSE1;
 }
 
 void CGolemMonster::Update(float fTimeElapsed)
 {
+	if (!m_bActive)
+		return;
+
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fRunCoolTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
@@ -48,10 +54,11 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 
 
-	if (m_pTarget)
+	if (clients.count(m_targetId))
 	{
 		// 타겟을 쫓아가는 걸로 이동 & 회전
-		XMFLOAT3 mf3TargetPos = m_pTarget->GetPosition();
+		CGameObject* pTarget = clients[m_targetId]._pObject;
+		XMFLOAT3 mf3TargetPos =pTarget ->GetPosition();
 
 		if (m_eCurAnim == GOLEM::ANIM::RUN && Vector3::Distance(mf3TargetPos, m_xmf3Position) > FOLLOW_DISTANCE)
 		{
@@ -70,7 +77,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 			m_bFollowStart = true;
 			Change_Animation(GOLEM::ANIM::RUN);
 		}
-		if (fDis < GOLEM_ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !m_pTarget->IsNowAttack())
+		if (fDis < GOLEM_ATTACK_DISTANCE && GOLEM::ANIM::RUN == m_eCurAnim && !pTarget->IsNowAttack())
 		{
 			// 두 개 중 랜덤하게
 			int iAttackRand = rand() % 2;
@@ -78,8 +85,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 			Change_Animation(eAnim);
 			m_fAttackAnimTime = 0.f;
 			// 공격 후 타겟 바꾸기
-			CPlayer* pPlayer = Get_Player(1 - m_pTarget->m_id);
-			m_pTarget = pPlayer;
+			m_targetId = 1 - m_targetId;
 
 		}
 	}
@@ -90,37 +96,53 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 }
 
+void CGolemMonster::Send_Packet_To_Clients(int c_id)
+{
+	SC_MOVE_MONSTER_PACKET p;
+	p.id = 0;
+	p.type = SC_MOVE_MONSTER;
+	p.size = sizeof(SC_MOVE_MONSTER_PACKET);
+	p.eCurAnim = m_eCurAnim;
+	p.xmf3Position = GetPosition();
+	p.xmf3Look = GetLook();
+	p.target_id = m_targetId;
+	p.hp = m_iHp;
+
+	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
+}
+
 void CGolemMonster::Move(XMFLOAT3& xmf3Shift)
 {
 	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
 }
 
-void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
+void CGolemMonster::CheckCollision(int c_id)
 {
 	if (m_eCurAnim == GOLEM::ANIM::DAMAGED_LEFT ||
 		m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
 		return;
 	
+	CGameObject* pObject = clients[c_id]._pObject;
 	// 애니메이션 position 계산해서 검사
 	if (m_eCurAnim == GOLEM::ATTACK1)
 	{
-		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition < 8000)
+		if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 8000)
 			return;
 	}
 	else
 	{
-		if (pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition < 5000 ||
-			pAttackPlayer->m_eAnimInfo[pAttackPlayer->m_eCurAnim].sPosition > 10000)
+		if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 5000 ||
+			pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition > 10000)
 			return;
 	}
 
 	
 
-	XMFLOAT3 fPlayerPos = pAttackPlayer->GetPosition();
+	XMFLOAT3 fPlayerPos = pObject->GetPosition();
 	float fDis = Vector3::Distance(fPlayerPos, m_xmf3Position);
 
 	// 플레이어 Look과 플레이어에서 몬스터 Dir 비교
-	XMFLOAT3 fPlayerLook = pAttackPlayer->GetLook();
+	XMFLOAT3 fPlayerLook = pObject->GetLook();
 	XMFLOAT3 fDir = Vector3::Subtract(m_xmf3Position, fPlayerPos, true, true);
 
 	float fAngle = Vector3::Angle(fPlayerLook, fDir);
@@ -144,8 +166,9 @@ void CGolemMonster::CheckCollision(CPlayer* pAttackPlayer)
 		{
 			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
 			m_fRunCoolTime = 0.f;
+
+			// 타겟 랜덤하게 바꾸기
 			m_targetId = rand() % 2;
-			m_pTarget = Get_Player(m_targetId);
 		}
 
 	}

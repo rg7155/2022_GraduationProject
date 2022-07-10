@@ -1,18 +1,19 @@
 #include "Client_Desert_Server.h"
 #include "GameObject.h"
+#include "GolemMonster.h"
+#include "Session.h"
+#include "SendData.h"
 
-class SESSION;
+unordered_map<int, CSession>			clients;
+list<CGameObject*>						objects; // monsters & objects
 
-unordered_map<int, SESSION>			clients; // players + monsters  [0][1]->Player
-unordered_map<WSAOVERLAPPED*, int>	over_to_session;
-CGameTimer m_GameTimer;
-mutex timer_lock;
+unordered_map<WSAOVERLAPPED*, int>		over_to_session;
+CGameTimer	m_GameTimer;
+mutex		timer_lock;
+char		recv_buf[BUFSIZE];
 
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
-
-char recv_buf[BUFSIZE];
-
 void error_display(const char* msg, int err_no)
 {
 	WCHAR* lpMsgBuf;
@@ -28,147 +29,28 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
-
-
-class SEND_DATA {
-public:
-	WSAOVERLAPPED _over;
-	WSABUF _wsabuf;
-	char send_buf[BUFSIZE];
-
-	SEND_DATA(int size, char* n_data )
-	{
-		// size id data 순으로 보낸다.
-		_wsabuf.len = size;
-		_wsabuf.buf = send_buf;
-		ZeroMemory(&_over, sizeof(_over));
-		ZeroMemory(&send_buf, BUFSIZE);
-		memcpy(send_buf, n_data, size);
-	}
-};
-
-class SESSION
-{
-	WSAOVERLAPPED _c_over;
-	WSABUF	_c_wsabuf[1];
-
-public:
-	int				_id;
-	CGameObject*	_pObject;
-
-public:
-	SOCKET	_socket;
-	CHAR	_c_mess[BUFSIZE];
-
-public:
-	SESSION() {}
-	SESSION(int id, SOCKET s) : _id(id), _socket(s)
-	{
-		_c_wsabuf[0].buf = _c_mess;
-		_c_wsabuf[0].len = sizeof(_c_mess);
-		over_to_session[&_c_over] = id;
-
-	}
-	~SESSION() {}
-
-	void do_recv()
-	{
-		// 받기전에 초기화 해준다.......
-		_c_wsabuf[0].buf = _c_mess;
-		_c_wsabuf[0].len = BUFSIZE;
-		DWORD recv_flag = 0;
-		memset(&_c_over, 0, sizeof(_c_over));
-
-		// 키값 받음
-		WSARecv(_socket, _c_wsabuf, 1, 0, &recv_flag, &_c_over, recv_callback);
-	}
-
-	void do_send(int num_bytes, char* mess)
-	{
-		SEND_DATA* sdata = new SEND_DATA{ num_bytes, mess };
-		WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
-
-	}
-
-	void send_login_packet()
-	{
-		_pObject = new CGameObject;
-		_pObject->Initialize();
-		XMFLOAT3 pos = _pObject->GetPosition();
-		SC_LOGIN_INFO_PACKET p;
-		p.id = _id;
-		p.size = sizeof(SC_LOGIN_INFO_PACKET);
-		p.type = SC_LOGIN_INFO;
-		p.x = pos.x;
-		p.y = pos.y;
-		p.z = pos.z;
-		do_send(p.size, reinterpret_cast<char*>(&p));
-	}
-
-	void send_add_object(int c_id)
-	{
-		CGameObject* pObject = clients[c_id]._pObject;
-
-		SC_ADD_OBJECT_PACKET p;
-		p.id = c_id;
-		p.size = sizeof(SC_ADD_OBJECT_PACKET);
-		p.type = SC_ADD_OBJECT;
-		p.xmf4x4World = pObject->m_xmf4x4World;
-		p.eCurAnim = pObject->m_eCurAnim;
-		memcpy(p.animInfo, pObject->m_eAnimInfo, sizeof(p.animInfo));
-		p.race = clients[c_id]._pObject->race;
-		p.hp = clients[c_id]._pObject->hp;
-		p.hpmax = clients[c_id]._pObject->hpmax;
-		do_send(p.size, reinterpret_cast<char*>(&p));
-	}
-
-	void send_move_packet(int c_id)
-	{
-		CGameObject* pObject = clients[c_id]._pObject;
-
-		SC_MOVE_OBJECT_PACKET p;
-		p.id = c_id; // _id로 해서 오류 났었음
-		p.size = sizeof(SC_MOVE_OBJECT_PACKET);
-		p.type = SC_MOVE_OBJECT;
-		p.xmf4x4World = pObject->m_xmf4x4World;
-		p.eCurAnim = pObject->m_eCurAnim;
-		memcpy(p.animInfo, pObject->m_eAnimInfo, sizeof(p.animInfo));
-		p.race = pObject->race;
-		do_send(p.size, reinterpret_cast<char*>(&p));
-	}
-
-	void send_stat_change_packet(int c_id)
-	{
-		// 위치, 이동방향만 보내는걸루
-		SC_STAT_CHANGE_PACKET p;
-		p.id = c_id; // _id로 해서 오류 났었음
-		p.size = sizeof(SC_STAT_CHANGE_PACKET);
-		p.type = SC_STAT_CHANGE;
-		/*p.hp = clients[c_id].hp;
-		p.hpmax = clients[c_id].hpmax;
-		p.race = clients[c_id].race;
-		p.anim = clients[c_id].anim;*/
-		do_send(p.size, reinterpret_cast<char*>(&p));
-	}
-};
+void Init_Monsters();
 
 void TimerThread_func()
 {
+	float	fGolemCreateTime = 0.f;
+	bool	bGolemCreateOn = false;
+
 	while (true)
 	{
 		m_GameTimer.Tick(60.0f);
 		float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 
-		// 몬스터 로직짜기
+		for (auto& object : objects) {
+			object->Update(fTimeElapsed);
+		}
 	}
 
 }
 
-
 int main()
 {
 	srand(unsigned int(time(NULL)));
-
 	m_GameTimer.Start();
 
 	WSADATA WSAData;
@@ -201,6 +83,7 @@ int main()
 
 		cout << "Client " << client_id << '\n';
 
+
 	}
 	timerThread.join();
 	closesocket(server);
@@ -210,19 +93,22 @@ int main()
 void process_packet(int c_id)
 {
 	char* packet = clients[c_id]._c_mess;
-	switch (packet[1])
+	switch (packet[0])
 	{
 	case CS_LOGIN:
 	{
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		clients[c_id].send_login_packet();
 
+		if(c_id == 1)
+			Init_Monsters();
+		
 		// 다른 플레이어에게 알림
 		for (auto& cl : clients)
 		{
 			if (cl.first == c_id) continue;
 			cl.second.send_add_object(c_id);
-		}
+		}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 
 		// 다른 플레이어 가져옴
 		for (auto& cl : clients)
@@ -246,6 +132,10 @@ void process_packet(int c_id)
 		{
 			if (cl.first == c_id) continue;
 			cl.second.send_move_packet(c_id);
+			for (auto& object : objects)
+			{
+				object->Send_Packet_To_Clients(cl.first);
+			}
 		}
 		break;
 	}
@@ -265,7 +155,8 @@ void disconnect(int c_id)
 		p.id = c_id;
 		p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 		p.type = SC_REMOVE_OBJECT;
-		p.race = clients[c_id]._pObject->race;
+		if(clients[c_id]._pObject)
+			p.race = clients[c_id]._pObject->race;
 		cl.second.do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 	cout << c_id << "Client Disconnection\n";
@@ -285,6 +176,8 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		return;
 	}
 	process_packet(client_id);
+
+
 	clients[client_id].do_recv();
 }
 
@@ -297,8 +190,15 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 	if (iter == clients.end())
 		over_to_session.erase(over);
 
-	SEND_DATA* sdata = reinterpret_cast<SEND_DATA*>(over);
+	CSendData* sdata = reinterpret_cast<CSendData*>(over);
 	delete sdata;
 
 	return;
+}
+
+void Init_Monsters()
+{
+	CGameObject* pGolem = new CGolemMonster(0);
+	objects.push_back(pGolem);
+	pGolem->m_bActive = true;
 }

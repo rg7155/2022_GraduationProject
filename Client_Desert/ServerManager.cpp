@@ -34,29 +34,27 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	char* m_start = m_recv_buf;
 	while (true)
 	{
-		int msg_size = static_cast<unsigned char>(m_start[0]);
+		int msg_size = static_cast<int>(m_start[0]);
 
 		msg_size = ProcessPacket(m_start);
+		if (cbTransferred < msg_size) {
 
-		if (cbTransferred < msg_size)
-		{
-			std::cout << "recv_callback Error" << endl;
-			std::cout << msg_size << endl;
-			std::cout << cbTransferred << endl;
-			std::cout << m_start[0] << endl;
-			break;
+			cout << cbTransferred << ' ' << msg_size << endl;
+			// 33 204
 		}
-
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
 		m_start += msg_size;
+		// 30 171
 	}
 	delete lpOverlapped;
-	char dir = CGameMgr::GetInstance()->GetPlayer()->m_dir;
-	CServerManager::GetInstance()->send_move_packet(dir);
+
 	//CServerManager::GetInstance()->send_anim_change_packet();
 
 	recv_packet();
+
+	char dir = CGameMgr::GetInstance()->GetPlayer()->m_dir;
+	CServerManager::GetInstance()->send_move_packet(dir);
 }
 
 void CServerManager::recv_packet()
@@ -76,13 +74,13 @@ void CServerManager::recv_packet()
 	}
 }
 
-void CServerManager::send_packet(void* packet)
+void CServerManager::send_packet(void* packet, int size)
 {
 	char* p = reinterpret_cast<char*>(packet);
 	size_t sent = 0;
 	WSABUF wsabuf;
 	wsabuf.buf = p;
-	wsabuf.len = static_cast<unsigned char>(p[0]);
+	wsabuf.len = size;
 	WSAOVERLAPPED* s_over = new WSAOVERLAPPED;
 	ZeroMemory(s_over, sizeof(WSAOVERLAPPED));
 
@@ -100,7 +98,7 @@ void CServerManager::send_login_packet()
 	p.size = sizeof(CS_LOGIN_PACKET);
 	p.type = CS_LOGIN;
 	std::cout << "상대 클라 대기중" << endl;
-	send_packet(&p);
+	send_packet(&p, p.size);
 }
 
 void CServerManager::send_move_packet(char dir)
@@ -113,7 +111,7 @@ void CServerManager::send_move_packet(char dir)
 	p.xmf4x4World = pPlayer->m_xmf4x4ToParent;
 	p.eCurAnim = pPlayer->GetCurAnim();
 	pPlayer->Set_object_anim(p.animInfo);
-	send_packet(&p);
+	send_packet(&p, p.size);
 }
 
 void CServerManager::Connect()
@@ -140,7 +138,7 @@ void CServerManager::Connect()
 int CServerManager::ProcessPacket(char* packet)
 {
 	// type을 비교
-	switch (packet[1])
+	switch (packet[0])
 	{
 	case SC_LOGIN_INFO:
 	{
@@ -208,6 +206,12 @@ int CServerManager::ProcessPacket(char* packet)
 	{
 		SC_REMOVE_OBJECT_PACKET* p = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
 		gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(false);
+		return p->size;
+	}
+	case SC_MOVE_MONSTER:
+	{
+		SC_MOVE_MONSTER_PACKET* p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(packet);
+
 		return p->size;
 	}
 	default:

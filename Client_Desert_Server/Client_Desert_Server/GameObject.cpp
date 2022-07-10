@@ -2,7 +2,9 @@
 
 CGameObject::CGameObject()
 {
-
+	m_bActive = false;
+	race = RACE_PLAYER;
+	hp = 100, hpmax=100;
 }
 
 CGameObject::~CGameObject()

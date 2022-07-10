@@ -18,11 +18,10 @@ public:
 		LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags);
 
 	static void recv_packet();
-	static void send_packet(void* packet);
+	static void send_packet(void* packet, int size);
 
 	static void send_login_packet();
 	static void send_move_packet(char dir);
-	static void send_anim_change_packet();
 
 public:
 	static void Connect();

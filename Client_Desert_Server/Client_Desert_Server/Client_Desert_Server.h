@@ -7,6 +7,7 @@
 #include <DirectXCollision.h>
 #include <thread>
 #include <mutex>
+#include <list>
 
 #pragma comment(lib, "WS2_32.lib")
 
@@ -19,6 +20,15 @@ using namespace DirectX;
 #include "Protocol.h"
 #include "Timer.h"
 
-void error_display(const char* msg, int err_no);
+constexpr int STAGE1_VERSE = 1;
+constexpr int STAGE2_VERSE = 2;
+constexpr int STAGE3_VERSE = 3;
+constexpr int STAGE4_VERSE = 4;
+
+void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
+void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
+class CSession;
+extern unordered_map<int, CSession>	clients; // players + monsters  [0][1]->Player
+extern unordered_map<WSAOVERLAPPED*, int>	over_to_session;
 
 
