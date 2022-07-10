@@ -23,6 +23,8 @@ public:
 	virtual void CheckCollision(int c_id) {};
 	bool BoundingBox_Intersect(int c_id);
 	void UpdateBoundingBox();
+
+
 public:
 	char			race;
 	int				hp, hpmax;

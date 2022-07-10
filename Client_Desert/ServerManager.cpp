@@ -202,6 +202,23 @@ int CServerManager::ProcessPacket(char* packet)
 			pGolem->SetHp(static_cast<int>(p->hp));
 			//cout << static_cast<int>(p->hp) << endl;
 		}
+		else if (p->race == RACE_CACTI) {
+			// id: 1, 2
+			CGameObject* pObj;
+			if (p->id == 1) {
+				pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").front();
+			}
+			else
+				pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").back();
+
+			CCactiObject* pCacti = reinterpret_cast<CCactiObject*>(pObj);
+
+			pCacti->Change_Animation((CACTI::ANIM)p->eCurAnim);
+			pCacti->SetLookAt(p->xmf3Look);
+			pCacti->SetPosition(p->xmf3Position);
+			pCacti->SetHp(static_cast<int>(p->hp));
+
+		}
 		
 		return p->size;
 	}
