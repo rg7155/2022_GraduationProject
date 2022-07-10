@@ -42,10 +42,12 @@ void TimerThread_func()
 	{
 		m_GameTimer.Tick(60.0f);
 		float fTimeElapsed = m_GameTimer.GetTimeElapsed();
-
+		timer_lock.lock();
 		for (auto& object : objects) {
 			object->Update(fTimeElapsed);
 		}
+		timer_lock.unlock();
+
 	}
 
 }
@@ -144,10 +146,17 @@ void process_packet(int c_id)
 		{
 			if (cl.first == c_id) continue;
 			cl.second.send_move_packet(c_id);
-			for (auto& object : objects)
+			timer_lock.lock();
+			for (auto iter = objects.begin(); iter != objects.end();)
 			{
-				object->Send_Packet_To_Clients(cl.first);
+				(*iter)->Send_Packet_To_Clients(cl.first);
+				if (!(*iter)->m_bActive)
+					iter = objects.erase(iter);
+				else
+					iter++;
 			}
+			timer_lock.unlock();
+
 		}
 		break;
 	}
@@ -212,9 +221,13 @@ void Init_Monsters()
 {
 	LoadingBoundingBox();
 
+
 	CGameObject* pGolem = new CGolemMonster(0);
 	pGolem->m_xmLocalOOBB = oobbs["Golem"];
+	timer_lock.lock();
 	objects.push_back(pGolem);
+	timer_lock.unlock();
+
 	pGolem->m_bActive = true;
 
 }

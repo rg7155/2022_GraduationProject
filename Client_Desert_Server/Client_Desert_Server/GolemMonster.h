@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+
 class CGolemMonster : public CGameObject
 {
 public:

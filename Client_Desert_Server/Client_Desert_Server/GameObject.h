@@ -33,10 +33,13 @@ public:
 
 public:
 	bool					m_bActive;
+	float					m_fDieCoolTime;
 
 public:
 	BoundingOrientedBox		m_xmLocalOOBB;
 	BoundingOrientedBox		m_xmOOBB;
+
+
 
 };
 

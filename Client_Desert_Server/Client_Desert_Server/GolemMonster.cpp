@@ -5,6 +5,8 @@
 #define FOLLOW_DISTANCE 1.f
 #define VERSE1 1
 #define VERSE2 2
+constexpr float DAMAGE_COOLTIME = 1.2f;
+
 
 CGolemMonster::CGolemMonster(int _targetId)
 {
@@ -28,6 +30,12 @@ void CGolemMonster::Update(float fTimeElapsed)
 	if (!m_bActive)
 		return;
 
+	if (m_eCurAnim == GOLEM::DIE) {
+		m_fDieCoolTime += fTimeElapsed;
+		if (m_fDieCoolTime > 3.f)
+			m_bActive = false;
+		return;
+	}
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fRunCoolTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
@@ -50,7 +58,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 	// 아이들 -> 피격 -> 아이들 -> 런 -> 공격 -> 아이들 -> 런
 	// 피격 -> 아이들 -> 런
-	if (m_fRunCoolTime > 1.5f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE && m_bFollowStart)
+	if (m_fRunCoolTime > 1.f && m_eCurAnim != GOLEM::ANIM::RUN && m_eCurAnim != GOLEM::ANIM::DIE && m_bFollowStart)
 		Change_Animation(GOLEM::ANIM::RUN);
 
 
@@ -126,7 +134,7 @@ void CGolemMonster::CheckCollision(int c_id)
 		return;
 	
 	
-	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > 0.8f && m_iHp > 0)
+	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_iHp > 0)
 	{
 		m_iHp -= 20.f;
 		m_fDamagedCoolTime = 0.f;
@@ -135,9 +143,10 @@ void CGolemMonster::CheckCollision(int c_id)
 		{
 			Change_Animation(GOLEM::ANIM::DIE);
 			m_fRunCoolTime = 0.f;
+
 			return;
 		}
-		else if (m_fRunCoolTime > 1.5f)
+		else
 		{
 			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
 			m_fRunCoolTime = 0.f;
@@ -145,7 +154,6 @@ void CGolemMonster::CheckCollision(int c_id)
 			// 타겟 랜덤하게 바꾸기
 			m_targetId = rand() % 2;
 		}
-
 	}
 }
 

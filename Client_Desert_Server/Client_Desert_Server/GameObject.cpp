@@ -8,6 +8,8 @@ CGameObject::CGameObject()
 	hp = 100, hpmax=100;
 
 	m_xmf4x4World = Matrix4x4::Identity();
+	m_fDieCoolTime = 0.f;
+
 	//SetPosition(PLAYER_INIT_POSITION_X, PLAYER_INIT_POSITION_Z);
 	//for (int i = 0; i < PLAYER::ANIM::END; i++)
 	//{
