@@ -127,6 +127,15 @@ void process_packet(int c_id)
 		clients[c_id]._pObject->m_eCurAnim = p->eCurAnim;
 		memcpy(clients[c_id]._pObject->m_eAnimInfo, p->animInfo, sizeof(p->animInfo));
 
+		// 객체들과 충돌체크
+		if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
+			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
+		{
+			for (auto& object : objects)
+			{
+				object->CheckCollision(c_id);
+			}
+		}
 		// 모든 클라에게 클라의 위치 전송
 		for (auto& cl : clients)
 		{

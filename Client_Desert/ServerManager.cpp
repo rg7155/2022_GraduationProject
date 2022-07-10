@@ -1,6 +1,7 @@
 #include "ServerManager.h"
 #include "GameMgr.h"
 #include "GameFramework.h"
+#include "Monster.h"
 
 IMPLEMENT_SINGLETON(CServerManager)
 
@@ -184,34 +185,30 @@ int CServerManager::ProcessPacket(char* packet)
 		//gameFramework->m_pScene->m_pDuoPlayer->set_stat_change(p);
 		return p->size;
 	}
-	//case SC_MOVE_MONSTER:
-	//{
-	//	SC_MOVE_MONSTER_PACKET* p;
-	//	p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(ptr);
-	//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
-	//	CGolemObject* pGolem = reinterpret_cast<CGolemObject*>(pObj);
+	case SC_MOVE_MONSTER:
+	{
+		SC_MOVE_MONSTER_PACKET* p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(packet);
+		if (p->race == RACE_GOLEM) {
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Golem").front();
+			CGolemObject* pGolem = reinterpret_cast<CGolemObject*>(pObj);
 
-	//	if (!pGolem->m_isActive)
-	//		pGolem->SetActiveState(true);
+			if (!pGolem->m_isActive)
+				pGolem->SetActiveState(true);
 
-	//	pGolem->Change_Animation(p->eCurAnim);
-	//	pGolem->SetLookAt(p->xmf3Look);
-	//	pGolem->SetPosition(p->xmf3Position);
-	//	pGolem->m_targetId = p->target_id;
-	//	pGolem->SetHp(static_cast<int>(p->hp));
-	//	//cout << static_cast<int>(p->hp) << endl;
-	//	return p->size;
-	//}
+			pGolem->Change_Animation((GOLEM::ANIM)p->eCurAnim);
+			pGolem->SetLookAt(p->xmf3Look);
+			pGolem->SetPosition(p->xmf3Position);
+			pGolem->m_targetId = p->target_id;
+			pGolem->SetHp(static_cast<int>(p->hp));
+			//cout << static_cast<int>(p->hp) << endl;
+		}
+		
+		return p->size;
+	}
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* p = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
 		gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(false);
-		return p->size;
-	}
-	case SC_MOVE_MONSTER:
-	{
-		SC_MOVE_MONSTER_PACKET* p = reinterpret_cast<SC_MOVE_MONSTER_PACKET*>(packet);
-
 		return p->size;
 	}
 	default:
@@ -221,4 +218,15 @@ int CServerManager::ProcessPacket(char* packet)
 
 void CServerManager::error_display(const char* msg, int err_no)
 {
+	WCHAR* lpMsgBuf;
+	FormatMessage(
+		FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM,
+		NULL, err_no,
+		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+		(LPTSTR)&lpMsgBuf, 0, NULL);
+	std::cout << msg;
+	std::wcout << L"¿¡·¯ " << lpMsgBuf << std::endl;
+	while (true);
+	LocalFree(lpMsgBuf);
 }

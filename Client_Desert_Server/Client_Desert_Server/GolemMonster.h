@@ -12,7 +12,7 @@ public:
 	virtual void Send_Packet_To_Clients(int c_id);
 
 	void Move(XMFLOAT3& xmf3Shift);
-	void CheckCollision(int c_id);
+	virtual void CheckCollision(int c_id);
 	void Change_Animation(GOLEM::ANIM eNewAnim);
 
 public:

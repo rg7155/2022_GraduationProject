@@ -747,13 +747,6 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	//pObj->SetPosition(CACTI_POS_AFTER1);
 	AddObject(L"Golem", pObj);
 	
-	//pObj = new CGolemObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
-	//pObj->SetActiveState(true);
-	//pObj->SetPosition(CACTI_POS_AFTER2);
-	//AddObject(L"Golem", pObj);
-
-
-
 	// Cacti
 	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cacti.bin", NULL);
 	m_mapModelInfo.emplace(L"Cacti", pModel);

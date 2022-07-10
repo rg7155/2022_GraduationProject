@@ -103,11 +103,11 @@ void CGolemMonster::Send_Packet_To_Clients(int c_id)
 	p.type = SC_MOVE_MONSTER;
 	p.size = sizeof(SC_MOVE_MONSTER_PACKET);
 	p.eCurAnim = m_eCurAnim;
-	p.xmf3Position = GetPosition();
-	p.xmf3Look = GetLook();
+	p.xmf3Position = m_xmf3Position;
+	p.xmf3Look = m_xmf3Look;
 	p.target_id = m_targetId;
 	p.hp = m_iHp;
-
+	p.race = RACE_GOLEM;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
@@ -123,18 +123,18 @@ void CGolemMonster::CheckCollision(int c_id)
 		return;
 	
 	CGameObject* pObject = clients[c_id]._pObject;
-	// 애니메이션 position 계산해서 검사
-	if (m_eCurAnim == GOLEM::ATTACK1)
-	{
-		if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 8000)
-			return;
-	}
-	else
-	{
-		if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 5000 ||
-			pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition > 10000)
-			return;
-	}
+	//// 애니메이션 position 계산해서 검사
+	//if (m_eCurAnim == GOLEM::ATTACK1)
+	//{
+	//	if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 0.8f)
+	//		return;
+	//}
+	//else
+	//{
+	//	if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 0.5f ||
+	//		pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition > 1.f)
+	//		return;
+	//}
 
 	
 
