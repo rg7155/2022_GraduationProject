@@ -381,7 +381,7 @@ CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	//상호작용 ui
 	m_pInteractionUI = new CGameObject(1);
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.f);
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, true);
 	m_pInteractionUI->SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
@@ -490,16 +490,24 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
 		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f); 
 		break;
-	case CUIObject::UI_READY:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
-		SetOrthoWorld(100, 100, FRAME_BUFFER_WIDTH - 100.f, FRAME_BUFFER_HEIGHT - 100.f);
-		m_isClickedAble = true;
+	case CUIObject::UI_READY_BTN:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ReadyButton.dds", 0);
+		SetOrthoWorld(300, 100, FRAME_BUFFER_WIDTH - 300.f, FRAME_BUFFER_HEIGHT - 100.f);
+		break;
+	case CUIObject::UI_READY_BTN_CLK:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ReadyButton_Clicked.dds", 0);
+		SetOrthoWorld(300, 100, FRAME_BUFFER_WIDTH - 300.f, FRAME_BUFFER_HEIGHT - 100.f);
+		m_isActive = false;
 		break;
 	case CUIObject::UI_QUEST:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/TextBox.dds", 0);
 		SetOrthoWorld(1000, 200, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.83f);
 		SetActiveState(false);
 		m_fAlpha = 0.2;
+		break;
+	case CUIObject::UI_CURSOR:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		break;
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -517,6 +525,8 @@ CUIObject::~CUIObject()
 
 void CUIObject::Animate(float fTimeElapsed)
 {
+	if (!m_isActive) return;
+
 	switch (m_eUIType)
 	{
 	case CUIObject::UI_FADE:
@@ -535,19 +545,36 @@ void CUIObject::Animate(float fTimeElapsed)
 				else if (!m_isChangeScene && m_fAlpha > 1.f)
 				{
 					m_isChangeScene = true;
+					//m_isStartFade = false; //수정
 					CGameMgr::GetInstance()->GetScene()->ChangeScene(SCENE::SCENE_2);
 				}
 			}
 		}
 		break;
-	case CUIObject::UI_READY:
-		if (CInputDev::GetInstance()->LButtonDown())
+	case CUIObject::UI_READY_BTN:
+	case CUIObject::UI_READY_BTN_CLK:
+		if (m_isOnceRender && CInputDev::GetInstance()->LButtonDown())
 		{
 			XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
 			if (Cursor.x > m_xmf2Pos.x - m_xmf2Size.x && Cursor.x < m_xmf2Pos.x + m_xmf2Size.x &&
 				Cursor.y > m_xmf2Pos.y - m_xmf2Size.y && Cursor.y < m_xmf2Pos.y + m_xmf2Size.y)
-				cout << "Cliked" << endl;
+			{
+				//cout << "Cliked" << endl;
+				if (m_pButtonToggle)
+				{
+					m_isActive = false;
+					m_pButtonToggle->m_isOnceRender = false;
+					m_pButtonToggle->m_isActive = true;
+
+				}
+				CGameMgr::GetInstance()->GetPlayer()->ClickedReadyButton();
+			}
 		}
+		break;
+	case CUIObject::UI_CURSOR:
+		XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
+
+		SetOrthoWorld(21, 41, Cursor.x, Cursor.y);
 		break;
 	}
 
@@ -556,6 +583,8 @@ void CUIObject::Animate(float fTimeElapsed)
 
 void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
+	if (!m_isOnceRender) m_isOnceRender = true;
+
 	UpdateShaderVariables(pd3dCommandList);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
@@ -711,7 +740,7 @@ void CPortalObject::Animate(float fTimeElapsed)
 	if (fDistanceToPlayer < RANGE && fDistanceToDuo < RANGE && !m_isOverlap)
 	{
 		m_isOverlap = true;
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Info").back();
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
 		static_cast<CUIObject*>(pObj)->SetFadeState(false);
 		m_isActive = false;
 	}
@@ -761,15 +790,21 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		break;
 
 	case CTexturedObject::TEXTURE_HP:
-		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f, 0.f, 0.f, 0.f, true);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Hp.dds", 0);
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		SetActiveState(true);
 		break;
 
 	case CTexturedObject::TEXTURE_HP_FRAME:
-		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f, 0.f, 0.f, 0.f, true);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HpFrame.dds", 0); 
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		SetActiveState(true);
+		break;
+	case CTexturedObject::TEXTURE_READY:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.33f, 0.f, 0.f, 0.f, 0.f, true);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Ready3D.dds", 0);
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		SetActiveState(true);
 		break;
@@ -806,8 +841,8 @@ void CTexturedObject::Animate(float fTimeElapsed)
 		break;
 
 	case CTexturedObject::TEXTURE_HP:
-
 	case CTexturedObject::TEXTURE_HP_FRAME:
+	case CTexturedObject::TEXTURE_READY:
 		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
 		UpdateTransform(NULL); 
 		break;

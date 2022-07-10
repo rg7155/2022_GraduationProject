@@ -4,6 +4,10 @@
 #include "Camera.h"
 #include "InputDev.h"
 
+const static XMFLOAT3 Scene0_SpawnPos = { 0.f, 100.f, 0.f };
+const static XMFLOAT3 Scene1_SpawnPos = { 25.f, 0.f, 25.f };
+const static XMFLOAT3 Scene2_SpawnPos = { 10.f, 0.f, 15.f };
+
 class CPlayer : public CGameObject
 {
 //private:
@@ -148,7 +152,17 @@ public:
 public:
 	int		m_iId;
 
+public:
+	void	ClickedReadyButton() { m_isReadyToggle = !m_isReadyToggle; }
+
+private:
+	void UpdateReadyTexture(float fTimeElapsed);
+
+	CGameObject*	m_pReadyTex = nullptr;
+	bool			m_isReadyToggle = false;
+
 };
+
 
 class CSoundCallbackHandler : public CAnimationCallbackHandler
 {

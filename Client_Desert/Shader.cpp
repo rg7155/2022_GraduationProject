@@ -1240,13 +1240,23 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_QUEST);
 	AddObject(L"UI_Quest", pObject);
 
-	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY);
-	//AddObject(L"UI_Ready", pObject);
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY_BTN);
+	AddObject(L"UI_Button", pObject);
+	CGameObject*  pObject1 = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY_BTN_CLK);
+	AddObject(L"UI_Button", pObject1);
+
+	static_cast<CUIObject*>(pObject)->m_pButtonToggle = static_cast<CUIObject*>(pObject1);
+	static_cast<CUIObject*>(pObject1)->m_pButtonToggle = static_cast<CUIObject*>(pObject);
+
+
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_CURSOR);
+	AddObject(L"UI_Cursor", pObject);
 
 	//Á© ¸¶Áö¸·¿¡ »ðÀÔ
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);
-	AddObject(L"UI_Info", pObject);
+	AddObject(L"UI_Fade", pObject);
 
+	
 
 }
 

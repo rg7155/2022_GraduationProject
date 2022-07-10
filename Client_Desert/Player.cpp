@@ -9,7 +9,7 @@
 #include "Animation.h"
 #include "Scene.h"
 
-#define START_POS 25.0f, 0, 25.0f
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
@@ -46,7 +46,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
+	//SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
+	//SetPosition(Scene0_SpawnPos);
+	SetPosition(Scene1_SpawnPos);
+
+
 	
 	char fileName[2048];
 	m_iId = *((int*)pContext);
@@ -106,9 +110,11 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fAnimMaxTime = 0.f;
 	m_fBlendingTime = 0.f;
 	///////////////////////////////////////////////
-	//ÄÄÆ÷³ÍÆ®
+	//ÄÄÆ÷³ÍÆ®, ÅØ½ºÃÄ
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_eObjId = OBJ_PLAYER;
+	m_pReadyTex = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_READY);
+
 	///////////////////////////////////////////////
 
 	//SetScale(XMFLOAT3(0.2, 1, 1.8));
@@ -128,6 +134,13 @@ CPlayer::~CPlayer()
 	ReleaseShaderVariables();
 
 	if (m_pCamera) delete m_pCamera;
+
+	if (m_pReadyTex)
+	{
+		m_pReadyTex->ReleaseUploadBuffers();
+		m_pReadyTex->ReleaseShaderVariables();
+		m_pReadyTex->Release();
+	}
 }
 
 void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -333,15 +346,13 @@ void CPlayer::Rotate(float x, float y, float z)
 	m_xmf3Up = Vector3::CrossProduct(m_xmf3Look, m_xmf3Right, true);
 }
 
-#define START_POS 25.0f, 0, 25.0f
 
 void CPlayer::Update(float fTimeElapsed)
 {
 	//Nan°ª ÀÌ¸é
 	if (isnan(GetPosition().x) != 0)
 	{
-		XMFLOAT3 xmf3Pos = { START_POS };
-		SetPosition(xmf3Pos);
+		SetPosition(Scene1_SpawnPos);
 		cout << "Position is Nan!" << endl;
 	}
 
@@ -369,6 +380,8 @@ void CPlayer::Update(float fTimeElapsed)
 
 	////////////////////////////////////////////
 	UpdateComponent(fTimeElapsed);
+
+	UpdateReadyTexture(fTimeElapsed);
 	////////////////////////////////////////////
 
 	// ¹Ù´Ú ÀÌÆåÆ®
@@ -662,6 +675,20 @@ CS_MOVE_PACKET* CPlayer::Server_GetParentAndAnimation()
 	}
 	_duoPlayer->eCurAnim = m_eCurAnim;
 	return _duoPlayer;
+}
+
+void CPlayer::UpdateReadyTexture(float fTimeElapsed)
+{
+	if (!m_pReadyTex || !m_isReadyToggle) return;
+
+	m_pReadyTex->Animate(fTimeElapsed);
+
+	CScene* pScene = CGameMgr::GetInstance()->GetScene();
+	pScene->AddAlphaObjectToList(m_pReadyTex);
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += 2.f;
+	m_pReadyTex->SetPosition(xmf3Pos);
 }
 
 
