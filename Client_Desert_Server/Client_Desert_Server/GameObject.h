@@ -9,18 +9,20 @@ public:
 
 public:
 	virtual void Initialize() {};
-	virtual void Update(float fTimeElapsed) {};
+	virtual void Update(float fTimeElapsed);
 
 public:
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
-	void SetPosition(int x, int y, int z);
+	void SetPosition(float x, float y, float z);
+	void SetLook(float x, float y, float z);
 	bool IsNowAttack();
 
 public:
 	virtual void Send_Packet_To_Clients(int c_id) {};
 	virtual void CheckCollision(int c_id) {};
-
+	bool BoundingBox_Intersect(int c_id);
+	void UpdateBoundingBox();
 public:
 	char			race;
 	int				hp, hpmax;
@@ -30,6 +32,11 @@ public:
 
 
 public:
-	bool			m_bActive;
+	bool					m_bActive;
+
+public:
+	BoundingOrientedBox		m_xmLocalOOBB;
+	BoundingOrientedBox		m_xmOOBB;
+
 };
 

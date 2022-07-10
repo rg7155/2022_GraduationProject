@@ -10,8 +10,9 @@ CGolemMonster::CGolemMonster(int _targetId)
 {
 	
 	m_eCurAnim = GOLEM::ANIM::IDLE;
-	m_xmf3Position = XMFLOAT3(13.f, 0.f, 134.f);
-	m_xmf3Look = clients[_targetId]._pObject->GetPosition();
+	SetPosition(13.f, 0.f, 134.f);
+	XMFLOAT3 playerPos = clients[_targetId]._pObject->GetPosition();
+	m_xmf3Look = playerPos;
 	m_fAttackAnimTime = 0.f;
 	m_targetId = clients[_targetId]._id;
 	m_fRunCoolTime = 0.f;
@@ -19,6 +20,7 @@ CGolemMonster::CGolemMonster(int _targetId)
 	m_iHp = 100.f;
 	m_bFollowStart = false;
 	m_iVerse = VERSE1;
+
 }
 
 void CGolemMonster::Update(float fTimeElapsed)
@@ -60,9 +62,9 @@ void CGolemMonster::Update(float fTimeElapsed)
 		CGameObject* pTarget = clients[m_targetId]._pObject;
 		XMFLOAT3 mf3TargetPos =pTarget ->GetPosition();
 
-		if (m_eCurAnim == GOLEM::ANIM::RUN && Vector3::Distance(mf3TargetPos, m_xmf3Position) > FOLLOW_DISTANCE)
+		if (m_eCurAnim == GOLEM::ANIM::RUN && Vector3::Distance(mf3TargetPos, GetPosition()) > FOLLOW_DISTANCE)
 		{
-			XMFLOAT3 subVectorNormal = Vector3::Subtract(mf3TargetPos, m_xmf3Position, true, true);
+			XMFLOAT3 subVectorNormal = Vector3::Subtract(mf3TargetPos, GetPosition(), true, true);
 			XMVECTOR xmVecNormal = { subVectorNormal.x,subVectorNormal.y, subVectorNormal.z };
 
 			xmVecNormal = xmVecNormal * fTimeElapsed * GOLEMSPEED;
@@ -71,7 +73,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 		}
 
 		// 타겟과 일정거리 내로 좁혀지면 공격
-		float fDis = Vector3::Distance(mf3TargetPos, m_xmf3Position);
+		float fDis = Vector3::Distance(mf3TargetPos, GetPosition());
 		if (fDis < 15.f && !m_bFollowStart)
 		{
 			m_bFollowStart = true;
@@ -103,7 +105,7 @@ void CGolemMonster::Send_Packet_To_Clients(int c_id)
 	p.type = SC_MOVE_MONSTER;
 	p.size = sizeof(SC_MOVE_MONSTER_PACKET);
 	p.eCurAnim = m_eCurAnim;
-	p.xmf3Position = m_xmf3Position;
+	p.xmf3Position = GetPosition();
 	p.xmf3Look = m_xmf3Look;
 	p.target_id = m_targetId;
 	p.hp = m_iHp;
@@ -113,7 +115,8 @@ void CGolemMonster::Send_Packet_To_Clients(int c_id)
 
 void CGolemMonster::Move(XMFLOAT3& xmf3Shift)
 {
-	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
+	XMFLOAT3 pos = Vector3::Add(GetPosition(), xmf3Shift);
+	SetPosition(pos.x, pos.y, pos.z);
 }
 
 void CGolemMonster::CheckCollision(int c_id)
@@ -122,36 +125,8 @@ void CGolemMonster::CheckCollision(int c_id)
 		m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
 		return;
 	
-	CGameObject* pObject = clients[c_id]._pObject;
-	//// 애니메이션 position 계산해서 검사
-	//if (m_eCurAnim == GOLEM::ATTACK1)
-	//{
-	//	if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 0.8f)
-	//		return;
-	//}
-	//else
-	//{
-	//	if (pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition < 0.5f ||
-	//		pObject->m_eAnimInfo[pObject->m_eCurAnim].fPosition > 1.f)
-	//		return;
-	//}
-
 	
-
-	XMFLOAT3 fPlayerPos = pObject->GetPosition();
-	float fDis = Vector3::Distance(fPlayerPos, m_xmf3Position);
-
-	// 플레이어 Look과 플레이어에서 몬스터 Dir 비교
-	XMFLOAT3 fPlayerLook = pObject->GetLook();
-	XMFLOAT3 fDir = Vector3::Subtract(m_xmf3Position, fPlayerPos, true, true);
-
-	float fAngle = Vector3::Angle(fPlayerLook, fDir);
-
-	if (m_eCurAnim == GOLEM::ANIM::ATTACK1 || m_eCurAnim == GOLEM::ANIM::ATTACK2)
-		fAngle = 0.f;
-
-
-	if (fDis < PLAYER_ATTACK_DISTANCE && m_fDamagedCoolTime > 0.8f && abs(fAngle) < 90.f)
+	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > 0.8f && m_iHp > 0)
 	{
 		m_iHp -= 20.f;
 		m_fDamagedCoolTime = 0.f;

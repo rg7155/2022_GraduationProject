@@ -20,9 +20,7 @@ public:
 
 public:
 	int				m_targetId;
-	XMFLOAT3		m_xmf3Position;
 	XMFLOAT3		m_xmf3Look;
-	GOLEM::ANIM		m_eCurAnim;
 
 private:
 	float			m_fAttackAnimTime;

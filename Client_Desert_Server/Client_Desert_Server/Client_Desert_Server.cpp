@@ -4,8 +4,9 @@
 #include "Session.h"
 #include "SendData.h"
 
-unordered_map<int, CSession>			clients;
-list<CGameObject*>						objects; // monsters & objects
+unordered_map<int, CSession>				clients;
+list<CGameObject*>							objects; // monsters & objects
+unordered_map<string, BoundingOrientedBox>	oobbs;
 
 unordered_map<WSAOVERLAPPED*, int>		over_to_session;
 CGameTimer	m_GameTimer;
@@ -30,6 +31,7 @@ void error_display(const char* msg, int err_no)
 }
 
 void Init_Monsters();
+void LoadingBoundingBox();
 
 void TimerThread_func()
 {
@@ -99,6 +101,7 @@ void process_packet(int c_id)
 	{
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		clients[c_id].send_login_packet();
+		clients[c_id]._pObject->m_xmLocalOOBB = oobbs["Player"];
 
 		if(c_id == 1)
 			Init_Monsters();
@@ -207,7 +210,26 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 
 void Init_Monsters()
 {
+	LoadingBoundingBox();
+
 	CGameObject* pGolem = new CGolemMonster(0);
+	pGolem->m_xmLocalOOBB = oobbs["Golem"];
 	objects.push_back(pGolem);
 	pGolem->m_bActive = true;
+
+}
+
+void LoadingBoundingBox()
+{
+	// bound ·Îµù
+	ifstream in{ "Bounds/bounds.txt" };
+	string str;
+	BoundingOrientedBox OOBB;
+	while (!in.eof())
+	{
+		in >> str;
+		in >> OOBB.Center.x >> OOBB.Center.y >> OOBB.Center.z
+			>> OOBB.Extents.x >> OOBB.Extents.y >> OOBB.Extents.z;
+		oobbs.try_emplace(str, OOBB);
+	}
 }
