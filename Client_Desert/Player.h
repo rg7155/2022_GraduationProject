@@ -157,10 +157,12 @@ public:
 
 private:
 	void UpdateReadyTexture(float fTimeElapsed);
+	void MovePosByCollision();
 
 	CGameObject*	m_pReadyTex = nullptr;
 	bool			m_isReadyToggle = false;
 
+	vector<XMFLOAT3*> m_vecLine;
 };
 
 

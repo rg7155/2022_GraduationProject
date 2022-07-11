@@ -14,7 +14,7 @@ private:
 
 public:
 	bool	CheckCollsion(CGameObject* pObj1, CGameObject* pObj2);
-	void	CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, bool isNearCheck = false);
+	void	CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, bool isNearCheck = false, bool isCheckOnce = false);
 	void	CheckCollsion(list<CGameObject*> listObj1, list<CGameObject*> listObj2);
 
 private:

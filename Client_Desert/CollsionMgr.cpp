@@ -34,7 +34,7 @@ bool CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2)
 	return false;
 }
 
-void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, bool isNearCheck /*= false*/)
+void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, bool isNearCheck /*= false*/, bool isCheckOnce /*= false*/)
 {
 	bool isCol = false;
 	for (auto& iter : listObj)
@@ -43,12 +43,22 @@ void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, 
 		{
 			if (20.f > Vector3::Length(Vector3::Subtract(iter->GetPosition(), pObj->GetPosition()))) //상수값 임시로
 				if (CheckCollsion(pObj, iter))
+				{
 					isCol = true;
+
+					if (isCheckOnce)
+						break;
+				}
 		}
 		else
 		{
 			if (CheckCollsion(pObj, iter))
+			{
 				isCol = true;
+
+				if (isCheckOnce)
+					break;
+			}
 		}
 	}
 

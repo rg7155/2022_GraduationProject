@@ -382,6 +382,8 @@ void CPlayer::Update(float fTimeElapsed)
 	UpdateComponent(fTimeElapsed);
 
 	UpdateReadyTexture(fTimeElapsed);
+
+	//MovePosByCollision();
 	////////////////////////////////////////////
 
 	// 바닥 이펙트
@@ -488,6 +490,7 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	//cout << "Player Render" << endl;
 	UpdateShaderVariables(pd3dCommandList);
 	
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
@@ -608,7 +611,7 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		//m_pCamera->RegenerateViewMatrix();
 		//OnPrepareRender();
 
-		//방법2. 충동한 오브젝트 원점에서 밀어주기
+		////방법2. 충동한 오브젝트 원점에서 밀어주기
 		//XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3PrePosition, pObj->GetPosition(), true, true);
 		//xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, m_fTempShift);
 		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
@@ -617,7 +620,10 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		//m_pCamera->RegenerateViewMatrix();
 		//OnPrepareRender();
 
-		//방법3. 충돌한 선분의 법선벡터 방향으로 밀어주기
+		////방법3. 충돌한 선분의 법선벡터 방향으로 밀어주기
+		//m_vecLine.emplace_back(xmf3Line);
+
+
 		XMFLOAT3 xmf3Temp(0, 0, 0), xmf3Normal(0, 0, 0);
 		XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
 		xmf3Temp = Vector3::Subtract(xmf3Point0, xmf3Point1, true, false);
@@ -645,11 +651,58 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		OnPrepareRender();
 
 		//cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
+		//cout << "Col" << endl;
+
 	}
 		break;
 	case OBJ_END:
 		break;
 	}
+}
+
+void CPlayer::MovePosByCollision()//충돌한 선분중 가까운 선분 한개와 밀어내기 이동
+{
+	if (m_vecLine.empty()) return;
+
+
+	vector<float> vecDis;
+	for (auto& iter : m_vecLine)
+	{
+		XMFLOAT3 xmf3Line[2] = {iter[0], iter[1]};
+
+		//XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
+
+		//XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
+		XMFLOAT3 xmf3Pos = GetPosition();
+		float x0 = xmf3Pos.x, y0 = xmf3Pos.z;
+		float x1 = xmf3Line[0].x, y1 = xmf3Line[0].z;
+		float x2 = xmf3Line[1].x, y2 = xmf3Line[1].z;
+		//직선과 점 사이 거리
+		float fDis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / (float)sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+		vecDis.emplace_back(fDis);
+	}
+
+	int iMinIndex = int(min_element(vecDis.begin(), vecDis.end()) - vecDis.begin());
+	XMFLOAT3 xmf3Line[2] = { m_vecLine[iMinIndex][0],  m_vecLine[iMinIndex][1] };
+
+	XMFLOAT3 xmf3Temp(0, 0, 0), xmf3Normal(0, 0, 0);
+	xmf3Temp = Vector3::Subtract(xmf3Line[0], xmf3Line[1], true, false);
+	xmf3Normal.z = -xmf3Temp.x;
+	xmf3Normal.x = xmf3Temp.z;
+
+	float fShift = m_pComCollision->m_xmOOBB.Extents.z - vecDis[iMinIndex];
+	if (fShift < 0.f) fShift = 0.f;
+
+	XMFLOAT3 xmf3Dir = xmf3Normal/*xmf3Reflect*/;
+	xmf3Dir = Vector3::ScalarProduct(xmf3Dir, fShift/*m_fTempShift*/, false);
+	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Dir);
+
+	m_pCamera->Move(xmf3Dir);
+	m_pCamera->RegenerateViewMatrix();
+	OnPrepareRender();
+
+
+	m_vecLine.clear();
 }
 
 bool CPlayer::IsNowAttack()
@@ -690,6 +743,8 @@ void CPlayer::UpdateReadyTexture(float fTimeElapsed)
 	xmf3Pos.y += 2.f;
 	m_pReadyTex->SetPosition(xmf3Pos);
 }
+
+
 
 
 CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
