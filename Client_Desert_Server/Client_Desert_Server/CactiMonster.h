@@ -36,6 +36,7 @@ private:
 public:
 	int			m_index;
 	CCactiMonster* pOtherCacti;
+
 	//pCactus;
 
 };

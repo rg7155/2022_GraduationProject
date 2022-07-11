@@ -203,8 +203,7 @@ int CServerManager::ProcessPacket(char* packet)
 			//cout << static_cast<int>(p->hp) << endl;
 		}
 		else if (p->race == RACE_CACTI) {
-			// id: 1, 2
-			cout << "Caci Recv" << endl;
+			// id: 0,1
 			CGameObject* pObj;
 			if (p->id == 0) {
 				pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").front();
@@ -215,9 +214,14 @@ int CServerManager::ProcessPacket(char* packet)
 			CCactiObject* pCacti = reinterpret_cast<CCactiObject*>(pObj);
 
 			pCacti->Change_Animation((CACTI::ANIM)p->eCurAnim);
-			pCacti->SetLookAt(p->xmf3Look);
+			//pCacti->SetLookAt(p->xmf3Look);
 			pCacti->SetPosition(p->xmf3Position);
 			pCacti->SetHp(static_cast<int>(p->hp));
+			// verse ¹Ù²î¸é
+			if ((p->verse != pCacti->m_nowVerse) && (p->verse == VERSE3)) {
+				pCacti->m_nowVerse = p->verse;
+				pCacti->Rotate(0.f, 180.f, 0.f);
+			}
 
 		}
 		

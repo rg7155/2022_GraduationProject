@@ -137,6 +137,7 @@ struct SC_MOVE_MONSTER_PACKET
 	int eCurAnim;
 	short target_id;
 	short hp;
+	char verse;
 	//float	fElapsedTime;
 };
 #pragma pack (pop)

@@ -1,9 +1,9 @@
 #include "CactiMonster.h"
 #include "Session.h"
 
-constexpr int VERSE1 = 1;
-constexpr int VERSE2 = 2;
-constexpr int VERSE3 = 3;
+constexpr int VERSE1 = 0;
+constexpr int VERSE2 = 1;
+constexpr int VERSE3 = 2;
 
 constexpr float CACTISPEED = 5.f;
 
@@ -24,8 +24,12 @@ CCactiMonster::CCactiMonster(int _index)
 	m_fDamagedCoolTime = 0.f;
 	m_eCurAnim = CACTI::IDLE;
 	m_hp = 100;
+	SetLookAt(m_fAfterPos);
+	SetScale(2.f, 2.f, 2.f);
 
 	m_bActive = true;
+
+
 }
 
 void CCactiMonster::Update(float fTimeElapsed)
@@ -51,12 +55,11 @@ void CCactiMonster::Update(float fTimeElapsed)
 	}
 	if (VERSE2 == m_nowVerse) {
 		XMFLOAT3 xmf3Pos = GetPosition();
-		XMFLOAT3 xmf3Look = GetLook();
-		XMFLOAT3 moveSize = xmf3Look;
-		moveSize.x *= fTimeElapsed * CACTISPEED;
-		moveSize.z *= fTimeElapsed * CACTISPEED;
+		XMFLOAT3 xmf3Look =GetLook();
+		xmf3Look.x *= fTimeElapsed * CACTISPEED;
+		xmf3Look.z *= fTimeElapsed * CACTISPEED;
 
-		XMFLOAT3 newPos = Vector3::Add(xmf3Pos, moveSize);
+		XMFLOAT3 newPos = Vector3::Add(xmf3Pos, xmf3Look);
 		SetPosition(newPos.x, newPos.y, newPos.z);
 		xmf3Pos = GetPosition();
 		float dis = Vector3::Distance(xmf3Pos, m_fAfterPos);
@@ -86,6 +89,7 @@ void CCactiMonster::Send_Packet_To_Clients(int c_id)
 	p.xmf3Look = m_xmf3Target;
 	p.hp = m_hp;
 	p.race = RACE_CACTI;
+	p.verse = m_nowVerse;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 

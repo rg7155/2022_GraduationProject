@@ -15,7 +15,9 @@ public:
 public:
 	XMFLOAT3 GetPosition();
 	XMFLOAT3 GetLook();
+	void SetLookAt(XMFLOAT3& xmf3Target);
 	void SetPosition(float x, float y, float z);
+	void SetScale(float x, float y, float z);
 	bool IsNowAttack();
 	void Move(XMFLOAT3& xmf3Shift);
 
