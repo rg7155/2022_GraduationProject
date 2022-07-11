@@ -4,7 +4,7 @@
 #include "Camera.h"
 #include "InputDev.h"
 
-const static XMFLOAT3 Scene0_SpawnPos = { 0.f, 100.f, 0.f };
+const static XMFLOAT3 Scene0_SpawnPos = { 40.f, 0.f, 60.f };
 const static XMFLOAT3 Scene1_SpawnPos = { 25.f, 0.f, 25.f };
 const static XMFLOAT3 Scene2_SpawnPos = { 10.f, 0.f, 15.f };
 

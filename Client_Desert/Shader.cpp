@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "InputDev.h"
 #include "Monster.h"
+#include "Object.h"
 
 
 CShader::CShader(int nPipelineStates /*= 1*/)
@@ -614,11 +615,11 @@ CMapObjectsShader::~CMapObjectsShader()
 void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	
-
 	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/SceneTest_Transform.bin", true);
 	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene1_Transform_NoCol.bin", true);
-	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene1_Transform.bin", true);
-	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene2_Transform.bin", false);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene0_Transform.bin", 0);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene1_Transform.bin", 1);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene2_Transform.bin", 2);
 
 }
 
@@ -627,7 +628,7 @@ void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
 	CStandardObjectsShader::AnimateObjects(fTimeElapsed);
 }
 
-void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pFileName, bool isActive)
+void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pFileName, int iSceneIndex)
 {
 	FILE* pInFile = NULL;
 
@@ -707,11 +708,13 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			pMapObject->m_strName = str;
 			pMapObject->Ready();
 
-			pMapObject->SetActiveState(isActive);
+			pMapObject->SetActiveState(iSceneIndex == 0 ? true : false);
 
-			if(isActive) 
+			if(iSceneIndex == 0)
+				AddObject(L"Lobby", pGameObject);
+			else if (iSceneIndex == 1)
 				AddObject(L"Map", pGameObject);
-			else 
+			else if (iSceneIndex == 2)
 				AddObject(L"Map2", pGameObject); 
 		}
 	}
@@ -725,11 +728,24 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 void CMapObjectsShader::ChangeMap(SCENE eScene)
 {
-	auto list = GetObjectList(L"Map");
-	for (auto& iter : list)
-		iter->SetActiveState(false);
+	SetInactiveAllObject();
 
-	list = GetObjectList(L"Map2");
+	const wchar_t* pObjTag = L"";
+	switch (eScene)
+	{
+	case SCENE_0:
+		pObjTag = L"Lobby";
+		break;
+	case SCENE_1:
+		pObjTag = L"Map";
+		break;
+	case SCENE_2:
+		pObjTag = L"Map2";
+		break;
+	}
+
+	auto& list = GetObjectList(pObjTag);
+
 	for (auto& iter : list)
 		iter->SetActiveState(true);
 }

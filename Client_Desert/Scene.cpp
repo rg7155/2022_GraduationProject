@@ -31,7 +31,7 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	m_eCurScene = SCENE_1;
+	m_eCurScene = SCENE_0;
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -247,7 +247,10 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
 	{
-		ChangeScene(SCENE_2);
+		int cur = (int)m_eCurScene + 1;
+		SCENE eScene = (SCENE)cur;
+		if(eScene < SCENE_END)
+			ChangeScene(eScene);
 	}
 	
 	//TCHAR szTest[32] = L"";
@@ -369,13 +372,19 @@ void CScene::ChangeScene(SCENE eScene)
 	switch (eScene)
 	{
 	case SCENE_1:
+		m_pPlayer->SetPosition(Scene1_SpawnPos);
+
+		m_pMapObjectShader->ChangeMap(eScene);
+
+		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
+		
 		break;
 	case SCENE_2:
 		m_pPlayer->SetPosition(Scene2_SpawnPos);
 
 		m_pMapObjectShader->ChangeMap(eScene);
 
-		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
+		m_pDepthRenderShader->m_isStaticRender = false;
 
 		m_pMonsterObjectShader->SetInactiveAllObject();
 		m_pNPCObjectShader->SetInactiveAllObject();
