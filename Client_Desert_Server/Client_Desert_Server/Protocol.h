@@ -140,4 +140,16 @@ struct SC_MOVE_MONSTER_PACKET
 	char verse;
 	//float	fElapsedTime;
 };
+
+struct SC_MOVE_BULLET_PACKET
+{
+	// 타입추가
+	char type;
+	int size;
+	short id;
+	char race;
+	XMFLOAT3 xmf3Look;
+	XMFLOAT3 xmf3Position;
+	short target_id;
+};
 #pragma pack (pop)

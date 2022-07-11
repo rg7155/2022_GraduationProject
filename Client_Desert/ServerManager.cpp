@@ -222,6 +222,14 @@ int CServerManager::ProcessPacket(char* packet)
 				pCacti->m_nowVerse = p->verse;
 				pCacti->Rotate(0.f, 180.f, 0.f);
 			}
+		}
+		else if (p->race == RACE_CACTUS) {
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cactus").front();
+			CCactusObject* pCactus = reinterpret_cast<CCactusObject*>(pObj);
+			if (!pCactus->m_isActive)
+				pCactus->SetActiveState(true);
+			pCactus->Change_Animation((CACTUS::ANIM)p->eCurAnim);
+			pCactus->SetHp(static_cast<int>(p->hp));
 
 		}
 		

@@ -1,11 +1,11 @@
 #pragma once
 #include "GameObject.h"
-
 constexpr auto CACTI_POS_INIT1 = XMFLOAT3(84.f, 0.f, 96.f);
 constexpr auto CACTI_POS_INIT2 = XMFLOAT3(100.f, 0.f, 85.f);
 constexpr auto CACTI_POS_AFTER1 = XMFLOAT3(127.f, 0.f, 105.f);
 constexpr auto CACTI_POS_AFTER2 = XMFLOAT3(127.f, 0.f, 95.f);
-constexpr auto CACTUS_POS_INIT = XMFLOAT3(127.f, 0.f, 100.f);
+
+class CCactusMonster;
 
 class CCactiMonster : public CGameObject
 {
@@ -23,6 +23,9 @@ public:
 public:
 	void Change_Animation(CACTI::ANIM eNewAnim);
 
+public:
+	void AttackProcess(CACTUS::ANIM eAnim);
+	void AddBullet();
 
 private:
 	float		m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
@@ -35,9 +38,8 @@ private:
 
 public:
 	int			m_index;
-	CCactiMonster* pOtherCacti;
-
-	//pCactus;
+	CCactiMonster*	m_pCacti;
+	CCactusMonster* m_pCactus;
 
 };
 

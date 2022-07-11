@@ -139,7 +139,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CactiBullet.cpp" />
     <ClCompile Include="CactiMonster.cpp" />
+    <ClCompile Include="CactusMonster.cpp" />
     <ClCompile Include="Client_Desert_Server.cpp" />
     <ClCompile Include="GameObject.cpp" />
     <ClCompile Include="GolemMonster.cpp">
@@ -154,7 +156,9 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CactiBullet.h" />
     <ClInclude Include="CactiMonster.h" />
+    <ClInclude Include="CactusMonster.h" />
     <ClInclude Include="Client_Desert_Server.h" />
     <ClInclude Include="GameObject.h" />
     <ClInclude Include="GolemMonster.h">

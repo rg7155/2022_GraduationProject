@@ -232,11 +232,14 @@ void Init_Monsters()
 	CGameObject* pCacti2 = new CCactiMonster(1);
 	pCacti2->m_xmLocalOOBB = oobbs["Cacti"];
 
-	timer_lock.lock();
+	reinterpret_cast<CCactiMonster*>(pCacti1)->m_pCacti = reinterpret_cast<CCactiMonster*>(pCacti2);
+	reinterpret_cast<CCactiMonster*>(pCacti2)->m_pCacti = reinterpret_cast<CCactiMonster*>(pCacti1);
+
+	//timer_lock.lock();
 	objects.push_back(pGolem);
 	objects.push_back(pCacti1);
 	objects.push_back(pCacti2);
-	timer_lock.unlock();
+	//timer_lock.unlock();
 
 	pGolem->m_bActive = true;
 

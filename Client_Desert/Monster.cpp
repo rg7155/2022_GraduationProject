@@ -929,7 +929,7 @@ void CCactusObject::CollsionDetection(CGameObject* pObj)
 
 void CCactusObject::Animate(float fTimeElapsed)
 {
-	m_fAnimElapsedTime += fTimeElapsed;
+	/*m_fAnimElapsedTime += fTimeElapsed;
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
@@ -957,7 +957,7 @@ void CCactusObject::Animate(float fTimeElapsed)
 
 
 		}
-	}
+	}*/
 	
 
 	CMonsterObject::Animate(fTimeElapsed);

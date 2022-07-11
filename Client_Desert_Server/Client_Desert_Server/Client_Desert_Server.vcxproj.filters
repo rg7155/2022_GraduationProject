@@ -25,6 +25,9 @@
     <Filter Include="GameObject\Player">
       <UniqueIdentifier>{342e6068-5f8c-4786-a21b-e894b5181f7e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="GameObject\CactiBullet">
+      <UniqueIdentifier>{c86312c7-15b2-4c80-b3f4-28014920a2d2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert_Server.cpp">
@@ -50,6 +53,12 @@
     </ClCompile>
     <ClCompile Include="Player.cpp">
       <Filter>GameObject\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="CactusMonster.cpp">
+      <Filter>GameObject\CactusMonster</Filter>
+    </ClCompile>
+    <ClCompile Include="CactiBullet.cpp">
+      <Filter>GameObject\CactiBullet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -82,6 +91,12 @@
     </ClInclude>
     <ClInclude Include="Player.h">
       <Filter>GameObject\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="CactusMonster.h">
+      <Filter>GameObject\CactusMonster</Filter>
+    </ClInclude>
+    <ClInclude Include="CactiBullet.h">
+      <Filter>GameObject\CactiBullet</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,9 +1,8 @@
 #include "CactiMonster.h"
 #include "Session.h"
+#include "CactusMonster.h"
 
-constexpr int VERSE1 = 0;
-constexpr int VERSE2 = 1;
-constexpr int VERSE3 = 2;
+
 
 constexpr float CACTISPEED = 5.f;
 
@@ -70,10 +69,22 @@ void CCactiMonster::Update(float fTimeElapsed)
 			Change_Animation(CACTI::IDLE);
 
 			// 180도 회전 후 Cactus 생성하는 부분
-			//Rotate(0.f, 180.f, 0.f);
-			//if (m_pCacti && VERSE3 == static_cast<CMonsterObject*>(m_pCacti)->m_nowVerse) {
-			//	m_pCactus->SetActiveState(true);
-			//}
+			if (m_pCacti && (VERSE3 == m_pCacti->m_nowVerse)) {
+				m_pCactus = new CCactusMonster();
+				m_pCactus->m_xmLocalOOBB = oobbs["Cactus"];
+				objects.push_back(m_pCactus);
+				m_pCacti->m_pCactus = m_pCactus;
+				if (m_index == 0) {
+					m_pCactus->m_pCacti1 = this;
+					m_pCactus->m_pCacti2 = m_pCacti;
+				}
+				else
+				{
+					m_pCactus->m_pCacti2 = this;
+					m_pCactus->m_pCacti1 = m_pCacti;
+				}
+
+			}
 		}
 	}
 }
@@ -113,4 +124,48 @@ void CCactiMonster::Change_Animation(CACTI::ANIM eNewAnim)
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 1.f;
 	m_eCurAnim = eNewAnim;
+}
+
+void CCactiMonster::AttackProcess(CACTUS::ANIM eAnim)
+{
+
+	switch (eAnim)
+	{
+	case CACTUS::ATTACK1: {
+		Change_Animation(CACTI::ATTACK1);
+
+		AddBullet();
+		break;
+	}
+	case CACTUS::ATTACK2: {
+		Change_Animation(CACTI::ATTACK2);
+		for (int i = 0; i < 5; i++)
+			AddBullet();
+		break;
+	}
+	case CACTUS::ATTACK3:
+	default:
+		break;
+	}
+}
+
+void CCactiMonster::AddBullet()
+{
+	//CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
+	//CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+	//XMFLOAT3 xmf3Target = pPlayer->GetPosition();
+	//pObj->SetActiveState(true);
+
+	//XMFLOAT3 regenPos;
+	//regenPos.x = (float)(rand() % 20) * 0.05f * 2.f;
+	//regenPos.y = (float)(rand() % 10) * 0.05f + 0.5f;
+	//regenPos.z = (float)(rand() % 20) * 0.05f * 2.f;
+	//regenPos = Vector3::Add(GetPosition(), regenPos);
+	//pObj->SetPosition(regenPos);
+	//pObj->SetTarget(pObj->GetPosition(), xmf3Target);
+
+	//// look 벡터 설정
+	//pObj->SetLookAt(xmf3Target, false);
+	//pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
+	//pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 5.f;
 }

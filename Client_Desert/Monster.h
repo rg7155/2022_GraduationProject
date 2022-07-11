@@ -208,6 +208,7 @@ public:
 	void Blending_Animation(float fTimeElapsed);
 	void SetNewRotate(XMFLOAT3 xmf3Look);
 	void AddBullet();
+
 public:
 	CGameObject* m_pCacti1;
 	CGameObject* m_pCacti2;
