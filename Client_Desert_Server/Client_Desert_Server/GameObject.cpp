@@ -4,8 +4,8 @@
 CGameObject::CGameObject()
 {
 	m_bActive = false;
-	race = RACE_PLAYER;
-	hp = 100, hpmax=100;
+	m_race = RACE_PLAYER;
+	m_hp = 100, m_hpmax=100;
 
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_fDieCoolTime = 0.f;
@@ -48,20 +48,6 @@ void CGameObject::SetPosition(float x, float y, float z)
 	m_xmf4x4World._43 = z;
 }
 
-void CGameObject::SetLook(float x, float y, float z)
-{
-	XMFLOAT3 targetPos = XMFLOAT3(x, y, z);
-	XMFLOAT3 xmf3Pos = GetPosition(), xmf3Up = { 0.f, 1.f, 0.f };
-	XMFLOAT3 xmf3Look = Vector3::Subtract(targetPos, xmf3Pos, true);
-	XMFLOAT3 xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
-
-	m_xmf4x4World._11 = xmf3Right.x; m_xmf4x4World._12 = xmf3Right.y; m_xmf4x4World._13 = xmf3Right.z;
-	m_xmf4x4World._21 = xmf3Up.x; m_xmf4x4World._22 = xmf3Up.y; m_xmf4x4World._23 = xmf3Up.z;
-	m_xmf4x4World._31 = xmf3Look.x; m_xmf4x4World._32 = xmf3Look.y; m_xmf4x4World._33 = xmf3Look.z;
-
-	//SetScale(m_xmf3Scale);
-}
-
 bool CGameObject::IsNowAttack()
 {
 	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 ||
@@ -69,6 +55,12 @@ bool CGameObject::IsNowAttack()
 		return true;
 
 	return false;
+}
+
+void CGameObject::Move(XMFLOAT3& xmf3Shift)
+{
+	XMFLOAT3 pos = Vector3::Add(GetPosition(), xmf3Shift);
+	SetPosition(pos.x, pos.y, pos.z);
 }
 
 bool CGameObject::BoundingBox_Intersect(int c_id)

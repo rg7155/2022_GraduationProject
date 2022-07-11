@@ -3,10 +3,6 @@
 #include "GolemMonster.h"
 #include "Session.h"
 #define FOLLOW_DISTANCE 1.f
-#define VERSE1 1
-#define VERSE2 2
-constexpr float DAMAGE_COOLTIME = 1.2f;
-
 
 CGolemMonster::CGolemMonster(int _targetId)
 {
@@ -14,15 +10,13 @@ CGolemMonster::CGolemMonster(int _targetId)
 	m_eCurAnim = GOLEM::ANIM::IDLE;
 	SetPosition(13.f, 0.f, 134.f);
 	XMFLOAT3 playerPos = clients[_targetId]._pObject->GetPosition();
-	m_xmf3Look = playerPos;
+	m_xmf3Target = playerPos;
 	m_fAttackAnimTime = 0.f;
 	m_targetId = clients[_targetId]._id;
 	m_fRunCoolTime = 0.f;
 	m_fDamagedCoolTime = 0.f;
-	m_iHp = 100.f;
+	m_hp = 100.f;
 	m_bFollowStart = false;
-	m_iVerse = VERSE1;
-
 }
 
 void CGolemMonster::Update(float fTimeElapsed)
@@ -77,7 +71,7 @@ void CGolemMonster::Update(float fTimeElapsed)
 
 			xmVecNormal = xmVecNormal * fTimeElapsed * GOLEMSPEED;
 			Move(Vector3::XMVectorToFloat3(xmVecNormal));
-			m_xmf3Look = mf3TargetPos;
+			m_xmf3Target = mf3TargetPos;
 		}
 
 		// 타겟과 일정거리 내로 좁혀지면 공격
@@ -114,17 +108,11 @@ void CGolemMonster::Send_Packet_To_Clients(int c_id)
 	p.size = sizeof(SC_MOVE_MONSTER_PACKET);
 	p.eCurAnim = m_eCurAnim;
 	p.xmf3Position = GetPosition();
-	p.xmf3Look = m_xmf3Look;
+	p.xmf3Look = m_xmf3Target;
 	p.target_id = m_targetId;
-	p.hp = m_iHp;
+	p.hp = m_hp;
 	p.race = RACE_GOLEM;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
-}
-
-void CGolemMonster::Move(XMFLOAT3& xmf3Shift)
-{
-	XMFLOAT3 pos = Vector3::Add(GetPosition(), xmf3Shift);
-	SetPosition(pos.x, pos.y, pos.z);
 }
 
 void CGolemMonster::CheckCollision(int c_id)
@@ -134,12 +122,12 @@ void CGolemMonster::CheckCollision(int c_id)
 		return;
 	
 	
-	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_iHp > 0)
+	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
 	{
-		m_iHp -= 20.f;
+		m_hp -= 20.f;
 		m_fDamagedCoolTime = 0.f;
 
-		if (m_iHp <= 0.f)
+		if (m_hp <= 0.f)
 		{
 			Change_Animation(GOLEM::ANIM::DIE);
 			m_fRunCoolTime = 0.f;

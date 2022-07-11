@@ -1,6 +1,7 @@
 #include "Client_Desert_Server.h"
 #include "GameObject.h"
 #include "GolemMonster.h"
+#include "CactiMonster.h"
 #include "Session.h"
 #include "SendData.h"
 
@@ -177,7 +178,7 @@ void disconnect(int c_id)
 		p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 		p.type = SC_REMOVE_OBJECT;
 		if(clients[c_id]._pObject)
-			p.race = clients[c_id]._pObject->race;
+			p.race = clients[c_id]._pObject->m_race;
 		cl.second.do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 	cout << c_id << "Client Disconnection\n";
@@ -224,8 +225,17 @@ void Init_Monsters()
 
 	CGameObject* pGolem = new CGolemMonster(0);
 	pGolem->m_xmLocalOOBB = oobbs["Golem"];
+
+	CGameObject* pCacti1 = new CCactiMonster(0);
+	pCacti1->m_xmLocalOOBB = oobbs["Cacti"];
+
+	CGameObject* pCacti2 = new CCactiMonster(1);
+	pCacti2->m_xmLocalOOBB = oobbs["Cacti"];
+
 	timer_lock.lock();
 	objects.push_back(pGolem);
+	objects.push_back(pCacti1);
+	objects.push_back(pCacti2);
 	timer_lock.unlock();
 
 	pGolem->m_bActive = true;

@@ -56,9 +56,9 @@ void CSession::send_add_object(int c_id)
 	p.xmf4x4World = pObject->m_xmf4x4World;
 	p.eCurAnim = pObject->m_eCurAnim;
 	memcpy(p.animInfo, pObject->m_eAnimInfo, sizeof(p.animInfo));
-	p.race = clients[c_id]._pObject->race;
-	p.hp = clients[c_id]._pObject->hp;
-	p.hpmax = clients[c_id]._pObject->hpmax;
+	p.race = clients[c_id]._pObject->m_race;
+	p.hp = clients[c_id]._pObject->m_hp;
+	p.hpmax = clients[c_id]._pObject->m_hpmax;
 	do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
@@ -73,6 +73,6 @@ void CSession::send_move_packet(int c_id)
 	p.xmf4x4World = pObject->m_xmf4x4World;
 	p.eCurAnim = pObject->m_eCurAnim;
 	memcpy(p.animInfo, pObject->m_eAnimInfo, sizeof(p.animInfo));
-	p.race = pObject->race;
+	p.race = pObject->m_race;
 	do_send(p.size, reinterpret_cast<char*>(&p));
 }

@@ -204,8 +204,9 @@ int CServerManager::ProcessPacket(char* packet)
 		}
 		else if (p->race == RACE_CACTI) {
 			// id: 1, 2
+			cout << "Caci Recv" << endl;
 			CGameObject* pObj;
-			if (p->id == 1) {
+			if (p->id == 0) {
 				pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").front();
 			}
 			else

@@ -697,29 +697,29 @@ void CCactiObject::Animate(float fTimeElapsed)
 	//Blending_Animation(fTimeElapsed);
 
 
-	m_fAnimElapsedTime += fTimeElapsed;
-	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
-	{
-		m_fAnimElapsedTime = 0.f;
-		if (m_eCurAnim == CACTI::ANIM::BITE)
-		{
-			Change_Animation(CACTI::ANIM::WALK);
-			
-			m_nowVerse = VERSE2;
-		}
-		if (m_nowVerse == VERSE3) {
-			Change_Animation(CACTI::ANIM::IDLE);
+	//m_fAnimElapsedTime += fTimeElapsed;
+	//if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+	//{
+	//	m_fAnimElapsedTime = 0.f;
+	//	if (m_eCurAnim == CACTI::ANIM::BITE)
+	//	{
+	//		Change_Animation(CACTI::ANIM::WALK);
+	//		
+	//		m_nowVerse = VERSE2;
+	//	}
+	//	if (m_nowVerse == VERSE3) {
+	//		Change_Animation(CACTI::ANIM::IDLE);
 
-		}
+	//	}
 
 
 
-	}
+	//}
 	
 	CMonsterObject::Animate(fTimeElapsed);
 
 
-	if (VERSE2 == m_nowVerse) {
+	/*if (VERSE2 == m_nowVerse) {
 		XMFLOAT3 xmf3Pos = GetPosition();
 		XMFLOAT3 xmf3Look = GetLook();
 		XMFLOAT3 moveSize = xmf3Look;
@@ -740,7 +740,7 @@ void CCactiObject::Animate(float fTimeElapsed)
 				m_pCactus->SetActiveState(true);
 			}
 		}
-	}
+	}*/
 
 }
 
