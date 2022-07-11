@@ -162,7 +162,7 @@ private:
 	CGameObject*	m_pReadyTex = nullptr;
 	bool			m_isReadyToggle = false;
 
-	vector<XMFLOAT3*> m_vecLine;
+	vector<vector<XMFLOAT3>> m_vecLine;
 };
 
 

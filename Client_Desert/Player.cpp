@@ -621,7 +621,8 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		//OnPrepareRender();
 
 		////방법3. 충돌한 선분의 법선벡터 방향으로 밀어주기
-		//m_vecLine.emplace_back(xmf3Line);
+		//vector<XMFLOAT3> vec = { xmf3Line[0], xmf3Line[1] };
+		//m_vecLine.emplace_back(vec);
 
 
 		XMFLOAT3 xmf3Temp(0, 0, 0), xmf3Normal(0, 0, 0);
@@ -650,7 +651,7 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		m_pCamera->RegenerateViewMatrix();
 		OnPrepareRender();
 
-		//cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
+		////cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
 		//cout << "Col" << endl;
 
 	}
@@ -663,7 +664,6 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 void CPlayer::MovePosByCollision()//충돌한 선분중 가까운 선분 한개와 밀어내기 이동
 {
 	if (m_vecLine.empty()) return;
-
 
 	vector<float> vecDis;
 	for (auto& iter : m_vecLine)
@@ -701,6 +701,8 @@ void CPlayer::MovePosByCollision()//충돌한 선분중 가까운 선분 한개와 밀어내기 이
 	m_pCamera->RegenerateViewMatrix();
 	OnPrepareRender();
 
+	//cout << xmf3Normal.x << "," << xmf3Normal.y << "," << xmf3Normal.z<< "," << endl;
+	//cout << xmf3Line[1].x << "," << xmf3Line[1].y << "," << xmf3Line[1].z << "," << endl;
 
 	m_vecLine.clear();
 }
