@@ -5,8 +5,8 @@
 CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	char fileName[2048];
-	m_iId = *((int*)pContext);
-	if (m_iId == 0)
+	int id = *(int*)pContext;
+	if (id == 0)
 		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
 	else
 		strcpy(fileName, "Model/Adventurer_Aland_Green.bin");
@@ -34,7 +34,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	if (pPlayerModel) delete pPlayerModel;
 
-	SetPosition(15.f, 0.f, 15.f);
+	SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail->SetRenderingTrail(false);
@@ -125,30 +125,13 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
 }
 
-void CDuoPlayer::Server_SetParentAndAnimation(SC_MOVE_PLAYER_PACKET* packet)
+void CDuoPlayer::Update_object_anim(object_anim* _object_anim)
 {
-	// За·Д
-	m_xmf4x4ToParent = packet->xmf4x4World;
-	player_anim* _player_anim = packet->animInfo;
-	m_eCurAnim = packet->eCurAnim;
-
 	for (int i = 0; i < PLAYER::ANIM::END; i++)
 	{
-
-		float fWeight, fPosition;
-		if (_player_anim[i].sWeight != 0)
-			fWeight = (float)_player_anim[i].sWeight / 10000.f;
-		else
-			fWeight = 0.f;
-
-		if (_player_anim[i].sPosition != 0)
-			fPosition = (float)_player_anim[i].sPosition / 10000.f;
-		else
-			fPosition = 0.f;
-
-		m_pSkinnedAnimationController->SetTrackWeight(i, fWeight);
-		m_pSkinnedAnimationController->SetTrackEnable(i, _player_anim[i].bEnable);
-		m_pSkinnedAnimationController->m_fPosition[i] = fPosition;
+		m_pSkinnedAnimationController->SetTrackWeight(i, _object_anim[i].fWeight);
+		m_pSkinnedAnimationController->SetTrackEnable(i, _object_anim[i].bEnable);
+		m_pSkinnedAnimationController->m_fPosition[i] = _object_anim[i].fPosition;
 	}
 }
 

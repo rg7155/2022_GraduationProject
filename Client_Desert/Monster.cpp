@@ -1,6 +1,7 @@
 #include "Monster.h"
 #include "Scene.h"
 #include "ChildObject.h"
+#include "ServerManager.h"
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CGameObject(1)
@@ -455,7 +456,7 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 
 	// 플레이어가 공격 중이면 공격하지 않음
 	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
-
+	int id = CServerManager::GetInstance()->m_myid;
 
 	if (!pPlayer->IsNowAttack())
 	{
@@ -465,7 +466,7 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 		{
 			// 타겟이면
 
-			if (pPlayer->m_iId == m_targetId)
+			if (id == m_targetId)
 			{
 				pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
 
@@ -564,13 +565,12 @@ void CGolemObject::SetNewRotate(XMFLOAT3 xmf3Look)
 void CGolemObject::Check_Collision()
 {
 	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+	int id = CServerManager::GetInstance()->m_myid;
 	float fDis = Vector3::Distance(pPlayer->GetPosition(), GetPosition());
 	if (fDis < GOLEM_ATTACK1_DISTANCE)
 	{
 		// 타겟이면
-		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
-
-		if (pPlayer->m_iId == m_targetId)
+		if (id == m_targetId)
 		{
 			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
 		}
@@ -697,29 +697,29 @@ void CCactiObject::Animate(float fTimeElapsed)
 	//Blending_Animation(fTimeElapsed);
 
 
-	m_fAnimElapsedTime += fTimeElapsed;
-	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
-	{
-		m_fAnimElapsedTime = 0.f;
-		if (m_eCurAnim == CACTI::ANIM::BITE)
-		{
-			Change_Animation(CACTI::ANIM::WALK);
-			
-			m_nowVerse = VERSE2;
-		}
-		if (m_nowVerse == VERSE3) {
-			Change_Animation(CACTI::ANIM::IDLE);
+	//m_fAnimElapsedTime += fTimeElapsed;
+	//if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+	//{
+	//	m_fAnimElapsedTime = 0.f;
+	//	if (m_eCurAnim == CACTI::ANIM::BITE)
+	//	{
+	//		Change_Animation(CACTI::ANIM::WALK);
+	//		
+	//		m_nowVerse = VERSE2;
+	//	}
+	//	if (m_nowVerse == VERSE3) {
+	//		Change_Animation(CACTI::ANIM::IDLE);
 
-		}
+	//	}
 
 
 
-	}
+	//}
 	
 	CMonsterObject::Animate(fTimeElapsed);
 
 
-	if (VERSE2 == m_nowVerse) {
+	/*if (VERSE2 == m_nowVerse) {
 		XMFLOAT3 xmf3Pos = GetPosition();
 		XMFLOAT3 xmf3Look = GetLook();
 		XMFLOAT3 moveSize = xmf3Look;
@@ -740,7 +740,7 @@ void CCactiObject::Animate(float fTimeElapsed)
 				m_pCactus->SetActiveState(true);
 			}
 		}
-	}
+	}*/
 
 }
 
@@ -929,7 +929,7 @@ void CCactusObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 
 void CCactusObject::Animate(float fTimeElapsed)
 {
-	m_fAnimElapsedTime += fTimeElapsed;
+	/*m_fAnimElapsedTime += fTimeElapsed;
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
@@ -957,7 +957,7 @@ void CCactusObject::Animate(float fTimeElapsed)
 
 
 		}
-	}
+	}*/
 	
 
 	CMonsterObject::Animate(fTimeElapsed);

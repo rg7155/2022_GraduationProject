@@ -1,21 +1,22 @@
 #include "Client_Desert_Server.h"
-#include "Player.h"
+#include "GameObject.h"
 #include "GolemMonster.h"
-#include "Protocol.h"
-#include "Timer.h"
-class SESSION;
+#include "CactiMonster.h"
+#include "Session.h"
+#include "SendData.h"
 
-unordered_map<int, SESSION>			clients;
-unordered_map<WSAOVERLAPPED*, int>	over_to_session;
-CGolemMonster*						g_pGolemMonster = nullptr;
-CGameTimer							m_GameTimer;
+unordered_map<int, CSession>				clients;
+list<CGameObject*>							objects; // monsters & objects
+unordered_map<string, BoundingOrientedBox>	oobbs;
+unordered_map<string, vector<float>>			animTimes;
+
+unordered_map<WSAOVERLAPPED*, int>		over_to_session;
+CGameTimer	m_GameTimer;
+mutex		timer_lock;
+char		recv_buf[BUFSIZE];
 
 void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
-
-char recv_buf[BUFSIZE];
-void send_GolemMonster();
-
 void error_display(const char* msg, int err_no)
 {
 	WCHAR* lpMsgBuf;
@@ -31,158 +32,32 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
-
-
-class SEND_DATA {
-public:
-	WSAOVERLAPPED _over;
-	WSABUF _wsabuf;
-	char send_buf[BUFSIZE];
-
-	SEND_DATA(int size, int client_id, char* n_data )
-	{
-		// size id data 순으로 보낸다.
-		_wsabuf.len = size;
-		_wsabuf.buf = send_buf;
-		ZeroMemory(&_over, sizeof(_over));
-		ZeroMemory(&send_buf, BUFSIZE);
-		//send_buf[0] = client_id;
-		memcpy(send_buf, n_data, size);
-	}
-};
-
-class SESSION
-{
-	WSAOVERLAPPED _c_over;
-	WSABUF _c_wsabuf[1];
-	int _id;
-
-public:
-	SOCKET	_socket;
-	CHAR	_c_mess[BUFSIZE];
-
-	CPlayer* pPlayer;
-	bool	_bGolemSend = false;
-public:
-	SESSION() {}
-	SESSION(int id, SOCKET s) : _id(id), _socket(s)
-	{
-		_c_wsabuf[0].buf = _c_mess;
-		_c_wsabuf[0].len = sizeof(_c_mess);
-		over_to_session[&_c_over] = id;
-		pPlayer = new CPlayer;
-		pPlayer->Initialize();
-		pPlayer->m_id = id;
-	}
-	~SESSION() {}
-
-	void do_recv()
-	{
-		// 받기전에 초기화 해준다.......
-		_c_wsabuf[0].buf = _c_mess;
-		_c_wsabuf[0].len = BUFSIZE;
-		DWORD recv_flag = 0;
-		memset(&_c_over, 0, sizeof(_c_over));
-
-		// 키값 받음
-		WSARecv(_socket, _c_wsabuf, 1, 0, &recv_flag, &_c_over, recv_callback);
-	}
-
-	void do_send(int num_bytes, int client_id, char* mess)
-	{
-		SEND_DATA* sdata = new SEND_DATA{ num_bytes, client_id, mess };
-		WSASend(_socket, &sdata->_wsabuf, 1, 0, 0, &sdata->_over, send_callback);
-
-	}
-
-	void send_login_packet()
-	{
-		SC_LOGIN_INFO_PACKET p;
-		p.id = _id;
-		p.size = sizeof(SC_LOGIN_INFO_PACKET);
-		p.type = SC_LOGIN_INFO;
-		p.x = pPlayer->GetPosition().x;
-		p.z = pPlayer->GetPosition().z;
-		do_send(p.size, p.id, reinterpret_cast<char*>(&p));
-	}
-
-	void send_move_packet(int c_id)
-	{
-		SC_MOVE_PLAYER_PACKET p;
-		p.id = c_id; // _id로 해서 오류 났었음
-		p.size = sizeof(SC_MOVE_PLAYER_PACKET);
-		p.type = SC_MOVE_PLAYER;
-		p.xmf4x4World = clients[c_id].pPlayer->m_xmf4x4World;
-		p.eCurAnim = clients[c_id].pPlayer->m_eCurAnim;
-		for (int i = 0; i < PLAYER::ANIM::END; i++)
-		{
-			p.animInfo[i] = clients[c_id].pPlayer->m_eAnimInfo[i];
-		}		
-
-		// 몬스터 패킷
-		if (g_pGolemMonster)
-		{
-			SC_MOVE_MONSTER_PACKET monsterpacket;
-			monsterpacket.id = 0;
-			monsterpacket.type = SC_MOVE_MONSTER;
-			monsterpacket.size = sizeof(SC_MOVE_MONSTER_PACKET);
-			monsterpacket.eCurAnim = g_pGolemMonster->m_eCurAnim;
-			monsterpacket.xmf3Position = g_pGolemMonster->m_xmf3Position;
-			monsterpacket.xmf3Look = g_pGolemMonster->m_xmf3Look;
-			monsterpacket.target_id = g_pGolemMonster->m_pTarget->m_id;
-			monsterpacket.hp = static_cast<short>(g_pGolemMonster->GetHp());
-
-			char buf[BUFSIZE];
-			memcpy(buf, &p, p.size);
-			memcpy(buf + p.size, &monsterpacket, monsterpacket.size);
-			int bufSize = p.size + monsterpacket.size;
-
-			do_send(bufSize, p.id, buf);
-		}
-		else
-			do_send(p.size, p.id, reinterpret_cast<char*>(&p));
-
-	
-	}
-};
-
-
-CPlayer* Get_Player(int c_id)
-{
-	return clients[c_id].pPlayer;
-}
+void Init_Monsters();
+void LoadingBoundingBox();
+void LoadingAnimTime();
 
 void TimerThread_func()
 {
 	float	fGolemCreateTime = 0.f;
 	bool	bGolemCreateOn = false;
+
 	while (true)
 	{
 		m_GameTimer.Tick(60.0f);
 		float fTimeElapsed = m_GameTimer.GetTimeElapsed();
-		if(clients.size() >= 1)
-			fGolemCreateTime += fTimeElapsed;
-
-		if (!bGolemCreateOn && clients.size() >= 2)
-		{
-			g_pGolemMonster = new CGolemMonster(clients[0].pPlayer);
-			bGolemCreateOn = true;
+		timer_lock.lock();
+		for (auto& object : objects) {
+			object->Update(fTimeElapsed);
 		}
+		timer_lock.unlock();
 
-		if (g_pGolemMonster)
-		{
-			g_pGolemMonster->Update(fTimeElapsed);
-
-		}
 	}
 
 }
-mutex mylock;
 
 int main()
 {
 	srand(unsigned int(time(NULL)));
-
 	m_GameTimer.Start();
 
 	WSADATA WSAData;
@@ -215,105 +90,79 @@ int main()
 
 		cout << "Client " << client_id << '\n';
 
+
 	}
 	timerThread.join();
 	closesocket(server);
 	WSACleanup();
 }
 
-void send_GolemMonster()
-{
-	SC_MOVE_MONSTER_PACKET p;
-	p.id = 0;
-	p.type = SC_MOVE_MONSTER;
-	p.size = sizeof(SC_MOVE_MONSTER_PACKET);
-	p.eCurAnim = g_pGolemMonster->m_eCurAnim;
-	p.xmf3Position = g_pGolemMonster->m_xmf3Position;
-	p.xmf3Look = g_pGolemMonster->m_xmf3Look;
-	p.target_id = g_pGolemMonster->m_pTarget->m_id;
-	p.hp = static_cast<short>(g_pGolemMonster->GetHp());
-	for (auto& cl : clients)
-	{
-		//if (cl.first == c_id) continue;
-		mylock.lock();
-		cl.second.do_send(p.size, cl.first, reinterpret_cast<char*>(&p));
-		mylock.unlock();
-
-	}
-}
-
 void process_packet(int c_id)
 {
 	char* packet = clients[c_id]._c_mess;
-	switch (packet[1])
+	switch (packet[0])
 	{
 	case CS_LOGIN:
 	{
 		CS_LOGIN_PACKET* p = reinterpret_cast<CS_LOGIN_PACKET*>(packet);
 		clients[c_id].send_login_packet();
+		clients[c_id]._pObject->m_xmLocalOOBB = oobbs["Player"];
 
+		if(c_id == 1)
+			Init_Monsters();
+		
 		// 다른 플레이어에게 알림
 		for (auto& cl : clients)
 		{
 			if (cl.first == c_id) continue;
-
-			SC_ADD_PLAYER_PACKET add_packet;
-			add_packet.id = c_id;
-			strcpy_s(add_packet.name, p->name);
-			add_packet.size = sizeof(SC_ADD_PLAYER_PACKET);
-			add_packet.type = SC_ADD_PLAYER;
-			add_packet.x = clients[c_id].pPlayer->GetPosition().x;
-			add_packet.z = clients[c_id].pPlayer->GetPosition().z;
-			cl.second.do_send(add_packet.size, add_packet.id, reinterpret_cast<char*>(&add_packet));
-		}
+			cl.second.send_add_object(c_id);
+		}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 
 		// 다른 플레이어 가져옴
 		for (auto& cl : clients)
 		{
 			if (cl.first == c_id) continue;
-
-			SC_ADD_PLAYER_PACKET add_packet;
-			add_packet.id = cl.first;
-			strcpy_s(add_packet.name, p->name);
-			add_packet.size = sizeof(SC_ADD_PLAYER_PACKET);
-			add_packet.type = SC_ADD_PLAYER;
-			add_packet.x = cl.second.pPlayer->GetPosition().x;
-			add_packet.z = cl.second.pPlayer->GetPosition().z;
-			clients[c_id].do_send(add_packet.size, add_packet.id, reinterpret_cast<char*>(&add_packet));
+			clients[c_id].send_add_object(cl.first);
 		}
 		break;
 
 	}
 	case CS_MOVE:
 	{
-		// 받은 데이터로 클라 갱신
+		// 받은 데이터로 서버 갱신
 		CS_MOVE_PACKET* p = reinterpret_cast<CS_MOVE_PACKET*>(packet);
-		clients[c_id].pPlayer->m_xmf4x4World = p->xmf4x4World;
-		clients[c_id].pPlayer->m_eCurAnim = p->eCurAnim;
-		for (int i = 0; i < PLAYER::ANIM::END; i++)
-		{
-			clients[c_id].pPlayer->m_eAnimInfo[i] = p->animInfo[i];
-		}
-		// 플레이어가 공격하면 몬스터랑 충돌체크
-		if (g_pGolemMonster && g_pGolemMonster->GetHp() > 0.f)
-		{
-			if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
-				p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
-			{
-				g_pGolemMonster->CheckCollision(clients[c_id].pPlayer);
-			}
+		clients[c_id]._pObject->m_xmf4x4World = p->xmf4x4World;
+		clients[c_id]._pObject->m_eCurAnim = p->eCurAnim;
+		memcpy(clients[c_id]._pObject->m_eAnimInfo, p->animInfo, sizeof(p->animInfo));
 
+		// 객체들과 충돌체크
+		if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
+			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
+		{
+			for (auto& object : objects)
+			{
+				object->CheckCollision(c_id);
+			}
 		}
-		
-		// 모든 클라에게 클라의 위치 전송 (나를 제외)
+		// 모든 클라에게 클라의 위치 전송
 		for (auto& cl : clients)
 		{
 			if (cl.first == c_id) continue;
 			cl.second.send_move_packet(c_id);
+			timer_lock.lock();
+			for (auto iter = objects.begin(); iter != objects.end();)
+			{
+				(*iter)->Send_Packet_To_Clients(cl.first);
+				if (!(*iter)->m_bActive)
+					iter = objects.erase(iter);
+				else
+					iter++;
+			}
+			timer_lock.unlock();
+
 		}
 		break;
 	}
-		
 	default:
 		break;
 	}
@@ -326,16 +175,15 @@ void disconnect(int c_id)
 	{
 		if (cl.first == c_id) continue;
 
-		SC_REMOVE_PLAYER_PACKET p;
+		SC_REMOVE_OBJECT_PACKET p;
 		p.id = c_id;
-		p.size = sizeof(SC_REMOVE_PLAYER_PACKET);
-		p.type = SC_REMOVE_PLAYER;
-		cl.second.do_send(p.size, p.id, reinterpret_cast<char*>(&p));
+		p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+		p.type = SC_REMOVE_OBJECT;
+		if(clients[c_id]._pObject)
+			p.race = clients[c_id]._pObject->m_race;
+		cl.second.do_send(p.size, reinterpret_cast<char*>(&p));
 	}
 	cout << c_id << "Client Disconnection\n";
-	delete clients[c_id].pPlayer;
-	clients[c_id].pPlayer = nullptr;
-
 	clients.erase(c_id);
 }
 
@@ -351,9 +199,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 		disconnect(client_id);
 		return;
 	}
-
 	process_packet(client_id);
-	
 
 
 	clients[client_id].do_recv();
@@ -368,8 +214,70 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 	if (iter == clients.end())
 		over_to_session.erase(over);
 
-	SEND_DATA* sdata = reinterpret_cast<SEND_DATA*>(over);
+	CSendData* sdata = reinterpret_cast<CSendData*>(over);
 	delete sdata;
 
 	return;
 }
+
+void Init_Monsters()
+{
+	LoadingBoundingBox();
+	LoadingAnimTime();
+
+	CGameObject* pGolem = new CGolemMonster(0);
+	pGolem->m_xmLocalOOBB = oobbs["Golem"];
+
+	CGameObject* pCacti1 = new CCactiMonster(0);
+	pCacti1->m_xmLocalOOBB = oobbs["Cacti"];
+
+	CGameObject* pCacti2 = new CCactiMonster(1);
+	pCacti2->m_xmLocalOOBB = oobbs["Cacti"];
+
+	reinterpret_cast<CCactiMonster*>(pCacti1)->m_pCacti = reinterpret_cast<CCactiMonster*>(pCacti2);
+	reinterpret_cast<CCactiMonster*>(pCacti2)->m_pCacti = reinterpret_cast<CCactiMonster*>(pCacti1);
+
+	//timer_lock.lock();
+	objects.push_back(pGolem);
+	objects.push_back(pCacti1);
+	objects.push_back(pCacti2);
+	//timer_lock.unlock();
+
+	pGolem->m_bActive = true;
+
+}
+
+void LoadingBoundingBox()
+{
+	// bound 로딩
+	ifstream in{ "Bounds/bounds.txt" };
+	string str;
+	BoundingOrientedBox OOBB;
+	while (!in.eof())
+	{
+		in >> str;
+		in >> OOBB.Center.x >> OOBB.Center.y >> OOBB.Center.z
+			>> OOBB.Extents.x >> OOBB.Extents.y >> OOBB.Extents.z;
+		oobbs.try_emplace(str, OOBB);
+	}
+}
+
+void LoadingAnimTime()
+{
+	// bound 로딩
+	ifstream in{ "AnimTime/AnimTime.txt" };
+
+	string str;
+	int num, index = 0;
+	float time = 0.f;
+	while (!in.eof())
+	{
+		in >> str >> num;
+		for (int i = 0; i < num; i++)
+		{
+			in >> index >> time;
+			animTimes[str].push_back(time);
+		}
+	}
+}
+

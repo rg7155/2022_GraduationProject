@@ -1,51 +1,102 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="소스 파일">
-      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
-      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    <Filter Include="GameObject">
+      <UniqueIdentifier>{bd9dc1a9-65e6-4fe1-8579-9e8b736d19b2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="헤더 파일">
-      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
-      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    <Filter Include="Main">
+      <UniqueIdentifier>{989dd363-a755-45ec-b01a-38379aac8202}</UniqueIdentifier>
     </Filter>
-    <Filter Include="리소스 파일">
-      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
-      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    <Filter Include="Default">
+      <UniqueIdentifier>{dbdd4df6-c5f1-43f0-8805-c620a4da771e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header">
+      <UniqueIdentifier>{9c3c6676-e5a0-4206-9919-079371116b25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\GolemMonster">
+      <UniqueIdentifier>{59618ab9-b461-49ee-bc58-79dbbd93f629}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\CactusMonster">
+      <UniqueIdentifier>{9372c013-34d1-4fc8-bbd1-7af0176b7d84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\CactiMonster">
+      <UniqueIdentifier>{d90a495d-2b55-43e9-8456-77c2e447c422}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\Player">
+      <UniqueIdentifier>{342e6068-5f8c-4786-a21b-e894b5181f7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameObject\CactiBullet">
+      <UniqueIdentifier>{c86312c7-15b2-4c80-b3f4-28014920a2d2}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert_Server.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="Player.cpp">
-      <Filter>소스 파일</Filter>
+    <ClCompile Include="GameObject.cpp">
+      <Filter>GameObject</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>Default</Filter>
+    </ClCompile>
+    <ClCompile Include="Session.cpp">
+      <Filter>Header</Filter>
+    </ClCompile>
+    <ClCompile Include="SendData.cpp">
+      <Filter>Header</Filter>
     </ClCompile>
     <ClCompile Include="GolemMonster.cpp">
-      <Filter>소스 파일</Filter>
+      <Filter>GameObject\GolemMonster</Filter>
+    </ClCompile>
+    <ClCompile Include="CactiMonster.cpp">
+      <Filter>GameObject\CactiMonster</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>GameObject\Player</Filter>
+    </ClCompile>
+    <ClCompile Include="CactusMonster.cpp">
+      <Filter>GameObject\CactusMonster</Filter>
+    </ClCompile>
+    <ClCompile Include="CactiBullet.cpp">
+      <Filter>GameObject\CactiBullet</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Player.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Client_Desert_Server.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Protocol.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="Timer.h">
-      <Filter>소스 파일</Filter>
+    <ClInclude Include="GameObject.h">
+      <Filter>GameObject</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Client_Desert_Server.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Default</Filter>
+    </ClInclude>
+    <ClInclude Include="Session.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="SendData.h">
+      <Filter>Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Protocol.h">
+      <Filter>Header</Filter>
     </ClInclude>
     <ClInclude Include="GolemMonster.h">
-      <Filter>헤더 파일</Filter>
+      <Filter>GameObject\GolemMonster</Filter>
+    </ClInclude>
+    <ClInclude Include="CactiMonster.h">
+      <Filter>GameObject\CactiMonster</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>GameObject\Player</Filter>
+    </ClInclude>
+    <ClInclude Include="CactusMonster.h">
+      <Filter>GameObject\CactusMonster</Filter>
+    </ClInclude>
+    <ClInclude Include="CactiBullet.h">
+      <Filter>GameObject\CactiBullet</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

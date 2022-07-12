@@ -283,7 +283,6 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	{
 	case SCENE_1:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"));
-		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer->GetSword(), m_pMonsterObjectShader->GetObjectList(L"Cacti"));
 		break;
 	case SCENE_2:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"));
@@ -715,8 +714,6 @@ void CScene::SetRootParameterConstants(D3D12_ROOT_PARAMETER pd3dRootParameter[],
 
 void CScene::CreateDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int id)
 {
-	int duo_id;
-	duo_id = 1 - id;
-
-	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (void*)&duo_id);
+	
+	m_pDuoPlayer = new CDuoPlayer(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature, (void*)&id);
 }

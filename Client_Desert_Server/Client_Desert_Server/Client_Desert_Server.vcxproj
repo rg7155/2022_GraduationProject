@@ -139,17 +139,39 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CactiBullet.cpp" />
+    <ClCompile Include="CactiMonster.cpp" />
+    <ClCompile Include="CactusMonster.cpp" />
     <ClCompile Include="Client_Desert_Server.cpp" />
-    <ClCompile Include="GolemMonster.cpp" />
+    <ClCompile Include="GameObject.cpp" />
+    <ClCompile Include="GolemMonster.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="Player.cpp" />
+    <ClCompile Include="SendData.cpp" />
+    <ClCompile Include="Session.cpp" />
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CactiBullet.h" />
+    <ClInclude Include="CactiMonster.h" />
+    <ClInclude Include="CactusMonster.h" />
     <ClInclude Include="Client_Desert_Server.h" />
-    <ClInclude Include="GolemMonster.h" />
+    <ClInclude Include="GameObject.h" />
+    <ClInclude Include="GolemMonster.h">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</ExcludedFromBuild>
+    </ClInclude>
     <ClInclude Include="Player.h" />
     <ClInclude Include="Protocol.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="SendData.h" />
+    <ClInclude Include="Session.h" />
     <ClInclude Include="Timer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

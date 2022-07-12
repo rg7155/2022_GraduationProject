@@ -109,8 +109,5 @@ private:
 
 	UILayer						*m_pUILayer = NULL;
 
-public:
-	int							m_iId;
-
 };
 
