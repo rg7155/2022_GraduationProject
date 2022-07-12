@@ -32,9 +32,11 @@ public:
 public:
 	bool		m_isPlane = false;
 	bool		m_isCollisionBox = false;
+	bool		m_isCollisionBoxRender = false;
 
 	string		m_strName = "";
 	CCollision* m_pComCollision = nullptr;
+
 };
 
 class CStoneDoorMapObject;

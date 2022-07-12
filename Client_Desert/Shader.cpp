@@ -587,6 +587,17 @@ void CStandardObjectsShader::SetInactiveAllObject()
 			iterSec->SetActiveState(false);
 }
 
+void CStandardObjectsShader::SetActiveStateObjects(const wchar_t* pObjTag, bool isActive)
+{
+	auto& iter = m_mapObject.find(pObjTag);
+	if (iter == m_mapObject.end())
+		return;
+
+	for (auto& list_iter : iter->second)
+		list_iter->SetActiveState(isActive);
+
+}
+
 void CStandardObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
 	for (auto& iter : m_mapObject)
@@ -726,7 +737,7 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 }
 
-void CMapObjectsShader::ChangeMap(SCENE eScene)
+void CMapObjectsShader::ActiveObjectByChangeScene(SCENE eScene)
 {
 	SetInactiveAllObject();
 
@@ -1242,8 +1253,10 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PROFILE);
 	AddObject(L"UI_Info", pObject); 
+	pObject->SetActiveState(false);
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PLAYER);
 	AddObject(L"UI_Info", pObject);
+	pObject->SetActiveState(false);
 
 	//Äù½ºÆ®
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_QUEST);
@@ -1272,6 +1285,24 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 void CUIObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
 {
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
+}
+
+void CUIObjectsShader::ActiveObjectByChangeScene(SCENE eScene)
+{
+	switch (eScene)
+	{
+	case SCENE_0:
+		break;
+	case SCENE_1:
+	{
+		SetActiveStateObjects(L"UI_Button", false);
+		SetActiveStateObjects(L"UI_Info", true);
+	}
+		break;
+	case SCENE_2:
+		break;
+	}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

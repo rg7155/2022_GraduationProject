@@ -123,6 +123,7 @@ public:
 	virtual HRESULT		CreateObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, const wchar_t* pObjTag) { return S_OK; }
 	CGameObject*		SetActive(const wchar_t* pObjTag);
 	void				SetInactiveAllObject();
+	void				SetActiveStateObjects(const wchar_t* pObjTag, bool isActive);
 	void				UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList);
 public:
 	//map<const wchar_t*, list<CGameObject*>>		m_mapObject;
@@ -143,7 +144,7 @@ public:
 	virtual void AnimateObjects(float fTimeElapsed) override;
 
 	void LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pFileName, int iSceneIndex);
-	void ChangeMap(SCENE eScene);
+	void ActiveObjectByChangeScene(SCENE eScene);
 
 private:
 	map<string, CLoadedModelInfo*> m_mapModelInfo;
@@ -285,6 +286,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
 
+	void	ActiveObjectByChangeScene(SCENE eScene);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

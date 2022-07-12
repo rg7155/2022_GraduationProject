@@ -51,8 +51,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	//SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
 	SetPosition(Scene0_SpawnPos);
 	//SetPosition(Scene1_SpawnPos);
-	
-	Rotate(0.f, 180.f, 0.f);
 	////////////////////////////////////////////////////////////
 
 
@@ -392,7 +390,17 @@ void CPlayer::Update(float fTimeElapsed)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
+	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
+	{
+		if (CGameMgr::GetInstance()->GetScene()->m_eCurScene != SCENE::SCENE_0)
+			m_pCamera->SetLookAt(m_xmf3Position);
+		else
+		{
+			XMFLOAT3 xmf3Pos = {40.f, 0.f, 60.f}/*m_xmf3Position*/;
+			xmf3Pos.y += 2.f;
+			m_pCamera->SetLookAt(xmf3Pos);
+		}
+	}
 	m_pCamera->RegenerateViewMatrix();
 
 	m_xmf3Velocity = {0.00f,0.00f ,0.00f };

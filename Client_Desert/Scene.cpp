@@ -32,6 +32,7 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_eCurScene = SCENE_0;
+	m_eGoalScene = SCENE_0;
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
@@ -247,10 +248,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
 	{
-		int cur = (int)m_eCurScene + 1;
-		SCENE eScene = (SCENE)cur;
-		if(eScene < SCENE_END)
-			ChangeScene(eScene);
+		ChangeSceneByFadeInOut();
 	}
 	
 	//TCHAR szTest[32] = L"";
@@ -364,18 +362,36 @@ CGameObject* CScene::SetActiveObjectFromShader(const wchar_t* pShaderTag, const 
 		return nullptr;
 }
 
-void CScene::ChangeScene(SCENE eScene)
+//Fade In,Out으로 씬 변경 시작 함수
+void CScene::ChangeSceneByFadeInOut()
 {
-	m_eCurScene = eScene;
+	CUIObject* pFade = static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front());
+	if (!pFade) return;
 
-	switch (eScene)
+	int cur = (int)m_eCurScene + 1;
+	SCENE eScene = (SCENE)cur;
+	if (eScene >= SCENE_END) return;
+
+	m_eGoalScene = eScene;
+
+	pFade->SetFadeState(false);
+
+	cout << cur << endl;
+}
+
+//실제로 씬이 바뀔때 Fade오브젝트에서 불리는 함수(화면 어두울때)
+void CScene::ChangeScene()
+{
+	m_eCurScene = m_eGoalScene;
+
+	switch (m_eCurScene)
 	{
 	case SCENE_1:
 		m_pPlayer->SetPosition(Scene1_SpawnPos);
 		m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
 
-
-		m_pMapObjectShader->ChangeMap(eScene);
+		m_pMapObjectShader->ActiveObjectByChangeScene(m_eCurScene);
+		m_pUIObjectShader->ActiveObjectByChangeScene(m_eCurScene);
 
 		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
 		
@@ -383,7 +399,7 @@ void CScene::ChangeScene(SCENE eScene)
 	case SCENE_2:
 		m_pPlayer->SetPosition(Scene2_SpawnPos);
 
-		m_pMapObjectShader->ChangeMap(eScene);
+		m_pMapObjectShader->ActiveObjectByChangeScene(m_eCurScene);
 
 		m_pDepthRenderShader->m_isStaticRender = false;
 

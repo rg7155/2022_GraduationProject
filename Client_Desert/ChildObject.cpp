@@ -110,6 +110,11 @@ void CMapObject::Animate(float fTimeElapsed)
 	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
 	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
+	if (m_isCollisionBox && CInputDev::GetInstance()->KeyDown(DIKEYBOARD_B))
+	{
+		m_isCollisionBoxRender = !m_isCollisionBoxRender;
+	}
+
 	for (int i = 0; i < COM_END; ++i)
 		if (m_pComponent[i])
 			m_pComponent[i]->Update_Component(fTimeElapsed);
@@ -120,7 +125,10 @@ void CMapObject::Animate(float fTimeElapsed)
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
-	if (!m_isActive/* || m_isCollisionBox*/)
+	if (!m_isActive)
+		return;
+
+	if (m_isCollisionBox && !m_isCollisionBoxRender)
 		return;
 
 	UpdateShaderVariables(pd3dCommandList);
@@ -545,8 +553,7 @@ void CUIObject::Animate(float fTimeElapsed)
 				else if (!m_isChangeScene && m_fAlpha > 1.f)
 				{
 					m_isChangeScene = true;
-					//m_isStartFade = false; //수정
-					CGameMgr::GetInstance()->GetScene()->ChangeScene(SCENE::SCENE_2);
+					CGameMgr::GetInstance()->GetScene()->ChangeScene();
 				}
 			}
 		}
@@ -607,6 +614,7 @@ void CUIObject::SetFadeState(bool isIn)
 	else
 	{
 		m_isStartFade = true;
+		m_isChangeScene = false;
 		//페이드 아웃 - 어두워짐
 		m_fAlpha = 0.f;
 	}
@@ -739,9 +747,8 @@ void CPortalObject::Animate(float fTimeElapsed)
 
 	if (fDistanceToPlayer < RANGE && fDistanceToDuo < RANGE && !m_isOverlap)
 	{
+		CGameMgr::GetInstance()->GetScene()->ChangeSceneByFadeInOut();
 		m_isOverlap = true;
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
-		static_cast<CUIObject*>(pObj)->SetFadeState(false);
 		m_isActive = false;
 	}
 	CGameObject::Animate(fTimeElapsed);
@@ -842,7 +849,15 @@ void CTexturedObject::Animate(float fTimeElapsed)
 
 	case CTexturedObject::TEXTURE_HP:
 	case CTexturedObject::TEXTURE_HP_FRAME:
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		UpdateTransform(NULL);
+		break;
 	case CTexturedObject::TEXTURE_READY:
+		if (CGameMgr::GetInstance()->GetScene()->m_eCurScene != SCENE::SCENE_0)
+		{
+			SetActiveState(false);
+			return;
+		}
 		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
 		UpdateTransform(NULL); 
 		break;
