@@ -373,6 +373,8 @@ void CScene::ChangeScene(SCENE eScene)
 	{
 	case SCENE_1:
 		m_pPlayer->SetPosition(Scene1_SpawnPos);
+		m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
+
 
 		m_pMapObjectShader->ChangeMap(eScene);
 

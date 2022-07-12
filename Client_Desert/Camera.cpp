@@ -2,6 +2,7 @@
 #include "Player.h"
 #include "Camera.h"
 #include "InputDev.h"
+#include "Scene.h"
 
 CCamera::CCamera()
 {
@@ -359,6 +360,9 @@ void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 
 void CThirdPersonCamera::RotateByMouse(XMFLOAT3& xmf3LookAt)
 {
+	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0)
+		return;
+
 	// 마우스 회전 
 	// 위아래
 	long dwMouseMove = 0;

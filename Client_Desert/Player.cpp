@@ -36,9 +36,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
 
-	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecTmpRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, -1.f, 1.f);
+	m_xmVecTmpRotate = XMVectorSet(0.f, 0.f, -1.f, 1.f);
+	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, -1.f, 1.f);
 	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 
 	m_pPlayerUpdatedContext = NULL;
@@ -46,9 +46,14 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
+	////////////////////////////////////////////////////////////
+	// 초기 Transform
 	//SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
 	SetPosition(Scene0_SpawnPos);
 	//SetPosition(Scene1_SpawnPos);
+	
+	Rotate(0.f, 180.f, 0.f);
+	////////////////////////////////////////////////////////////
 
 
 	
@@ -166,6 +171,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 
 	}
+
+	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0)
+		return;
+
 
 	// 대기동작이나 이동중일때만 움직이기 가능
 	if (m_eCurAnim != PLAYER::ANIM::IDLE && m_eCurAnim != PLAYER::ANIM::IDLE_RELAXED && m_eCurAnim != PLAYER::ANIM::RUN)
@@ -786,7 +795,8 @@ CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
+		//m_pCamera->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 2.f, -4.f)); //로비 화면 오프셋
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -812,6 +822,9 @@ void CPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 bool CPlayer::Check_Input(float fTimeElapsed)
 {
+	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0)
+		return false;
+
 	// 공격 4가지 처리
 
 		// attack1
