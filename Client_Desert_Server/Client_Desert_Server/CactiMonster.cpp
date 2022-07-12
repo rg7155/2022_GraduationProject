@@ -22,6 +22,8 @@ CCactiMonster::CCactiMonster(int _index)
 	m_fAnimElapsedTime = 0.f;
 	m_fDamagedCoolTime = 0.f;
 	m_eCurAnim = CACTI::IDLE;
+	m_fAnimMaxTime = animTimes["Cacti"][m_eCurAnim];
+
 	m_hp = 100;
 	SetLookAt(m_fAfterPos);
 	SetScale(2.f, 2.f, 2.f);
@@ -122,7 +124,7 @@ void CCactiMonster::CheckCollision(int c_id) // 플레이어가 공격할때 호출
 void CCactiMonster::Change_Animation(CACTI::ANIM eNewAnim)
 {
 	m_fAnimElapsedTime = 0.f;
-	m_fAnimMaxTime = 1.f;
+	m_fAnimMaxTime = animTimes["Cacti"][eNewAnim];
 	m_eCurAnim = eNewAnim;
 }
 

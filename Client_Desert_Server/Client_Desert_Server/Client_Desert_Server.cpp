@@ -8,6 +8,7 @@
 unordered_map<int, CSession>				clients;
 list<CGameObject*>							objects; // monsters & objects
 unordered_map<string, BoundingOrientedBox>	oobbs;
+unordered_map<string, vector<float>>			animTimes;
 
 unordered_map<WSAOVERLAPPED*, int>		over_to_session;
 CGameTimer	m_GameTimer;
@@ -33,6 +34,7 @@ void error_display(const char* msg, int err_no)
 
 void Init_Monsters();
 void LoadingBoundingBox();
+void LoadingAnimTime();
 
 void TimerThread_func()
 {
@@ -221,7 +223,7 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 void Init_Monsters()
 {
 	LoadingBoundingBox();
-
+	LoadingAnimTime();
 
 	CGameObject* pGolem = new CGolemMonster(0);
 	pGolem->m_xmLocalOOBB = oobbs["Golem"];
@@ -259,3 +261,23 @@ void LoadingBoundingBox()
 		oobbs.try_emplace(str, OOBB);
 	}
 }
+
+void LoadingAnimTime()
+{
+	// bound ·Îµù
+	ifstream in{ "AnimTime/AnimTime.txt" };
+
+	string str;
+	int num, index = 0;
+	float time = 0.f;
+	while (!in.eof())
+	{
+		in >> str >> num;
+		for (int i = 0; i < num; i++)
+		{
+			in >> index >> time;
+			animTimes[str].push_back(time);
+		}
+	}
+}
+

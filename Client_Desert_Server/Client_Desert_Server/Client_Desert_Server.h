@@ -35,6 +35,8 @@ class CGameObject;
 extern unordered_map<int, CSession>	clients; // players + monsters  [0][1]->Player
 extern list<CGameObject*>							objects; // monsters & objects
 extern unordered_map<string, BoundingOrientedBox>	oobbs;
+extern unordered_map<string, vector<float>>			animTimes;
+
 extern unordered_map<WSAOVERLAPPED*, int>	over_to_session;
 extern mutex		timer_lock;
 

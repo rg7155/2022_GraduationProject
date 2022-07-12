@@ -6,6 +6,7 @@ CCactusMonster::CCactusMonster()
 	SetScale(2.f, 2.f, 2.f);
 	m_bActive = true;
 	m_eCurAnim = CACTUS::ANIM::SPAWN;
+	m_fAnimMaxTime = animTimes["Cactus"][m_eCurAnim];
 
 }
 
@@ -73,8 +74,9 @@ void CCactusMonster::CheckCollision(int c_id)
 void CCactusMonster::Change_Animation(CACTUS::ANIM eNewAnim)
 {
 	m_fAnimElapsedTime = 0.f;
-	m_fAnimMaxTime = 1.f;
+	m_fAnimMaxTime = animTimes["Cactus"][eNewAnim];
 	m_eCurAnim = eNewAnim;
+
 }
 
 void CCactusMonster::AddBullet()

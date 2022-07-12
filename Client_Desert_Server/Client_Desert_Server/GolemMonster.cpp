@@ -8,6 +8,8 @@ CGolemMonster::CGolemMonster(int _targetId)
 {
 	
 	m_eCurAnim = GOLEM::ANIM::IDLE;
+	m_fAnimMaxTime = animTimes["Golem"][m_eCurAnim];
+
 	SetPosition(13.f, 0.f, 134.f);
 	XMFLOAT3 playerPos = clients[_targetId]._pObject->GetPosition();
 	m_xmf3Target = playerPos;
@@ -148,7 +150,7 @@ void CGolemMonster::CheckCollision(int c_id)
 void CGolemMonster::Change_Animation(GOLEM::ANIM eNewAnim)
 {
 	m_fAnimElapsedTime = 0.f;
-	m_fAnimMaxTime = 1.f;
+	m_fAnimMaxTime = animTimes["Golem"][eNewAnim];
 	m_eCurAnim = eNewAnim;
 	m_fRunCoolTime = 0.f;
 
