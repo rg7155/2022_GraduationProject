@@ -2,6 +2,7 @@
 #include "GameObject.h"
 
 constexpr auto CACTUS_POS_INIT = XMFLOAT3(127.f, 0.f, 100.f);
+constexpr auto ATTACK_COOLTIME = 2.f;
 
 class CCactiMonster;
 class CCactusMonster : public CGameObject

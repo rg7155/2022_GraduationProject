@@ -6,7 +6,7 @@
 #pragma comment(lib, "MSWSock.lib")
 
 constexpr int SERVER_PORT = 4000;
-constexpr int BUFSIZE = 1024;
+constexpr int BUFSIZE = 2048;
 constexpr int NAME_SIZE = 20;
 constexpr int MAX_USER = 100;
 
@@ -20,7 +20,6 @@ constexpr char SC_REMOVE_OBJECT = 4;
 constexpr char SC_MOVE_OBJECT = 5;
 constexpr char SC_STAT_CHANGE = 6;
 constexpr char SC_MOVE_MONSTER = 7;
-
 
 // dir
 constexpr char DIR_UPRIGHT = 1;
@@ -37,7 +36,10 @@ constexpr char RACE_PLAYER = 0;
 constexpr char RACE_GOLEM = 1;
 constexpr char RACE_CACTI = 2;
 constexpr char RACE_CACTUS = 3;
-constexpr char RACE_THORN = 4;
+
+// bullet
+constexpr char BULLET_SIZE1 = 0;
+constexpr char BULLET_SIZE2 = 1;
 
 #define DISCONNECT -99.f
 
@@ -141,15 +143,14 @@ struct SC_MOVE_MONSTER_PACKET
 	//float	fElapsedTime;
 };
 
-struct SC_MOVE_BULLET_PACKET
+struct SC_ADD_BULLET_PACKET
 {
-	// 타입추가
 	char type;
 	int size;
-	short id;
-	char race;
-	XMFLOAT3 xmf3Look;
+	char bullet_size; // 1, 2
 	XMFLOAT3 xmf3Position;
 	short target_id;
+
+	
 };
 #pragma pack (pop)

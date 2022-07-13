@@ -234,6 +234,9 @@ public:
 	ID3D12Resource					*m_pd3dcbSubUpload = NULL;
 	CB_SUBOBJECT_INFO				*m_pcbMappedSubInfo = NULL;
 
+public:
+	int								m_index = 0;
+
 	void SetActiveState(bool isActve) { m_isActive = isActve; }
 	void SetEffectsType(UINT nMask, bool isOn);
 

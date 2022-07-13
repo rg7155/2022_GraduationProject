@@ -6,9 +6,9 @@
 #include "SendData.h"
 
 unordered_map<int, CSession>				clients;
-list<CGameObject*>							objects; // monsters & objects
+list<CGameObject*>							objects[OBJECT_END]; // monsters & objects
 unordered_map<string, BoundingOrientedBox>	oobbs;
-unordered_map<string, vector<float>>			animTimes;
+unordered_map<string, vector<float>>		animTimes;
 
 unordered_map<WSAOVERLAPPED*, int>		over_to_session;
 CGameTimer	m_GameTimer;
@@ -46,8 +46,11 @@ void TimerThread_func()
 		m_GameTimer.Tick(60.0f);
 		float fTimeElapsed = m_GameTimer.GetTimeElapsed();
 		timer_lock.lock();
-		for (auto& object : objects) {
-			object->Update(fTimeElapsed);
+		for (int i = 0; i < OBJECT::OBJECT_END; i++)
+		{
+			for (auto& object : objects[i]) {
+				object->Update(fTimeElapsed);
+			}
 		}
 		timer_lock.unlock();
 
@@ -139,7 +142,7 @@ void process_packet(int c_id)
 		if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
 			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
 		{
-			for (auto& object : objects)
+			for (auto& object : objects[OBJECT_MONSTER])
 			{
 				object->CheckCollision(c_id);
 			}
@@ -149,15 +152,19 @@ void process_packet(int c_id)
 		{
 			if (cl.first == c_id) continue;
 			cl.second.send_move_packet(c_id);
+
 			timer_lock.lock();
-			for (auto iter = objects.begin(); iter != objects.end();)
-			{
-				(*iter)->Send_Packet_To_Clients(cl.first);
-				if (!(*iter)->m_bActive)
-					iter = objects.erase(iter);
-				else
-					iter++;
+			for (int i = 0; i < OBJECT::OBJECT_END; ++i) {
+				for (auto iter = objects[i].begin(); iter != objects[i].end();)
+				{
+					(*iter)->Send_Packet_To_Clients(cl.first);
+					if (!(*iter)->m_bActive)
+						iter = objects[i].erase(iter);
+					else
+						iter++;
+				}
 			}
+		
 			timer_lock.unlock();
 
 		}
@@ -238,9 +245,9 @@ void Init_Monsters()
 	reinterpret_cast<CCactiMonster*>(pCacti2)->m_pCacti = reinterpret_cast<CCactiMonster*>(pCacti1);
 
 	//timer_lock.lock();
-	objects.push_back(pGolem);
-	objects.push_back(pCacti1);
-	objects.push_back(pCacti2);
+	objects[OBJECT::OBJECT_MONSTER].push_back(pGolem);
+	objects[OBJECT::OBJECT_MONSTER].push_back(pCacti1);
+	objects[OBJECT::OBJECT_MONSTER].push_back(pCacti2);
 	//timer_lock.unlock();
 
 	pGolem->m_bActive = true;

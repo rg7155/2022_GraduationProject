@@ -114,6 +114,8 @@ public:
 
 public:
 	bool IsNowAttack();
+	void SetDamaged();
+
 private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecTmpRotate;

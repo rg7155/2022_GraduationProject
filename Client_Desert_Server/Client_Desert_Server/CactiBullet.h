@@ -6,7 +6,7 @@ constexpr float CACTI_BULLET_TIME = 3.f;
 class CCactiBullet : public CGameObject
 {
 public:
-	CCactiBullet();
+	CCactiBullet(int _index);
 	~CCactiBullet();
 
 public:
@@ -25,5 +25,6 @@ public:
 	float		m_fTime = 0;
 	float		m_fSpeed;
 	float		m_fCreateTime = 0.f;
+	int			m_index = 0;
 };
 

@@ -7,7 +7,9 @@ CCactusMonster::CCactusMonster()
 	m_bActive = true;
 	m_eCurAnim = CACTUS::ANIM::SPAWN;
 	m_fAnimMaxTime = animTimes["Cactus"][m_eCurAnim];
-
+	m_hp = 100;
+	SetPosition(CACTUS_POS_INIT.x, CACTUS_POS_INIT.y, CACTUS_POS_INIT.z);
+	
 }
 
 CCactusMonster::~CCactusMonster()
@@ -18,7 +20,10 @@ void CCactusMonster::Update(float fTimeElapsed)
 {
 	if (!m_bActive)
 		return;
-
+	if (m_eCurAnim == CACTUS::DIE) {
+		m_bActive = false;
+		return;
+	}
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -30,7 +35,7 @@ void CCactusMonster::Update(float fTimeElapsed)
 
 	if (m_nowVerse == VERSE2) {
 		m_fAttackCoolTime += fTimeElapsed;
-		if (m_fAttackCoolTime > 3.f)
+		if (m_fAttackCoolTime > ATTACK_COOLTIME)
 		{
 			m_fAttackCoolTime = 0.f;
 			CACTUS::ANIM eNext = m_ePreAttack == CACTUS::ATTACK3 ? CACTUS::ATTACK1 : (CACTUS::ANIM)(m_ePreAttack + 1);
@@ -40,14 +45,7 @@ void CCactusMonster::Update(float fTimeElapsed)
 				m_pCacti1->AttackProcess(eNext);
 				m_pCacti2->AttackProcess(eNext);
 			}
-			else {
-				for (int i = 0; i < 5; i++)
-				{
-					AddBullet();
-				}
-			}
-
-
+			
 		}
 	}
 }
@@ -69,6 +67,25 @@ void CCactusMonster::Send_Packet_To_Clients(int c_id)
 
 void CCactusMonster::CheckCollision(int c_id)
 {
+	if (m_eCurAnim == CACTUS::ANIM::TAKE_DAMAGED)
+		return;
+
+
+	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
+	{
+		m_hp -= 20.f;
+		m_fDamagedCoolTime = 0.f;
+
+		if (m_hp <= 0.f)
+		{
+			Change_Animation(CACTUS::ANIM::DIE);
+			return;
+		}
+		else
+		{
+			Change_Animation(CACTUS::ANIM::TAKE_DAMAGED);
+		}
+	}
 }
 
 void CCactusMonster::Change_Animation(CACTUS::ANIM eNewAnim)
@@ -100,3 +117,4 @@ void CCactusMonster::AddBullet()
 	////pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
 	//pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 4.f;
 }
+ 

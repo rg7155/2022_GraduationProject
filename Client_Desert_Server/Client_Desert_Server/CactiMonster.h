@@ -25,7 +25,7 @@ public:
 
 public:
 	void AttackProcess(CACTUS::ANIM eAnim);
-	void AddBullet();
+	void AddBullet(int _id);
 
 private:
 	float		m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간

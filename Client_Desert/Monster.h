@@ -169,8 +169,7 @@ public:
 	void SetNewRotate(XMFLOAT3 xmf3Look);
 
 public:
-	void AttackProcess(CACTUS::ANIM eAnim);
-	void AddBullet();
+	void AddBullet(CACTUS::ANIM _eAnim);
 public:
 	CGameObject*	m_pCactus;
 	CGameObject*	m_pCacti;
@@ -219,6 +218,9 @@ public:
 };
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+constexpr char BULLET_FOLLOW_TYPE1 = 0;
+constexpr char BULLET_FOLLOW_TYPE2 = 1;
+constexpr char BULLET_FOLLOW_TYPE3 = 2;
 class CCactiBulletObject : public CGameObject
 {
 public:
@@ -228,6 +230,8 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
+	virtual void UpdateComponent(float fTimeElapsed);
 
 public:
 	void	SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target, bool IsYFix=true);
@@ -237,5 +241,10 @@ public:
 	float		m_fTime = 0;
 	float		m_fSpeed;
 	float		m_fCreateTime = 0.f;
+	char		m_FollowType = 0;
+	CGameObject* m_pTarget;
+
+public:
+	CCollision* m_pComCollision = nullptr;
 
 };

@@ -35,7 +35,7 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	char* m_start = m_recv_buf;
 	while (true)
 	{
-		int msg_size = static_cast<int>(m_start[0]);
+		int msg_size = static_cast<int>(m_start[1]);
 
 		msg_size = ProcessPacket(m_start);
 		if (cbTransferred < msg_size) {
@@ -212,7 +212,7 @@ int CServerManager::ProcessPacket(char* packet)
 				pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").back();
 
 			CCactiObject* pCacti = reinterpret_cast<CCactiObject*>(pObj);
-
+			pCacti->m_index = p->id;
 			pCacti->Change_Animation((CACTI::ANIM)p->eCurAnim);
 			//pCacti->SetLookAt(p->xmf3Look);
 			pCacti->SetPosition(p->xmf3Position);
@@ -244,6 +244,8 @@ int CServerManager::ProcessPacket(char* packet)
 	default:
 		break;
 	}
+
+	return 0;
 }
 
 void CServerManager::error_display(const char* msg, int err_no)

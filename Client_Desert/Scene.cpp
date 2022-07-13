@@ -279,7 +279,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	{
 	case SCENE_1:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"), true);
-		//CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer->GetSword(), m_pMonsterObjectShader->GetObjectList(L"Cacti"));
+		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pStandardObjectShader->GetObjectList(L"CactiBullet"), true);
 		break;
 	case SCENE_2:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"), true);
