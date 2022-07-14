@@ -536,12 +536,13 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 
-	if(CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
-	{
-		XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
-		int iDamage = rand() % 999 + 1;
-		m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
-	}
+	//if(CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
+	//{
+	//	XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
+	//	int iDamage = rand() % 999 + 1;
+	//	m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
+	//}
+
 	m_pUILayer->Update(fTimeElapsed);
 }
 

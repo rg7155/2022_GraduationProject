@@ -39,7 +39,8 @@ public:
 	void UpdateHpBar(float fTimeElapsed);
 	void SetHp(int iDamage);
 	void MakeHitEffect();	
-	
+	void MakeHitFont();
+
 	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void	UpdateComponent(float fTimeElapsed);
@@ -232,6 +233,7 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 	virtual void CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void UpdateComponent(float fTimeElapsed);
+	virtual void CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 
 public:
 	void	SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target, bool IsYFix=true);

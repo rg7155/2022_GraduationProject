@@ -39,6 +39,9 @@ void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, 
 	bool isCol = false;
 	for (auto& iter : listObj)
 	{
+		if (!iter->m_isActive)
+			continue;
+
 		if (isNearCheck)
 		{
 			if (20.f > Vector3::Length(Vector3::Subtract(iter->GetPosition(), pObj->GetPosition()))) //상수값 임시로
