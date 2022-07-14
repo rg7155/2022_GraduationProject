@@ -154,6 +154,7 @@ public:
 private:
 	void UpdateReadyTexture(float fTimeElapsed);
 	void MovePosByCollision();
+	void HitEffectOn();
 
 	CGameObject*	m_pReadyTex = nullptr;
 

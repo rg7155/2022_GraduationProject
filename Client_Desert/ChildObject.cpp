@@ -589,13 +589,11 @@ void CUIObject::Animate(float fTimeElapsed)
 		SetOrthoWorld(21, 41, Cursor.x, Cursor.y);
 		break;
 	case CUIObject::UI_HIT_EFFECT:
-		if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
-			m_isHit = true;
 
 		if (m_isHit)
 		{
 			m_fValue += fTimeElapsed * 2.f; //0~1 -> 0~180
-			m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.5f;
+			m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.3f;
 
 			if (m_fValue >= 1.f)
 			{

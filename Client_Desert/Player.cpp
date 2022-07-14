@@ -627,6 +627,7 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		pCol->m_isCollisionIgnore = false;
 	else
 		pCol->m_isCollisionIgnore = true;
+
 }
 
 void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
@@ -737,6 +738,14 @@ void CPlayer::MovePosByCollision()//충돌한 선분중 가까운 선분 한개와 밀어내기 이
 	//cout << xmf3Line[1].x << "," << xmf3Line[1].y << "," << xmf3Line[1].z << "," << endl;
 
 	m_vecLine.clear();
+}
+
+void CPlayer::HitEffectOn()
+{
+	CUIObject* pEffect = static_cast<CUIObject*>(CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Hit_Effect").front());
+	if (!pEffect) return;
+
+	pEffect->m_isHit = true;
 }
 
 bool CPlayer::IsNowAttack()

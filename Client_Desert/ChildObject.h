@@ -166,6 +166,7 @@ public:
 public:
 	UI_TYPE		m_eUIType = UI_END;
 	CUIObject* m_pButtonToggle = nullptr;
+	bool		m_isHit = false;
 
 private:
 	float	m_fAlpha = 0.f;
@@ -178,7 +179,6 @@ private:
 
 	bool		m_isOnceRender = false;
 
-	bool		m_isHit = false;
 	float		m_fValue = 0.f;
 };
 
