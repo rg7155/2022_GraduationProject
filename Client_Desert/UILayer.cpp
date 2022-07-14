@@ -2,6 +2,7 @@
 #include "UILayer.h"
 #include "GameMgr.h"
 #include "Camera.h"
+#include "Scene.h"
 using namespace std;
 
 UILayer::UILayer(UINT nFrame, ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue)
@@ -83,11 +84,7 @@ void UILayer::Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dComma
 
 void UILayer::UpdateLabels(const wstring& strUIText, int n)
 {
-    //if(n == 0)
-    //    m_vTextBlocks[0] = { strUIText, D2D1::RectF(30.0f, 30.0f, m_fWidth, m_fHeight), m_pdwTextFormat };
-    //else
-    //    m_vTextBlocks[1] = { strUIText, D2D1::RectF(35.0f, 35.0f, m_fWidth, m_fHeight), m_pdwTextFormat };
-
+ 
 }
 
 void UILayer::Render(UINT nFrame)
@@ -129,6 +126,7 @@ void UILayer::ReleaseResources()
     m_pd2dTextBrush->Release();
     m_pd2dDeviceContext->Release();
     m_pdwTextFormat->Release();
+    m_pdwDamageFontFormat->Release();
     m_pd2dWriteFactory->Release();
     m_pd2dDevice->Release();
     m_pd2dFactory->Release();
@@ -164,17 +162,23 @@ void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHei
     const float fFontSize = m_fHeight / 25.0f;
     const float fSmallFontSize = m_fHeight / 40.0f;
 
-    m_pd2dWriteFactory->CreateTextFormat(L"궁서체", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"en-us", &m_pdwTextFormat);
+    m_pd2dWriteFactory->CreateTextFormat(L"궁서체", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize, L"en-us", &m_pdwTextFormat);
 
     m_pdwTextFormat->SetTextAlignment(/*DWRITE_TEXT_ALIGNMENT_CENTER*/DWRITE_TEXT_ALIGNMENT_LEADING);
     m_pdwTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
+
+    
+    m_pd2dWriteFactory->CreateTextFormat(L"궁서체", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"en-us", &m_pdwDamageFontFormat);
+
+    m_pdwDamageFontFormat->SetTextAlignment(/*DWRITE_TEXT_ALIGNMENT_CENTER*/DWRITE_TEXT_ALIGNMENT_LEADING);
+    m_pdwDamageFontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 //    m_pd2dWriteFactory->CreateTextFormat(L"Arial", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"en-us", &m_pdwTextFormat);
 
 
-        /////////////
-    wstring str = L"";
-    CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT), str);
-    m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
+    /////////////
+    //wstring str = L"";
+    //CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT), str);
+    //m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
 }
 
 void UILayer::Update(const float& fTimeElapsed)
@@ -199,9 +203,18 @@ void UILayer::Update(const float& fTimeElapsed)
 
 void UILayer::AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText)
 {
-    CTextBlock* pTb = new CDamageTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
+    CTextBlock* pTb = new CDamageTextBlock(m_pdwDamageFontFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
     m_vecTextBlocks[TEXT_DAMAGE].emplace_back(pTb);
 
+}
+
+void UILayer::AddTextFont(queue<wstring>& queueStr)
+{
+    if (!m_vecTextBlocks[TEXT_NPC].empty()) //NPC Text는 1개 씩
+        m_vecTextBlocks[TEXT_NPC].front()->m_isDead = true;
+
+    CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), queueStr);
+    m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
 }
 
 
@@ -298,27 +311,59 @@ void CDamageTextBlock::Update(const float& fTimeElapsed)
 }
 
 
-CNPCTextBlock::CNPCTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText)
-    :CTextBlock(pdwFormat, d2dLayoutRect, strText)
+CNPCTextBlock::CNPCTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, queue<wstring>& queueStr)
 {
-    m_strTotalText = L"안녕. 나는 NPC야. 이건 Test글씨야 123412341234 ㅋㅋㅋㅋㅋ";
-
-    m_d2dLayoutRect.left = FRAME_BUFFER_WIDTH * 0.5f;
-    m_d2dLayoutRect.top = FRAME_BUFFER_HEIGHT * 0.5f;
+    m_pdwFormat = pdwFormat;
+    m_d2dLayoutRect = d2dLayoutRect;
+    m_queueTotalText = queueStr;
+    //m_strTotalText = strText;
+    m_d2dLayoutRect.left = FRAME_BUFFER_WIDTH * 0.2f;
+    m_d2dLayoutRect.top = FRAME_BUFFER_HEIGHT * 0.8f;
 }
 
 CNPCTextBlock::~CNPCTextBlock()
 {
 }
 
+#define CHARACTHER_DELAY 0.1f
+#define SENTENCE_DELAY 1.5f
+
 void CNPCTextBlock::Update(const float& fTimeElapsed)
 {
     m_fTime += fTimeElapsed;
-    if (m_fTime > 0.1f && m_iIndex < m_strTotalText.size())
+    if (!m_isSentenceEnd)
     {
-        //m_strText.assign(m_strTotalText, 0, ++m_iIndex);
-        m_strText.append(m_strTotalText, m_iIndex++, 1);
+        if (m_fTime > CHARACTHER_DELAY)
+        {
+            wstring curTotalStr = m_queueTotalText.front();
 
-        m_fTime = 0.f;
+            //m_strText.assign(m_strTotalText, 0, ++m_iIndex);
+            m_strText.append(curTotalStr, m_iIndex++, 1);
+
+            if (m_iIndex > curTotalStr.size()) //한 문장 끝나면
+            {
+                m_queueTotalText.pop();
+                m_iIndex = 0;
+                m_isSentenceEnd = true;
+            }
+
+            m_fTime = 0.f;
+        }
     }
+    else 
+    {
+        if (m_fTime > SENTENCE_DELAY)
+        {
+            m_isSentenceEnd = false;
+            m_strText = L"";
+
+            if (m_queueTotalText.empty()) //모든 문장 끝나면
+            {
+				m_isDead = true;
+				CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+				pObj->SetActiveState(false);
+            }
+        }
+    }
+
 }

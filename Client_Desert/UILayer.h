@@ -36,8 +36,9 @@ public:
     void Update(const float& fTimeElapsed);
 
     void AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText);
-    static XMFLOAT3 WorldToScreen(XMFLOAT3& xmf3WorldPos);
+    void AddTextFont(queue<wstring>& queueStr);
 
+    static XMFLOAT3 WorldToScreen(XMFLOAT3& xmf3WorldPos);
 private:
     UINT GetRenderTargetsCount() { return static_cast<UINT>(m_vWrappedRenderTargets.size()); }
     void Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue);
@@ -53,6 +54,8 @@ private:
     ID2D1DeviceContext2*            m_pd2dDeviceContext = NULL;
     ID2D1SolidColorBrush*           m_pd2dTextBrush = NULL;
     IDWriteTextFormat*              m_pdwTextFormat = NULL;
+    IDWriteTextFormat*              m_pdwDamageFontFormat = NULL;
+
 
     std::vector<ID3D11Resource*>    m_vWrappedRenderTargets;
     std::vector<ID2D1Bitmap1*>      m_vd2dRenderTargets;
@@ -102,16 +105,19 @@ public:
 class CNPCTextBlock : public CTextBlock
 {
 public:
-    CNPCTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText);
+    CNPCTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, queue<wstring>& queueStr);
     virtual ~CNPCTextBlock();
 
 public:
     virtual void Update(const float& fTimeElapsed) override;
 
 public:
-    wstring             m_strTotalText;
+    //wstring             m_strTotalText;
+    queue<wstring>      m_queueTotalText;
+
     float               m_fTime = 0.f;
     int                 m_iIndex = 0;
+    bool                m_isSentenceEnd = false;
 
 
 };

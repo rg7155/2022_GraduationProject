@@ -6,6 +6,7 @@
 #include "Scene.h"
 #include "CollsionMgr.h"
 #include "Monster.h"
+#include "UILayer.h"
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -30,14 +31,14 @@ CScene::~CScene()
 
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
-	m_eCurScene = SCENE_1;
+	m_eCurScene = SCENE_0;
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
 	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+75); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+150); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -48,6 +49,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	m_pSkyBox = new CSkyBox(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature);
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
+
 }
 
 void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -243,11 +245,13 @@ ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevic
 
 void CScene::AnimateObjects(float fTimeElapsed)
 {
-	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_C))
-	//{
-
-	//	//ChangeScene(SCENE_2);
-	//}
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
+	{
+		int cur = (int)m_eCurScene + 1;
+		SCENE eScene = (SCENE)cur;
+		if(eScene < SCENE_END)
+			ChangeScene(eScene);
+	}
 	
 	//TCHAR szTest[32] = L"";
 	//float f = 0.f;
@@ -282,7 +286,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pStandardObjectShader->GetObjectList(L"CactiBullet"), true);
 		break;
 	case SCENE_2:
-		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"), true);
+		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"));
 		break;
 	}
 	///////////////////////////////////////////////////////////////////////////////////
@@ -368,13 +372,21 @@ void CScene::ChangeScene(SCENE eScene)
 	switch (eScene)
 	{
 	case SCENE_1:
-		break;
-	case SCENE_2:
-		m_pPlayer->SetPosition(XMFLOAT3(70.f, 0.f, 70.f));
+		m_pPlayer->SetPosition(Scene1_SpawnPos);
+		m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
+
 
 		m_pMapObjectShader->ChangeMap(eScene);
 
 		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
+		
+		break;
+	case SCENE_2:
+		m_pPlayer->SetPosition(Scene2_SpawnPos);
+
+		m_pMapObjectShader->ChangeMap(eScene);
+
+		m_pDepthRenderShader->m_isStaticRender = false;
 
 		m_pMonsterObjectShader->SetInactiveAllObject();
 		m_pNPCObjectShader->SetInactiveAllObject();
@@ -392,6 +404,38 @@ void CScene::AddAlphaObjectToList(CGameObject* pObj)
 void CScene::SetPointLightPos(XMFLOAT3& xmf3Pos)
 {
 	m_pLights[1].m_xmf3Position = xmf3Pos;
+}
+
+
+
+void CScene::AddTextToUILayer(int iIndex)
+{
+	CGameObject *pObj = m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+	pObj->SetActiveState(true);
+
+	queue<wstring> queueStr;
+	if (iIndex == NPC_TEXT)
+	{
+		queueStr.emplace(L"용사여..드디어 왔구나..");
+		queueStr.emplace(L"잡아줘....선인장 보스...그리고..가져와...전리품...");
+	}
+	else if (iIndex == GOLEM_TEXT) //돌덩이 죽을때
+	{
+		queueStr.emplace(L"전리품? 나한텐 그런거 없다..");
+		queueStr.emplace(L"선인장에게 힌트를 얻을수도...");
+	}
+	else if (iIndex == CACTUS_TEXT) //선인장 죽을때
+	{
+		queueStr.emplace(L"너가 나보다 강해도 과연 우리 아빠보다 강할까?!");
+		queueStr.emplace(L"넌 이제 죽은 목숨이라고!!!");
+	}
+	else if (iIndex == BOSS_TEXT) //보스 죽을때
+	{
+		queueStr.emplace(L"강하구나 용사여...");
+		queueStr.emplace(L"강자는 전리품을 얻을수 있는 자격이 있다..");
+		queueStr.emplace(L"받고 떠나라");
+	}
+	m_pUILayer->AddTextFont(queueStr);
 }
 
 
@@ -437,7 +481,7 @@ void CScene::BuildDefaultLightsAndMaterials()
 	//m_pLights[1].m_fPhi = (float)cos(XMConvertToRadians(40.0f));
 	//m_pLights[1].m_fTheta = (float)cos(XMConvertToRadians(20.0f));
 
-	m_pLights[1].m_bEnable = true;
+	m_pLights[1].m_bEnable = false;
 	m_pLights[1].m_nType = POINT_LIGHT;
 	m_pLights[1].m_fRange = 30.0f;
 	//m_pLights[1].m_xmf4Ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);

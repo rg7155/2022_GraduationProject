@@ -4,6 +4,10 @@
 #include "Camera.h"
 #include "InputDev.h"
 
+const static XMFLOAT3 Scene0_SpawnPos = { 40.f, 0.f, 60.f };
+const static XMFLOAT3 Scene1_SpawnPos = { 25.f, 0.f, 25.f };
+const static XMFLOAT3 Scene2_SpawnPos = { 10.f, 0.f, 15.f };
+
 class CPlayer : public CGameObject
 {
 //private:
@@ -110,7 +114,7 @@ private:
 	virtual void	UpdateComponent(float fTimeElapsed);
 
 public:
-	virtual void	CollsionDetection(CGameObject* pObj) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line = nullptr) override;
 
 public:
 	bool IsNowAttack();
@@ -145,7 +149,19 @@ public:
 public:
 	char	m_dir;
 
+public:
+	void	ClickedReadyButton() { m_isReadyToggle = !m_isReadyToggle; }
+
+private:
+	void UpdateReadyTexture(float fTimeElapsed);
+	void MovePosByCollision();
+
+	CGameObject*	m_pReadyTex = nullptr;
+	bool			m_isReadyToggle = false;
+
+	vector<vector<XMFLOAT3>> m_vecLine;
 };
+
 
 class CSoundCallbackHandler : public CAnimationCallbackHandler
 {

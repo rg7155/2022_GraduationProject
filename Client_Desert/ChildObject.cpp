@@ -74,13 +74,19 @@ void CMapObject::CreateComponent()
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
 
-	if (m_strName.find("tree") != string::npos || m_strName.find("grass") != string::npos)
-		m_pComCollision->m_isCollisionIgnore = true;
-	else if (m_strName.find("Plane") != string::npos)
+	m_pComCollision->m_isCollisionIgnore = true;
+
+	if (m_strName.find("stonedoor") != string::npos)
 	{
-		m_isPlane = true;
-		m_pComCollision->m_isCollisionIgnore = true;
+		m_pComCollision->m_isCollisionIgnore = false;
 	}
+	else if (m_strName.find("CollisionBox") != string::npos)
+	{
+		m_pComCollision->m_isCollisionIgnore = false;
+		m_isCollisionBox = true;
+	}
+	else if (m_strName.find("Plane") != string::npos)
+		m_isPlane = true;
 
 	//건물 파고들지 않게끔 좀 키워둠?
 	//m_pComCollision->m_xmLocalOOBB.Extents = Vector3::ScalarProduct(m_pComCollision->m_xmLocalOOBB.Extents, 1.1f, false);
@@ -114,7 +120,7 @@ void CMapObject::Animate(float fTimeElapsed)
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
-	if (!m_isActive)
+	if (!m_isActive/* || m_isCollisionBox*/)
 		return;
 
 	UpdateShaderVariables(pd3dCommandList);
@@ -131,7 +137,7 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 		float fRadi = fMaxRadius * fMaxExtents; 
 
 		//임시로
-		fRadi *= 1.51f;
+		//fRadi *= 1.51f;
 
 		//포지션 축이 다르면 이상함
 		if (static_cast<CFrustum*>(m_pComponent[COM_FRUSTUM])->Isin_Frustum_ForObject(pCamera, &GetPosition(), fRadi))
@@ -141,7 +147,71 @@ void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 	}
 }
 
+#define DOOR_NORMAL 0
+#define DOOR_UP		1
+#define DOOR_DOWN	2
 
+
+
+CFootHoldMapObject::CFootHoldMapObject()
+{
+}
+
+CFootHoldMapObject::~CFootHoldMapObject()
+{
+}
+
+void CFootHoldMapObject::Animate(float fTimeElapsed)
+{
+	XMFLOAT3 xmf3PlayerPos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+	float fDis = Vector3::Distance(xmf3PlayerPos, GetPosition());
+
+	if (!m_isBeginOverlap && fDis < 1.f)
+	{
+		m_isBeginOverlap = true;
+		for (auto& iter : m_vecStoneDoor)
+			iter->m_iState = DOOR_DOWN;
+	}
+	else if (m_isBeginOverlap && fDis > 1.f)
+	{
+		m_isBeginOverlap = false;
+		for (auto& iter : m_vecStoneDoor)
+			iter->m_iState = DOOR_UP;
+	}
+
+	CMapObject::Animate(fTimeElapsed);
+}
+
+#define DOOR_MAX_Y 2.39
+#define DOOR_MIN_Y -2.39
+
+CStoneDoorMapObject::CStoneDoorMapObject()
+{
+	//2.39
+}
+
+CStoneDoorMapObject::~CStoneDoorMapObject()
+{
+}
+
+void CStoneDoorMapObject::Animate(float fTimeElapsed)
+{
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	if (m_iState == DOOR_UP)
+	{
+		if (xmf3Pos.y < DOOR_MAX_Y)
+			xmf3Pos.y += fTimeElapsed * 10.f;
+	}
+	else if (m_iState == DOOR_DOWN)
+	{
+		if (xmf3Pos.y > DOOR_MIN_Y)
+			xmf3Pos.y -= fTimeElapsed * 10.f;
+	}
+	SetPosition(xmf3Pos);
+
+	CMapObject::Animate(fTimeElapsed);
+}
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define BLUE_COLOR4 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f
 //#define BLUE_COLOR4 1.f / 255.f, 102.f / 255.f, 200.f / 255.f, 0.f
@@ -311,7 +381,7 @@ CNPCObject::CNPCObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	//상호작용 ui
 	m_pInteractionUI = new CGameObject(1);
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.f);
+	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 0.5f, 0.5f, 0.f, 0.f, 0.f, 0.f, true);
 	m_pInteractionUI->SetMesh(pMesh);
 
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
@@ -352,10 +422,10 @@ void CNPCObject::Animate(float fTimeElapsed)
 	if (fDistance > 5.f) SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = false);
 	else SetEffectsType(EFFECT_LIMLIGHT, m_isAbleInteraction = true);
 
-	if (!m_pUIQuest)
-		m_pUIQuest = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+	//if (!m_pUIQuest)
+	//	m_pUIQuest = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
 	if (m_isAbleInteraction && CInputDev::GetInstance()->KeyDown(DIKEYBOARD_R))
-		m_pUIQuest->SetActiveState(true);
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(NPC_TEXT);
 
 	CGameObject::Animate(fTimeElapsed);
 
@@ -414,21 +484,30 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_PLAYER:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
-		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.85f);
+		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.15f);
 		break;
 	case CUIObject::UI_PROFILE:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
-		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.9f); 
+		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f); 
 		break;
-	case CUIObject::UI_READY:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
-		SetOrthoWorld(100, 100, FRAME_BUFFER_WIDTH - 100.f, FRAME_BUFFER_HEIGHT - 100.f);
-		m_isClickedAble = true;
+	case CUIObject::UI_READY_BTN:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ReadyButton.dds", 0);
+		SetOrthoWorld(300, 100, FRAME_BUFFER_WIDTH - 300.f, FRAME_BUFFER_HEIGHT - 100.f);
+		break;
+	case CUIObject::UI_READY_BTN_CLK:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ReadyButton_Clicked.dds", 0);
+		SetOrthoWorld(300, 100, FRAME_BUFFER_WIDTH - 300.f, FRAME_BUFFER_HEIGHT - 100.f);
+		m_isActive = false;
 		break;
 	case CUIObject::UI_QUEST:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/TextBox.dds", 0);
-		SetOrthoWorld(1000, 300, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.8f);
+		SetOrthoWorld(1000, 200, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.83f);
 		SetActiveState(false);
+		m_fAlpha = 0.2;
+		break;
+	case CUIObject::UI_CURSOR:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		break;
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -446,6 +525,8 @@ CUIObject::~CUIObject()
 
 void CUIObject::Animate(float fTimeElapsed)
 {
+	if (!m_isActive) return;
+
 	switch (m_eUIType)
 	{
 	case CUIObject::UI_FADE:
@@ -464,19 +545,36 @@ void CUIObject::Animate(float fTimeElapsed)
 				else if (!m_isChangeScene && m_fAlpha > 1.f)
 				{
 					m_isChangeScene = true;
+					//m_isStartFade = false; //수정
 					CGameMgr::GetInstance()->GetScene()->ChangeScene(SCENE::SCENE_2);
 				}
 			}
 		}
 		break;
-	case CUIObject::UI_READY:
-		if (CInputDev::GetInstance()->LButtonDown())
+	case CUIObject::UI_READY_BTN:
+	case CUIObject::UI_READY_BTN_CLK:
+		if (m_isOnceRender && CInputDev::GetInstance()->LButtonDown())
 		{
 			XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
 			if (Cursor.x > m_xmf2Pos.x - m_xmf2Size.x && Cursor.x < m_xmf2Pos.x + m_xmf2Size.x &&
 				Cursor.y > m_xmf2Pos.y - m_xmf2Size.y && Cursor.y < m_xmf2Pos.y + m_xmf2Size.y)
-				cout << "Cliked" << endl;
+			{
+				//cout << "Cliked" << endl;
+				if (m_pButtonToggle)
+				{
+					m_isActive = false;
+					m_pButtonToggle->m_isOnceRender = false;
+					m_pButtonToggle->m_isActive = true;
+
+				}
+				CGameMgr::GetInstance()->GetPlayer()->ClickedReadyButton();
+			}
 		}
+		break;
+	case CUIObject::UI_CURSOR:
+		XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
+
+		SetOrthoWorld(21, 41, Cursor.x, Cursor.y);
 		break;
 	}
 
@@ -485,6 +583,8 @@ void CUIObject::Animate(float fTimeElapsed)
 
 void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
+	if (!m_isOnceRender) m_isOnceRender = true;
+
 	UpdateShaderVariables(pd3dCommandList);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
@@ -640,7 +740,7 @@ void CPortalObject::Animate(float fTimeElapsed)
 	if (fDistanceToPlayer < RANGE && fDistanceToDuo < RANGE && !m_isOverlap)
 	{
 		m_isOverlap = true;
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Info").back();
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
 		static_cast<CUIObject*>(pObj)->SetFadeState(false);
 		m_isActive = false;
 	}
@@ -690,15 +790,21 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		break;
 
 	case CTexturedObject::TEXTURE_HP:
-		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f, 0.f, 0.f, 0.f, true);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Hp.dds", 0);
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		SetActiveState(true);
 		break;
 
 	case CTexturedObject::TEXTURE_HP_FRAME:
-		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f);
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 2.f, 0.5f, 0.f, 0.f, 0.f, 0.f, true);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HpFrame.dds", 0); 
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		SetActiveState(true);
+		break;
+	case CTexturedObject::TEXTURE_READY:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.33f, 0.f, 0.f, 0.f, 0.f, true);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Ready3D.dds", 0);
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		SetActiveState(true);
 		break;
@@ -735,8 +841,8 @@ void CTexturedObject::Animate(float fTimeElapsed)
 		break;
 
 	case CTexturedObject::TEXTURE_HP:
-
 	case CTexturedObject::TEXTURE_HP_FRAME:
+	case CTexturedObject::TEXTURE_READY:
 		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
 		UpdateTransform(NULL); 
 		break;
@@ -772,3 +878,5 @@ void CTexturedObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 	//PSAlphaTextured의 gfDissolve값 설정
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
 }
+
+

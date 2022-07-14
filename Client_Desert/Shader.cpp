@@ -8,6 +8,7 @@
 #include "Scene.h"
 #include "InputDev.h"
 #include "Monster.h"
+#include "Object.h"
 
 
 CShader::CShader(int nPipelineStates /*= 1*/)
@@ -614,10 +615,11 @@ CMapObjectsShader::~CMapObjectsShader()
 void CMapObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	
-	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform_Test.bin", true);
-
-	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform.bin", true);
-	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/NewMapTransform2.bin", false);
+	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/SceneTest_Transform.bin", true);
+	//LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene1_Transform_NoCol.bin", true);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene0_Transform.bin", 0);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene1_Transform.bin", 1);
+	LoadFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Data/Scene2_Transform.bin", 2);
 
 }
 
@@ -626,7 +628,7 @@ void CMapObjectsShader::AnimateObjects(float fTimeElapsed)
 	CStandardObjectsShader::AnimateObjects(fTimeElapsed);
 }
 
-void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pFileName, bool isActive)
+void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, const char* pFileName, int iSceneIndex)
 {
 	FILE* pInFile = NULL;
 
@@ -640,12 +642,14 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 	int nObjects = ReadIntegerFromFile(pInFile);
 
+	vector<CStoneDoorMapObject*> vecStoneDoor;
+	vector<CFootHoldMapObject*> vecFootHold;
+
 	for (int i = 0; i < nObjects; ++i)
 	{
 		if (ReadStringFromFile(pInFile, pstrToken))
 		{
 			CLoadedModelInfo* pMapModel = NULL;
-			bool bLoad = true;
 			int iLength = (int)strlen(pstrToken);
 
 			for (int j = 0; j < iLength; j++)
@@ -659,10 +663,11 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 			string str(pstrToken);
 			auto iter = m_mapModelInfo.find(str);
-			if (bLoad && iter == m_mapModelInfo.end())
+			if (iter == m_mapModelInfo.end())
 			{
 				//삽입
 				char pName[64] = "Model/Map/";
+
 				strcat_s(pName, pstrToken);
 				strcat_s(pName, ".bin");
 
@@ -674,12 +679,24 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 				pMapModel = iter->second;
 			}
 
-			CGameObject* pGameObject = new CMapObject();
+			CGameObject* pGameObject = nullptr;
+			if (str.find("foothold") != string::npos)
+			{
+				pGameObject = new CFootHoldMapObject();
+				vecFootHold.emplace_back(static_cast<CFootHoldMapObject*>(pGameObject));
+			}
+			else if (str.find("stonedoor") != string::npos)
+			{
+				pGameObject = new CStoneDoorMapObject();
+				vecStoneDoor.emplace_back(static_cast<CStoneDoorMapObject*>(pGameObject));
+			}
+			else
+				pGameObject = new CMapObject();
+
 			pGameObject->SetChild(pMapModel->m_pModelRootObject, true);
 
 			//크자이로 읽어옴
 			XMFLOAT3 xmf3Scale = ReadVectorFromFile(pInFile, 3);
-
 			XMFLOAT3 xmf3Rotaion = ReadVectorFromFile(pInFile, 3);
 			pGameObject->Rotate(xmf3Rotaion.x, xmf3Rotaion.y, xmf3Rotaion.z);
 			pGameObject->SetScale(xmf3Scale);
@@ -691,23 +708,44 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 			pMapObject->m_strName = str;
 			pMapObject->Ready();
 
-			pMapObject->SetActiveState(isActive);
+			pMapObject->SetActiveState(iSceneIndex == 0 ? true : false);
 
-			if(isActive) 
+			if(iSceneIndex == 0)
+				AddObject(L"Lobby", pGameObject);
+			else if (iSceneIndex == 1)
 				AddObject(L"Map", pGameObject);
-			else 
+			else if (iSceneIndex == 2)
 				AddObject(L"Map2", pGameObject); 
 		}
 	}
+
+	//발판과 돌문 연결
+	for (auto& iter1 : vecFootHold)
+		for (auto& iter2 : vecStoneDoor)
+			iter1->m_vecStoneDoor.emplace_back(iter2);
+
 }
 
 void CMapObjectsShader::ChangeMap(SCENE eScene)
 {
-	auto list = GetObjectList(L"Map");
-	for (auto& iter : list)
-		iter->SetActiveState(false);
+	SetInactiveAllObject();
 
-	list = GetObjectList(L"Map2");
+	const wchar_t* pObjTag = L"";
+	switch (eScene)
+	{
+	case SCENE_0:
+		pObjTag = L"Lobby";
+		break;
+	case SCENE_1:
+		pObjTag = L"Map";
+		break;
+	case SCENE_2:
+		pObjTag = L"Map2";
+		break;
+	}
+
+	auto& list = GetObjectList(pObjTag);
+
 	for (auto& iter : list)
 		iter->SetActiveState(true);
 }
@@ -1211,13 +1249,23 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_QUEST);
 	AddObject(L"UI_Quest", pObject);
 
-	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY);
-	//AddObject(L"UI_Ready", pObject);
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY_BTN);
+	AddObject(L"UI_Button", pObject);
+	CGameObject*  pObject1 = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_READY_BTN_CLK);
+	AddObject(L"UI_Button", pObject1);
+
+	static_cast<CUIObject*>(pObject)->m_pButtonToggle = static_cast<CUIObject*>(pObject1);
+	static_cast<CUIObject*>(pObject1)->m_pButtonToggle = static_cast<CUIObject*>(pObject);
+
+
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_CURSOR);
+	AddObject(L"UI_Cursor", pObject);
 
 	//젤 마지막에 삽입
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);
-	AddObject(L"UI_Info", pObject);
+	AddObject(L"UI_Fade", pObject);
 
+	
 
 }
 

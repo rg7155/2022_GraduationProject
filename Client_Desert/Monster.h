@@ -40,7 +40,7 @@ public:
 	void SetHp(int iDamage);
 	void MakeHitEffect();	
 	
-	virtual void	CollsionDetection(CGameObject* pObj) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void	UpdateComponent(float fTimeElapsed);
 
@@ -103,7 +103,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
-	virtual void	CollsionDetection(CGameObject* pObj) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 
 private:
 	GOLEM::ANIM	m_ePrevAnim;			// 이전 애니메이션
@@ -146,7 +146,7 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
-	virtual void	CollsionDetection(CGameObject* pObj) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 
 private:
 	CACTI::ANIM	m_ePrevAnim;			// 이전 애니메이션
@@ -184,7 +184,7 @@ public:
 	CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel,
 		CGameObject* pCacti1, CGameObject* pCacti2);
 	virtual ~CCactusObject();
-	virtual void	CollsionDetection(CGameObject* pObj) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 
 public:
 	virtual void Animate(float fTimeElapsed) override;

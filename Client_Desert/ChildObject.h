@@ -31,11 +31,44 @@ public:
 
 public:
 	bool		m_isPlane = false;
+	bool		m_isCollisionBox = false;
 
 	string		m_strName = "";
 	CCollision* m_pComCollision = nullptr;
 };
 
+class CStoneDoorMapObject;
+class CFootHoldMapObject : public CMapObject
+{
+public:
+	CFootHoldMapObject();
+	virtual ~CFootHoldMapObject();
+
+public:
+	//virtual void Ready() override;
+	virtual void Animate(float fTimeElapsed) override;
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
+
+public:
+	vector<CStoneDoorMapObject*> m_vecStoneDoor;
+	bool	m_isBeginOverlap = false;
+
+};
+
+class CStoneDoorMapObject : public CMapObject
+{
+public:
+	CStoneDoorMapObject();
+	virtual ~CStoneDoorMapObject();
+
+public:
+	//virtual void Ready() override;
+	virtual void Animate(float fTimeElapsed) override;
+	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
+
+public:
+	int		m_iState = 0;
+};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //재질이 쉐이더를 가지는 오브젝트 - ex)스카이박스
@@ -113,7 +146,7 @@ private:
 class CUIObject : public CGameObject
 {
 public:
-	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY, UI_QUEST, UI_END };
+	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY_BTN, UI_READY_BTN_CLK, UI_QUEST, UI_CURSOR, UI_END };
 
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
@@ -130,6 +163,7 @@ public:
 
 public:
 	UI_TYPE		m_eUIType = UI_END;
+	CUIObject* m_pButtonToggle = nullptr;
 
 private:
 	float	m_fAlpha = 0.f;
@@ -140,7 +174,7 @@ private:
 	XMFLOAT2	m_xmf2Size = { 0.f, 0.f };
 	XMFLOAT2	m_xmf2Pos = { 0.f, 0.f };
 
-	bool		m_isClickedAble = false;
+	bool		m_isOnceRender = false;
 
 };
 
@@ -181,7 +215,7 @@ private:
 class CTexturedObject : public CGameObject
 {
 public:
-	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_END };
+	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_READY, TEXTURE_END };
 
 	CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType);
 	virtual ~CTexturedObject();
@@ -195,7 +229,6 @@ public:
 
 public:
 	TEXTURE_TYPE		m_eTextureType = TEXTURE_END;
-
 private:
 	float	m_fAlpha = 0.f;
 	bool	m_isAlphaObject = false;

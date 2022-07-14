@@ -76,6 +76,7 @@ public:
 	XMFLOAT4X4*				m_pxmf4x4World = nullptr;
 	BoundingOrientedBox		m_xmLocalOOBB;
 	BoundingOrientedBox		m_xmOOBB;
+	XMFLOAT3				m_xmf3OBBScale = { 1.f, 1.f, 1.f };
 private:
 	bool					m_isOneUpdate = false;
 

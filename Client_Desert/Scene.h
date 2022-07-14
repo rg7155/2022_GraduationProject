@@ -37,6 +37,7 @@ struct LIGHTS
 
 class CDepthRenderShader;
 class CTextureToViewportShader;
+class UILayer;
 class CScene
 {
 public:
@@ -74,6 +75,7 @@ public:
 	void ChangeScene(SCENE eScene);
 	void AddAlphaObjectToList(CGameObject* pObj);
 	void SetPointLightPos(XMFLOAT3& xmf3Pos);
+	void AddTextToUILayer(int iIndex);
 	////////////////////////////////////////////////////////////////////////
 	void SetDescriptorRange(D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[], int iIndex, D3D12_DESCRIPTOR_RANGE_TYPE RangeType, UINT NumDescriptors, UINT BaseShaderRegister, UINT RegisterSpace);
 	void SetRootParameterCBV(D3D12_ROOT_PARAMETER pd3dRootParameter[], int iIndex, UINT ShaderRegister, UINT RegisterSpace, D3D12_SHADER_VISIBILITY ShaderVisibility);
@@ -122,6 +124,7 @@ public:
 
 	SCENE								m_eCurScene = SCENE_END;
 
+	UILayer								*m_pUILayer = NULL;
 protected:
 	ID3D12RootSignature* m_pd3dGraphicsRootSignature = NULL;
 

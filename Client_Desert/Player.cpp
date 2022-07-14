@@ -36,9 +36,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fRoll = 0.0f;
 	m_fYaw = 0.0f;
 
-	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecTmpRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
-	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, 1.f, 1.f);
+	m_xmVecNowRotate = XMVectorSet(0.f, 0.f, -1.f, 1.f);
+	m_xmVecTmpRotate = XMVectorSet(0.f, 0.f, -1.f, 1.f);
+	m_xmVecNewRotate = XMVectorSet(0.f, 0.f, -1.f, 1.f);
 	m_xmVecSrc = XMVectorSet(0.f, 0.f, 1.f, 1.f);
 
 	m_pPlayerUpdatedContext = NULL;
@@ -46,7 +46,16 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
-	SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
+	////////////////////////////////////////////////////////////
+	// 초기 Transform
+	//SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
+	SetPosition(Scene0_SpawnPos);
+	//SetPosition(Scene1_SpawnPos);
+	
+	Rotate(0.f, 180.f, 0.f);
+	////////////////////////////////////////////////////////////
+
+
 	
 	char fileName[2048];
 	int id = *(int*)pContext;
@@ -107,10 +116,14 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fAnimMaxTime = 0.f;
 	m_fBlendingTime = 0.f;
 	///////////////////////////////////////////////
-	//컴포넌트
+	//컴포넌트, 텍스쳐
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_eObjId = OBJ_PLAYER;
+	m_pReadyTex = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_READY);
+
 	///////////////////////////////////////////////
+
+	//SetScale(XMFLOAT3(0.2, 1, 1.8));
 
 	m_pSword->m_pComponent[COM_COLLISION] = CCollision::Create();
 
@@ -130,6 +143,13 @@ CPlayer::~CPlayer()
 	ReleaseShaderVariables();
 
 	if (m_pCamera) delete m_pCamera;
+
+	if (m_pReadyTex)
+	{
+		m_pReadyTex->ReleaseUploadBuffers();
+		m_pReadyTex->ReleaseShaderVariables();
+		m_pReadyTex->Release();
+	}
 }
 
 void CPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -155,6 +175,10 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 
 	}
+
+	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0)
+		return;
+
 
 	// 대기동작이나 이동중일때만 움직이기 가능
 	if (m_eCurAnim != PLAYER::ANIM::IDLE && m_eCurAnim != PLAYER::ANIM::IDLE_RELAXED && m_eCurAnim != PLAYER::ANIM::RUN)
@@ -354,8 +378,7 @@ void CPlayer::Update(float fTimeElapsed)
 	//Nan값 이면
 	if (isnan(GetPosition().x) != 0)
 	{
-		XMFLOAT3 xmf3Pos = { START_POS };
-		SetPosition(xmf3Pos);
+		SetPosition(Scene1_SpawnPos);
 		cout << "Position is Nan!" << endl;
 	}
 
@@ -383,6 +406,10 @@ void CPlayer::Update(float fTimeElapsed)
 
 	////////////////////////////////////////////
 	UpdateComponent(fTimeElapsed);
+
+	UpdateReadyTexture(fTimeElapsed);
+
+	//MovePosByCollision();
 	////////////////////////////////////////////
 
 	// 바닥 이펙트
@@ -488,6 +515,7 @@ void CPlayer::OnPrepareRender()
 
 void CPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera)
 {
+	//cout << "Player Render" << endl;
 	UpdateShaderVariables(pd3dCommandList);
 	
 	DWORD nCameraMode = (pCamera) ? pCamera->GetMode() : 0x00;
@@ -554,6 +582,7 @@ void CPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLis
 	if (m_pChild && m_pChild->m_isRootModelObject)
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	//m_pComCollision->m_xmf3OBBScale = { 10.f, 1.f, 10.f }; // 바운딩박스 스케일 키움
 	m_pComCollision->UpdateBoundingBox();
 
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -567,8 +596,12 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		if (m_pComponent[i])
 			m_pComponent[i]->Update_Component(fTimeElapsed);
 
+	XMFLOAT3 xmf3Corners[8];
 	if (m_pComCollision)
+	{
 		m_pComCollision->UpdateBoundingBox();
+		m_pComCollision->m_xmOOBB.GetCorners(xmf3Corners);
+	}
 
 	if (m_pComTrail)
 	{
@@ -589,12 +622,13 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		pCol->m_isCollisionIgnore = true;
 }
 
-void CPlayer::CollsionDetection(CGameObject* pObj)
+void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 {
 	OBJ_ID eObjId = pObj->m_eObjId;
 	switch (eObjId)
 	{
 	case OBJ_MAP:
+	{
 		////방법1. 이동한값 취소
 		//XMFLOAT3 xmf3Shift = Vector3::ScalarProduct(m_xmf3PreVelocity, -1, false);
 		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Shift);
@@ -602,15 +636,50 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 		//m_pCamera->RegenerateViewMatrix();
 		//OnPrepareRender();
 
-		//방법2. 오브젝트 밀어주기
-		XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3PrePosition, pObj->GetPosition(), true, true);
+		////방법2. 충동한 오브젝트 원점에서 밀어주기
+		//XMFLOAT3 xmf3ToPlayer = Vector3::Subtract(m_xmf3PrePosition, pObj->GetPosition(), true, true);
+		//xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, m_fTempShift);
+		//m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
 
-		xmf3ToPlayer = Vector3::ScalarProduct(xmf3ToPlayer, m_fTempShift);
-		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3ToPlayer);
+		//m_pCamera->Move(xmf3ToPlayer);
+		//m_pCamera->RegenerateViewMatrix();
+		//OnPrepareRender();
 
-		m_pCamera->Move(xmf3ToPlayer);
+		////방법3. 충돌한 선분의 법선벡터 방향으로 밀어주기
+		//vector<XMFLOAT3> vec = { xmf3Line[0], xmf3Line[1] };
+		//m_vecLine.emplace_back(vec);
+
+
+		XMFLOAT3 xmf3Temp(0, 0, 0), xmf3Normal(0, 0, 0);
+		XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
+		xmf3Temp = Vector3::Subtract(xmf3Point0, xmf3Point1, true, false);
+		xmf3Normal.z = -xmf3Temp.x;
+		xmf3Normal.x = xmf3Temp.z;
+
+
+		//XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
+		XMFLOAT3 xmf3Pos = GetPosition();
+		float x0 = xmf3Pos.x, y0 = xmf3Pos.z;
+		float x1 = xmf3Point0.x, y1 = xmf3Point0.z;
+		float x2 = xmf3Point1.x, y2 = xmf3Point1.z;
+		//직선과 점 사이 거리
+		float fDis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / (float)sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+		//fDis -= m_pComCollision->m_xmOOBB.Extents.z;
+		float fShift = m_pComCollision->m_xmOOBB.Extents.z - fDis;
+		if (fShift < 0.f) fShift = 0.f;
+		//cout << fShift << endl;
+		XMFLOAT3 xmf3Dir = xmf3Normal/*xmf3Reflect*/;
+		xmf3Dir = Vector3::ScalarProduct(xmf3Dir, fShift/*m_fTempShift*/, false);
+		m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Dir);
+
+		m_pCamera->Move(xmf3Dir);
 		m_pCamera->RegenerateViewMatrix();
 		OnPrepareRender();
+
+		////cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
+		//cout << "Col" << endl;
+
+	}
 		break;
 	case OBJ_BULLET:
 		SetDamaged();
@@ -618,6 +687,52 @@ void CPlayer::CollsionDetection(CGameObject* pObj)
 	case OBJ_END:
 		break;
 	}
+}
+
+void CPlayer::MovePosByCollision()//충돌한 선분중 가까운 선분 한개와 밀어내기 이동
+{
+	if (m_vecLine.empty()) return;
+
+	vector<float> vecDis;
+	for (auto& iter : m_vecLine)
+	{
+		XMFLOAT3 xmf3Line[2] = {iter[0], iter[1]};
+
+		//XMFLOAT3 xmf3Point0 = xmf3Line[0], xmf3Point1 = xmf3Line[1]; //인자 직접 쓰면 이상함? no 이상하게 전달됨
+
+		//XMFLOAT3 xmf3Reflect = Vector3::Add(m_xmf3Look, Vector3::ScalarProduct(xmf3Normal, 2 * Vector3::DotProduct(Vector3::ScalarProduct(m_xmf3Look, -1.f), xmf3Normal)));
+		XMFLOAT3 xmf3Pos = GetPosition();
+		float x0 = xmf3Pos.x, y0 = xmf3Pos.z;
+		float x1 = xmf3Line[0].x, y1 = xmf3Line[0].z;
+		float x2 = xmf3Line[1].x, y2 = xmf3Line[1].z;
+		//직선과 점 사이 거리
+		float fDis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / (float)sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+		vecDis.emplace_back(fDis);
+	}
+
+	int iMinIndex = int(min_element(vecDis.begin(), vecDis.end()) - vecDis.begin());
+	XMFLOAT3 xmf3Line[2] = { m_vecLine[iMinIndex][0],  m_vecLine[iMinIndex][1] };
+
+	XMFLOAT3 xmf3Temp(0, 0, 0), xmf3Normal(0, 0, 0);
+	xmf3Temp = Vector3::Subtract(xmf3Line[0], xmf3Line[1], true, false);
+	xmf3Normal.z = -xmf3Temp.x;
+	xmf3Normal.x = xmf3Temp.z;
+
+	float fShift = m_pComCollision->m_xmOOBB.Extents.z - vecDis[iMinIndex];
+	if (fShift < 0.f) fShift = 0.f;
+
+	XMFLOAT3 xmf3Dir = xmf3Normal/*xmf3Reflect*/;
+	xmf3Dir = Vector3::ScalarProduct(xmf3Dir, fShift/*m_fTempShift*/, false);
+	m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Dir);
+
+	m_pCamera->Move(xmf3Dir);
+	m_pCamera->RegenerateViewMatrix();
+	OnPrepareRender();
+
+	//cout << xmf3Normal.x << "," << xmf3Normal.y << "," << xmf3Normal.z<< "," << endl;
+	//cout << xmf3Line[1].x << "," << xmf3Line[1].y << "," << xmf3Line[1].z << "," << endl;
+
+	m_vecLine.clear();
 }
 
 bool CPlayer::IsNowAttack()
@@ -643,6 +758,21 @@ void CPlayer::Set_object_anim(object_anim* _object_anim)
 		_object_anim[i].fPosition = m_pSkinnedAnimationController->m_fPosition[i];
 	}
 }
+
+void CPlayer::UpdateReadyTexture(float fTimeElapsed)
+{
+	if (!m_pReadyTex || !m_isReadyToggle) return;
+
+	m_pReadyTex->Animate(fTimeElapsed);
+
+	CScene* pScene = CGameMgr::GetInstance()->GetScene();
+	pScene->AddAlphaObjectToList(m_pReadyTex);
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += 2.f;
+	m_pReadyTex->SetPosition(xmf3Pos);
+}
+
 
 CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 {
@@ -681,7 +811,8 @@ CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 		SetMaxVelocityY(400.0f);
 		m_pCamera = OnChangeCamera(THIRD_PERSON_CAMERA, nCurrentCameraMode);
 		m_pCamera->SetTimeLag(0.25f);
-		m_pCamera->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
+		//m_pCamera->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
+		m_pCamera->SetOffset(XMFLOAT3(0.0f, 2.f, -4.f)); //로비 화면 오프셋
 		m_pCamera->GenerateProjectionMatrix(1.01f, 5000.0f, ASPECT_RATIO, 60.0f);
 		m_pCamera->SetViewport(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, 0.0f, 1.0f);
 		m_pCamera->SetScissorRect(0, 0, FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT);
@@ -707,6 +838,9 @@ void CPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 bool CPlayer::Check_Input(float fTimeElapsed)
 {
+	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0)
+		return false;
+
 	// 공격 4가지 처리
 
 		// attack1

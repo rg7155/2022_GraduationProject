@@ -221,7 +221,7 @@ void CMonsterObject::MakeHitEffect()
 	cout << "MakeEff" << endl;
 }
 
-void CMonsterObject::CollsionDetection(CGameObject* pObj)
+void CMonsterObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 {
 	OBJ_ID eObjId = pObj->m_eObjId;
 
@@ -430,7 +430,7 @@ void CGolemObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
-void CGolemObject::CollsionDetection(CGameObject* pObj)
+void CGolemObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 {
 	OBJ_ID eObjId = pObj->m_eObjId;
 
@@ -790,7 +790,7 @@ void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
-void CCactiObject::CollsionDetection(CGameObject* pObj)
+void CCactiObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 {
 	OBJ_ID eObjId = pObj->m_eObjId;
 
@@ -934,7 +934,7 @@ CCactusObject::~CCactusObject()
 {
 }
 
-void CCactusObject::CollsionDetection(CGameObject* pObj)
+void CCactusObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 {
 	OBJ_ID eObjId = pObj->m_eObjId;
 
