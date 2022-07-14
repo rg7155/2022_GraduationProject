@@ -142,10 +142,14 @@ void process_packet(int c_id)
 		if (p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
 			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2)
 		{
+			timer_lock.lock();
+
 			for (auto& object : objects[OBJECT_MONSTER])
 			{
 				object->CheckCollision(c_id);
 			}
+			timer_lock.unlock();
+
 		}
 		// 모든 클라에게 클라의 위치 전송
 		for (auto& cl : clients)
@@ -157,14 +161,17 @@ void process_packet(int c_id)
 			for (int i = 0; i < OBJECT::OBJECT_END; ++i) {
 				for (auto iter = objects[i].begin(); iter != objects[i].end();)
 				{
-					(*iter)->Send_Packet_To_Clients(cl.first);
-					if (!(*iter)->m_bActive)
+					if (!(*iter)->m_bActive) {
+						(*iter)->Send_Remove_Packet_To_Clients(cl.first);
 						iter = objects[i].erase(iter);
-					else
+
+					}
+					else {
+						(*iter)->Send_Packet_To_Clients(cl.first);
 						iter++;
+					}
 				}
 			}
-		
 			timer_lock.unlock();
 
 		}
@@ -186,6 +193,7 @@ void disconnect(int c_id)
 		p.id = c_id;
 		p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
 		p.type = SC_REMOVE_OBJECT;
+		p.race = RACE_PLAYER;
 		if(clients[c_id]._pObject)
 			p.race = clients[c_id]._pObject->m_race;
 		cl.second.do_send(p.size, reinterpret_cast<char*>(&p));

@@ -100,7 +100,6 @@ struct SC_ADD_OBJECT_PACKET
 struct SC_REMOVE_OBJECT_PACKET
 {
 	char type;
-
 	int size;
 	short race;		// 몬스터 판별용
 	short id;

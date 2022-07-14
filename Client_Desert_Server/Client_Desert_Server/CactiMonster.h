@@ -18,6 +18,7 @@ public:
 
 public:
 	virtual void Send_Packet_To_Clients(int c_id);
+	virtual void Send_Remove_Packet_To_Clients(int c_id);
 	virtual void CheckCollision(int c_id);
 
 public:
@@ -26,12 +27,13 @@ public:
 public:
 	void AttackProcess(CACTUS::ANIM eAnim);
 	void AddBullet(int _id);
+	void SetVerse(char _verse);
 
 private:
 	float		m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
 	float		m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
 	float		m_fDamagedCoolTime;
-
+	float		m_fRunCoolTime;
 	int			m_nowVerse;
 
 	XMFLOAT3	m_fAfterPos;

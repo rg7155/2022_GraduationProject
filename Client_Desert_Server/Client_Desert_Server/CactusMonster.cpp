@@ -22,6 +22,9 @@ void CCactusMonster::Update(float fTimeElapsed)
 		return;
 	if (m_eCurAnim == CACTUS::DIE) {
 		m_bActive = false;
+		m_pCacti1->SetVerse(VERSE4);
+		m_pCacti2->SetVerse(VERSE4);
+
 		return;
 	}
 	m_fAnimElapsedTime += fTimeElapsed;

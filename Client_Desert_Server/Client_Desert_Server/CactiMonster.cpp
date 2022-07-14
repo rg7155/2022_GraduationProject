@@ -4,7 +4,8 @@
 
 
 
-constexpr float CACTISPEED = 5.f;
+constexpr float CACTISPEED = 7.f;
+constexpr float RUNCOOLTIME = 3.f;
 
 CCactiMonster::CCactiMonster(int _index)
 {
@@ -40,6 +41,8 @@ void CCactiMonster::Update(float fTimeElapsed)
 
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
+	m_fRunCoolTime += fTimeElapsed;
+
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
@@ -89,6 +92,22 @@ void CCactiMonster::Update(float fTimeElapsed)
 			}
 		}
 	}
+	else if (VERSE4 == m_nowVerse) {
+		// µµ¸Á
+		if (m_fRunCoolTime > RUNCOOLTIME)
+		{
+			m_bActive = false;
+			return;
+		}
+		XMFLOAT3 xmf3Pos = GetPosition();
+		XMFLOAT3 xmf3Look = GetLook();
+		xmf3Look.x *= fTimeElapsed * CACTISPEED;
+		xmf3Look.z *= fTimeElapsed * CACTISPEED;
+
+		XMFLOAT3 newPos = Vector3::Add(xmf3Pos, xmf3Look);
+		SetPosition(newPos.x, newPos.y, newPos.z);
+		xmf3Pos = GetPosition();
+	}
 }
 
 void CCactiMonster::Send_Packet_To_Clients(int c_id)
@@ -103,6 +122,16 @@ void CCactiMonster::Send_Packet_To_Clients(int c_id)
 	p.hp = m_hp;
 	p.race = RACE_CACTI;
 	p.verse = m_nowVerse;
+	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
+}
+
+void CCactiMonster::Send_Remove_Packet_To_Clients(int c_id)
+{
+	SC_REMOVE_OBJECT_PACKET p;
+	p.type = SC_REMOVE_OBJECT;
+	p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+	p.race = RACE_CACTI;
+	p.id = m_index; // 0 , 1
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
@@ -165,4 +194,14 @@ void CCactiMonster::AddBullet(int _id)
 	//pObj->SetLookAt(xmf3Target, false);
 	//pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
 	//pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 5.f;
+}
+
+void CCactiMonster::SetVerse(char _verse)
+{
+	m_nowVerse = _verse;
+
+	if (m_nowVerse == VERSE4) {
+		Change_Animation(CACTI::ANIM::WALK);
+		m_fRunCoolTime = 0.f;
+	}
 }

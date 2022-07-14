@@ -238,7 +238,15 @@ int CServerManager::ProcessPacket(char* packet)
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* p = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
-		gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(false);
+		if(p->race == RACE_PLAYER)
+			gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(false);
+		else if (p->race == RACE_CACTI) {
+			if (p->id == 0) {
+				CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").front()->SetActiveState(false);
+			}
+			else
+				CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").back()->SetActiveState(false);
+		}
 		return p->size;
 	}
 	default:
