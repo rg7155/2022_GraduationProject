@@ -1,6 +1,8 @@
 #ifndef Define_h__
 #define Define_h__
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #define FRAME_BUFFER_WIDTH				1280/*800/*640*/
 #define FRAME_BUFFER_HEIGHT				720/*600/*480*/
 

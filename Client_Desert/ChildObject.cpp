@@ -511,11 +511,17 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/TextBox.dds", 0);
 		SetOrthoWorld(1000, 200, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.83f);
 		SetActiveState(false);
-		m_fAlpha = 0.2;
+		m_fAlpha = 0.2f;
 		break;
 	case CUIObject::UI_CURSOR:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
 		break;
+	case CUIObject::UI_HIT_EFFECT:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HitEffect.dds", 0);
+		SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+		m_fAlpha = 0.f;
+		break;
+		
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -580,8 +586,23 @@ void CUIObject::Animate(float fTimeElapsed)
 		break;
 	case CUIObject::UI_CURSOR:
 		XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
-
 		SetOrthoWorld(21, 41, Cursor.x, Cursor.y);
+		break;
+	case CUIObject::UI_HIT_EFFECT:
+		if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+			m_isHit = true;
+
+		if (m_isHit)
+		{
+			m_fValue += fTimeElapsed * 2.f; //0~1 -> 0~180
+			m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.5f;
+
+			if (m_fValue >= 1.f)
+			{
+				m_isHit = false;
+				m_fValue = 0.f;
+			}
+		}
 		break;
 	}
 

@@ -38,6 +38,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail->SetRenderingTrail(false);
+	m_pReadyTex = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_READY);
 
 	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
 
@@ -51,6 +52,12 @@ CDuoPlayer::~CDuoPlayer()
 {
 	ReleaseShaderVariables();
 
+	if (m_pReadyTex)
+	{
+		m_pReadyTex->ReleaseUploadBuffers();
+		m_pReadyTex->ReleaseShaderVariables();
+		m_pReadyTex->Release();
+	}
 }
 
 void CDuoPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -74,6 +81,8 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 	UpdateComponent(fTimeElapsed);
 	//·»´õ¸µ ²°´Ù Ä×´Ù-> °ø°ÝÇÒ¶§¸¸ ³ª¿À°Ô º¯°æ
 	m_pComTrail->SetRenderingTrail(IsNowAttack());
+
+	UpdateReadyTexture(fTimeElapsed);
 
 	// ¹Ù´Ú ÀÌÆåÆ®
 
@@ -123,6 +132,20 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 
 	if (m_pComTrail)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
+}
+
+void CDuoPlayer::UpdateReadyTexture(float fTimeElapsed)
+{
+	if (!m_pReadyTex || !m_isReadyToggle) return;
+
+	m_pReadyTex->Animate(fTimeElapsed);
+
+	CScene* pScene = CGameMgr::GetInstance()->GetScene();
+	pScene->AddAlphaObjectToList(m_pReadyTex);
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += 2.f;
+	m_pReadyTex->SetPosition(xmf3Pos);
 }
 
 void CDuoPlayer::Update_object_anim(object_anim* _object_anim)

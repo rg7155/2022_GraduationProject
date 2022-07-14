@@ -279,6 +279,17 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	//플레이어-맵 충돌
 	switch (m_eCurScene)
 	{
+	case SCENE_0:
+#ifdef USE_SERVER
+		if (m_eGoalScene == SCENE_0 && m_pPlayer->m_isReadyToggle && m_pDuoPlayer->m_isReadyToggle)
+			ChangeSceneByFadeInOut();
+#else //디버깅 용
+		if (m_eGoalScene == SCENE_0 && m_pPlayer->m_isReadyToggle)
+			ChangeSceneByFadeInOut();
+#endif // USE_SERVER
+
+		
+
 	case SCENE_1:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"));
 		break;
@@ -286,7 +297,6 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"));
 		break;
 	}
-	///////////////////////////////////////////////////////////////////////////////////
 
 }
 

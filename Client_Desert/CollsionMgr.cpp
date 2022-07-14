@@ -144,7 +144,7 @@ XMFLOAT3* CCollsionMgr::CheckLineCloseToPoint(XMFLOAT3& xmf3Point, XMFLOAT3* xmf
 		float x0 = xmf3Point.x, y0 = xmf3Point.z;
 		float x1 = xmf3Line[i][0].x, y1 = xmf3Line[i][0].z;
 		float x2 = xmf3Line[i][1].x, y2 = xmf3Line[i][1].z;
-		float fDis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
+		float fDis = abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / (float)sqrt(pow((x2 - x1), 2) + pow((y2 - y1), 2));
 		vecDis.emplace_back(fDis);
 	}
 	int iMinIndex = int(min_element(vecDis.begin(), vecDis.end()) - vecDis.begin());

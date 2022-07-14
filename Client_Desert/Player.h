@@ -149,13 +149,13 @@ public:
 
 public:
 	void	ClickedReadyButton() { m_isReadyToggle = !m_isReadyToggle; }
+	bool	m_isReadyToggle = false;
 
 private:
 	void UpdateReadyTexture(float fTimeElapsed);
 	void MovePosByCollision();
 
 	CGameObject*	m_pReadyTex = nullptr;
-	bool			m_isReadyToggle = false;
 
 	vector<vector<XMFLOAT3>> m_vecLine;
 };
