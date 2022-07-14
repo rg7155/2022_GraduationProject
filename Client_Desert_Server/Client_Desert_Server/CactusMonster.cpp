@@ -68,6 +68,16 @@ void CCactusMonster::Send_Packet_To_Clients(int c_id)
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
+void CCactusMonster::Send_Remove_Packet_To_Clients(int c_id)
+{
+	SC_REMOVE_OBJECT_PACKET p;
+	p.type = SC_REMOVE_OBJECT;
+	p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+	p.race = RACE_CACTUS;
+	p.id = 0; // 0
+	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
+}
+
 void CCactusMonster::CheckCollision(int c_id)
 {
 	if (m_eCurAnim == CACTUS::ANIM::TAKE_DAMAGED)

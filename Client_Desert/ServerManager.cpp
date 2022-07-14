@@ -247,6 +247,11 @@ int CServerManager::ProcessPacket(char* packet)
 			else
 				CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").back()->SetActiveState(false);
 		}
+		else if (p->race == RACE_CACTUS) {
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cactus").front();
+			CCactusObject* pCactus = reinterpret_cast<CCactusObject*>(pObj);
+			pCactus->Change_Animation(CACTUS::ANIM::DIE);
+		}
 		return p->size;
 	}
 	default:

@@ -16,6 +16,8 @@ public:
 
 public:
 	virtual void Send_Packet_To_Clients(int c_id);
+	virtual void Send_Remove_Packet_To_Clients(int c_id);
+
 	virtual void CheckCollision(int c_id);
 
 public:
