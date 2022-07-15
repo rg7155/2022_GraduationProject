@@ -599,6 +599,8 @@ CCactiBulletObject::CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	SetChild(pModel->m_pModelRootObject, true);
 	Rotate(0.f, -90.f, 0.f);
 	SetScale(3.f, 3.f, 3.f);
+	m_xmf4x4Origin = m_xmf4x4World;
+
 	//SetScale(XMFLOAT3{ 0.2f, 0.2f, 0.2f });
 
 	//TODO - 캣티가 만들 것
@@ -629,10 +631,7 @@ void CCactiBulletObject::Animate(float fTimeElapsed)
 	if (m_fTime > CACTI_BULLET_TIME)
 	{
 		m_isActive = false;
-		//if (m_FollowType == BULLET_FOLLOW_TYPE3) {
-		//	Rotate(-90.f, 0.f, 0.f);
-		//	SetScale(0.5f, 0.5f, 0.5f);
-		//}
+		m_xmf4x4World = m_xmf4x4Origin;
 		return;
 	}
 	if (m_FollowType == BULLET_FOLLOW_TYPE1) {
@@ -655,10 +654,9 @@ void CCactiBulletObject::Animate(float fTimeElapsed)
 		xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed * m_fSpeed, false));
 		SetPosition(xmf3Pos);
 		if (xmf3Pos.y <= -1.f) {
-			//Rotate(-90.f, 0.f, 0.f);
 			//SetScale(0.5f, 0.5f, 0.5f);
 			m_isActive = false;
-
+			m_xmf4x4World = m_xmf4x4Origin;
 		}
 	}
 
@@ -684,7 +682,7 @@ void CCactiBulletObject::CreateComponent(ID3D12Device* pd3dDevice, ID3D12Graphic
 	if (m_pChild && m_pChild->m_isRootModelObject)
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
 	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
-	m_pComCollision->m_xmf3OBBScale = XMFLOAT3(3.f, 3.f, 3.f);
+	m_pComCollision->m_xmf3OBBScale = XMFLOAT3(2.f, 2.f, 2.f);
 	//m_pComCollision->m_xmf3OBBScale = { 10.f, 1.f, 10.f }; // 바운딩박스 스케일 키움
 	m_pComCollision->UpdateBoundingBox();
 }
@@ -894,7 +892,8 @@ void CCactiObject::AddBullet(CACTUS::ANIM _eAnim)
 {
 	CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
 	CGameObject* pTarget = nullptr;
-
+	pObj->m_xmf4x4ToParent = pObj->m_xmf4x4Origin;
+	pObj->m_xmf3Scale = XMFLOAT3(3.f, 3.f, 3.f);
 	if (CServerManager::GetInstance()->m_myid == m_index)
 		pTarget = CGameMgr::GetInstance()->GetPlayer();
 	else
@@ -1087,7 +1086,8 @@ void CCactusObject::AddBullet()
 	for (int i = 0; i < 5; i++)
 	{
 		CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
-		pObj->SetActiveState(true);
+		pObj->m_xmf4x4ToParent = pObj->m_xmf4x4Origin;
+		pObj->m_xmf3Scale = XMFLOAT3(3.f, 3.f, 3.f);
 
 		XMFLOAT3 regenPos;
 		regenPos.x = -10.f;
@@ -1101,7 +1101,7 @@ void CCactusObject::AddBullet()
 		xmf3Target.y = -1.f;
 		pObj->SetTarget(pObj->GetPosition(), xmf3Target, false);
 		//pObj->SetScale(2.f, 2.f, 2.f);
-		//pObj->Rotate(90.f, 0.f, 0.f);
+		pObj->Rotate(90.f, 0.f, 0.f);
 		//pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
 		pObj->m_fSpeed = 4.f;
 		pObj->m_fTime = 0.f;

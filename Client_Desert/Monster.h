@@ -245,6 +245,7 @@ public:
 	float		m_fCreateTime = 0.f;
 	char		m_FollowType = 0;
 	CGameObject* m_pTarget;
+	XMFLOAT4X4	m_xmf4x4Origin{};
 
 public:
 	CCollision* m_pComCollision = nullptr;
