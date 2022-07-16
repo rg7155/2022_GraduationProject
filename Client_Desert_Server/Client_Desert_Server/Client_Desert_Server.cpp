@@ -38,9 +38,6 @@ void LoadingAnimTime();
 
 void TimerThread_func()
 {
-	float	fGolemCreateTime = 0.f;
-	bool	bGolemCreateOn = false;
-
 	while (true)
 	{
 		m_GameTimer.Tick(60.0f);
@@ -151,14 +148,43 @@ void process_packet(int c_id)
 			timer_lock.unlock();
 
 		}
+		// 발판 충돌체크
+		bool bFoot[2]{};
+		for (auto& cl : clients)
+		{
+			int cnt = 0;
+			timer_lock.lock();
+			for (auto& object : objects[OBJECT_FOOTHOLD])
+			{
+				XMFLOAT3 xmf3Pos = object->GetPosition();
+				float fDis = Vector3::Distance(object->GetPosition(), cl.second._pObject->GetPosition());
+				if (fDis < 1.f)
+					bFoot[cnt] = true;
+				cnt++;
+			}
+			timer_lock.unlock();
+
+		}
+	
 		// 모든 클라에게 클라의 위치 전송
 		for (auto& cl : clients)
 		{
+			
 			if (cl.first == c_id) continue;
 			cl.second.send_move_packet(c_id);
-
+			{
+				SC_FOOTHOLD_PACKET foot_packet;
+				foot_packet.size = sizeof(SC_FOOTHOLD_PACKET);
+				foot_packet.type = SC_FOOTHOLD;
+				foot_packet.flag1 = bFoot[0];
+				foot_packet.flag2 = bFoot[1];
+				cl.second.do_send(foot_packet.size, reinterpret_cast<char*>(&foot_packet));
+			}
 			timer_lock.lock();
 			for (int i = 0; i < OBJECT::OBJECT_END; ++i) {
+				if (i == OBJECT_FOOTHOLD)
+					continue;
+
 				for (auto iter = objects[i].begin(); iter != objects[i].end();)
 				{
 					if (!(*iter)->m_bActive) {
@@ -235,6 +261,9 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 	return;
 }
 
+constexpr XMFLOAT3 FOOTHOLD1 = XMFLOAT3(22.11f, 0.f, 28.77f);
+constexpr XMFLOAT3 FOOTHOLD2 = XMFLOAT3(18.95f, 0.f, 9.42f);
+
 void Init_Monsters()
 {
 	LoadingBoundingBox();
@@ -259,6 +288,16 @@ void Init_Monsters()
 	//timer_lock.unlock();
 
 	pGolem->m_bActive = true;
+
+
+	// 발판 2개 로딩
+	CGameObject* pFootHold1 = new CGameObject();
+	pFootHold1->SetPosition(FOOTHOLD2.x, FOOTHOLD2.y, FOOTHOLD2.z);
+	CGameObject* pFootHold2 = new CGameObject();
+	pFootHold2->SetPosition(FOOTHOLD1.x, FOOTHOLD1.y, FOOTHOLD1.z);
+
+	objects[OBJECT::OBJECT_FOOTHOLD].push_back(pFootHold1);
+	objects[OBJECT::OBJECT_FOOTHOLD].push_back(pFootHold2);
 
 }
 

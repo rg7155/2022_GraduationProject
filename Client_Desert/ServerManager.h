@@ -42,6 +42,7 @@ public:
 	
 
 public:
+	static bool m_bFoot[2];
 
 	// send 여러 개 할 수 있으니 map으로 버퍼 관리하자
 	//static queue<char*> m_queueSendBuf;

@@ -11,6 +11,7 @@ WSABUF			CServerManager::m_wsabuf_r;
 bool			CServerManager::m_isWindow = false;
 int				CServerManager::m_myid = -1;
 //queue<char*>	CServerManager::m_queueSendBuf;
+bool			CServerManager::m_bFoot[2]{};
 
 CGameFramework* CServerManager::gameFramework;
 
@@ -252,6 +253,13 @@ int CServerManager::ProcessPacket(char* packet)
 			CCactusObject* pCactus = reinterpret_cast<CCactusObject*>(pObj);
 			pCactus->Change_Animation(CACTUS::ANIM::DIE);
 		}
+		return p->size;
+	}
+	case SC_FOOTHOLD:
+	{
+		SC_FOOTHOLD_PACKET* p = reinterpret_cast<SC_FOOTHOLD_PACKET*>(packet);
+		m_bFoot[0] = p->flag1;
+		m_bFoot[1] = p->flag2;
 		return p->size;
 	}
 	default:

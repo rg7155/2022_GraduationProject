@@ -19,7 +19,9 @@ constexpr char SC_ADD_OBJECT = 3;
 constexpr char SC_REMOVE_OBJECT = 4;
 constexpr char SC_MOVE_OBJECT = 5;
 constexpr char SC_STAT_CHANGE = 6;
-constexpr char SC_MOVE_MONSTER = 7;
+constexpr char SC_MOVE_MONSTER = 7; 
+constexpr char SC_FOOTHOLD = 8;
+
 
 // dir
 constexpr char DIR_UPRIGHT = 1;
@@ -71,9 +73,10 @@ struct CS_MOVE_PACKET
 	unsigned int	client_time;
 };
 
+
 struct CS_ATTACK_PACKET {
 	char	type;
-	int size;
+	int		size;
 	int		skill;
 };
 
@@ -149,7 +152,14 @@ struct SC_ADD_BULLET_PACKET
 	char bullet_size; // 1, 2
 	XMFLOAT3 xmf3Position;
 	short target_id;
+};
 
-	
+struct SC_FOOTHOLD_PACKET 
+{
+	char type;
+	int size;
+	bool flag1;
+	bool flag2;
+
 };
 #pragma pack (pop)

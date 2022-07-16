@@ -30,7 +30,7 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 bool Check_Collision(BoundingOrientedBox& xmOOBB, BoundingOrientedBox& xmTargetOOBB);
 
-enum OBJECT { OBJECT_MONSTER, OBJECT_BULLET, OBJECT_END };
+enum OBJECT { OBJECT_MONSTER, OBJECT_BULLET, OBJECT_FOOTHOLD, OBJECT_END };
 
 
 class CSession;
