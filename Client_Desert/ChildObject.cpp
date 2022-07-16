@@ -193,9 +193,13 @@ void CFootHoldMapObject::Animate(float fTimeElapsed)
 #define DOOR_MAX_Y 2.39
 #define DOOR_MIN_Y -2.39
 
+#define DUST_ACTIVE_TIME 0.1f
+
 CStoneDoorMapObject::CStoneDoorMapObject()
 {
 	//2.39
+	m_fDustActiveTime = DUST_ACTIVE_TIME;
+
 }
 
 CStoneDoorMapObject::~CStoneDoorMapObject()
@@ -209,16 +213,47 @@ void CStoneDoorMapObject::Animate(float fTimeElapsed)
 	if (m_iState == DOOR_UP)
 	{
 		if (xmf3Pos.y < DOOR_MAX_Y)
+		{
+			ActiveDust(fTimeElapsed);
 			xmf3Pos.y += fTimeElapsed * 10.f;
+		}
 	}
 	else if (m_iState == DOOR_DOWN)
 	{
 		if (xmf3Pos.y > DOOR_MIN_Y)
+		{
+			ActiveDust(fTimeElapsed);
 			xmf3Pos.y -= fTimeElapsed * 10.f;
+		}
 	}
 	SetPosition(xmf3Pos);
 
 	CMapObject::Animate(fTimeElapsed);
+}
+void CStoneDoorMapObject::ActiveDust(float fTimeElapsed)
+{
+	m_fDustActiveTime -= fTimeElapsed;
+	if (m_fDustActiveTime > 0.f)
+		return;
+
+	m_fDustActiveTime = DUST_ACTIVE_TIME;
+
+	for (int i = 0; i < 10; ++i)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Dust");
+		if (!pObj) return;
+
+		pObj->SetActiveState(true);
+
+		XMFLOAT3 xmf3Pos = GetPosition(), xmf3Right = GetLook(), xmf3Look = GetUp();
+		float fZ = m_pComCollision->m_xmOOBB.Extents.z; //8.,,
+		float fDis = RandomValue(-fZ, fZ);
+		xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(xmf3Right, fDis, false));
+		xmf3Look = Vector3::ScalarProduct(xmf3Look, 2.5f, false);
+		xmf3Pos = Vector3::Add(xmf3Pos, xmf3Look);
+		xmf3Pos.y = 0.f;
+		pObj->SetPosition(xmf3Pos);
+	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define BLUE_COLOR4 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f
@@ -834,6 +869,19 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		SetActiveState(true);
 		break;
+	case CTexturedObject::TEXTURE_DUST:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f, 0.f, 0.f, 0.f, true);
+		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/fogSheet_o.dds", 0);
+		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/smoke_thick.dds", 0);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/smoke_thin.dds", 0);
+
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		pMaterial->m_iPipelineState = 1;
+
+		//SetActiveState(true);
+		m_isAlphaObject = true;
+
+		break;
 	}
 
 	SetMesh(pMesh);
@@ -880,6 +928,21 @@ void CTexturedObject::Animate(float fTimeElapsed)
 		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
 		UpdateTransform(NULL); 
 		break;
+	case CTexturedObject::TEXTURE_DUST:
+		CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(this);
+
+		XMFLOAT3 xmf3Pos = GetPosition();
+		xmf3Pos.y += fTimeElapsed * m_fRandSpeed;
+		SetPosition(xmf3Pos);
+
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		Rotate(0.f, 0.f, m_fRandRot);
+		UpdateTransform(NULL);
+
+		m_fValue += fTimeElapsed * 3.f * RandomValue(0.5f, 2.f);
+		m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.1f;
+		if (m_fValue >= 1.f) SetActiveState(false);
+		break;
 	}
 
 	CGameObject::Animate(fTimeElapsed);
@@ -911,6 +974,27 @@ void CTexturedObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 {
 	//PSAlphaTextured의 gfDissolve값 설정
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
+}
+
+void CTexturedObject::SetActiveState(bool isActve)
+{
+	CGameObject::SetActiveState(isActve);
+
+	if (!isActve)
+		return;
+
+	switch (m_eTextureType)
+	{
+	case CTexturedObject::TEXTURE_DUST:
+	{
+		m_fValue = 0.f;
+		m_fRandRot = RandomValue(0.f, 360.f);
+		m_fRandSpeed = RandomValue(0.5f, 1.f);
+		SetScale(RandomValue(0.5f, 3.5f), RandomValue(0.5f, 3.5f), RandomValue(0.5f, 3.5f));
+	}
+		break;
+	}
+
 }
 
 

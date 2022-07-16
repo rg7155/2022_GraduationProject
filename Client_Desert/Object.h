@@ -234,7 +234,7 @@ public:
 	ID3D12Resource					*m_pd3dcbSubUpload = NULL;
 	CB_SUBOBJECT_INFO				*m_pcbMappedSubInfo = NULL;
 
-	void SetActiveState(bool isActve) { m_isActive = isActve; }
+	virtual void SetActiveState(bool isActve) { m_isActive = isActve; }
 	void SetEffectsType(UINT nMask, bool isOn);
 
 	void SetMesh(CMesh *pMesh);

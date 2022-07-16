@@ -67,7 +67,9 @@ public:
 	//virtual void Ready() override;
 	virtual void Animate(float fTimeElapsed) override;
 	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
-
+private:
+	void	ActiveDust(float fTimeElapsed);
+	float	m_fDustActiveTime = 0.f;
 public:
 	int		m_iState = 0;
 };
@@ -219,7 +221,7 @@ private:
 class CTexturedObject : public CGameObject
 {
 public:
-	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_READY, TEXTURE_END };
+	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_READY, TEXTURE_DUST, TEXTURE_END };
 
 	CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType);
 	virtual ~CTexturedObject();
@@ -231,10 +233,17 @@ public:
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
+	virtual void SetActiveState(bool isActve) override;
+
 public:
 	TEXTURE_TYPE		m_eTextureType = TEXTURE_END;
 private:
 	float	m_fAlpha = 0.f;
 	bool	m_isAlphaObject = false;
+	float	m_fRandRot = 0.f;
+	float	m_fRandSpeed = 0.f;
+	float	m_fValue = 0.f;
+
+	
 };
 
