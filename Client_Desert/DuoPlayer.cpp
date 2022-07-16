@@ -7,9 +7,9 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	char fileName[2048];
 	int id = *(int*)pContext;
 	if (id == 0)
-		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
-	else
 		strcpy(fileName, "Model/Adventurer_Aland_Green.bin");
+	else
+		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
 
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, fileName, NULL);
 

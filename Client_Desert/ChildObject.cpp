@@ -526,7 +526,11 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		m_fAlpha = 0.f;
 		break;
 	case CUIObject::UI_PLAYER:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		if(CGameMgr::GetInstance()->GetId() == 0)
+			pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle_Player0.dds", 0);
+		else
+			pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle_Player1.dds", 0);
+
 		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.15f);
 		break;
 	case CUIObject::UI_PROFILE:
