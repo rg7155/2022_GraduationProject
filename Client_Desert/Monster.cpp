@@ -597,9 +597,9 @@ CCactiBulletObject::CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//TODO - 파일이름 바꾸기
 	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Thorn_Projectile.bin", nullptr);
 	SetChild(pModel->m_pModelRootObject, true);
-	Rotate(0.f, -90.f, 0.f);
 	SetScale(3.f, 3.f, 3.f);
-	m_xmf4x4Origin = m_xmf4x4World;
+	//Rotate(0.f, -90.f, 0.f);
+	m_xmf4x4Origin = m_xmf4x4ToParent;
 
 	//SetScale(XMFLOAT3{ 0.2f, 0.2f, 0.2f });
 
@@ -681,8 +681,8 @@ void CCactiBulletObject::CreateComponent(ID3D12Device* pd3dDevice, ID3D12Graphic
 	m_pComCollision->m_isStaticOOBB = false;
 	if (m_pChild && m_pChild->m_isRootModelObject)
 		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
-	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
-	m_pComCollision->m_xmf3OBBScale = XMFLOAT3(2.f, 2.f, 2.f);
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4ToParent;
+	//m_pComCollision->m_xmf3OBBScale = XMFLOAT3(2.f, 2.f, 2.f);
 	//m_pComCollision->m_xmf3OBBScale = { 10.f, 1.f, 10.f }; // 바운딩박스 스케일 키움
 	m_pComCollision->UpdateBoundingBox();
 }
