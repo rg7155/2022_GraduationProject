@@ -1,6 +1,6 @@
 #pragma once
 #include "Client_Desert_Server.h"
-constexpr float DAMAGE_COOLTIME = 1.2f;
+constexpr float DAMAGE_COOLTIME = 2.f;
 constexpr int VERSE1 = 0;
 constexpr int VERSE2 = 1;
 constexpr int VERSE3 = 2;

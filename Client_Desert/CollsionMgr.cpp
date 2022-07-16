@@ -41,7 +41,7 @@ bool CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2, float f
 
 	XMFLOAT3 xmf3Obj1 = pObj1->GetPosition();
 	XMFLOAT3 xmf3Obj2 = pObj2->GetPosition();
-	xmf3Obj2.y = xmf3Obj1.y;
+	//xmf3Obj2.y = xmf3Obj1.y;
 	if (Vector3::Distance(xmf3Obj1, xmf3Obj2) < fDis) {
 		pObj1->CollsionDetection(pObj2, nullptr);
 		pObj2->CollsionDetection(pObj1, nullptr);

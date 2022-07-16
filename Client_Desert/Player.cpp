@@ -133,6 +133,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pSword->m_eObjId = OBJ_SWORD;
 
 	m_dir = DIR_UP;
+	m_isActive = true;
 
 }
 

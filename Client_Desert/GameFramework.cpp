@@ -448,9 +448,10 @@ void CGameFramework::BuildObjects()
 	CGameMgr::GetInstance()->SetScene(m_pScene);
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 	m_pScene->m_pUILayer = m_pUILayer;
-
+	
 #ifdef _WITH_TERRAIN_PLAYER
 	int id = CServerManager::GetInstance()->m_myid;
+	cout << id << endl;
 	CPlayer *pPlayer = new CPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), (void*)&id);
 #else
 	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
