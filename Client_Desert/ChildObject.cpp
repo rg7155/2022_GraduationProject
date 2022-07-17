@@ -79,6 +79,7 @@ void CMapObject::CreateComponent()
 	if (m_strName.find("stonedoor") != string::npos)
 	{
 		m_pComCollision->m_isCollisionIgnore = false;
+		m_pComCollision->m_isStaticOOBB = false;
 	}
 	else if (m_strName.find("CollisionBox") != string::npos)
 	{
@@ -191,7 +192,7 @@ void CFootHoldMapObject::Animate(float fTimeElapsed)
 }
 
 #define DOOR_MAX_Y 2.39
-#define DOOR_MIN_Y -2.39
+#define DOOR_MIN_Y -3.39
 
 #define DUST_ACTIVE_TIME 0.1f
 
