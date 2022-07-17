@@ -11,6 +11,7 @@ WSABUF			CServerManager::m_wsabuf_r;
 bool			CServerManager::m_isWindow = false;
 int				CServerManager::m_myid = -1;
 //queue<char*>	CServerManager::m_queueSendBuf;
+bool			CServerManager::m_bFoot[2]{};
 
 CGameFramework* CServerManager::gameFramework;
 
@@ -35,7 +36,7 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	char* m_start = m_recv_buf;
 	while (true)
 	{
-		int msg_size = static_cast<int>(m_start[0]);
+		int msg_size = static_cast<int>(m_start[1]);
 
 		msg_size = ProcessPacket(m_start);
 		if (cbTransferred < msg_size) {
@@ -212,7 +213,7 @@ int CServerManager::ProcessPacket(char* packet)
 				pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").back();
 
 			CCactiObject* pCacti = reinterpret_cast<CCactiObject*>(pObj);
-
+			pCacti->m_index = p->id;
 			pCacti->Change_Animation((CACTI::ANIM)p->eCurAnim);
 			//pCacti->SetLookAt(p->xmf3Look);
 			pCacti->SetPosition(p->xmf3Position);
@@ -238,12 +239,34 @@ int CServerManager::ProcessPacket(char* packet)
 	case SC_REMOVE_OBJECT:
 	{
 		SC_REMOVE_OBJECT_PACKET* p = reinterpret_cast<SC_REMOVE_OBJECT_PACKET*>(packet);
-		gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(false);
+		if(p->race == RACE_PLAYER)
+			gameFramework->m_pScene->m_pDuoPlayer->SetActiveState(false);
+		else if (p->race == RACE_CACTI) {
+			if (p->id == 0) {
+				CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").front()->SetActiveState(false);
+			}
+			else
+				CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cacti").back()->SetActiveState(false);
+		}
+		else if (p->race == RACE_CACTUS) {
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cactus").front();
+			CCactusObject* pCactus = reinterpret_cast<CCactusObject*>(pObj);
+			pCactus->Change_Animation(CACTUS::ANIM::DIE);
+		}
+		return p->size;
+	}
+	case SC_FOOTHOLD:
+	{
+		SC_FOOTHOLD_PACKET* p = reinterpret_cast<SC_FOOTHOLD_PACKET*>(packet);
+		m_bFoot[0] = p->flag1;
+		m_bFoot[1] = p->flag2;
 		return p->size;
 	}
 	default:
 		break;
 	}
+
+	return 0;
 }
 
 void CServerManager::error_display(const char* msg, int err_no)

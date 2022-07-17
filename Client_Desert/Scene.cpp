@@ -304,6 +304,9 @@ void CScene::AnimateObjects(float fTimeElapsed)
 
 	case SCENE_1:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"));
+		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pStandardObjectShader->GetObjectList(L"CactiBullet"), 1.5f);
+		CCollsionMgr::GetInstance()->CheckCollsion(m_pDuoPlayer, m_pStandardObjectShader->GetObjectList(L"CactiBullet"), 1.5f);
+
 		break;
 	case SCENE_2:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"));

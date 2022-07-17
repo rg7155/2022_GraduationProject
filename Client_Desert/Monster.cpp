@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "ChildObject.h"
 #include "ServerManager.h"
+#include "UILayer.h"
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CGameObject(1)
@@ -194,7 +195,10 @@ void CMonsterObject::SetHp(int hp)
 {
 	//피격 상태
 	if (m_iHp != hp)
+	{
 		MakeHitEffect();
+		MakeHitFont();
+	}
 
 	m_iHp = hp;
 	if (m_iHp < 0)
@@ -202,6 +206,8 @@ void CMonsterObject::SetHp(int hp)
 
 	float fRatio = (m_iHp / (float)m_iMaxHp);
 	m_pHp->SetScale(fRatio, 1.f, 1.f);
+
+	
 }
 
 
@@ -219,6 +225,14 @@ void CMonsterObject::MakeHitEffect()
 	pObj->SetPosition(xmf3Pos);
 
 	cout << "MakeEff" << endl;
+}
+
+void CMonsterObject::MakeHitFont()
+{
+	CGameMgr* pGameMgr = CGameMgr::GetInstance();
+	XMFLOAT3 xmf3Pos = pGameMgr->GetPlayer()->GetPosition();
+	int iDamage = rand() % 999 + 1;
+	pGameMgr->GetScene()->m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
 }
 
 void CMonsterObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
@@ -468,8 +482,7 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 
 			if (id == m_targetId)
 			{
-				pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
-
+				pPlayer->SetDamaged();
 			}
 		}
 
@@ -572,7 +585,7 @@ void CGolemObject::Check_Collision()
 		// 타겟이면
 		if (id == m_targetId)
 		{
-			pPlayer->Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
+			pPlayer->SetDamaged();
 		}
 	}
 }
@@ -584,10 +597,10 @@ CCactiBulletObject::CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//TODO - 파일이름 바꾸기
 	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Thorn_Projectile.bin", nullptr);
 	SetChild(pModel->m_pModelRootObject, true);
-	Rotate(0.f, -90.f, 0.f);
+	SetScale(3.f, 3.f, 3.f);
+	//Rotate(0.f, -90.f, 0.f);
+	m_xmf4x4Origin = m_xmf4x4ToParent;
 
-	SetScale(2.f, 2.f, 2.f);
-	m_xmOOBB.Extents = Vector3::ScalarProduct(m_xmOOBB.Extents, 2.f, false);
 	//SetScale(XMFLOAT3{ 0.2f, 0.2f, 0.2f });
 
 	//TODO - 캣티가 만들 것
@@ -600,6 +613,9 @@ CCactiBulletObject::CCactiBulletObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 		pObj->SetTarget(xmf3Pos, xmf3Target);
 		pObj->SetActiveState(true);
 	}*/
+
+	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
+	m_eObjId = OBJ_ID::OBJ_BULLET;
 }
 
 CCactiBulletObject::~CCactiBulletObject()
@@ -610,38 +626,90 @@ CCactiBulletObject::~CCactiBulletObject()
 void CCactiBulletObject::Animate(float fTimeElapsed)
 {
 	if (!m_isActive) return;
-	m_fCreateTime -= fTimeElapsed;
-	if (m_fCreateTime > 0)
-		return;
 
-	m_fTime -= fTimeElapsed;
-	if (m_fTime < 0)
+	m_fTime += fTimeElapsed;
+	if (m_fTime > CACTI_BULLET_TIME)
 	{
 		m_isActive = false;
+		m_xmf4x4World = m_xmf4x4Origin;
 		return;
 	}
+	if (m_FollowType == BULLET_FOLLOW_TYPE1) {
+		XMFLOAT3 xmf3Pos = GetPosition();
+		xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed * m_fSpeed, false));
+		xmf3Pos.y = 1.f;
+		SetPosition(xmf3Pos);
+	}
+	else if(m_FollowType == BULLET_FOLLOW_TYPE2){
+		XMFLOAT3 xmf3Pos = GetPosition();
+		SetTarget(GetPosition(), m_pTarget->GetPosition());
+		xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed * m_fSpeed, false));
+		xmf3Pos.y = 1.f;
+		SetPosition(xmf3Pos);
+		// 회전까지!!
+		SetLookAt(m_pTarget->GetPosition(), false);
+	}
+	else {
+		XMFLOAT3 xmf3Pos = GetPosition();
+		xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed * m_fSpeed, false));
+		SetPosition(xmf3Pos);
+		if (xmf3Pos.y <= -1.f) {
+			//SetScale(0.5f, 0.5f, 0.5f);
+			m_isActive = false;
+			m_xmf4x4World = m_xmf4x4Origin;
+		}
+	}
 
-	XMFLOAT3 xmf3Pos = GetPosition();
-	xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(m_xmf3Target, fTimeElapsed*m_fSpeed, false));
-	SetPosition(xmf3Pos);
-
-
+	UpdateComponent(fTimeElapsed);
 
 	CGameObject::Animate(fTimeElapsed);
+
 }
 
 void CCactiBulletObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
 	if (!m_isActive) return;
-	if (m_fCreateTime > 0)
-		return;
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+
+}
+
+void CCactiBulletObject::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
+{
+	m_pComponent[COM_COLLISION] = CCollision::Create();
+	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
+	m_pComCollision->m_isStaticOOBB = false;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4ToParent;
+	//m_pComCollision->m_xmf3OBBScale = XMFLOAT3(2.f, 2.f, 2.f);
+	//m_pComCollision->m_xmf3OBBScale = { 10.f, 1.f, 10.f }; // 바운딩박스 스케일 키움
+	m_pComCollision->UpdateBoundingBox();
+}
+
+void CCactiBulletObject::UpdateComponent(float fTimeElapsed)
+{
+	if (m_pComCollision)
+		m_pComCollision->UpdateBoundingBox();
+}
+
+void CCactiBulletObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
+{
+	if (!m_isActive)
+		return;
+
+	m_isActive = false;
+	/*if (m_FollowType == BULLET_FOLLOW_TYPE3) {
+		Rotate(-90.f, 0.f, 0.f);
+		SetScale(0.5f, 0.5f, 0.5f);
+	}*/
+	cout << "bullet delete" << endl; 
+	return;
 }
 
 void CCactiBulletObject::SetTarget(XMFLOAT3& xmf3Start, XMFLOAT3& xmf3Target, bool isYFix/*=true*/)
 {
-	m_fTime = CACTI_BULLET_TIME;
+	//m_fTime = CACTI_BULLET_TIME;
 
 	SetPosition(xmf3Start);
 
@@ -748,7 +816,7 @@ void CCactiObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* p
 {
 	//if (!m_isActive) return;
 
-	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
 void CCactiObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
@@ -820,48 +888,32 @@ void CCactiObject::SetNewRotate(XMFLOAT3 xmf3Look)
 {
 }
 
-void CCactiObject::AttackProcess(CACTUS::ANIM eAnim)
-{
-
-	switch (eAnim)
-	{
-	case CACTUS::ATTACK1: {
-		Change_Animation(CACTI::ATTACK1);
-
-		AddBullet();
-		break;
-	}
-	case CACTUS::ATTACK2: {
-		Change_Animation(CACTI::ATTACK2);
-		for (int i = 0; i < 5; i++)
-			AddBullet();
-		break;
-	}
-	case CACTUS::ATTACK3:
-	default:
-		break;
-	}
-}
-
-void CCactiObject::AddBullet()
+void CCactiObject::AddBullet(CACTUS::ANIM _eAnim)
 {
 	CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
-	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
-	XMFLOAT3 xmf3Target = pPlayer->GetPosition();
+	CGameObject* pTarget = nullptr;
+	pObj->m_xmf4x4ToParent = pObj->m_xmf4x4Origin;
+	pObj->m_xmf3Scale = XMFLOAT3(3.f, 3.f, 3.f);
+	if (CServerManager::GetInstance()->m_myid == m_index)
+		pTarget = CGameMgr::GetInstance()->GetPlayer();
+	else
+		pTarget = CGameMgr::GetInstance()->GetDuoPlayer();
+
+	XMFLOAT3 xmf3Target = pTarget->GetPosition();
 	pObj->SetActiveState(true);
-
-	XMFLOAT3 regenPos;
-	regenPos.x = (float)(rand() % 20) * 0.05f * 2.f;
-	regenPos.y = (float)(rand() % 10) * 0.05f + 0.5f;
-	regenPos.z = (float)(rand() % 20) * 0.05f * 2.f;
-	regenPos = Vector3::Add(GetPosition(), regenPos);
-	pObj->SetPosition(regenPos);
+	pObj->SetPosition(GetPosition());
 	pObj->SetTarget(pObj->GetPosition(), xmf3Target);
-
 	// look 벡터 설정
 	pObj->SetLookAt(xmf3Target, false);
-	pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
-	pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 5.f;
+	pObj->m_fTime = 0.f;
+	pObj->m_fSpeed = 6.f;
+	pObj->m_pTarget = pTarget;
+
+	if (_eAnim == CACTUS::ATTACK1) 
+		pObj->m_FollowType = BULLET_FOLLOW_TYPE1;
+	else 
+		pObj->m_FollowType = BULLET_FOLLOW_TYPE2;
+	
 }
 
 CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, 
@@ -960,15 +1012,28 @@ void CCactusObject::Animate(float fTimeElapsed)
 	}*/
 	
 
+	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
+
+	if (m_eCurAnim == CACTUS::ANIM::DIE)
+	{
+		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
+		if (fAnimElapseTime >= fLength - EPSILON)
+		{
+			m_fDissolve += fTimeElapsed * 0.5f;
+			if (m_fDissolve > 1.f)
+			{
+				m_fDissolve = 1.f;
+				m_isActive = false;
+			}
+		}
+	}
 	CMonsterObject::Animate(fTimeElapsed);
-
-
 
 }
 
 void CCactusObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
-	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 
 }
 
@@ -976,6 +1041,15 @@ void CCactusObject::Change_Animation(CACTUS::ANIM eNewAnim)
 {
 	if (m_eCurAnim == eNewAnim)
 		return;
+
+	// 애님에 따라 총알 생성
+	if (eNewAnim == CACTUS::ATTACK1 || eNewAnim == CACTUS::ATTACK2) {
+		static_cast<CCactiObject*>(m_pCacti1)->AddBullet(eNewAnim);
+		static_cast<CCactiObject*>(m_pCacti2)->AddBullet(eNewAnim);
+	}
+	if (eNewAnim == CACTUS::ATTACK3) {
+		AddBullet();
+	}
 
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
@@ -1007,22 +1081,31 @@ void CCactusObject::SetNewRotate(XMFLOAT3 xmf3Look)
 
 void CCactusObject::AddBullet()
 {
-	CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
-	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
-	XMFLOAT3 xmf3Target = pPlayer->GetPosition();
-	pObj->SetActiveState(true);
+	//m_index에 따라서 3가지
 
-	XMFLOAT3 regenPos;
-	regenPos.x = (float)(rand() % 40) * 0.5f - 10.f;
-	regenPos.y = (float)(rand() % 10) * 0.1f + 10.f;
-	regenPos.z = (float)(rand() % 40) * 0.5f - 10.f;
-	regenPos = Vector3::Add(xmf3Target, regenPos);
-	pObj->SetPosition(regenPos);
-	xmf3Target = regenPos;
-	xmf3Target.y = -1.f;
-	pObj->SetTarget(pObj->GetPosition(), xmf3Target, false);
-	pObj->Rotate(90.f, 0.f, 0.f);
-	pObj->SetScale(4.f, 4.f, 4.f);
-	//pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
-	pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 4.f;
+	for (int i = 0; i < 5; i++)
+	{
+		CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
+		pObj->m_xmf4x4ToParent = pObj->m_xmf4x4Origin;
+		pObj->m_xmf3Scale = XMFLOAT3(3.f, 3.f, 3.f);
+
+		XMFLOAT3 regenPos;
+		regenPos.x = -10.f;
+		regenPos.y = 10.f;
+		regenPos.z = (i - 2) * 3.f;
+		regenPos = Vector3::Add(GetPosition(), regenPos);
+		pObj->SetPosition(regenPos);
+
+		XMFLOAT3 xmf3Target;
+		xmf3Target = regenPos;
+		xmf3Target.y = -1.f;
+		pObj->SetTarget(pObj->GetPosition(), xmf3Target, false);
+		//pObj->SetScale(2.f, 2.f, 2.f);
+		pObj->Rotate(90.f, 0.f, 0.f);
+		//pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
+		pObj->m_fSpeed = 4.f;
+		pObj->m_fTime = 0.f;
+		pObj->m_FollowType = BULLET_FOLLOW_TYPE3;
+	}
+	
 }

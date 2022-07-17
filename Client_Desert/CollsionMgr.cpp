@@ -34,11 +34,30 @@ bool CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2)
 	return false;
 }
 
+bool CCollsionMgr::CheckCollsion(CGameObject* pObj1, CGameObject* pObj2, float fDis)
+{
+	if (!pObj1->m_isActive || !pObj2->m_isActive)
+		return false;
+
+	XMFLOAT3 xmf3Obj1 = pObj1->GetPosition();
+	XMFLOAT3 xmf3Obj2 = pObj2->GetPosition();
+	//xmf3Obj2.y = xmf3Obj1.y;
+	if (Vector3::Distance(xmf3Obj1, xmf3Obj2) < fDis) {
+		pObj1->CollsionDetection(pObj2, nullptr);
+		pObj2->CollsionDetection(pObj1, nullptr);
+		return true;
+	}
+	return false;
+}
+
 void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, bool isNearCheck /*= false*/, bool isCheckOnce /*= false*/)
 {
 	bool isCol = false;
 	for (auto& iter : listObj)
 	{
+		if (!iter->m_isActive)
+			continue;
+
 		if (isNearCheck)
 		{
 			if (20.f > Vector3::Length(Vector3::Subtract(iter->GetPosition(), pObj->GetPosition()))) //상수값 임시로
@@ -64,6 +83,14 @@ void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, 
 
 	static_cast<CCollision*>(pObj->m_pComponent[COM_COLLISION])->m_isCollision = isCol;  //일단 자기것만 체크
 
+}
+
+void CCollsionMgr::CheckCollsion(CGameObject* pObj, list<CGameObject*> listObj, float fDis)
+{
+	for (auto& iter : listObj)
+	{
+		CheckCollsion(pObj, iter, fDis);
+	}
 }
 
 void CCollsionMgr::CheckCollsion(list<CGameObject*> listObj1, list<CGameObject*> listObj2)

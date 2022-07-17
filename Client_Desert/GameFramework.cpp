@@ -448,9 +448,10 @@ void CGameFramework::BuildObjects()
 	CGameMgr::GetInstance()->SetScene(m_pScene);
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 	m_pScene->m_pUILayer = m_pUILayer;
-
+	
 #ifdef _WITH_TERRAIN_PLAYER
 	int id = CServerManager::GetInstance()->m_myid;
+	cout << id << endl;
 	CPlayer *pPlayer = new CPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), (void*)&id);
 #else
 	CAirplanePlayer *pPlayer = new CAirplanePlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), NULL);
@@ -460,7 +461,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
-	m_pScene->CreateDuoPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), 1-id);
+	m_pScene->CreateDuoPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), id);
 	/// ///////////////////
 	CGameMgr::GetInstance()->SetPlayer(m_pPlayer);
 	CGameMgr::GetInstance()->SetCamera(m_pCamera); 
@@ -536,12 +537,13 @@ void CGameFramework::AnimateObjects()
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
 
 
-	if(CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
-	{
-		XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
-		int iDamage = rand() % 999 + 1;
-		m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
-	}
+	//if(CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
+	//{
+	//	XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
+	//	int iDamage = rand() % 999 + 1;
+	//	m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
+	//}
+
 	m_pUILayer->Update(fTimeElapsed);
 }
 

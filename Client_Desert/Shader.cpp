@@ -732,9 +732,13 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 	}
 
 	//발판과 돌문 연결
-	for (auto& iter1 : vecFootHold)
+	int cnt = 0;
+	for (auto& iter1 : vecFootHold) {
+		iter1->m_FootId = cnt++;
 		for (auto& iter2 : vecStoneDoor)
 			iter1->m_vecStoneDoor.emplace_back(iter2);
+	}
+		
 
 }
 

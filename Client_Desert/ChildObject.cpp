@@ -2,6 +2,8 @@
 
 #include "Shader.h"
 #include "Scene.h"
+#include "ServerManager.h"
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 CSkyBox::CSkyBox(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature) : CGameObject(1)
 {
@@ -172,22 +174,21 @@ CFootHoldMapObject::~CFootHoldMapObject()
 
 void CFootHoldMapObject::Animate(float fTimeElapsed)
 {
-	XMFLOAT3 xmf3PlayerPos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
-	float fDis = Vector3::Distance(xmf3PlayerPos, GetPosition());
+	bool bFoot = 0;
+	bFoot = CServerManager::GetInstance()->m_bFoot[m_FootId];
 
-	if (!m_isBeginOverlap && fDis < 1.f)
+	if (!m_isBeginOverlap && bFoot)
 	{
 		m_isBeginOverlap = true;
 		for (auto& iter : m_vecStoneDoor)
 			iter->m_iState = DOOR_DOWN;
 	}
-	else if (m_isBeginOverlap && fDis > 1.f)
+	else if (m_isBeginOverlap && !bFoot)
 	{
 		m_isBeginOverlap = false;
 		for (auto& iter : m_vecStoneDoor)
 			iter->m_iState = DOOR_UP;
 	}
-
 	CMapObject::Animate(fTimeElapsed);
 }
 

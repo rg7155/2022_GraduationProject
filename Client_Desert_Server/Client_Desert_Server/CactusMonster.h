@@ -2,6 +2,7 @@
 #include "GameObject.h"
 
 constexpr auto CACTUS_POS_INIT = XMFLOAT3(127.f, 0.f, 100.f);
+constexpr auto ATTACK_COOLTIME = 3.f;
 
 class CCactiMonster;
 class CCactusMonster : public CGameObject
@@ -15,6 +16,8 @@ public:
 
 public:
 	virtual void Send_Packet_To_Clients(int c_id);
+	virtual void Send_Remove_Packet_To_Clients(int c_id);
+
 	virtual void CheckCollision(int c_id);
 
 public:

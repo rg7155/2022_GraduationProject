@@ -6,7 +6,7 @@
 #pragma comment(lib, "MSWSock.lib")
 
 constexpr int SERVER_PORT = 4000;
-constexpr int BUFSIZE = 1024;
+constexpr int BUFSIZE = 2048;
 constexpr int NAME_SIZE = 20;
 constexpr int MAX_USER = 100;
 
@@ -19,7 +19,8 @@ constexpr char SC_ADD_OBJECT = 3;
 constexpr char SC_REMOVE_OBJECT = 4;
 constexpr char SC_MOVE_OBJECT = 5;
 constexpr char SC_STAT_CHANGE = 6;
-constexpr char SC_MOVE_MONSTER = 7;
+constexpr char SC_MOVE_MONSTER = 7; 
+constexpr char SC_FOOTHOLD = 8;
 
 
 // dir
@@ -37,7 +38,10 @@ constexpr char RACE_PLAYER = 0;
 constexpr char RACE_GOLEM = 1;
 constexpr char RACE_CACTI = 2;
 constexpr char RACE_CACTUS = 3;
-constexpr char RACE_THORN = 4;
+
+// bullet
+constexpr char BULLET_SIZE1 = 0;
+constexpr char BULLET_SIZE2 = 1;
 
 #define DISCONNECT -99.f
 
@@ -69,9 +73,10 @@ struct CS_MOVE_PACKET
 	unsigned int	client_time;
 };
 
+
 struct CS_ATTACK_PACKET {
 	char	type;
-	int size;
+	int		size;
 	int		skill;
 };
 
@@ -98,7 +103,6 @@ struct SC_ADD_OBJECT_PACKET
 struct SC_REMOVE_OBJECT_PACKET
 {
 	char type;
-
 	int size;
 	short race;		// 몬스터 판별용
 	short id;
@@ -141,15 +145,21 @@ struct SC_MOVE_MONSTER_PACKET
 	//float	fElapsedTime;
 };
 
-struct SC_MOVE_BULLET_PACKET
+struct SC_ADD_BULLET_PACKET
 {
-	// 타입추가
 	char type;
 	int size;
-	short id;
-	char race;
-	XMFLOAT3 xmf3Look;
+	char bullet_size; // 1, 2
 	XMFLOAT3 xmf3Position;
 	short target_id;
+};
+
+struct SC_FOOTHOLD_PACKET 
+{
+	char type;
+	int size;
+	bool flag1;
+	bool flag2;
+
 };
 #pragma pack (pop)

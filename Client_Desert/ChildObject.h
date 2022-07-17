@@ -54,6 +54,7 @@ public:
 public:
 	vector<CStoneDoorMapObject*> m_vecStoneDoor;
 	bool	m_isBeginOverlap = false;
+	int m_FootId;
 
 };
 

@@ -4,7 +4,8 @@
 
 
 
-constexpr float CACTISPEED = 5.f;
+constexpr float CACTISPEED = 7.f;
+constexpr float RUNCOOLTIME = 3.f;
 
 CCactiMonster::CCactiMonster(int _index)
 {
@@ -40,6 +41,8 @@ void CCactiMonster::Update(float fTimeElapsed)
 
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
+	m_fRunCoolTime += fTimeElapsed;
+
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
@@ -74,7 +77,7 @@ void CCactiMonster::Update(float fTimeElapsed)
 			if (m_pCacti && (VERSE3 == m_pCacti->m_nowVerse)) {
 				m_pCactus = new CCactusMonster();
 				m_pCactus->m_xmLocalOOBB = oobbs["Cactus"];
-				objects.push_back(m_pCactus);
+				objects[OBJECT::OBJECT_MONSTER].push_back(m_pCactus);
 				m_pCacti->m_pCactus = m_pCactus;
 				if (m_index == 0) {
 					m_pCactus->m_pCacti1 = this;
@@ -88,6 +91,22 @@ void CCactiMonster::Update(float fTimeElapsed)
 
 			}
 		}
+	}
+	else if (VERSE4 == m_nowVerse) {
+		// 도망
+		if (m_fRunCoolTime > RUNCOOLTIME)
+		{
+			m_bActive = false;
+			return;
+		}
+		XMFLOAT3 xmf3Pos = GetPosition();
+		XMFLOAT3 xmf3Look = GetLook();
+		xmf3Look.x *= fTimeElapsed * CACTISPEED;
+		xmf3Look.z *= fTimeElapsed * CACTISPEED;
+
+		XMFLOAT3 newPos = Vector3::Add(xmf3Pos, xmf3Look);
+		SetPosition(newPos.x, newPos.y, newPos.z);
+		xmf3Pos = GetPosition();
 	}
 }
 
@@ -106,13 +125,23 @@ void CCactiMonster::Send_Packet_To_Clients(int c_id)
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
+void CCactiMonster::Send_Remove_Packet_To_Clients(int c_id)
+{
+	SC_REMOVE_OBJECT_PACKET p;
+	p.type = SC_REMOVE_OBJECT;
+	p.size = sizeof(SC_REMOVE_OBJECT_PACKET);
+	p.race = RACE_CACTI;
+	p.id = m_index; // 0 , 1
+	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
+}
+
 void CCactiMonster::CheckCollision(int c_id) // 플레이어가 공격할때 호출
 {
 	if (m_fDamagedCoolTime < DAMAGE_COOLTIME || m_hp <= 0)
 		return;
 
 	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0) {
-		m_hp -= 20.f;
+		//m_hp -= 20.f;
 		m_fDamagedCoolTime = 0.f;
 		if (m_nowVerse == VERSE1) {
 			Change_Animation(CACTI::ANIM::BITE);
@@ -130,19 +159,14 @@ void CCactiMonster::Change_Animation(CACTI::ANIM eNewAnim)
 
 void CCactiMonster::AttackProcess(CACTUS::ANIM eAnim)
 {
-
 	switch (eAnim)
 	{
 	case CACTUS::ATTACK1: {
 		Change_Animation(CACTI::ATTACK1);
-
-		AddBullet();
 		break;
 	}
 	case CACTUS::ATTACK2: {
 		Change_Animation(CACTI::ATTACK2);
-		for (int i = 0; i < 5; i++)
-			AddBullet();
 		break;
 	}
 	case CACTUS::ATTACK3:
@@ -151,7 +175,7 @@ void CCactiMonster::AttackProcess(CACTUS::ANIM eAnim)
 	}
 }
 
-void CCactiMonster::AddBullet()
+void CCactiMonster::AddBullet(int _id)
 {
 	//CCactiBulletObject* pObj = static_cast<CCactiBulletObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"CactiBullet"));
 	//CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
@@ -170,4 +194,14 @@ void CCactiMonster::AddBullet()
 	//pObj->SetLookAt(xmf3Target, false);
 	//pObj->m_fCreateTime = (float)(rand() % 5) * 0.2f;
 	//pObj->m_fSpeed = (float)(rand() % 10) * 0.5f + 5.f;
+}
+
+void CCactiMonster::SetVerse(char _verse)
+{
+	m_nowVerse = _verse;
+
+	if (m_nowVerse == VERSE4) {
+		Change_Animation(CACTI::ANIM::WALK);
+		m_fRunCoolTime = 0.f;
+	}
 }

@@ -30,10 +30,13 @@ void CALLBACK recv_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DWORD flags);
 bool Check_Collision(BoundingOrientedBox& xmOOBB, BoundingOrientedBox& xmTargetOOBB);
 
+enum OBJECT { OBJECT_MONSTER, OBJECT_BULLET, OBJECT_FOOTHOLD, OBJECT_END };
+
+
 class CSession;
 class CGameObject;
 extern unordered_map<int, CSession>	clients; // players + monsters  [0][1]->Player
-extern list<CGameObject*>							objects; // monsters & objects
+extern list<CGameObject*>							objects[OBJECT_END]; // monsters & objects
 extern unordered_map<string, BoundingOrientedBox>	oobbs;
 extern unordered_map<string, vector<float>>			animTimes;
 

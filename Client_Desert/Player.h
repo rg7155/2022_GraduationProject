@@ -114,10 +114,12 @@ private:
 	virtual void	UpdateComponent(float fTimeElapsed);
 
 public:
-	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line = nullptr) override;
+	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 
 public:
 	bool IsNowAttack();
+	void SetDamaged();
+
 private:
 	XMVECTOR m_xmVecNowRotate;
 	XMVECTOR m_xmVecTmpRotate;

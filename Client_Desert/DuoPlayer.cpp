@@ -135,6 +135,16 @@ void CDuoPlayer::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCa
 
 void CDuoPlayer::CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature)
 {
+	m_pComponent[COM_COLLISION] = CCollision::Create();
+
+	m_pComCollision = static_cast<CCollision*>(m_pComponent[COM_COLLISION]);
+	m_pComCollision->m_isStaticOOBB = false;
+	if (m_pChild && m_pChild->m_isRootModelObject)
+		m_pComCollision->m_xmLocalOOBB = m_pChild->m_xmOOBB;
+	m_pComCollision->m_pxmf4x4World = &m_xmf4x4World;
+	//m_pComCollision->m_xmf3OBBScale = { 10.f, 1.f, 10.f }; // 바운딩박스 스케일 키움
+	m_pComCollision->UpdateBoundingBox();
+
 	m_pComponent[COM_TRAIL] = CTrail::Create(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail = static_cast<CTrail*>(m_pComponent[COM_TRAIL]);
 	m_pComTrail->SetColor(false);
@@ -145,6 +155,13 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 	for (int i = 0; i < COM_END; ++i)
 		if (m_pComponent[i])
 			m_pComponent[i]->Update_Component(fTimeElapsed);
+
+	XMFLOAT3 xmf3Corners[8];
+	if (m_pComCollision)
+	{
+		m_pComCollision->UpdateBoundingBox();
+		m_pComCollision->m_xmOOBB.GetCorners(xmf3Corners);
+	}
 
 	if (m_pComTrail)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());

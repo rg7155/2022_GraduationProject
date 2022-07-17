@@ -1,6 +1,7 @@
 #include "CactiBullet.h"
+#include "Session.h"
 
-CCactiBullet::CCactiBullet()
+CCactiBullet::CCactiBullet(int _index)
 {
 }
 
@@ -29,15 +30,16 @@ void CCactiBullet::Update(float fTimeElapsed)
 
 void CCactiBullet::Send_Packet_To_Clients(int c_id)
 {
-	SC_MOVE_BULLET_PACKET p;
+	//SC_MOVE_BULLET_PACKET p;
 	//// 타입추가
-	//type;
-	//size;
-	//id;
-	//race;
-	//xmf3Look;
-	//xmf3Position;
-	//target_id;
+	//p.type = SC_MOVE_BULLET;
+	//p.size = sizeof(SC_MOVE_BULLET_PACKET);
+	//p.id = m_index;
+	//p.race = RACE_THORN;
+	//p.xmf3Look = m_xmf3Target;
+	//p.xmf3Position = GetPosition();
+	//p.target_id = c_id;
+	//clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
 void CCactiBullet::CheckCollision(int c_id)

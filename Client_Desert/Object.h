@@ -234,6 +234,8 @@ public:
 	ID3D12Resource					*m_pd3dcbSubUpload = NULL;
 	CB_SUBOBJECT_INFO				*m_pcbMappedSubInfo = NULL;
 
+public:
+	int								m_index = 0;
 	virtual void SetActiveState(bool isActve) { m_isActive = isActve; }
 	void SetEffectsType(UINT nMask, bool isOn);
 
@@ -316,7 +318,6 @@ public:
 
 public:
 	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) {};
-	virtual void	CollsionDetection(CGameObject* pObj) {};
 	virtual void	Update_object_anim(object_anim* _object_anim) {};
 protected:
 	virtual void	CreateComponent() {};

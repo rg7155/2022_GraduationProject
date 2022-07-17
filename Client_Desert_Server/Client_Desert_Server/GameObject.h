@@ -1,9 +1,11 @@
 #pragma once
 #include "Client_Desert_Server.h"
-constexpr float DAMAGE_COOLTIME = 1.2f;
+constexpr float DAMAGE_COOLTIME = 2.f;
 constexpr int VERSE1 = 0;
 constexpr int VERSE2 = 1;
 constexpr int VERSE3 = 2;
+constexpr int VERSE4 = 3;
+
 class CGameObject
 {
 public:
@@ -25,6 +27,8 @@ public:
 
 public:
 	virtual void Send_Packet_To_Clients(int c_id) {};
+	virtual void Send_Remove_Packet_To_Clients(int c_id) {};
+
 	virtual void CheckCollision(int c_id) {};
 	bool BoundingBox_Intersect(int c_id);
 	void UpdateBoundingBox();

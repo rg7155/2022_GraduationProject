@@ -13,8 +13,6 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-#define START_POS 25.0f, 0, 25.0f
-
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	//ShowCursor(false);
@@ -133,6 +131,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pSword->m_eObjId = OBJ_SWORD;
 
 	m_dir = DIR_UP;
+	m_isActive = true;
+
 }
 
 CPlayer::~CPlayer()
@@ -727,6 +727,9 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 
 	}
 		break;
+	case OBJ_BULLET:
+		SetDamaged();
+		break;
 	case OBJ_END:
 		break;
 	}
@@ -793,6 +796,11 @@ bool CPlayer::IsNowAttack()
 		return true;
 
 	return false;
+}
+
+void CPlayer::SetDamaged()
+{
+	Change_Animation(PLAYER::TAKE_DAMAGED);
 }
 
 void CPlayer::Set_object_anim(object_anim* _object_anim)
@@ -930,6 +938,7 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_0))
 	{
 		Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
+		SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))
@@ -960,6 +969,9 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 
 void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 {
+	if (m_eCurAnim == eNewAnim)
+		return;
+
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
 
