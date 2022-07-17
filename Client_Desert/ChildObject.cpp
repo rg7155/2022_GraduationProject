@@ -81,6 +81,7 @@ void CMapObject::CreateComponent()
 	if (m_strName.find("stonedoor") != string::npos)
 	{
 		m_pComCollision->m_isCollisionIgnore = false;
+		m_pComCollision->m_isStaticOOBB = false;
 	}
 	else if (m_strName.find("CollisionBox") != string::npos)
 	{
@@ -112,6 +113,11 @@ void CMapObject::Animate(float fTimeElapsed)
 	//BoundingOrientedBox if (m_xmOOBB.Intersects(iter->m_xmOOBB))
 	//m_xmOOBB = BoundingOrientedBox(XMFLOAT3(0.0f, 0.0f, 0.0f), XMFLOAT3(fx, fy, fz), XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f));
 
+	if (m_isCollisionBox && CInputDev::GetInstance()->KeyDown(DIKEYBOARD_B))
+	{
+		m_isCollisionBoxRender = !m_isCollisionBoxRender;
+	}
+
 	for (int i = 0; i < COM_END; ++i)
 		if (m_pComponent[i])
 			m_pComponent[i]->Update_Component(fTimeElapsed);
@@ -122,7 +128,10 @@ void CMapObject::Animate(float fTimeElapsed)
 
 void CMapObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
-	if (!m_isActive/* || m_isCollisionBox*/)
+	if (!m_isActive)
+		return;
+
+	if (m_isCollisionBox && !m_isCollisionBoxRender)
 		return;
 
 	UpdateShaderVariables(pd3dCommandList);
@@ -186,11 +195,15 @@ void CFootHoldMapObject::Animate(float fTimeElapsed)
 }
 
 #define DOOR_MAX_Y 2.39
-#define DOOR_MIN_Y -2.39
+#define DOOR_MIN_Y -3.39
+
+#define DUST_ACTIVE_TIME 0.1f
 
 CStoneDoorMapObject::CStoneDoorMapObject()
 {
 	//2.39
+	m_fDustActiveTime = DUST_ACTIVE_TIME;
+
 }
 
 CStoneDoorMapObject::~CStoneDoorMapObject()
@@ -204,16 +217,47 @@ void CStoneDoorMapObject::Animate(float fTimeElapsed)
 	if (m_iState == DOOR_UP)
 	{
 		if (xmf3Pos.y < DOOR_MAX_Y)
+		{
+			ActiveDust(fTimeElapsed);
 			xmf3Pos.y += fTimeElapsed * 10.f;
+		}
 	}
 	else if (m_iState == DOOR_DOWN)
 	{
 		if (xmf3Pos.y > DOOR_MIN_Y)
+		{
+			ActiveDust(fTimeElapsed);
 			xmf3Pos.y -= fTimeElapsed * 10.f;
+		}
 	}
 	SetPosition(xmf3Pos);
 
 	CMapObject::Animate(fTimeElapsed);
+}
+void CStoneDoorMapObject::ActiveDust(float fTimeElapsed)
+{
+	m_fDustActiveTime -= fTimeElapsed;
+	if (m_fDustActiveTime > 0.f)
+		return;
+
+	m_fDustActiveTime = DUST_ACTIVE_TIME;
+
+	for (int i = 0; i < 10; ++i)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Dust");
+		if (!pObj) return;
+
+		pObj->SetActiveState(true);
+
+		XMFLOAT3 xmf3Pos = GetPosition(), xmf3Right = GetLook(), xmf3Look = GetUp();
+		float fZ = m_pComCollision->m_xmOOBB.Extents.z; //8.,,
+		float fDis = RandomValue(-fZ, fZ);
+		xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(xmf3Right, fDis, false));
+		xmf3Look = Vector3::ScalarProduct(xmf3Look, 2.5f, false);
+		xmf3Pos = Vector3::Add(xmf3Pos, xmf3Look);
+		xmf3Pos.y = 0.f;
+		pObj->SetPosition(xmf3Pos);
+	}
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 #define BLUE_COLOR4 1.f / 255.f, 165.f / 255.f, 172.f / 255.f, 0.f
@@ -281,19 +325,24 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
 
 	m_xmf4x4Texture = Matrix4x4::Identity();
-	m_fSpeed = 0.001f;
 	//m_xmf4Color = { 1.f, 1.f, 1.f, 1.f };
 
 	m_eType = eType;
-	switch (eType)
-	{
-	case CMultiSpriteObject::SPRITE_WAVE:
-		break;
-	case CMultiSpriteObject::SPRITE_HIT:
-		m_isBiliboard = true;
-		m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
-		break;
-	}
+	//switch (eType)
+	//{
+	//case CMultiSpriteObject::SPRITE_WAVE:
+	//	m_fSpeed = 0.001f;
+	//	break;
+	//case CMultiSpriteObject::SPRITE_HIT:
+	//	m_fSpeed = 0.02f;
+	//	m_isBiliboard = true;
+	//	m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
+	//	break;
+	//case CMultiSpriteObject::SPRITE_SKILL2:
+	//	m_fSpeed = 0.05f;
+	//	m_xmf4Color = { BLUE_COLOR4 };
+	//	break;
+	//}
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
 }
@@ -321,6 +370,8 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 		SetLookAt(xmf3Target);
 	}
 
+	Rotate(0.f, 0.f, m_fRandRot);
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -334,6 +385,33 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_TEX_ANIM, &m_xmf4x4Texture);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
 	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+void CMultiSpriteObject::SetActiveState(bool isActive)
+{
+	CGameObject::SetActiveState(isActive);
+
+	if (!isActive)
+		return;
+
+	switch (m_eType)
+	{
+	case CMultiSpriteObject::SPRITE_SKILL1:
+		m_fSpeed = 0.001f;
+		break;
+	case CMultiSpriteObject::SPRITE_HIT:
+		m_fSpeed = 0.02f;
+		m_isBiliboard = true;
+		//m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
+		m_fRandRot = RandomValue(0.f, 360.f);
+		SetScale(RandomValue(2.f, 3.f), RandomValue(2.f, 3.f), RandomValue(2.f, 3.f));
+		break;
+	case CMultiSpriteObject::SPRITE_SKILL2:
+		m_fSpeed = 0.05f;
+		//m_xmf4Color = { BLUE_COLOR4 };
+		break;
+	}
+
 }
 
 void CMultiSpriteObject::AnimateRowColumn(float fTime)
@@ -486,7 +564,11 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		m_fAlpha = 0.f;
 		break;
 	case CUIObject::UI_PLAYER:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		if(CGameMgr::GetInstance()->GetId() == 0)
+			pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle_Player0.dds", 0);
+		else
+			pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle_Player1.dds", 0);
+
 		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.15f);
 		break;
 	case CUIObject::UI_PROFILE:
@@ -506,11 +588,17 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/TextBox.dds", 0);
 		SetOrthoWorld(1000, 200, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.83f);
 		SetActiveState(false);
-		m_fAlpha = 0.2;
+		m_fAlpha = 0.2f;
 		break;
 	case CUIObject::UI_CURSOR:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
 		break;
+	case CUIObject::UI_HIT_EFFECT:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HitEffect.dds", 0);
+		SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+		m_fAlpha = 0.f;
+		break;
+		
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -548,8 +636,7 @@ void CUIObject::Animate(float fTimeElapsed)
 				else if (!m_isChangeScene && m_fAlpha > 1.f)
 				{
 					m_isChangeScene = true;
-					//m_isStartFade = false; //수정
-					CGameMgr::GetInstance()->GetScene()->ChangeScene(SCENE::SCENE_2);
+					CGameMgr::GetInstance()->GetScene()->ChangeScene();
 				}
 			}
 		}
@@ -576,8 +663,21 @@ void CUIObject::Animate(float fTimeElapsed)
 		break;
 	case CUIObject::UI_CURSOR:
 		XMFLOAT2 Cursor = CGameMgr::GetInstance()->m_xmf2CursorPos;
-
 		SetOrthoWorld(21, 41, Cursor.x, Cursor.y);
+		break;
+	case CUIObject::UI_HIT_EFFECT:
+
+		if (m_isHit)
+		{
+			m_fValue += fTimeElapsed * 2.f; //0~1 -> 0~180
+			m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.3f;
+
+			if (m_fValue >= 1.f)
+			{
+				m_isHit = false;
+				m_fValue = 0.f;
+			}
+		}
 		break;
 	}
 
@@ -610,6 +710,7 @@ void CUIObject::SetFadeState(bool isIn)
 	else
 	{
 		m_isStartFade = true;
+		m_isChangeScene = false;
 		//페이드 아웃 - 어두워짐
 		m_fAlpha = 0.f;
 	}
@@ -742,9 +843,8 @@ void CPortalObject::Animate(float fTimeElapsed)
 
 	if (fDistanceToPlayer < RANGE && fDistanceToDuo < RANGE && !m_isOverlap)
 	{
+		CGameMgr::GetInstance()->GetScene()->ChangeSceneByFadeInOut();
 		m_isOverlap = true;
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Fade").front();
-		static_cast<CUIObject*>(pObj)->SetFadeState(false);
 		m_isActive = false;
 	}
 	CGameObject::Animate(fTimeElapsed);
@@ -811,6 +911,19 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		SetActiveState(true);
 		break;
+	case CTexturedObject::TEXTURE_DUST:
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f, 0.f, 0.f, 0.f, true);
+		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/fogSheet_o.dds", 0);
+		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/smoke_thick.dds", 0);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/smoke_thin.dds", 0);
+
+		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
+		pMaterial->m_iPipelineState = 1;
+
+		//SetActiveState(true);
+		m_isAlphaObject = true;
+
+		break;
 	}
 
 	SetMesh(pMesh);
@@ -845,9 +958,32 @@ void CTexturedObject::Animate(float fTimeElapsed)
 
 	case CTexturedObject::TEXTURE_HP:
 	case CTexturedObject::TEXTURE_HP_FRAME:
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		UpdateTransform(NULL);
+		break;
 	case CTexturedObject::TEXTURE_READY:
+		if (CGameMgr::GetInstance()->GetScene()->m_eCurScene != SCENE::SCENE_0)
+		{
+			SetActiveState(false);
+			return;
+		}
 		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
 		UpdateTransform(NULL); 
+		break;
+	case CTexturedObject::TEXTURE_DUST:
+		CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(this);
+
+		XMFLOAT3 xmf3Pos = GetPosition();
+		xmf3Pos.y += fTimeElapsed * m_fRandSpeed;
+		SetPosition(xmf3Pos);
+
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		Rotate(0.f, 0.f, m_fRandRot);
+		UpdateTransform(NULL);
+
+		m_fValue += fTimeElapsed * 3.f * RandomValue(0.5f, 2.f);
+		m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.1f;
+		if (m_fValue >= 1.f) SetActiveState(false);
 		break;
 	}
 
@@ -880,6 +1016,27 @@ void CTexturedObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dComma
 {
 	//PSAlphaTextured의 gfDissolve값 설정
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
+}
+
+void CTexturedObject::SetActiveState(bool isActve)
+{
+	CGameObject::SetActiveState(isActve);
+
+	if (!isActve)
+		return;
+
+	switch (m_eTextureType)
+	{
+	case CTexturedObject::TEXTURE_DUST:
+	{
+		m_fValue = 0.f;
+		m_fRandRot = RandomValue(0.f, 360.f);
+		m_fRandSpeed = RandomValue(0.5f, 1.f);
+		SetScale(RandomValue(0.5f, 3.5f), RandomValue(0.5f, 3.5f), RandomValue(0.5f, 3.5f));
+	}
+		break;
+	}
+
 }
 
 

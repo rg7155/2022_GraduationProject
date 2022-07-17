@@ -7,9 +7,9 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	char fileName[2048];
 	int id = *(int*)pContext;
 	if (id == 0)
-		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
-	else
 		strcpy(fileName, "Model/Adventurer_Aland_Green.bin");
+	else
+		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
 
 	CLoadedModelInfo* pPlayerModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, fileName, NULL);
 
@@ -38,6 +38,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail->SetRenderingTrail(false);
+	m_pReadyTex = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_READY);
 
 	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
 
@@ -51,6 +52,12 @@ CDuoPlayer::~CDuoPlayer()
 {
 	ReleaseShaderVariables();
 
+	if (m_pReadyTex)
+	{
+		m_pReadyTex->ReleaseUploadBuffers();
+		m_pReadyTex->ReleaseShaderVariables();
+		m_pReadyTex->Release();
+	}
 }
 
 void CDuoPlayer::CreateShaderVariables(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -70,10 +77,14 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 {
 	if (m_eCurAnim != PLAYER::SKILL1)
 		m_bSkill1EffectOn = false;
+	if (m_eCurAnim != PLAYER::SKILL2)
+		m_bSkill2EffectOn = false;
 
 	UpdateComponent(fTimeElapsed);
 	//·»´õ¸µ ²°´Ù Ä×´Ù-> °ø°ÝÇÒ¶§¸¸ ³ª¿À°Ô º¯°æ
 	m_pComTrail->SetRenderingTrail(IsNowAttack());
+
+	UpdateReadyTexture(fTimeElapsed);
 
 	// ¹Ù´Ú ÀÌÆåÆ®
 
@@ -92,6 +103,20 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 		}
 		m_bSkill1EffectOn = true;
 
+	}
+	else if (m_eCurAnim == PLAYER::ANIM::SKILL2 && !m_bSkill2EffectOn && fAnimElapseTime > 0.5f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Skill2");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			//xmf3Pos.x += m_xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			//xmf3Pos.z += m_xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(false);
+		}
+		m_bSkill2EffectOn = true;
 	}
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -140,6 +165,20 @@ void CDuoPlayer::UpdateComponent(float fTimeElapsed)
 
 	if (m_pComTrail)
 		m_pComTrail->AddTrail(m_pSwordTail->GetPosition(), m_pSword->GetPosition());
+}
+
+void CDuoPlayer::UpdateReadyTexture(float fTimeElapsed)
+{
+	if (!m_pReadyTex || !m_isReadyToggle) return;
+
+	m_pReadyTex->Animate(fTimeElapsed);
+
+	CScene* pScene = CGameMgr::GetInstance()->GetScene();
+	pScene->AddAlphaObjectToList(m_pReadyTex);
+
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += 2.f;
+	m_pReadyTex->SetPosition(xmf3Pos);
 }
 
 void CDuoPlayer::Update_object_anim(object_anim* _object_anim)

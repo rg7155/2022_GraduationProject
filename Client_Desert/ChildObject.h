@@ -32,9 +32,11 @@ public:
 public:
 	bool		m_isPlane = false;
 	bool		m_isCollisionBox = false;
+	bool		m_isCollisionBoxRender = false;
 
 	string		m_strName = "";
 	CCollision* m_pComCollision = nullptr;
+
 };
 
 class CStoneDoorMapObject;
@@ -66,7 +68,9 @@ public:
 	//virtual void Ready() override;
 	virtual void Animate(float fTimeElapsed) override;
 	//virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
-
+private:
+	void	ActiveDust(float fTimeElapsed);
+	float	m_fDustActiveTime = 0.f;
 public:
 	int		m_iState = 0;
 };
@@ -91,7 +95,7 @@ public:
 class CMultiSpriteObject : public CGameObject
 {
 public:
-	enum SPRITE_TYPE { SPRITE_WAVE, SPRITE_HIT, SPRITE_END };
+	enum SPRITE_TYPE { SPRITE_SKILL1, SPRITE_HIT, SPRITE_SKILL2, SPRITE_END };
 
 public:
 	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, SPRITE_TYPE eType);
@@ -101,6 +105,8 @@ public:
 
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
+
+	virtual void SetActiveState(bool isActive) override;
 
 	void SetColor(bool isHero = true);
 
@@ -118,6 +124,7 @@ public:
 	float				m_fTime = 0.0f;
 
 	bool				m_isBiliboard = false;
+	float				m_fRandRot = 0.f;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -147,7 +154,7 @@ private:
 class CUIObject : public CGameObject
 {
 public:
-	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY_BTN, UI_READY_BTN_CLK, UI_QUEST, UI_CURSOR, UI_END };
+	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY_BTN, UI_READY_BTN_CLK, UI_QUEST, UI_CURSOR, UI_HIT_EFFECT, UI_END };
 
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
@@ -165,6 +172,7 @@ public:
 public:
 	UI_TYPE		m_eUIType = UI_END;
 	CUIObject* m_pButtonToggle = nullptr;
+	bool		m_isHit = false;
 
 private:
 	float	m_fAlpha = 0.f;
@@ -177,6 +185,7 @@ private:
 
 	bool		m_isOnceRender = false;
 
+	float		m_fValue = 0.f;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -216,7 +225,7 @@ private:
 class CTexturedObject : public CGameObject
 {
 public:
-	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_READY, TEXTURE_END };
+	enum TEXTURE_TYPE { TEXTURE_QUAKE, TEXTURE_HP, TEXTURE_HP_FRAME, TEXTURE_READY, TEXTURE_DUST, TEXTURE_END };
 
 	CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, TEXTURE_TYPE eType);
 	virtual ~CTexturedObject();
@@ -228,10 +237,17 @@ public:
 
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
+	virtual void SetActiveState(bool isActve) override;
+
 public:
 	TEXTURE_TYPE		m_eTextureType = TEXTURE_END;
 private:
 	float	m_fAlpha = 0.f;
 	bool	m_isAlphaObject = false;
+	float	m_fRandRot = 0.f;
+	float	m_fRandSpeed = 0.f;
+	float	m_fValue = 0.f;
+
+	
 };
 

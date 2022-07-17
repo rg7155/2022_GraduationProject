@@ -236,8 +236,7 @@ public:
 
 public:
 	int								m_index = 0;
-
-	void SetActiveState(bool isActve) { m_isActive = isActve; }
+	virtual void SetActiveState(bool isActve) { m_isActive = isActve; }
 	void SetEffectsType(UINT nMask, bool isOn);
 
 	void SetMesh(CMesh *pMesh);

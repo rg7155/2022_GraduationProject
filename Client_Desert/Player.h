@@ -105,7 +105,7 @@ private:
 private:
 	bool Check_Input(float fTimeElapsed);
 	bool Check_MoveInput();
-
+	void Check_CreateEffect();
 public:
 	void Change_Animation(PLAYER::ANIM eNewAnim);
 
@@ -143,6 +143,8 @@ private:
 	bool	m_bBattleOn;
 	bool	m_bBlendingOn;
 	bool	m_bSkill1EffectOn;
+	bool	m_bSkill2EffectOn;
+
 public:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;
@@ -151,13 +153,14 @@ public:
 
 public:
 	void	ClickedReadyButton() { m_isReadyToggle = !m_isReadyToggle; }
+	bool	m_isReadyToggle = false;
 
 private:
 	void UpdateReadyTexture(float fTimeElapsed);
 	void MovePosByCollision();
+	void HitEffectOn();
 
 	CGameObject*	m_pReadyTex = nullptr;
-	bool			m_isReadyToggle = false;
 
 	vector<vector<XMFLOAT3>> m_vecLine;
 };

@@ -1,6 +1,8 @@
 #ifndef Define_h__
 #define Define_h__
 
+#define _CRT_SECURE_NO_WARNINGS
+
 #define FRAME_BUFFER_WIDTH				1280/*800/*640*/
 #define FRAME_BUFFER_HEIGHT				720/*600/*480*/
 
@@ -8,7 +10,7 @@
 
 #define EPSILON					1.0e-10f
 
-#define USE_SERVER 1
+//#define USE_SERVER 1
 
 #define PLAYER_SPEED					10.f
 #define BLENDING_TIME					0.3f

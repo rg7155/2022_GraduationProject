@@ -32,13 +32,14 @@ CScene::~CScene()
 void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *pd3dCommandList)
 {
 	m_eCurScene = SCENE_0;
+	m_eGoalScene = SCENE_0;
 
 	m_pd3dGraphicsRootSignature = CreateGraphicsRootSignature(pd3dDevice);
 
 	//전에는 각 쉐이더마다 DescriptorHeap을 만들었다. 지금은 씬에서 딱 한번만 만든다. 이게 편할수도
 	//이러면 미리 텍스쳐 몇개 쓰는지 알아야함->오브젝트 추가 될때마다 늘려줘야함
 	//미리 여유공간 만들어 놔도 됨->메모리 낭비?지만 터짐 방지
-	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+150); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
+	CreateCbvSrvDescriptorHeaps(pd3dDevice, 0, 13+200); //skybox-1, terrain-2, player-1, map-3, depth-4, traill-1, explsion-1
 
 	CMaterial::PrepareShaders(pd3dDevice, pd3dCommandList, m_pd3dGraphicsRootSignature); 
 
@@ -140,6 +141,16 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		m_pStandardObjectShader->AddObject(L"CactiBullet", pObj);
 	}
 
+	//퍼즐 바닥 안개 이펙트
+	//XMFLOAT3 xmf3Pos = Scene1_SpawnPos;
+	for (int i = 0; i < 80; ++i)
+	{
+		pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_DUST);
+		pObj->SetActiveState(false);
+		//xmf3Pos.z += 1.f;
+		//pObj->SetPosition(xmf3Pos);
+		m_pStandardObjectShader->AddObject(L"Dust", pObj);
+	}
 }
 
 
@@ -247,10 +258,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 {
 	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
 	{
-		int cur = (int)m_eCurScene + 1;
-		SCENE eScene = (SCENE)cur;
-		if(eScene < SCENE_END)
-			ChangeScene(eScene);
+		ChangeSceneByFadeInOut();
 	}
 	
 	//TCHAR szTest[32] = L"";
@@ -281,6 +289,17 @@ void CScene::AnimateObjects(float fTimeElapsed)
 	//플레이어-맵 충돌
 	switch (m_eCurScene)
 	{
+	case SCENE_0:
+#ifdef USE_SERVER
+		if (m_eGoalScene == SCENE_0 && m_pPlayer->m_isReadyToggle && m_pDuoPlayer->m_isReadyToggle)
+			ChangeSceneByFadeInOut();
+#else //디버깅 용
+		if (m_eGoalScene == SCENE_0 && m_pPlayer->m_isReadyToggle)
+			ChangeSceneByFadeInOut();
+#endif // USE_SERVER
+
+		
+
 	case SCENE_1:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"));
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pStandardObjectShader->GetObjectList(L"CactiBullet"), 1.5f);
@@ -291,7 +310,6 @@ void CScene::AnimateObjects(float fTimeElapsed)
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map2"));
 		break;
 	}
-	///////////////////////////////////////////////////////////////////////////////////
 
 }
 
@@ -367,18 +385,34 @@ CGameObject* CScene::SetActiveObjectFromShader(const wchar_t* pShaderTag, const 
 		return nullptr;
 }
 
-void CScene::ChangeScene(SCENE eScene)
+//Fade In,Out으로 씬 변경 시작 함수
+void CScene::ChangeSceneByFadeInOut()
 {
-	m_eCurScene = eScene;
+	CUIObject* pFade = static_cast<CUIObject*>(m_pUIObjectShader->GetObjectList(L"UI_Fade").front());
+	if (!pFade) return;
 
-	switch (eScene)
+	int cur = (int)m_eCurScene + 1;
+	SCENE eScene = (SCENE)cur;
+	if (eScene >= SCENE_END) return;
+
+	m_eGoalScene = eScene;
+
+	pFade->SetFadeState(false);
+}
+
+//실제로 씬이 바뀔때 Fade오브젝트에서 불리는 함수(화면 어두울때)
+void CScene::ChangeScene()
+{
+	m_eCurScene = m_eGoalScene;
+
+	switch (m_eCurScene)
 	{
 	case SCENE_1:
 		m_pPlayer->SetPosition(Scene1_SpawnPos);
 		m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
 
-
-		m_pMapObjectShader->ChangeMap(eScene);
+		m_pMapObjectShader->ActiveObjectByChangeScene(m_eCurScene);
+		m_pUIObjectShader->ActiveObjectByChangeScene(m_eCurScene);
 
 		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
 		
@@ -386,7 +420,7 @@ void CScene::ChangeScene(SCENE eScene)
 	case SCENE_2:
 		m_pPlayer->SetPosition(Scene2_SpawnPos);
 
-		m_pMapObjectShader->ChangeMap(eScene);
+		m_pMapObjectShader->ActiveObjectByChangeScene(m_eCurScene);
 
 		m_pDepthRenderShader->m_isStaticRender = false;
 

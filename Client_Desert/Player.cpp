@@ -49,8 +49,6 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	//SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
 	SetPosition(Scene0_SpawnPos);
 	//SetPosition(Scene1_SpawnPos);
-	
-	Rotate(0.f, 180.f, 0.f);
 	////////////////////////////////////////////////////////////
 
 
@@ -392,7 +390,17 @@ void CPlayer::Update(float fTimeElapsed)
 	DWORD nCurrentCameraMode = m_pCamera->GetMode();
 	//if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->Update(m_xmf3Position, fTimeElapsed);
 	if (m_pCameraUpdatedContext) OnCameraUpdateCallback(fTimeElapsed);
-	if (nCurrentCameraMode == THIRD_PERSON_CAMERA) m_pCamera->SetLookAt(m_xmf3Position);
+	if (nCurrentCameraMode == THIRD_PERSON_CAMERA)
+	{
+		if (CGameMgr::GetInstance()->GetScene()->m_eCurScene != SCENE::SCENE_0)
+			m_pCamera->SetLookAt(m_xmf3Position);
+		else
+		{
+			XMFLOAT3 xmf3Pos = {40.f, 0.f, 60.f}/*m_xmf3Position*/;
+			xmf3Pos.y += 2.f;
+			m_pCamera->SetLookAt(xmf3Pos);
+		}
+	}
 	m_pCamera->RegenerateViewMatrix();
 
 	m_xmf3Velocity = {0.00f,0.00f ,0.00f };
@@ -411,22 +419,8 @@ void CPlayer::Update(float fTimeElapsed)
 	//MovePosByCollision();
 	////////////////////////////////////////////
 
-	// 바닥 이펙트
+	Check_CreateEffect();
 
-	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
-	{
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
-		if (pObj) {
-			XMFLOAT3 xmf3Pos = GetPosition();
-			xmf3Pos.x += m_xmf3Look.x;
-			xmf3Pos.y += 0.1f;
-			xmf3Pos.z += m_xmf3Look.z;
-			pObj->SetPosition(xmf3Pos);
-			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
-		}
-		m_bSkill1EffectOn = true;
-
-	}
 	// 애니메이션이 끝나면 이펙트 끄는 것 해야함
 	
 	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
@@ -452,6 +446,53 @@ void CPlayer::Update(float fTimeElapsed)
 				Change_Animation(PLAYER::ANIM::IDLE);
 			else
 				Change_Animation(PLAYER::ANIM::IDLE_RELAXED);
+		}
+	}
+
+}
+
+void CPlayer::Check_CreateEffect()
+{
+	// 바닥 이펙트
+	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			xmf3Pos.x += m_xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			xmf3Pos.z += m_xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
+		}
+		m_bSkill1EffectOn = true;
+	}
+	else if (m_eCurAnim == PLAYER::ANIM::SKILL2 && !m_bSkill2EffectOn && m_fAnimElapsedTime > 0.5f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Skill2");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			//xmf3Pos.x += m_xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			//xmf3Pos.z += m_xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
+		}
+		m_bSkill2EffectOn = true;
+	}
+
+
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_3))
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"HitEffect");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			xmf3Pos.y += 0.5f;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
 		}
 	}
 
@@ -619,6 +660,7 @@ void CPlayer::UpdateComponent(float fTimeElapsed)
 		pCol->m_isCollisionIgnore = false;
 	else
 		pCol->m_isCollisionIgnore = true;
+
 }
 
 void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
@@ -732,6 +774,14 @@ void CPlayer::MovePosByCollision()//충돌한 선분중 가까운 선분 한개와 밀어내기 이
 	//cout << xmf3Line[1].x << "," << xmf3Line[1].y << "," << xmf3Line[1].z << "," << endl;
 
 	m_vecLine.clear();
+}
+
+void CPlayer::HitEffectOn()
+{
+	CUIObject* pEffect = static_cast<CUIObject*>(CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Hit_Effect").front());
+	if (!pEffect) return;
+
+	pEffect->m_isHit = true;
 }
 
 bool CPlayer::IsNowAttack()
@@ -923,7 +973,8 @@ void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 
 	if (m_eCurAnim != PLAYER::SKILL1)
 		m_bSkill1EffectOn = false;
-
+	if (m_eCurAnim != PLAYER::SKILL2)
+		m_bSkill2EffectOn = false;
 
 	m_fAnimElapsedTime = 0.f;
 	m_fBlendingTime = 0.f;
@@ -999,6 +1050,8 @@ bool CPlayer::Check_MoveInput()
 		return false;
 
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 

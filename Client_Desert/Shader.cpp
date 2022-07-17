@@ -569,7 +569,8 @@ CGameObject* CStandardObjectsShader::SetActive(const wchar_t* pObjTag)
 	{
 		if (!list_iter->m_isActive)
 		{
-			list_iter->m_isActive = true;
+			//list_iter->m_isActive = true;
+			list_iter->SetActiveState(true);
 			return list_iter;
 		}
 	}
@@ -585,6 +586,17 @@ void CStandardObjectsShader::SetInactiveAllObject()
 	for (auto& iter : m_mapObject)
 		for (auto& iterSec : iter.second)
 			iterSec->SetActiveState(false);
+}
+
+void CStandardObjectsShader::SetActiveStateObjects(const wchar_t* pObjTag, bool isActive)
+{
+	auto& iter = m_mapObject.find(pObjTag);
+	if (iter == m_mapObject.end())
+		return;
+
+	for (auto& list_iter : iter->second)
+		list_iter->SetActiveState(isActive);
+
 }
 
 void CStandardObjectsShader::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
@@ -730,7 +742,7 @@ void CMapObjectsShader::LoadFromFile(ID3D12Device* pd3dDevice, ID3D12GraphicsCom
 
 }
 
-void CMapObjectsShader::ChangeMap(SCENE eScene)
+void CMapObjectsShader::ActiveObjectByChangeScene(SCENE eScene)
 {
 	SetInactiveAllObject();
 
@@ -1112,9 +1124,11 @@ HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12
 	CMultiSpriteObject::SPRITE_TYPE eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_END;
 
 	if (!wcscmp(pObjTag, L"Shockwave"))
-		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_WAVE;
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_SKILL1;
 	else if (!wcscmp(pObjTag, L"HitEffect"))
 		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_HIT;
+	else if (!wcscmp(pObjTag, L"Skill2"))
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_SKILL2;
 
 	pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, eType);
 	pObject->SetMesh(pMesh);
@@ -1143,10 +1157,11 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	m_mapObjectInfo.emplace(L"Shockwave", make_pair(pMesh, pMaterial));
 	for(int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Shockwave");
 
+
 	//È÷Æ® ÀÌÆåÆ®
-	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 5.f, 0.f);
-	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 8, 8);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_shockwave_B-x8.dds", 0);
+	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 2, 5);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX16.dds", 0);
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
@@ -1155,6 +1170,20 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_mapObjectInfo.emplace(L"HitEffect", make_pair(pMesh, pMaterial));
 	for (int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"HitEffect");
+
+
+	//½ºÅ³2 ÀÌÆåÆ®
+	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 0.f, 5.f);
+	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 2, 7);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX36.dds", 0);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	m_mapObjectInfo.emplace(L"Skill2", make_pair(pMesh, pMaterial));
+	for (int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Skill2");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
@@ -1246,8 +1275,10 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PROFILE);
 	AddObject(L"UI_Info", pObject); 
+	pObject->SetActiveState(false);
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PLAYER);
 	AddObject(L"UI_Info", pObject);
+	pObject->SetActiveState(false);
 
 	//Äù½ºÆ®
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_QUEST);
@@ -1262,8 +1293,12 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	static_cast<CUIObject*>(pObject1)->m_pButtonToggle = static_cast<CUIObject*>(pObject);
 
 
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_HIT_EFFECT);
+	AddObject(L"UI_Hit_Effect", pObject);
+
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_CURSOR);
 	AddObject(L"UI_Cursor", pObject);
+
 
 	//Á© ¸¶Áö¸·¿¡ »ðÀÔ
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);
@@ -1276,6 +1311,24 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 void CUIObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
 {
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
+}
+
+void CUIObjectsShader::ActiveObjectByChangeScene(SCENE eScene)
+{
+	switch (eScene)
+	{
+	case SCENE_0:
+		break;
+	case SCENE_1:
+	{
+		SetActiveStateObjects(L"UI_Button", false);
+		SetActiveStateObjects(L"UI_Info", true);
+	}
+		break;
+	case SCENE_2:
+		break;
+	}
+
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -72,7 +72,8 @@ public:
 	void ReleaseUploadBuffers();
 
 	CGameObject* SetActiveObjectFromShader(const wchar_t* pShaderTag, const wchar_t* pObjTag);
-	void ChangeScene(SCENE eScene);
+	void ChangeSceneByFadeInOut();
+	void ChangeScene();
 	void AddAlphaObjectToList(CGameObject* pObj);
 	void SetPointLightPos(XMFLOAT3& xmf3Pos);
 	void AddTextToUILayer(int iIndex);
@@ -123,6 +124,7 @@ public:
 	CTextureToViewportShader			*m_pShadowMapToViewport = NULL;
 
 	SCENE								m_eCurScene = SCENE_END;
+	SCENE								m_eGoalScene = SCENE_END;
 
 	UILayer								*m_pUILayer = NULL;
 protected:
