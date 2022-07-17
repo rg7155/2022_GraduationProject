@@ -77,6 +77,8 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 {
 	if (m_eCurAnim != PLAYER::SKILL1)
 		m_bSkill1EffectOn = false;
+	if (m_eCurAnim != PLAYER::SKILL2)
+		m_bSkill2EffectOn = false;
 
 	UpdateComponent(fTimeElapsed);
 	//렌더링 껐다 켰다-> 공격할때만 나오게 변경
@@ -101,6 +103,20 @@ void CDuoPlayer::Animate(float fTimeElapsed)
 		}
 		m_bSkill1EffectOn = true;
 
+	}
+	else if (m_eCurAnim == PLAYER::ANIM::SKILL2 && !m_bSkill2EffectOn && fAnimElapseTime > 0.5f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Skill2");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			//xmf3Pos.x += m_xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			//xmf3Pos.z += m_xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(false);
+		}
+		m_bSkill2EffectOn = true;
 	}
 	CGameObject::Animate(fTimeElapsed);
 }

@@ -94,7 +94,7 @@ public:
 class CMultiSpriteObject : public CGameObject
 {
 public:
-	enum SPRITE_TYPE { SPRITE_WAVE, SPRITE_HIT, SPRITE_END };
+	enum SPRITE_TYPE { SPRITE_SKILL1, SPRITE_HIT, SPRITE_SKILL2, SPRITE_END };
 
 public:
 	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, SPRITE_TYPE eType);
@@ -104,6 +104,8 @@ public:
 
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true);
+
+	virtual void SetActiveState(bool isActive) override;
 
 	void SetColor(bool isHero = true);
 
@@ -121,6 +123,7 @@ public:
 	float				m_fTime = 0.0f;
 
 	bool				m_isBiliboard = false;
+	float				m_fRandRot = 0.f;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -105,7 +105,7 @@ private:
 private:
 	bool Check_Input(float fTimeElapsed);
 	bool Check_MoveInput();
-
+	void Check_CreateEffect();
 public:
 	void Change_Animation(PLAYER::ANIM eNewAnim);
 
@@ -141,6 +141,8 @@ private:
 	bool	m_bBattleOn;
 	bool	m_bBlendingOn;
 	bool	m_bSkill1EffectOn;
+	bool	m_bSkill2EffectOn;
+
 public:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;

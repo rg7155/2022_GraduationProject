@@ -569,7 +569,8 @@ CGameObject* CStandardObjectsShader::SetActive(const wchar_t* pObjTag)
 	{
 		if (!list_iter->m_isActive)
 		{
-			list_iter->m_isActive = true;
+			//list_iter->m_isActive = true;
+			list_iter->SetActiveState(true);
 			return list_iter;
 		}
 	}
@@ -1119,9 +1120,11 @@ HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12
 	CMultiSpriteObject::SPRITE_TYPE eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_END;
 
 	if (!wcscmp(pObjTag, L"Shockwave"))
-		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_WAVE;
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_SKILL1;
 	else if (!wcscmp(pObjTag, L"HitEffect"))
 		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_HIT;
+	else if (!wcscmp(pObjTag, L"Skill2"))
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_SKILL2;
 
 	pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, eType);
 	pObject->SetMesh(pMesh);
@@ -1150,10 +1153,11 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	m_mapObjectInfo.emplace(L"Shockwave", make_pair(pMesh, pMaterial));
 	for(int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Shockwave");
 
+
 	//È÷Æ® ÀÌÆåÆ®
-	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 5.f, 0.f);
-	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 8, 8);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_shockwave_B-x8.dds", 0);
+	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 2, 5);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX16.dds", 0);
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
@@ -1162,6 +1166,20 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_mapObjectInfo.emplace(L"HitEffect", make_pair(pMesh, pMaterial));
 	for (int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"HitEffect");
+
+
+	//½ºÅ³2 ÀÌÆåÆ®
+	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 0.f, 5.f);
+	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 2, 7);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX36.dds", 0);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	m_mapObjectInfo.emplace(L"Skill2", make_pair(pMesh, pMaterial));
+	for (int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Skill2");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)

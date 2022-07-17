@@ -419,22 +419,8 @@ void CPlayer::Update(float fTimeElapsed)
 	//MovePosByCollision();
 	////////////////////////////////////////////
 
-	// ¹Ù´Ú ÀÌÆåÆ®
+	Check_CreateEffect();
 
-	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
-	{
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
-		if (pObj) {
-			XMFLOAT3 xmf3Pos = GetPosition();
-			xmf3Pos.x += m_xmf3Look.x;
-			xmf3Pos.y += 0.1f;
-			xmf3Pos.z += m_xmf3Look.z;
-			pObj->SetPosition(xmf3Pos);
-			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
-		}
-		m_bSkill1EffectOn = true;
-
-	}
 	// ¾Ö´Ï¸ÞÀÌ¼ÇÀÌ ³¡³ª¸é ÀÌÆåÆ® ²ô´Â °Í ÇØ¾ßÇÔ
 	
 	//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_N))
@@ -460,6 +446,53 @@ void CPlayer::Update(float fTimeElapsed)
 				Change_Animation(PLAYER::ANIM::IDLE);
 			else
 				Change_Animation(PLAYER::ANIM::IDLE_RELAXED);
+		}
+	}
+
+}
+
+void CPlayer::Check_CreateEffect()
+{
+	// ¹Ù´Ú ÀÌÆåÆ®
+	if (m_eCurAnim == PLAYER::ANIM::SKILL1 && !m_bSkill1EffectOn && m_fAnimElapsedTime > 1.0f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Shockwave");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			xmf3Pos.x += m_xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			xmf3Pos.z += m_xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
+		}
+		m_bSkill1EffectOn = true;
+	}
+	else if (m_eCurAnim == PLAYER::ANIM::SKILL2 && !m_bSkill2EffectOn && m_fAnimElapsedTime > 0.5f)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Skill2");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			//xmf3Pos.x += m_xmf3Look.x;
+			xmf3Pos.y += 0.1f;
+			//xmf3Pos.z += m_xmf3Look.z;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
+		}
+		m_bSkill2EffectOn = true;
+	}
+
+
+	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_3))
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"HitEffect");
+		if (pObj)
+		{
+			XMFLOAT3 xmf3Pos = GetPosition();
+			xmf3Pos.y += 0.5f;
+			pObj->SetPosition(xmf3Pos);
+			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
 		}
 	}
 
@@ -928,7 +961,8 @@ void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 
 	if (m_eCurAnim != PLAYER::SKILL1)
 		m_bSkill1EffectOn = false;
-
+	if (m_eCurAnim != PLAYER::SKILL2)
+		m_bSkill2EffectOn = false;
 
 	m_fAnimElapsedTime = 0.f;
 	m_fBlendingTime = 0.f;
@@ -1004,6 +1038,8 @@ bool CPlayer::Check_MoveInput()
 		return false;
 
 }
+
+
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 

@@ -30,6 +30,7 @@ private:
 	CGameObject* m_pSwordTail = NULL;
 
 	bool	m_bSkill1EffectOn;
+	bool	m_bSkill2EffectOn = false;;
 
 	CGameObject*	m_pReadyTex = nullptr;
 

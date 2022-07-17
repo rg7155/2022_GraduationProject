@@ -322,19 +322,24 @@ CMultiSpriteObject::CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//m_fSpeed = 3.0f / (ppSpriteTextures[j]->m_nRows * ppSpriteTextures[j]->m_nCols);
 
 	m_xmf4x4Texture = Matrix4x4::Identity();
-	m_fSpeed = 0.001f;
 	//m_xmf4Color = { 1.f, 1.f, 1.f, 1.f };
 
 	m_eType = eType;
-	switch (eType)
-	{
-	case CMultiSpriteObject::SPRITE_WAVE:
-		break;
-	case CMultiSpriteObject::SPRITE_HIT:
-		m_isBiliboard = true;
-		m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
-		break;
-	}
+	//switch (eType)
+	//{
+	//case CMultiSpriteObject::SPRITE_WAVE:
+	//	m_fSpeed = 0.001f;
+	//	break;
+	//case CMultiSpriteObject::SPRITE_HIT:
+	//	m_fSpeed = 0.02f;
+	//	m_isBiliboard = true;
+	//	m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
+	//	break;
+	//case CMultiSpriteObject::SPRITE_SKILL2:
+	//	m_fSpeed = 0.05f;
+	//	m_xmf4Color = { BLUE_COLOR4 };
+	//	break;
+	//}
 
 	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
 }
@@ -362,6 +367,8 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 		SetLookAt(xmf3Target);
 	}
 
+	Rotate(0.f, 0.f, m_fRandRot);
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -375,6 +382,33 @@ void CMultiSpriteObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_TEX_ANIM, &m_xmf4x4Texture);
 	SetCBVInfo(pd3dCommandList, CGameObject::CBV_COLOR, &m_xmf4Color);
 	CGameObject::Render(pd3dCommandList, pCamera);
+}
+
+void CMultiSpriteObject::SetActiveState(bool isActive)
+{
+	CGameObject::SetActiveState(isActive);
+
+	if (!isActive)
+		return;
+
+	switch (m_eType)
+	{
+	case CMultiSpriteObject::SPRITE_SKILL1:
+		m_fSpeed = 0.001f;
+		break;
+	case CMultiSpriteObject::SPRITE_HIT:
+		m_fSpeed = 0.02f;
+		m_isBiliboard = true;
+		//m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
+		m_fRandRot = RandomValue(0.f, 360.f);
+		SetScale(RandomValue(2.f, 3.f), RandomValue(2.f, 3.f), RandomValue(2.f, 3.f));
+		break;
+	case CMultiSpriteObject::SPRITE_SKILL2:
+		m_fSpeed = 0.05f;
+		//m_xmf4Color = { BLUE_COLOR4 };
+		break;
+	}
+
 }
 
 void CMultiSpriteObject::AnimateRowColumn(float fTime)
