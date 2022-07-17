@@ -486,12 +486,17 @@ void CPlayer::Check_CreateEffect()
 
 	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_3))
 	{
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"HitEffect");
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Wind");
 		if (pObj)
 		{
-			XMFLOAT3 xmf3Pos = GetPosition();
+			XMFLOAT3 xmf3Pos = GetPosition(), xmf3Look = GetLook();
+			xmf3Look = Vector3::ScalarProduct(xmf3Look, -1.f);
+			XMFLOAT3 xmf3LookAt = Vector3::Add(xmf3Pos, xmf3Look);
 			xmf3Pos.y += 0.5f;
+
 			pObj->SetPosition(xmf3Pos);
+			pObj->SetLookAt(xmf3LookAt, true);
+
 			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
 		}
 	}

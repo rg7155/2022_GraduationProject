@@ -91,6 +91,12 @@ extern HWND								g_hWnd;
 #pragma comment(lib, "d2d1.lib")
 #pragma comment(lib, "dwrite.lib")
 
+// 사운드파일 추가
+#include <io.h>
+#include <random>
+#include "fmod.h"
+//#pragma comment (lib, "fmodex_vc.lib")
+
 // TODO: 프로그램에 필요한 추가 헤더는 여기에서 참조합니다.
 
 

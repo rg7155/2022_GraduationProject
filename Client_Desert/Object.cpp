@@ -719,6 +719,7 @@ void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, bool isYFix /*= false*/)
 {
 	XMFLOAT3 xmf3Pos = GetPosition(), xmf3Up = {0.f, 1.f, 0.f};
+	if (isYFix) xmf3Target.y = xmf3Pos.y;
 	XMFLOAT3 xmf3Look = Vector3::Subtract(xmf3Target, xmf3Pos, true);
 	XMFLOAT3 xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
 

@@ -94,7 +94,7 @@ public:
 class CMultiSpriteObject : public CGameObject
 {
 public:
-	enum SPRITE_TYPE { SPRITE_SKILL1, SPRITE_HIT, SPRITE_SKILL2, SPRITE_END };
+	enum SPRITE_TYPE { SPRITE_SKILL1, SPRITE_HIT, SPRITE_SKILL2, SPRITE_WIND, SPRITE_END };
 
 public:
 	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, SPRITE_TYPE eType);
@@ -124,6 +124,9 @@ public:
 
 	bool				m_isBiliboard = false;
 	float				m_fRandRot = 0.f;
+
+	XMFLOAT3			m_xmf3Dir;
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

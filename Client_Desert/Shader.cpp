@@ -1125,6 +1125,8 @@ HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12
 		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_HIT;
 	else if (!wcscmp(pObjTag, L"Skill2"))
 		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_SKILL2;
+	else if (!wcscmp(pObjTag, L"Wind"))
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_WIND;
 
 	pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, eType);
 	pObject->SetMesh(pMesh);
@@ -1180,6 +1182,20 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_mapObjectInfo.emplace(L"Skill2", make_pair(pMesh, pMaterial));
 	for (int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Skill2");
+
+
+	//보스 바람 이펙트
+	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 0.f, 5.f);
+	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 2, 7);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX11.dds", 0);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	m_mapObjectInfo.emplace(L"Wind", make_pair(pMesh, pMaterial));
+	for (int i = 0; i < 10; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Wind");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)

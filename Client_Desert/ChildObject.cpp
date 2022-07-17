@@ -369,6 +369,24 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 
 	Rotate(0.f, 0.f, m_fRandRot);
 
+	switch (m_eType)
+	{
+	case CMultiSpriteObject::SPRITE_SKILL1:
+		break;
+	case CMultiSpriteObject::SPRITE_HIT:
+		break;
+	case CMultiSpriteObject::SPRITE_SKILL2:
+		break;
+	case CMultiSpriteObject::SPRITE_WIND:
+	{
+		XMFLOAT3 xmf3Pos = GetPosition(), xmf3Look = GetLook();
+		xmf3Look = Vector3::ScalarProduct(xmf3Look, -1.f);
+		xmf3Pos = Vector3::Add(xmf3Pos, xmf3Look, 5.f * fTimeElapsed);
+		SetPosition(xmf3Pos);
+	}
+		break;
+	}
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -405,6 +423,11 @@ void CMultiSpriteObject::SetActiveState(bool isActive)
 		break;
 	case CMultiSpriteObject::SPRITE_SKILL2:
 		m_fSpeed = 0.05f;
+		//m_xmf4Color = { BLUE_COLOR4 };
+		break;
+	case CMultiSpriteObject::SPRITE_WIND:
+		m_fSpeed = 0.04f;
+		SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 		//m_xmf4Color = { BLUE_COLOR4 };
 		break;
 	}

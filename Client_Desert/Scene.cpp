@@ -7,7 +7,7 @@
 #include "CollsionMgr.h"
 #include "Monster.h"
 #include "UILayer.h"
-
+#include "SoundMgr.h"
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
 D3D12_CPU_DESCRIPTOR_HANDLE	CScene::m_d3dCbvCPUDescriptorStartHandle;
@@ -51,6 +51,8 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
+	CSoundMgr::GetInstance()->Initialize();
+	//CSoundMgr::GetInstance()->PlayBGM(L"Boss_DemonLord.ogg");
 }
 
 void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)

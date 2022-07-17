@@ -198,6 +198,12 @@
     <ClInclude Include="ServerManager.h">
       <Filter>소스 파일\99. Mgr</Filter>
     </ClInclude>
+    <ClInclude Include="SoundMgr.h">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClInclude>
+    <ClInclude Include="Fmod\fmod.h">
+      <Filter>소스 파일\98. Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Client_Desert.cpp">
@@ -291,6 +297,9 @@
       <Filter>소스 파일\10. UILayer</Filter>
     </ClCompile>
     <ClCompile Include="ServerManager.cpp">
+      <Filter>소스 파일\99. Mgr</Filter>
+    </ClCompile>
+    <ClCompile Include="SoundMgr.cpp">
       <Filter>소스 파일\99. Mgr</Filter>
     </ClCompile>
   </ItemGroup>
