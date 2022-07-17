@@ -461,7 +461,7 @@ void CGameFramework::BuildObjects()
 	m_pScene->m_pPlayer = m_pPlayer = pPlayer;
 	m_pCamera = m_pPlayer->GetCamera();
 
-	m_pScene->CreateDuoPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), 1-id);
+	m_pScene->CreateDuoPlayer(m_pd3dDevice, m_pd3dCommandList, m_pScene->GetGraphicsRootSignature(), id);
 	/// ///////////////////
 	CGameMgr::GetInstance()->SetPlayer(m_pPlayer);
 	CGameMgr::GetInstance()->SetCamera(m_pCamera); 

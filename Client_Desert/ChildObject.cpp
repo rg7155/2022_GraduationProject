@@ -189,8 +189,6 @@ void CFootHoldMapObject::Animate(float fTimeElapsed)
 		for (auto& iter : m_vecStoneDoor)
 			iter->m_iState = DOOR_UP;
 	}
-	cout << GetPosition().x << ' ' << GetPosition().y << ' '<<GetPosition().z << ' ' << endl;
-
 	CMapObject::Animate(fTimeElapsed);
 }
 
