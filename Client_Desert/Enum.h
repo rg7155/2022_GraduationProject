@@ -41,5 +41,13 @@ namespace CACTUS
 		ATTACK3 = 4, DIE = 5, TAKE_DAMAGED = 6, END = 7
 	};
 }
+
+namespace BOSS
+{
+	enum ANIM {
+		IDLE = 0, RUN = 1, ATTACK1 = 2, ATTACK2 = 3,
+		ATTACK3 = 4, TAKE_DAMAGED = 5, DIE = 6, END = 7
+	};
+}
 //string COM_FRUSTUM = "Frustum";
 #endif // Eunm_h__

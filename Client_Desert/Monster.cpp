@@ -295,14 +295,22 @@ CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
 {
 
-	//m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, 10, pModel);
-	//for (int i = 0; i < 10; i++)
-	//{
-	//	m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
-	//	m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	m_pSkinnedAnimationController = new CAnimationController(pd3dDevice, pd3dCommandList, BOSS::ANIM::END, pModel);
+	for (int i = 0; i < BOSS::ANIM::END; i++)
+	{
+		m_pSkinnedAnimationController->SetTrackAnimationSet(i, i);
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
 
-	//}
-	//m_pSkinnedAnimationController->SetTrackEnable(3, true);
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[BOSS::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
+
+	m_eCurAnim = BOSS::ANIM::IDLE;
+	m_ePrevAnim = BOSS::ANIM::IDLE;
+
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
+	m_fAnimElapsedTime = 0.f;
+	m_fAnimMaxTime = 0.f;
 }
 
 CBossObject::~CBossObject()
@@ -311,12 +319,39 @@ CBossObject::~CBossObject()
 
 void CBossObject::Animate(float fTimeElapsed)
 {
+	if (!m_isActive)
+		return;
+
 	CMonsterObject::Animate(fTimeElapsed);
 }
 
 void CBossObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline /*= true*/)
 {
+	if (!m_isActive)
+		return;
+
 	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
+{
+	if (m_eCurAnim == eNewAnim)
+		return;
+
+	m_ePrevAnim = m_eCurAnim;
+	m_eCurAnim = eNewAnim;
+
+	m_fAnimElapsedTime = 0.f;
+
+	for (int i = 0; i < BOSS::ANIM::END; i++)
+	{
+		m_pSkinnedAnimationController->SetTrackEnable(i, false);
+	}
+
+	// 애니메이션 진행시간 
+	m_fAnimMaxTime = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[eNewAnim]->GetLength();
+	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
+	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
 }
 
 

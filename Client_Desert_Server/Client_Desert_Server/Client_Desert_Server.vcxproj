@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BossMonster.cpp" />
     <ClCompile Include="CactiBullet.cpp" />
     <ClCompile Include="CactiMonster.cpp" />
     <ClCompile Include="CactusMonster.cpp" />
@@ -156,6 +157,7 @@
     <ClCompile Include="Timer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BossMonster.h" />
     <ClInclude Include="CactiBullet.h" />
     <ClInclude Include="CactiMonster.h" />
     <ClInclude Include="CactusMonster.h" />

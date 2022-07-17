@@ -89,6 +89,14 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	void Change_Animation(BOSS::ANIM eNewAnim);
+
+
+private:
+	BOSS::ANIM	m_ePrevAnim;			// 이전 애니메이션
+	BOSS::ANIM	m_eCurAnim;				// 현재 애니메이션
+	float		m_fAnimMaxTime;			// 현재 애니메이션의 진행 시간
+	float		m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
 };
 
 

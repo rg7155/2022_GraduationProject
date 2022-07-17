@@ -38,6 +38,7 @@ constexpr char RACE_PLAYER = 0;
 constexpr char RACE_GOLEM = 1;
 constexpr char RACE_CACTI = 2;
 constexpr char RACE_CACTUS = 3;
+constexpr char RACE_BOSS = 4;
 
 // bullet
 constexpr char BULLET_SIZE1 = 0;
