@@ -8,6 +8,7 @@ constexpr auto CACTI_POS_INIT2 = XMFLOAT3(100.f, 0.f, 85.f);
 constexpr auto CACTI_POS_AFTER1 = XMFLOAT3(127.f, 0.f, 105.f);
 constexpr auto CACTI_POS_AFTER2 = XMFLOAT3(127.f, 0.f, 95.f);
 constexpr auto CACTUS_POS_INIT = XMFLOAT3(127.f, 0.f, 100.f);
+constexpr auto BOSS_POS_INIT = XMFLOAT3(53.759f, 0.f, 60.787f);
 
 constexpr char CACTI1 = 1;
 constexpr char CACTI2 = 2;

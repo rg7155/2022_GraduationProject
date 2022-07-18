@@ -1,0 +1,6 @@
+1. 가만히 서서 파동&땅치기 (Target 봄 타겟 위에 화살표 추가)
+2. 피 절반보다 낮으면 Verse2
+3. Target에게 대쉬 돌진 후 벽에 박으면 멈춤 (Target으로 LerpRotate) -> 반복
+4.  Die
+
+

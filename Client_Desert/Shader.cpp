@@ -825,6 +825,14 @@ void CMonsterObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Graphic
 	pCactus->SetPosition(CACTUS_POS_INIT);
 	AddObject(L"Cactus", pCactus);
 
+	// Boss
+	pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Cactus_Boss.bin", NULL);
+	m_mapModelInfo.emplace(L"Boss", pModel);
+	CGameObject* pBoss = new CBossObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	pBoss->SetActiveState(false);
+	AddObject(L"Boss", pBoss);
+
+
 	// Cactic ¼¼ÆÃ
 	static_cast<CCactiObject*>(pCacti1)->m_pCactus = pCactus;
 	static_cast<CCactiObject*>(pCacti2)->m_pCactus = pCactus;

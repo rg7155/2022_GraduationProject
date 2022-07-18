@@ -311,6 +311,9 @@ CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
+	Rotate(90.f, 220.f, 0.f);
+	SetPosition(BOSS_POS_INIT);
+	SetScale(1.2f, 1.2f, 1.2f);
 }
 
 CBossObject::~CBossObject()

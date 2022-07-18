@@ -3,12 +3,16 @@
 
 CBossMonster::CBossMonster()
 {
-	SetScale(2.f, 2.f, 2.f);
+	//SetScale(2.f, 2.f, 2.f);
 	m_bActive = true;
 	m_eCurAnim = BOSS::ANIM::IDLE;
 	m_fAnimMaxTime = animTimes["Boss"][m_eCurAnim];
 	m_hp = 100;
 	SetPosition(BOSS_POS_INIT.x, BOSS_POS_INIT.y, BOSS_POS_INIT.z);
+	SetScale(1.2f, 1.2f, 1.2f);
+
+	m_nowVerse = VERSE1;
+	m_ePreAttack = BOSS::ATTACK2;
 }
 
 CBossMonster::~CBossMonster()
@@ -20,7 +24,36 @@ void CBossMonster::Update(float fTimeElapsed)
 	if (!m_bActive)
 		return;
 
-	// 공격 3종류
+	if (m_eCurAnim == CACTUS::DIE) {
+		m_bActive = false;
+		return;
+	}
+
+	m_fAnimElapsedTime += fTimeElapsed;
+	m_fDamagedCoolTime += fTimeElapsed;
+
+	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
+	{
+		m_fAnimElapsedTime = 0.f;
+		Change_Animation(BOSS::ANIM::IDLE);
+	}
+
+	if (m_nowVerse == VERSE1)
+	{
+		m_fAttackCoolTime += fTimeElapsed;
+		if (m_fAttackCoolTime > ATTACK_COOLTIME)
+		{
+			m_fAttackCoolTime = 0.f;
+			if (BOSS::ATTACK2 == m_ePreAttack) {
+				Change_Animation(BOSS::ANIM::ATTACK1);
+				m_ePreAttack = BOSS::ATTACK1;
+			}
+			else {
+				Change_Animation(BOSS::ANIM::ATTACK2);
+				m_ePreAttack = BOSS::ATTACK2;
+			}
+		}
+	}
 }
 
 void CBossMonster::Send_Packet_To_Clients(int c_id)

@@ -939,7 +939,7 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_0))
 	{
 		Change_Animation(PLAYER::ANIM::TAKE_DAMAGED);
-		SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
+		SetPosition(XMFLOAT3(54.f, 0.f, 50.f));
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))

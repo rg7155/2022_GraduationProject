@@ -256,6 +256,14 @@ int CServerManager::ProcessPacket(char* packet)
 			pCactus->SetHp(static_cast<int>(p->hp));
 
 		}
+		else if (p->race == RACE_BOSS) {
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Boss").front();
+			CBossObject* pBoss = reinterpret_cast<CBossObject*>(pObj);
+			if (!pBoss->m_isActive)
+				pBoss->SetActiveState(true);
+			pBoss->Change_Animation((BOSS::ANIM)p->eCurAnim);
+			pBoss->SetHp(static_cast<int>(p->hp));
+		}
 		
 		return p->size;
 	}
