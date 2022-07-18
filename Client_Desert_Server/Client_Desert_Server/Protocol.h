@@ -10,10 +10,10 @@ constexpr int BUFSIZE = 2048;
 constexpr int NAME_SIZE = 20;
 constexpr int MAX_USER = 100;
 
-constexpr char CS_LOGIN = 0;
-constexpr char CS_MOVE = 1;
-constexpr char CS_ATTACK = 2;
-constexpr char CS_READY = 3;
+constexpr char CS_LOGIN = 1;
+constexpr char CS_MOVE = 2;
+constexpr char CS_ATTACK = 3;
+constexpr char CS_READY = 4;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_ADD_OBJECT = 3;

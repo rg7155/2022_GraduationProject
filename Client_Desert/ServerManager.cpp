@@ -5,15 +5,16 @@
 
 IMPLEMENT_SINGLETON(CServerManager)
 
-SOCKET			CServerManager::m_socket;
-char			CServerManager::m_recv_buf[BUFSIZE];
-WSABUF			CServerManager::m_wsabuf_r;
-bool			CServerManager::m_isWindow = false;
-int				CServerManager::m_myid = -1;
-//queue<char*>	CServerManager::m_queueSendBuf;
-bool			CServerManager::m_bFoot[2]{};
+SOCKET					CServerManager::m_socket;
+char					CServerManager::m_recv_buf[BUFSIZE];
+WSABUF					CServerManager::m_wsabuf_r;
+bool					CServerManager::m_isWindow = false;
+int						CServerManager::m_myid = -1;
+//queue<char*>			CServerManager::m_queueSendBuf;
+bool					CServerManager::m_bFoot[2]{};
 
-CGameFramework* CServerManager::gameFramework;
+queue<char>				CServerManager::m_queue_send_packet;
+CGameFramework*			CServerManager::gameFramework;
 
 CServerManager::CServerManager()
 {
@@ -25,10 +26,6 @@ CServerManager::~CServerManager()
 void CServerManager::send_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 {
 	delete lpOverlapped;
-	
-	//delete m_queueSendBuf.front();
-	//m_queueSendBuf.pop();
-	//delete m_send_buf;
 }
 
 void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
@@ -57,9 +54,21 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 
 	char dir = CGameMgr::GetInstance()->GetPlayer()->m_dir;
 	CServerManager::GetInstance()->send_move_packet(dir);
-	if(gameFramework->m_pScene->m_eCurScene == SCENE_0)
-		CServerManager::GetInstance()->send_ready_packet();
 
+	// 큐에 있는거 send
+	while (!m_queue_send_packet.empty())
+	{
+		char type = m_queue_send_packet.front();
+		switch (type)
+		{
+		case CS_READY:
+			send_ready_packet();
+			break;
+		default:
+			break;
+		}
+		m_queue_send_packet.pop();
+	}
 }
 
 void CServerManager::recv_packet()
@@ -128,7 +137,6 @@ void CServerManager::send_ready_packet()
 	p.type = CS_READY;
 	p.bReady = pPlayer->m_isReadyToggle;
 	send_packet(&p, p.size);
-
 }
 
 void CServerManager::Connect()

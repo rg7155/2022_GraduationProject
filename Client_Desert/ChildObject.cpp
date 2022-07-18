@@ -656,6 +656,7 @@ void CUIObject::Animate(float fTimeElapsed)
 
 				}
 				CGameMgr::GetInstance()->GetPlayer()->ClickedReadyButton();
+
 			}
 		}
 		break;

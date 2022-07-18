@@ -152,7 +152,7 @@ public:
 	char	m_dir;
 
 public:
-	void	ClickedReadyButton() { m_isReadyToggle = !m_isReadyToggle; }
+	void	ClickedReadyButton(); 
 	bool	m_isReadyToggle = false;
 
 private:

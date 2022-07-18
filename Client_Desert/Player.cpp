@@ -808,6 +808,12 @@ void CPlayer::Set_object_anim(object_anim* _object_anim)
 	}
 }
 
+void CPlayer::ClickedReadyButton()
+{
+	m_isReadyToggle = !m_isReadyToggle;
+	CServerManager::GetInstance()->m_queue_send_packet.push(CS_READY);
+}
+
 void CPlayer::UpdateReadyTexture(float fTimeElapsed)
 {
 	if (!m_pReadyTex || !m_isReadyToggle) return;
