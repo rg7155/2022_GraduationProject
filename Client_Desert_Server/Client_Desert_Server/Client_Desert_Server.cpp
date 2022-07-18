@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "GolemMonster.h"
 #include "CactiMonster.h"
+#include "BossMonster.h"
 #include "Session.h"
 #include "SendData.h"
 
@@ -33,9 +34,10 @@ void error_display(const char* msg, int err_no)
 	LocalFree(lpMsgBuf);
 }
 
-void Init_Monsters();
+void Init_Monsters_Scene1();
 void LoadingBoundingBox();
 void LoadingAnimTime();
+void Init_Objects_Scene2();
 
 void TimerThread_func()
 {
@@ -110,7 +112,7 @@ void process_packet(int c_id)
 		clients[c_id]._pObject->m_xmLocalOOBB = oobbs["Player"];
 
 		if(c_id == 1)
-			Init_Monsters();
+			Init_Monsters_Scene1();
 		
 		// 다른 플레이어에게 알림
 		for (auto& cl : clients)
@@ -149,30 +151,31 @@ void process_packet(int c_id)
 			timer_lock.unlock();
 
 		}
-		// 발판 충돌체크
 		bool bFoot[2]{};
-		for (auto& cl : clients)
-		{
-			int cnt = 0;
-			timer_lock.lock();
-			for (auto& object : objects[OBJECT_FOOTHOLD])
+		if (g_Scene == SCENE_2) {
+			// 발판 충돌체크
+			for (auto& cl : clients)
 			{
-				XMFLOAT3 xmf3Pos = object->GetPosition();
-				float fDis = Vector3::Distance(object->GetPosition(), cl.second._pObject->GetPosition());
-				if (fDis < 1.f)
-					bFoot[cnt] = true;
-				cnt++;
+				int cnt = 0;
+				timer_lock.lock();
+				for (auto& object : objects[OBJECT_FOOTHOLD])
+				{
+					XMFLOAT3 xmf3Pos = object->GetPosition();
+					float fDis = Vector3::Distance(object->GetPosition(), cl.second._pObject->GetPosition());
+					if (fDis < 1.f)
+						bFoot[cnt] = true;
+					cnt++;
+				}
+				timer_lock.unlock();
 			}
-			timer_lock.unlock();
-
 		}
-	
 		// 모든 클라에게 클라의 위치 전송
 		for (auto& cl : clients)
 		{
 			
 			if (cl.first == c_id) continue;
 			cl.second.send_move_packet(c_id);
+			if(g_Scene == SCENE_2)
 			{
 				SC_FOOTHOLD_PACKET foot_packet;
 				foot_packet.size = sizeof(SC_FOOTHOLD_PACKET);
@@ -207,7 +210,14 @@ void process_packet(int c_id)
 	case CS_READY:
 	{
 		CS_READY_PACKET* p = reinterpret_cast<CS_READY_PACKET*>(packet);
-		if (clients[c_id]._isReady != p->bReady) {
+		// 씬전환 관리
+		if (SCENE_1 == g_Scene) {
+			g_Scene = SCENE_2;
+			// 씬2 객체 생성
+			Init_Objects_Scene2();
+			break;
+		}
+		else if (clients[c_id]._isReady != p->bReady) {
 			clients[c_id]._isReady = p->bReady;
 			// 두 플레이어 모두 Ready면 Scene전환
 			bool bAll = true;
@@ -219,7 +229,7 @@ void process_packet(int c_id)
 					clients[c_id].send_ready_packet(cl.first);
 			}
 			if (bAll)
-				g_Scene += 1;
+				g_Scene = SCENE_1;
 		}
 		break;
 	}
@@ -284,7 +294,7 @@ void CALLBACK send_callback(DWORD err, DWORD num_bytes, LPWSAOVERLAPPED over, DW
 constexpr XMFLOAT3 FOOTHOLD1 = XMFLOAT3(22.11f, 0.f, 28.77f);
 constexpr XMFLOAT3 FOOTHOLD2 = XMFLOAT3(18.95f, 0.f, 9.42f);
 
-void Init_Monsters()
+void Init_Monsters_Scene1()
 {
 	LoadingBoundingBox();
 	LoadingAnimTime();
@@ -308,17 +318,6 @@ void Init_Monsters()
 	//timer_lock.unlock();
 
 	pGolem->m_bActive = true;
-
-
-	// 발판 2개 로딩
-	CGameObject* pFootHold1 = new CGameObject();
-	pFootHold1->SetPosition(FOOTHOLD2.x, FOOTHOLD2.y, FOOTHOLD2.z);
-	CGameObject* pFootHold2 = new CGameObject();
-	pFootHold2->SetPosition(FOOTHOLD1.x, FOOTHOLD1.y, FOOTHOLD1.z);
-
-	objects[OBJECT::OBJECT_FOOTHOLD].push_back(pFootHold1);
-	objects[OBJECT::OBJECT_FOOTHOLD].push_back(pFootHold2);
-
 }
 
 void LoadingBoundingBox()
@@ -353,5 +352,23 @@ void LoadingAnimTime()
 			animTimes[str].push_back(time);
 		}
 	}
+}
+
+void Init_Objects_Scene2()
+{
+	// 발판 2개 로딩
+	CGameObject* pFootHold1 = new CGameObject();
+	pFootHold1->SetPosition(FOOTHOLD2.x, FOOTHOLD2.y, FOOTHOLD2.z);
+	CGameObject* pFootHold2 = new CGameObject();
+	pFootHold2->SetPosition(FOOTHOLD1.x, FOOTHOLD1.y, FOOTHOLD1.z);
+
+	objects[OBJECT::OBJECT_FOOTHOLD].push_back(pFootHold1);
+	objects[OBJECT::OBJECT_FOOTHOLD].push_back(pFootHold2);
+
+	// Boss 1마리 로딩
+	CGameObject* pBoss = new CBossMonster();
+	pBoss->m_xmLocalOOBB = oobbs["Boss"];
+	objects[OBJECT::OBJECT_MONSTER].push_back(pBoss);
+
 }
 
