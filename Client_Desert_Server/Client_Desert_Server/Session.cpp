@@ -7,7 +7,7 @@ CSession::CSession(int id, SOCKET s)
 	_c_wsabuf[0].buf = _c_mess;
 	_c_wsabuf[0].len = sizeof(_c_mess);
 	over_to_session[&_c_over] = id;
-
+	_isReady = false;
 }
 
 void CSession::do_recv()
@@ -75,4 +75,13 @@ void CSession::send_move_packet(int c_id)
 	memcpy(p.animInfo, pObject->m_eAnimInfo, sizeof(p.animInfo));
 	p.race = pObject->m_race;
 	do_send(p.size, reinterpret_cast<char*>(&p));
+}
+
+void CSession::send_ready_packet(int c_id)
+{
+	SC_READY_PACKET p;
+	p.size = sizeof(SC_READY_PACKET);
+	p.type = SC_READY;
+	p.bReady = _isReady;
+	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }

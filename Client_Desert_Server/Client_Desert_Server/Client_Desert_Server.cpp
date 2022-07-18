@@ -9,6 +9,7 @@ unordered_map<int, CSession>				clients;
 list<CGameObject*>							objects[OBJECT_END]; // monsters & objects
 unordered_map<string, BoundingOrientedBox>	oobbs;
 unordered_map<string, vector<float>>		animTimes;
+int											g_Scene = 0;
 
 unordered_map<WSAOVERLAPPED*, int>		over_to_session;
 CGameTimer	m_GameTimer;
@@ -200,6 +201,25 @@ void process_packet(int c_id)
 			}
 			timer_lock.unlock();
 
+		}
+		break;
+	}
+	case CS_READY:
+	{
+		CS_READY_PACKET* p = reinterpret_cast<CS_READY_PACKET*>(packet);
+		if (clients[c_id]._isReady != p->bReady) {
+			clients[c_id]._isReady = p->bReady;
+			// 두 플레이어 모두 Ready면 Scene전환
+			bool bAll = true;
+			for (auto& cl : clients)
+			{
+				if (!cl.second._isReady)
+					bAll = false;
+				if (cl.first == c_id) continue;
+					clients[c_id].send_ready_packet(cl.first);
+			}
+			if (bAll)
+				g_Scene += 1;
 		}
 		break;
 	}

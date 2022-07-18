@@ -13,6 +13,7 @@ constexpr int MAX_USER = 100;
 constexpr char CS_LOGIN = 0;
 constexpr char CS_MOVE = 1;
 constexpr char CS_ATTACK = 2;
+constexpr char CS_READY = 3;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_ADD_OBJECT = 3;
@@ -21,6 +22,7 @@ constexpr char SC_MOVE_OBJECT = 5;
 constexpr char SC_STAT_CHANGE = 6;
 constexpr char SC_MOVE_MONSTER = 7; 
 constexpr char SC_FOOTHOLD = 8;
+constexpr char SC_READY = 9;
 
 
 // dir
@@ -79,6 +81,18 @@ struct CS_ATTACK_PACKET {
 	char	type;
 	int		size;
 	int		skill;
+};
+
+struct CS_READY_PACKET {
+	char type;
+	int size;
+	bool bReady;
+};
+
+struct SC_READY_PACKET {
+	char type;
+	int size;
+	bool bReady;
 };
 
 struct SC_LOGIN_INFO_PACKET
@@ -161,6 +175,7 @@ struct SC_FOOTHOLD_PACKET
 	int size;
 	bool flag1;
 	bool flag2;
-
 };
+
+
 #pragma pack (pop)

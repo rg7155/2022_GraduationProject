@@ -22,6 +22,7 @@ public:
 
 	static void send_login_packet();
 	static void send_move_packet(char dir);
+	static void send_ready_packet();
 
 public:
 	static void Connect();

@@ -57,6 +57,9 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 
 	char dir = CGameMgr::GetInstance()->GetPlayer()->m_dir;
 	CServerManager::GetInstance()->send_move_packet(dir);
+	if(gameFramework->m_pScene->m_eCurScene == SCENE_0)
+		CServerManager::GetInstance()->send_ready_packet();
+
 }
 
 void CServerManager::recv_packet()
@@ -114,6 +117,18 @@ void CServerManager::send_move_packet(char dir)
 	p.eCurAnim = pPlayer->GetCurAnim();
 	pPlayer->Set_object_anim(p.animInfo);
 	send_packet(&p, p.size);
+}
+
+void CServerManager::send_ready_packet()
+{
+	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+
+	CS_READY_PACKET p;
+	p.size = sizeof(CS_READY_PACKET);
+	p.type = CS_READY;
+	p.bReady = pPlayer->m_isReadyToggle;
+	send_packet(&p, p.size);
+
 }
 
 void CServerManager::Connect()
@@ -260,6 +275,12 @@ int CServerManager::ProcessPacket(char* packet)
 		SC_FOOTHOLD_PACKET* p = reinterpret_cast<SC_FOOTHOLD_PACKET*>(packet);
 		m_bFoot[0] = p->flag1;
 		m_bFoot[1] = p->flag2;
+		return p->size;
+	}
+	case SC_READY:
+	{
+		SC_READY_PACKET* p = reinterpret_cast<SC_READY_PACKET*>(packet);
+		gameFramework->m_pScene->m_pDuoPlayer->m_isReadyToggle = p->bReady;
 		return p->size;
 	}
 	default:

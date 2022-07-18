@@ -9,6 +9,7 @@ class CSession
 
 public:
 	int				_id;
+	bool			_isReady;
 	CGameObject* _pObject;
 
 public:
@@ -26,6 +27,6 @@ public:
 	void send_login_packet();
 	void send_add_object(int c_id);
 	void send_move_packet(int c_id);
-
+	void send_ready_packet(int c_id);
 };
 
