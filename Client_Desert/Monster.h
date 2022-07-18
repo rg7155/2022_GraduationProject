@@ -74,7 +74,7 @@ protected:
 
 public:
 	char			m_nowVerse;
-
+	bool			m_isEndTalk = false;
 
 };
 
@@ -89,6 +89,13 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+
+private:
+	void	CheckCreateWindEffect(float fTimeElapsed);
+
+	int		m_iWindCount = 0;
+	float	m_fWindTime = 0.f;
+
 };
 
 

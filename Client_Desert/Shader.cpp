@@ -839,6 +839,19 @@ void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
 }
 
+void CMonsterObjectsShader::SetEndTalk()
+{
+	for (auto& iter : m_mapObject)
+	{
+		for (auto& iterSec : iter.second)
+		{
+			if (!iterSec->m_isActive)
+				continue;
+			static_cast<CMonsterObject*>(iterSec)->m_isEndTalk = true;
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 

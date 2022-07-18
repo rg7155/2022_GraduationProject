@@ -319,6 +319,34 @@ void CBossObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pC
 	CMonsterObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
 
+#define WIND_PERIOD 0.2f
+#define WIND_COUNT 5 
+
+void CBossObject::CheckCreateWindEffect(float fTimeElapsed)
+{
+	if (m_iWindCount > WIND_COUNT) return;
+
+	m_fWindTime += fTimeElapsed;
+	if (m_fWindTime < WIND_PERIOD) return;
+
+	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Wind");
+	if (!pObj) return;
+
+	XMFLOAT3 xmf3Pos = GetPosition(), xmf3Look = GetLook();
+	xmf3Look = Vector3::ScalarProduct(xmf3Look, -1.f);
+	XMFLOAT3 xmf3LookAt = Vector3::Add(xmf3Pos, xmf3Look);
+	xmf3Pos.y += 0.5f;
+
+	pObj->SetPosition(xmf3Pos);
+	pObj->SetLookAt(xmf3LookAt, true);
+
+	static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
+
+
+	m_fWindTime = 0.f;
+	++m_iWindCount; //바람 패턴 시작 시 0 초기화 필요
+}
+
 
 CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)

@@ -362,6 +362,8 @@ void CNPCTextBlock::Update(const float& fTimeElapsed)
 				m_isDead = true;
 				CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
 				pObj->SetActiveState(false);
+
+                CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->SetEndTalk();
             }
         }
     }
