@@ -14,7 +14,7 @@ CGolemMonster::CGolemMonster(int _targetId)
 	XMFLOAT3 playerPos = clients[_targetId]._pObject->GetPosition();
 	m_xmf3Target = playerPos;
 	m_fAttackAnimTime = 0.f;
-	m_targetId = clients[_targetId]._id;
+	m_targetId = _targetId;
 	m_fRunCoolTime = 0.f;
 	m_fDamagedCoolTime = 0.f;
 	m_hp = 100.f;

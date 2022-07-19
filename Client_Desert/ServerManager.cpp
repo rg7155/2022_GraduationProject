@@ -263,6 +263,13 @@ int CServerManager::ProcessPacket(char* packet)
 				pBoss->SetActiveState(true);
 			pBoss->Change_Animation((BOSS::ANIM)p->eCurAnim);
 			pBoss->SetHp(static_cast<int>(p->hp));
+			if (p->verse == VERSE2) {
+				pBoss->SetLookAt(p->xmf3Look);
+				pBoss->m_targetId = p->target_id;
+				pBoss->Rotate(90.f, 0.f, 0.f);
+			}
+		
+
 		}
 		
 		return p->size;

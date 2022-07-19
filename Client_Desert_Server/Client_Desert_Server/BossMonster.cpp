@@ -7,12 +7,18 @@ CBossMonster::CBossMonster()
 	m_bActive = true;
 	m_eCurAnim = BOSS::ANIM::IDLE;
 	m_fAnimMaxTime = animTimes["Boss"][m_eCurAnim];
+	
 	m_hp = 100;
 	SetPosition(BOSS_POS_INIT.x, BOSS_POS_INIT.y, BOSS_POS_INIT.z);
 	SetScale(1.2f, 1.2f, 1.2f);
 
-	m_nowVerse = VERSE2;
+	m_fAnimElapsedTime = 0.f;
+	m_fAttackCoolTime = 0.f;
+	m_nowVerse = VERSE1;
 	m_ePreAttack = BOSS::ATTACK2;
+	m_targetId = 0;
+	XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
+	m_xmf3Target = playerPos;
 }
 
 CBossMonster::~CBossMonster()
@@ -38,8 +44,22 @@ void CBossMonster::Update(float fTimeElapsed)
 		Change_Animation(BOSS::ANIM::IDLE);
 	}
 
-	if (m_nowVerse == VERSE2)
+	if (m_nowVerse == VERSE1) {
+		// 두 플레이어와 거리 비교해서 BOSS_ATTACK_START_DISTANCE보다 작으면 verse바꾸기
+		for (auto& client : clients)
+		{
+			XMFLOAT3 pos = client.second._pObject->GetPosition();
+			if (Vector3::Distance(pos, GetPosition()) > BOSS_ATTACK_START_DISTANCE) {
+				return;
+			}
+		}
+		m_nowVerse = VERSE2;
+	}
+	else if (m_nowVerse == VERSE2)
 	{
+		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
+		m_xmf3Target = playerPos;
+
 		m_fAttackCoolTime += fTimeElapsed;
 		if (m_fAttackCoolTime > ATTACK_COOLTIME)
 		{

@@ -1,6 +1,7 @@
 #pragma once
 #include "GameObject.h"
 constexpr auto BOSS_POS_INIT = XMFLOAT3(53.759f, 0.f, 60.787f);
+constexpr auto BOSS_ATTACK_START_DISTANCE = 5.f;
 constexpr auto ATTACK_COOLTIME = 3.f;
 
 class CBossMonster : public CGameObject
@@ -27,8 +28,10 @@ private:
 	float		m_fDamagedCoolTime;
 	float		m_fAttackCoolTime;
 	int			m_nowVerse;
-
 	BOSS::ANIM	m_ePreAttack;
+
+public:
+	int				m_targetId;
 
 };
 
