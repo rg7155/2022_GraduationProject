@@ -11,7 +11,7 @@ CBossMonster::CBossMonster()
 	SetPosition(BOSS_POS_INIT.x, BOSS_POS_INIT.y, BOSS_POS_INIT.z);
 	SetScale(1.2f, 1.2f, 1.2f);
 
-	m_nowVerse = VERSE1;
+	m_nowVerse = VERSE2;
 	m_ePreAttack = BOSS::ATTACK2;
 }
 
@@ -38,7 +38,7 @@ void CBossMonster::Update(float fTimeElapsed)
 		Change_Animation(BOSS::ANIM::IDLE);
 	}
 
-	if (m_nowVerse == VERSE1)
+	if (m_nowVerse == VERSE2)
 	{
 		m_fAttackCoolTime += fTimeElapsed;
 		if (m_fAttackCoolTime > ATTACK_COOLTIME)
