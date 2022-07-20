@@ -34,7 +34,9 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	if (pPlayerModel) delete pPlayerModel;
 
-	SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
+	//SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
+	(id == 0) ? SetPosition(Scene0_SpawnPos_Duo) : SetPosition(Scene0_SpawnPos);
+
 
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
 	m_pComTrail->SetRenderingTrail(false);

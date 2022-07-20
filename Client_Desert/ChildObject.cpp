@@ -612,14 +612,19 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		m_fAlpha = 0.2f;
 		break;
 	case CUIObject::UI_CURSOR:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Cursor.dds", 0);
 		break;
 	case CUIObject::UI_HIT_EFFECT:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HitEffect.dds", 0);
 		SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
 		m_fAlpha = 0.f;
 		break;
-		
+	case CUIObject::UI_SKILL1:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
+		break;
+	case CUIObject::UI_SKILL2:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
+		break;
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -707,6 +712,7 @@ void CUIObject::Animate(float fTimeElapsed)
 
 void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
+	cout << m_eUIType << endl;
 	if (!m_isOnceRender) m_isOnceRender = true;
 
 	UpdateShaderVariables(pd3dCommandList);

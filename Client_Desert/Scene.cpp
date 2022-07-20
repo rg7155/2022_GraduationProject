@@ -410,8 +410,12 @@ void CScene::ChangeScene()
 	switch (m_eCurScene)
 	{
 	case SCENE_1:
-		m_pPlayer->SetPosition(Scene1_SpawnPos);
-		m_pPlayer->GetCamera()->SetOffset(XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z));
+		//m_pPlayer->SetPosition(Scene1_SpawnPos);
+		(CGameMgr::GetInstance()->GetId() == 0) ? m_pPlayer->SetPosition(Scene1_SpawnPos) : m_pPlayer->SetPosition(Scene1_SpawnPos_Duo);
+
+		XMFLOAT3 xmf3Offset = XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z);
+		m_pPlayer->GetCamera()->SetOffset(xmf3Offset);
+		m_pPlayer->GetCamera()->SetPosition(Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset));
 
 		m_pMapObjectShader->ActiveObjectByChangeScene(m_eCurScene);
 		m_pUIObjectShader->ActiveObjectByChangeScene(m_eCurScene);
@@ -420,7 +424,8 @@ void CScene::ChangeScene()
 		
 		break;
 	case SCENE_2:
-		m_pPlayer->SetPosition(Scene2_SpawnPos);
+		//m_pPlayer->SetPosition(Scene2_SpawnPos);
+		(CGameMgr::GetInstance()->GetId() == 0) ? m_pPlayer->SetPosition(Scene2_SpawnPos) : m_pPlayer->SetPosition(Scene2_SpawnPos_Duo);
 
 		m_pMapObjectShader->ActiveObjectByChangeScene(m_eCurScene);
 

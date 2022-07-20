@@ -42,20 +42,21 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_pPlayerUpdatedContext = NULL;
 	m_pCameraUpdatedContext = NULL;
 
-	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 
+
+	int id = *(int*)pContext;
 	////////////////////////////////////////////////////////////
 	// ÃÊ±â Transform
 	//SetPosition(XMFLOAT3(84.f, 0.f, 96.f));
-	SetPosition(Scene0_SpawnPos);
+
+	(id == 0) ? SetPosition(Scene0_SpawnPos) : SetPosition(Scene0_SpawnPos_Duo);
 	//SetPosition(Scene1_SpawnPos);
 	////////////////////////////////////////////////////////////
 
-
+	m_pCamera = ChangeCamera(THIRD_PERSON_CAMERA, 0.0f);
 	
-	char fileName[2048];
-	int id = *(int*)pContext;
 
+	char fileName[2048];
 	if (id == 0)
 		strcpy(fileName, "Model/Adventurer_Aland_Blue.bin");
 	else
@@ -396,7 +397,7 @@ void CPlayer::Update(float fTimeElapsed)
 			m_pCamera->SetLookAt(m_xmf3Position);
 		else
 		{
-			XMFLOAT3 xmf3Pos = {40.f, 0.f, 60.f}/*m_xmf3Position*/;
+			XMFLOAT3 xmf3Pos = /*Scene0_SpawnPos*/m_xmf3Position;
 			xmf3Pos.y += 2.f;
 			m_pCamera->SetLookAt(xmf3Pos);
 		}
@@ -722,7 +723,7 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		m_pCamera->RegenerateViewMatrix();
 		OnPrepareRender();
 
-		////cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
+		cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
 		//cout << "Col" << endl;
 
 	}
@@ -874,7 +875,12 @@ CCamera* CPlayer::ChangeCamera(DWORD nNewCameraMode, float fTimeElapsed)
 	default:
 		break;
 	}
-	m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
+
+	//if (CGameMgr::GetInstance()->GetScene()->m_eCurScene != SCENE::SCENE_0)
+		m_pCamera->SetPosition(Vector3::Add(m_xmf3Position, m_pCamera->GetOffset()));
+	//else
+	//	m_pCamera->SetPosition(Vector3::Add(Scene0_SpawnPos, m_pCamera->GetOffset()));
+
 	//Update(fTimeElapsed);
 
 	return(m_pCamera);
