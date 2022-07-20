@@ -91,7 +91,7 @@ public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 	void Change_Animation(BOSS::ANIM eNewAnim);
-
+	virtual void SetLookAt(XMFLOAT3& xmf3Target, bool isYFix = false);
 
 private:
 	BOSS::ANIM	m_ePrevAnim;			// 이전 애니메이션

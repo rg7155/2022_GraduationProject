@@ -357,6 +357,22 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
 }
 
+void CBossObject::SetLookAt(XMFLOAT3& xmf3Target, bool isYFix)
+{
+	XMFLOAT3 xmf3Pos = GetPosition(), xmf3Up = { 0.f, 1.f, 0.f };
+	XMFLOAT3 xmf3Look = Vector3::Subtract(xmf3Target, xmf3Pos, true);
+	XMFLOAT3 xmf3Right = Vector3::CrossProduct(xmf3Up, xmf3Look, true);
+
+	m_xmf4x4ToParent._11 = xmf3Right.x; m_xmf4x4ToParent._12 = xmf3Right.y; m_xmf4x4ToParent._13 = xmf3Right.z;
+	m_xmf4x4ToParent._21 = xmf3Up.x; m_xmf4x4ToParent._22 = xmf3Up.y; m_xmf4x4ToParent._23 = xmf3Up.z;
+	m_xmf4x4ToParent._31 = xmf3Look.x; m_xmf4x4ToParent._32 = xmf3Look.y; m_xmf4x4ToParent._33 = xmf3Look.z;
+
+	SetScale(m_xmf3Scale);
+
+	Rotate(90.f, 0.f, 0.f);
+
+} 
+
 
 CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)

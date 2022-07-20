@@ -8,12 +8,13 @@ CBossMonster::CBossMonster()
 	m_eCurAnim = BOSS::ANIM::IDLE;
 	m_fAnimMaxTime = animTimes["Boss"][m_eCurAnim];
 	
-	m_hp = 100;
+	m_hp = 200;
 	SetPosition(BOSS_POS_INIT.x, BOSS_POS_INIT.y, BOSS_POS_INIT.z);
 	SetScale(1.2f, 1.2f, 1.2f);
 
 	m_fAnimElapsedTime = 0.f;
 	m_fAttackCoolTime = 0.f;
+	m_fDamagedCoolTime = 0.f;
 	m_nowVerse = VERSE1;
 	m_ePreAttack = BOSS::ATTACK2;
 	m_targetId = 0;
@@ -30,7 +31,7 @@ void CBossMonster::Update(float fTimeElapsed)
 	if (!m_bActive)
 		return;
 
-	if (m_eCurAnim == CACTUS::DIE) {
+	if (m_eCurAnim == BOSS::DIE) {
 		m_bActive = false;
 		return;
 	}
@@ -38,10 +39,15 @@ void CBossMonster::Update(float fTimeElapsed)
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fDamagedCoolTime += fTimeElapsed;
 
+	// verse3는 피격 시 SPELL도 함
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
-		Change_Animation(BOSS::ANIM::IDLE);
+		if (VERSE3 == m_nowVerse && BOSS::TAKE_DAMAGED == m_eCurAnim) {
+			Change_Animation(BOSS::ANIM::SPELL);
+		}
+		else
+			Change_Animation(BOSS::ANIM::IDLE);
 	}
 
 	if (m_nowVerse == VERSE1) {
@@ -54,12 +60,11 @@ void CBossMonster::Update(float fTimeElapsed)
 			}
 		}
 		m_nowVerse = VERSE2;
+		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
+		m_xmf3Target = playerPos;
 	}
 	else if (m_nowVerse == VERSE2)
 	{
-		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
-		m_xmf3Target = playerPos;
-
 		m_fAttackCoolTime += fTimeElapsed;
 		if (m_fAttackCoolTime > ATTACK_COOLTIME)
 		{
@@ -72,7 +77,13 @@ void CBossMonster::Update(float fTimeElapsed)
 				Change_Animation(BOSS::ANIM::ATTACK2);
 				m_ePreAttack = BOSS::ATTACK2;
 			}
+			m_targetId = 1 - m_targetId;
 		}
+		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
+		m_xmf3Target = playerPos;
+	}
+	else if (m_nowVerse == VERSE3) {
+
 	}
 }
 
@@ -103,7 +114,7 @@ void CBossMonster::Send_Remove_Packet_To_Clients(int c_id)
 
 void CBossMonster::CheckCollision(int c_id)
 {
-	if (m_eCurAnim == CACTUS::ANIM::TAKE_DAMAGED)
+	if (m_eCurAnim == BOSS::ANIM::TAKE_DAMAGED)
 		return;
 
 
@@ -111,7 +122,12 @@ void CBossMonster::CheckCollision(int c_id)
 	{
 		m_hp -= 20.f;
 		m_fDamagedCoolTime = 0.f;
+		m_fAttackCoolTime = 0.f;
 
+		if (m_hp < 50.f && m_nowVerse == VERSE2)
+		{
+			m_nowVerse = VERSE3;
+		}
 		if (m_hp <= 0.f)
 		{
 			Change_Animation(BOSS::ANIM::DIE);
