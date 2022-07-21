@@ -723,7 +723,7 @@ void CPlayer::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
 		m_pCamera->RegenerateViewMatrix();
 		OnPrepareRender();
 
-		cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
+		//cout << xmf3Normal.x << "," << xmf3Normal.z << endl;
 		//cout << "Col" << endl;
 
 	}
