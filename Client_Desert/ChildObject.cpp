@@ -621,9 +621,11 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_SKILL1:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.5f);
 		break;
 	case CUIObject::UI_SKILL2:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.6f);
 		break;
 	}
 
@@ -712,7 +714,6 @@ void CUIObject::Animate(float fTimeElapsed)
 
 void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
-	cout << m_eUIType << endl;
 	if (!m_isOnceRender) m_isOnceRender = true;
 
 	UpdateShaderVariables(pd3dCommandList);
