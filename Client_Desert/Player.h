@@ -8,6 +8,9 @@ const static XMFLOAT3 Scene0_SpawnPos = { 40.f, 0.f, 60.f };
 const static XMFLOAT3 Scene1_SpawnPos = { 25.f, 0.f, 25.f };
 const static XMFLOAT3 Scene2_SpawnPos = { 10.f, 0.f, 15.f };
 
+const static XMFLOAT3 Scene0_SpawnPos_Duo = { 42.f, 0.f, 60.f };
+const static XMFLOAT3 Scene1_SpawnPos_Duo = { 27.f, 0.f, 25.f };
+const static XMFLOAT3 Scene2_SpawnPos_Duo = { 12.f, 0.f, 15.f };
 class CPlayer : public CGameObject
 {
 //private:
@@ -16,7 +19,7 @@ class CPlayer : public CGameObject
 //		SKILL2 = 5, IDLE = 6, GET_RESOURCE = 7, DIE = 8, END = 9,
 //	};
 
-protected:
+protected:	
 	XMFLOAT3					m_xmf3Position = XMFLOAT3(0.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Right = XMFLOAT3(1.0f, 0.0f, 0.0f);
 	XMFLOAT3					m_xmf3Up = XMFLOAT3(0.0f, 1.0f, 0.0f);

@@ -847,6 +847,19 @@ void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
 }
 
+void CMonsterObjectsShader::SetEndTalk()
+{
+	for (auto& iter : m_mapObject)
+	{
+		for (auto& iterSec : iter.second)
+		{
+			if (!iterSec->m_isActive)
+				continue;
+			static_cast<CMonsterObject*>(iterSec)->m_isEndTalk = true;
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -1137,6 +1150,8 @@ HRESULT CMultiSpriteObjectsShader::CreateObject(ID3D12Device* pd3dDevice, ID3D12
 		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_HIT;
 	else if (!wcscmp(pObjTag, L"Skill2"))
 		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_SKILL2;
+	else if (!wcscmp(pObjTag, L"Wind"))
+		eType = CMultiSpriteObject::SPRITE_TYPE::SPRITE_WIND;
 
 	pObject = new CMultiSpriteObject(pd3dDevice, pd3dCommandList, eType);
 	pObject->SetMesh(pMesh);
@@ -1192,6 +1207,20 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 
 	m_mapObjectInfo.emplace(L"Skill2", make_pair(pMesh, pMaterial));
 	for (int i = 0; i < 5; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Skill2");
+
+
+	//º¸½º ¹Ù¶÷ ÀÌÆåÆ®
+	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 0.f, 5.f);
+	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 2, 7);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX11.dds", 0);
+
+	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	pMaterial = new CMaterial(1);
+	pMaterial->SetTexture(pTexture);
+
+	m_mapObjectInfo.emplace(L"Wind", make_pair(pMesh, pMaterial));
+	for (int i = 0; i < 10; ++i) CreateObject(pd3dDevice, pd3dCommandList, L"Wind");
 }
 
 void CMultiSpriteObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState, bool isChangePipeline)
@@ -1304,9 +1333,16 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_HIT_EFFECT);
 	AddObject(L"UI_Hit_Effect", pObject);
 
-	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_CURSOR);
-	AddObject(L"UI_Cursor", pObject);
+	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_CURSOR);
+	//AddObject(L"UI_Cursor", pObject);
 
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL1);
+	AddObject(L"UI_ICON", pObject);
+	//pObject->SetActiveState(false);
+
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL2);
+	AddObject(L"UI_ICON", pObject);
+	//pObject->SetActiveState(false);
 
 	//Á© ¸¶Áö¸·¿¡ »ðÀÔ
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);

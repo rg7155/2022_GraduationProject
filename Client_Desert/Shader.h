@@ -164,6 +164,7 @@ public:
 	virtual void BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext = NULL);
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, int nPipelineState = 0, bool isChangePipeline = true) override;
 
+	void		SetEndTalk();
 private:
 	map<const wchar_t*, CLoadedModelInfo*>			m_mapModelInfo; //런타임중 로드 위해 사용
 

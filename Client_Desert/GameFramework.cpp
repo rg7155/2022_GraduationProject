@@ -69,6 +69,9 @@ bool CGameFramework::OnCreate(HINSTANCE hInstance, HWND hMainWnd)
 
 
 	CInputDev::GetInstance()->Ready_InputDev(m_hInstance, m_hWnd);
+
+	//ShowCursor(false);
+
 	return(true);
 }
 

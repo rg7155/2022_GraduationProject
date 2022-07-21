@@ -370,6 +370,24 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 
 	Rotate(0.f, 0.f, m_fRandRot);
 
+	switch (m_eType)
+	{
+	case CMultiSpriteObject::SPRITE_SKILL1:
+		break;
+	case CMultiSpriteObject::SPRITE_HIT:
+		break;
+	case CMultiSpriteObject::SPRITE_SKILL2:
+		break;
+	case CMultiSpriteObject::SPRITE_WIND:
+	{
+		XMFLOAT3 xmf3Pos = GetPosition(), xmf3Look = GetLook();
+		xmf3Look = Vector3::ScalarProduct(xmf3Look, -1.f);
+		xmf3Pos = Vector3::Add(xmf3Pos, xmf3Look, 5.f * fTimeElapsed);
+		SetPosition(xmf3Pos);
+	}
+		break;
+	}
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -406,6 +424,11 @@ void CMultiSpriteObject::SetActiveState(bool isActive)
 		break;
 	case CMultiSpriteObject::SPRITE_SKILL2:
 		m_fSpeed = 0.05f;
+		//m_xmf4Color = { BLUE_COLOR4 };
+		break;
+	case CMultiSpriteObject::SPRITE_WIND:
+		m_fSpeed = 0.04f;
+		SetScale(XMFLOAT3(0.8f, 0.8f, 0.8f));
 		//m_xmf4Color = { BLUE_COLOR4 };
 		break;
 	}
@@ -589,14 +612,21 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		m_fAlpha = 0.2f;
 		break;
 	case CUIObject::UI_CURSOR:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Outcircle.dds", 0);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Cursor.dds", 0);
 		break;
 	case CUIObject::UI_HIT_EFFECT:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/HitEffect.dds", 0);
 		SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
 		m_fAlpha = 0.f;
 		break;
-		
+	case CUIObject::UI_SKILL1:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.5f);
+		break;
+	case CUIObject::UI_SKILL2:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.6f);
+		break;
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);

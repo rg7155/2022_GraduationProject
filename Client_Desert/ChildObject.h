@@ -95,7 +95,7 @@ public:
 class CMultiSpriteObject : public CGameObject
 {
 public:
-	enum SPRITE_TYPE { SPRITE_SKILL1, SPRITE_HIT, SPRITE_SKILL2, SPRITE_END };
+	enum SPRITE_TYPE { SPRITE_SKILL1, SPRITE_HIT, SPRITE_SKILL2, SPRITE_WIND, SPRITE_END };
 
 public:
 	CMultiSpriteObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, SPRITE_TYPE eType);
@@ -125,6 +125,9 @@ public:
 
 	bool				m_isBiliboard = false;
 	float				m_fRandRot = 0.f;
+
+	XMFLOAT3			m_xmf3Dir;
+
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,7 +157,8 @@ private:
 class CUIObject : public CGameObject
 {
 public:
-	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY_BTN, UI_READY_BTN_CLK, UI_QUEST, UI_CURSOR, UI_HIT_EFFECT, UI_END };
+	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY_BTN, UI_READY_BTN_CLK, UI_QUEST, UI_CURSOR, UI_HIT_EFFECT,
+		UI_SKILL1, UI_SKILL2, UI_END };
 
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
