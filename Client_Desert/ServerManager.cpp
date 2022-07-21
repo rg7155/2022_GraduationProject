@@ -40,6 +40,7 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 
 			cout << cbTransferred << ' ' << msg_size << endl;
 			// 33 204
+			break;
 		}
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;

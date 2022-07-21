@@ -46,7 +46,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 
 	SetEffectsType(EFFECT_FOG, true);
 	m_bSkill1EffectOn = false;
-
+	m_isActive = false;
 	CGameMgr::GetInstance()->SetDuoPlayer(this);
 }
 
