@@ -9,6 +9,7 @@
 #include "Animation.h"
 #include "Scene.h"
 #include "ServerManager.h"
+#include "ChildObject.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
@@ -940,12 +941,26 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_1))
 	{
-		Change_Animation(PLAYER::ANIM::SKILL1);
+		if (m_pSkillICon[0])
+		{
+			if (!m_pSkillICon[0]->m_isCool)
+			{
+				Change_Animation(PLAYER::ANIM::SKILL1);
+				m_pSkillICon[0]->m_isCool = true;
+			}
+		}
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_2))
 	{
-		Change_Animation(PLAYER::ANIM::SKILL2);
+		if (m_pSkillICon[1])
+		{
+			if (!m_pSkillICon[1]->m_isCool)
+			{
+				Change_Animation(PLAYER::ANIM::SKILL2);
+				m_pSkillICon[1]->m_isCool = true;
+			}
+		}
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_0))

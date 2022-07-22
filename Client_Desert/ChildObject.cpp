@@ -624,12 +624,13 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	case CUIObject::UI_SKILL1:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
 		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.5f);
-		m_xmf4ShaderInfo = { 1.f,0.f,0.f,0.f };
+		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
+
 		break;
 	case CUIObject::UI_SKILL2:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
 		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.6f);
-		m_xmf4ShaderInfo = { 1.f,0.f,0.f,0.f };
+		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
 		break;
 	}
 
@@ -716,9 +717,25 @@ void CUIObject::Animate(float fTimeElapsed)
 		}
 		break;
 	case CUIObject::UI_SKILL1:
-		if(m_xmf4ShaderInfo.y < 360.f)
-			m_xmf4ShaderInfo.y += fTimeElapsed * 90.f;
+	case CUIObject::UI_SKILL2:
+		if (!m_isOnceInit)
+		{
+			CGameMgr::GetInstance()->GetPlayer()->m_pSkillICon[m_eUIType - UI_SKILL1] = this;
+			m_isOnceInit = true;
+		}
 
+		if (m_isCool)
+		{
+			m_xmf4ShaderInfo.y = (m_fCoolTime * 360.f) / SKILL_COOLTIME;
+
+			if(m_fCoolTime < SKILL_COOLTIME)
+				m_fCoolTime += fTimeElapsed; // 0~5
+			else
+			{
+				m_fCoolTime = 0.f;
+				m_isCool = false;
+			}
+		}
 		break;
 	}
 

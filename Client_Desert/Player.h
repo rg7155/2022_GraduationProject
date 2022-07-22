@@ -11,6 +11,7 @@ const static XMFLOAT3 Scene2_SpawnPos = { 10.f, 0.f, 15.f };
 const static XMFLOAT3 Scene0_SpawnPos_Duo = { 42.f, 0.f, 60.f };
 const static XMFLOAT3 Scene1_SpawnPos_Duo = { 27.f, 0.f, 25.f };
 const static XMFLOAT3 Scene2_SpawnPos_Duo = { 12.f, 0.f, 15.f };
+class CUIObject;
 class CPlayer : public CGameObject
 {
 //private:
@@ -157,7 +158,7 @@ public:
 public:
 	void	ClickedReadyButton(); 
 	bool	m_isReadyToggle = false;
-
+	CUIObject* m_pSkillICon[2] = { nullptr };
 private:
 	void UpdateReadyTexture(float fTimeElapsed);
 	void MovePosByCollision();

@@ -32,6 +32,9 @@
 #define PLAYER_INIT_POSITION_Z			10.f
 #define PLAYER_ATTACK_DISTANCE			3.f
 
+#define SKILL_COOLTIME 5.f
+
+
 //Light.hlsl과 맞추기
 //#define MAX_LIGHTS				4 
 //#define MAX_DEPTH_TEXTURES		MAX_LIGHTS

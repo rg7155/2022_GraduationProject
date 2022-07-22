@@ -177,6 +177,7 @@ public:
 	UI_TYPE		m_eUIType = UI_END;
 	CUIObject* m_pButtonToggle = nullptr;
 	bool		m_isHit = false;
+	bool		m_isCool = false;
 
 private:
 	float	m_fAlpha = 0.f;
@@ -192,6 +193,9 @@ private:
 	float		m_fValue = 0.f;
 
 	XMFLOAT4	m_xmf4ShaderInfo;
+
+	float		m_fCoolTime = 0.f;
+	bool		m_isOnceInit = false;
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
