@@ -1198,7 +1198,7 @@ void CMultiSpriteObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12Gra
 	//½ºÅ³2 ÀÌÆåÆ®
 	pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 5.f, 0.f, 5.f);
 	pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0, 2, 7);
-	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX36.dds", 0);
+	pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ShapeFX36_White.dds", 0);
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
@@ -1338,11 +1338,11 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL1);
 	AddObject(L"UI_ICON", pObject);
-	//pObject->SetActiveState(false);
+	pObject->SetActiveState(false);
 
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL2);
 	AddObject(L"UI_ICON", pObject);
-	//pObject->SetActiveState(false);
+	pObject->SetActiveState(false);
 
 	//Á© ¸¶Áö¸·¿¡ »ðÀÔ
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);
@@ -1367,6 +1367,7 @@ void CUIObjectsShader::ActiveObjectByChangeScene(SCENE eScene)
 	{
 		SetActiveStateObjects(L"UI_Button", false);
 		SetActiveStateObjects(L"UI_Info", true);
+		SetActiveStateObjects(L"UI_ICON", true);
 	}
 		break;
 	case SCENE_2:

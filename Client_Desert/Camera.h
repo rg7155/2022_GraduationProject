@@ -149,11 +149,18 @@ public:
 	
 	void RotateByMouse(XMFLOAT3& vLookAt);
 	void SetFocusOnTarget(bool isFocus, XMFLOAT3 xmf3Target, XMFLOAT3 xmf3TargetOffset);
+	void CameraShaking(float fTimeElapsed);
 public:
 	XMFLOAT3	m_xmf3TargetPos = { 0.f, 0.f, 0.f };
 	XMFLOAT3	m_xmf3TargetLookingOffset = { 0.f, 0.f, 0.f };
 	XMFLOAT3	m_xmf3PrePos = { 0.f, 0.f, 0.f };
 	bool		m_isStartFocusing = false;
 	float		m_fTime = 0.f;
+
+	//카메라 쉐이킹
+	void		DoShaking(bool isSero);
+	bool		m_isShaking = false;
+	bool		m_isSero = false;
+	float		m_fShakeTime = 0.f;
 };
 

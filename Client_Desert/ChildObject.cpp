@@ -462,6 +462,8 @@ void CMultiSpriteObject::AnimateRowColumn(float fTime)
 			//cout << "end" << endl;
 			m_isActive = false;
 			m_nCol = 0;
+			m_nRow = 0;
+			m_fTime = 0.f;
 		}
 	}
 }
@@ -623,13 +625,13 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_SKILL1:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
-		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.5f);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05f, FRAME_BUFFER_HEIGHT * 0.3f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
 
 		break;
 	case CUIObject::UI_SKILL2:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
-		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.6f);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05, FRAME_BUFFER_HEIGHT * 0.4f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
 		break;
 	}
@@ -1042,7 +1044,7 @@ void CTexturedObject::Animate(float fTimeElapsed)
 		UpdateTransform(NULL);
 
 		m_fValue += fTimeElapsed * 3.f * RandomValue(0.5f, 2.f);
-		m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.1f;
+		m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.2f;
 		if (m_fValue >= 1.f) SetActiveState(false);
 		break;
 	}

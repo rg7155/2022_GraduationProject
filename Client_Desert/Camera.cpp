@@ -332,6 +332,7 @@ CThirdPersonCamera::CThirdPersonCamera(CCamera *pCamera) : CCamera(pCamera)
 
 void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 {
+	
 	if (m_isStartFocusing)
 	{
 		m_fTime += fTimeElapsed;
@@ -345,6 +346,8 @@ void CThirdPersonCamera::Update(XMFLOAT3& xmf3LookAt, float fTimeElapsed)
 	}
 	else
 		RotateByMouse(xmf3LookAt);
+
+	if (m_isShaking) CameraShaking(fTimeElapsed);
 
 	
 	CCamera::Update(xmf3LookAt, fTimeElapsed);
@@ -366,8 +369,8 @@ void CThirdPersonCamera::RotateByMouse(XMFLOAT3& xmf3LookAt)
 	// 마우스 회전 
 	// 위아래
 	long dwMouseMove = 0;
-
-	if (dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_Y))
+	dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_Y);
+	//if (dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_Y))
 	{
 		// 카메라 right 기준
 		XMMATRIX xmmtxRotate = XMMatrixRotationAxis(XMLoadFloat3(&m_xmf3Right), XMConvertToRadians(dwMouseMove / DPI));
@@ -392,13 +395,15 @@ void CThirdPersonCamera::RotateByMouse(XMFLOAT3& xmf3LookAt)
 			if (fLength > 0)
 			{
 				m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fLength);
-				SetLookAt(xmf3LookAt);
+				//SetLookAt(xmf3LookAt);
 			}
 		}
 
 	}
+
+	dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_X);
 	// 좌우
-	if (dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_X))
+	//if (dwMouseMove = CInputDev::GetInstance()->Get_DIMouseMove(DIMS_X))
 	{
 		XMMATRIX xmmtxRotate = XMMatrixRotationY(XMConvertToRadians(dwMouseMove / DPI));
 		m_xmf3Offset = Vector3::TransformNormal(m_xmf3Offset, xmmtxRotate);
@@ -416,7 +421,7 @@ void CThirdPersonCamera::RotateByMouse(XMFLOAT3& xmf3LookAt)
 			if (fLength > 0)
 			{
 				m_xmf3Position = Vector3::Add(m_xmf3Position, xmf3Direction, fLength);
-				SetLookAt(xmf3LookAt);
+				//SetLookAt(xmf3LookAt);
 
 			}
 		}
@@ -441,4 +446,45 @@ void CThirdPersonCamera::SetFocusOnTarget(bool isFocus, XMFLOAT3 xmf3Target, XMF
 	{
 
 	}
+}
+
+void CThirdPersonCamera::CameraShaking(float fTimeElapsed)
+{
+	m_fShakeTime += fTimeElapsed * 5.f;
+	float fValue = sinf(m_fShakeTime * 10.f) * powf(0.5f, m_fShakeTime);
+	//cout << "Cam Shake Val-" << fValue << endl;
+
+	XMFLOAT3 xmf3Dir;
+	if (m_isSero) 
+		xmf3Dir = { 0.f, 1.f, 0.f };
+	else
+	{
+		XMFLOAT3 xmf3Right = m_xmf3Right;
+		xmf3Right.y = 0.f;
+		xmf3Dir = Vector3::Normalize(xmf3Right);
+		//cout << xmf3Dir.x << "," << xmf3Dir.z << endl;
+	}
+	xmf3Dir = Vector3::ScalarProduct(xmf3Dir, fValue * 2.f, false);
+	Move(xmf3Dir);
+	 
+	//XMFLOAT3 xmf3Pos = GetPosition();s
+	//xmf3Pos.y += fValue;
+	//SetPosition(xmf3Pos);
+
+	//m_xmf3Offset.y += fValue;
+	if (m_fShakeTime > 10.f)
+	{
+		m_isShaking = false;
+		//m_xmf3Offset = { 0.f, CAM_OFFSET_Y, CAM_OFFSET_Z };
+	}
+
+	//XMFLOAT3 xmf3Position = Vector3::Add(m_pPlayer->GetPosition(), m_xmf3Offset);
+	//SetPosition(xmf3Position);
+}
+
+void CThirdPersonCamera::DoShaking(bool isSero)
+{
+	m_isSero = isSero;
+	m_isShaking = true;
+	m_fShakeTime = 0.f;
 }
