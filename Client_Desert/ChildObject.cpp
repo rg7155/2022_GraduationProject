@@ -576,7 +576,9 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	m_eUIType = eType;
 	m_fAlpha = 1.f;
+	m_xmf4ShaderInfo = { 0.f,0.f,0.f,0.f };
 	SetActiveState(true);
+
 	switch (eType)
 	{
 	case CUIObject::UI_FADE:
@@ -622,10 +624,12 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	case CUIObject::UI_SKILL1:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
 		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.5f);
+		m_xmf4ShaderInfo = { 1.f,0.f,0.f,0.f };
 		break;
 	case CUIObject::UI_SKILL2:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
 		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.9f, FRAME_BUFFER_HEIGHT * 0.6f);
+		m_xmf4ShaderInfo = { 1.f,0.f,0.f,0.f };
 		break;
 	}
 
@@ -636,10 +640,13 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 
 	SetMaterial(0, pMaterial);
 
+	CreateShaderVariables_Sub(pd3dDevice, pd3dCommandList);
+
 }
 
 CUIObject::~CUIObject()
 {
+	ReleaseShaderVariables_Sub();
 }
 
 void CUIObject::Animate(float fTimeElapsed)
@@ -708,6 +715,11 @@ void CUIObject::Animate(float fTimeElapsed)
 			}
 		}
 		break;
+	case CUIObject::UI_SKILL1:
+		if(m_xmf4ShaderInfo.y < 360.f)
+			m_xmf4ShaderInfo.y += fTimeElapsed * 90.f;
+
+		break;
 	}
 
 	CGameObject::Animate(fTimeElapsed);
@@ -724,6 +736,8 @@ void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCam
 
 void CUIObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
 {
+	SetCBVInfo(pd3dCommandList, CGameObject::CBV_UI, &m_xmf4ShaderInfo);
+
 	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fAlpha, 34);
 }
 

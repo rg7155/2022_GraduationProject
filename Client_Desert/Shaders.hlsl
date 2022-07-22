@@ -49,7 +49,9 @@ cbuffer cbSubObjectInfo : register(b6)
 {
 	matrix	gmtxTextureAnim : packoffset(c0);
     float4  gf4Color : packoffset(c4);
-    float gfDamageNum : packoffset(c5);
+    float4 gf4UIINfo : packoffset(c5); //x-스킬 사용 여부0,1 / y-시간 / z-쿨타임
+    
+    //float gfDamageNum : packoffset(c5);
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -299,7 +301,7 @@ VS_TEXTURED_OUTPUT VSDamageFontTextured(VS_TEXTURED_INPUT input)
     //output.position = mul(mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxView), gmtxProjection);
     output.position = mul(mul(float4(input.position, 1.0f), gmtxGameObject), gmtxOrthoProjection);
     
-    output.uv.x = (input.uv.x + gfDamageNum) * 0.1; // 0~0.1, 0.1~0.2, ... 0.9~1.0
+    output.uv.x = (input.uv.x/* + gfDamageNum*/) * 0.1; // 0~0.1, 0.1~0.2, ... 0.9~1.0
     //output.uv.x = (input.uv.x + 1) * 0.1; // 0~0.1, 0.1~0.2, ... 0.9~1.0
     output.uv.y = input.uv.y; 
     
@@ -321,9 +323,23 @@ float4 PSAlphaTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
     return (cColor);
 }
 
-float4 PSAlphaIconTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
+float4 PSUIAlphaTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
 {
     float4 cColor = gtxtTexture.Sample(gssWrap, input.uv);
+    if (gf4UIINfo.x != 0)
+    {
+        float2 center = float2(0.5f, 0.f) - float2(0.5f, 0.5f);
+        center = normalize(center);
+        
+        float2 to = input.uv - float2(0.5f, 0.5f);
+        to = normalize(to);
+        
+        float angle = degrees(acos(dot(center, to)));
+        if (input.uv.x < 0.5f)
+            angle = 360.f - angle;
+        
+        cColor.a = angle > gf4UIINfo.y ? 0.1f : 1.f;
+    }
     cColor.a *= gfDissolve;
     return (cColor);
 }

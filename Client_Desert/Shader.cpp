@@ -1260,7 +1260,7 @@ D3D12_SHADER_BYTECODE CUIObjectsShader::CreateVertexShader(ID3DBlob** ppd3dShade
 
 D3D12_SHADER_BYTECODE CUIObjectsShader::CreatePixelShader(ID3DBlob** ppd3dShaderBlob, int nPipelineState)
 {
-	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSAlphaTextured", "ps_5_1", ppd3dShaderBlob));
+	return(CShader::CompileShaderFromFile(L"Shaders.hlsl", "PSUIAlphaTextured", "ps_5_1", ppd3dShaderBlob));
 }
 
 D3D12_DEPTH_STENCIL_DESC CUIObjectsShader::CreateDepthStencilState(int nPipelineState)
@@ -1336,12 +1336,12 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_CURSOR);
 	//AddObject(L"UI_Cursor", pObject);
 
-	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL1);
-	//AddObject(L"UI_ICON", pObject);
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL1);
+	AddObject(L"UI_ICON", pObject);
 	//pObject->SetActiveState(false);
 
-	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL2);
-	//AddObject(L"UI_ICON", pObject);
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_SKILL2);
+	AddObject(L"UI_ICON", pObject);
 	//pObject->SetActiveState(false);
 
 	//Á© ¸¶Áö¸·¿¡ »ğÀÔ

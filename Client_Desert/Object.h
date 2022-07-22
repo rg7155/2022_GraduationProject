@@ -187,13 +187,15 @@ struct CB_SUBOBJECT_INFO
 {
 	XMFLOAT4X4		m_xmf4x4TextureAnim;
 	XMFLOAT4		m_xmf4Color;
-	float			m_fDamageNumber; //0~9값
+	XMFLOAT4		m_xmf4UIInfo; //x-스킬 사용 여부0,1 / y-시간
+
+	//float			m_fDamageNumber; //0~9값
 };
 class CAnimationController;
 class CGameObject
 {
 public:
-	enum CBV_TYPE { CBV_TEX_ANIM, CBV_COLOR, CBV_DAMAGE_NUMBER, CBV_END };
+	enum CBV_TYPE { CBV_TEX_ANIM, CBV_COLOR, CBV_UI, CBV_END };
 
 private:
 	int								m_nReferences = 0;
