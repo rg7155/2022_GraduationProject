@@ -10,7 +10,7 @@ unordered_map<int, CSession>				clients;
 list<CGameObject*>							objects[OBJECT_END]; // monsters & objects
 unordered_map<string, BoundingOrientedBox>	oobbs;
 unordered_map<string, vector<float>>		animTimes;
-int											g_Scene = 0;
+int											g_Scene = SCENE_0;
 
 unordered_map<WSAOVERLAPPED*, int>		over_to_session;
 CGameTimer	m_GameTimer;

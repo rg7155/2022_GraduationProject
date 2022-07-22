@@ -230,8 +230,9 @@ void CMonsterObject::MakeHitEffect()
 void CMonsterObject::MakeHitFont()
 {
 	CGameMgr* pGameMgr = CGameMgr::GetInstance();
-	XMFLOAT3 xmf3Pos = pGameMgr->GetPlayer()->GetPosition();
-	int iDamage = rand() % 999 + 1;
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += 2.f;
+	int iDamage = 20;
 	pGameMgr->GetScene()->m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
 }
 
@@ -312,9 +313,13 @@ CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
 	m_iMaxHp = 200.f;
+	m_iHp = 200.f;
+	m_fHpOffsetY = 4.f;
+
 	Rotate(90.f, 220.f, 0.f);
 	SetPosition(BOSS_POS_INIT);
 	SetScale(1.2f, 1.2f, 1.2f);
+
 }
 
 CBossObject::~CBossObject()
@@ -1033,6 +1038,7 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_pCacti1 = pCacti1;
 	m_pCacti2 = pCacti2;
+	m_fHpOffsetY = 4.f;
 
 	m_nowVerse = VERSE1;
 	m_ePreAttack = CACTUS::IDLE;
