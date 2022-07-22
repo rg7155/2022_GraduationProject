@@ -83,22 +83,26 @@ void CCactusMonster::CheckCollision(int c_id)
 	if (m_eCurAnim == CACTUS::ANIM::TAKE_DAMAGED)
 		return;
 
-
-	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
-	{
-		m_hp -= 20.f;
-		m_fDamagedCoolTime = 0.f;
-
-		if (m_hp <= 0.f)
+	CGameObject* pPlayer = clients[c_id]._pObject;
+	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
+		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
 		{
-			Change_Animation(CACTUS::ANIM::DIE);
-			return;
-		}
-		else
-		{
-			Change_Animation(CACTUS::ANIM::TAKE_DAMAGED);
+			m_hp -= 20.f;
+			m_fDamagedCoolTime = 0.f;
+
+			if (m_hp <= 0.f)
+			{
+				Change_Animation(CACTUS::ANIM::DIE);
+				return;
+			}
+			else
+			{
+				Change_Animation(CACTUS::ANIM::TAKE_DAMAGED);
+			}
 		}
 	}
+	
 }
 
 void CCactusMonster::Change_Animation(CACTUS::ANIM eNewAnim)

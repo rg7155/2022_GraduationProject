@@ -224,8 +224,6 @@ void CMonsterObject::MakeHitEffect()
 	xmf3Pos.y += 1.f;
 	xmf3Pos.z += xmf3Look.z;
 	pObj->SetPosition(xmf3Pos);
-
-	cout << "MakeEff" << endl;
 }
 
 void CMonsterObject::MakeHitFont()
@@ -320,7 +318,7 @@ CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	Rotate(90.f, 220.f, 0.f);
 	SetPosition(BOSS_POS_INIT);
 	SetScale(1.2f, 1.2f, 1.2f);
-
+	m_iWindCount = 0;
 }
 
 CBossObject::~CBossObject()
@@ -348,6 +346,9 @@ void CBossObject::Animate(float fTimeElapsed)
 		}
 	}
 
+	if (m_eCurAnim == BOSS::ATTACK1) {
+		CheckCreateWindEffect(fTimeElapsed);
+	}
 	CMonsterObject::Animate(fTimeElapsed);
 }
 
@@ -378,11 +379,11 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 {
 	if (m_eCurAnim == eNewAnim)
 		return;
-
-	if (BOSS::DIE == eNewAnim) {
+	if (BOSS::ATTACK1 == m_eCurAnim)
+		m_iWindCount = 0;
+	else if (BOSS::DIE == eNewAnim) {
 		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(BOSS_TEXT);
 	}
-
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
 
@@ -413,9 +414,10 @@ void CBossObject::CheckCreateWindEffect(float fTimeElapsed)
 	if (!pObj) return;
 
 	XMFLOAT3 xmf3Pos = GetPosition(), xmf3Look = GetLook();
+	xmf3Look.y = 0.f;
 	xmf3Look = Vector3::ScalarProduct(xmf3Look, -1.f);
 	XMFLOAT3 xmf3LookAt = Vector3::Add(xmf3Pos, xmf3Look);
-	xmf3Pos.y += 0.5f;
+	xmf3Pos.y += 1.f;
 
 	pObj->SetPosition(xmf3Pos);
 	pObj->SetLookAt(xmf3LookAt, true);

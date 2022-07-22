@@ -43,8 +43,13 @@ void CBossMonster::Update(float fTimeElapsed)
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
-		if (VERSE3 == m_nowVerse && BOSS::TAKE_DAMAGED == m_eCurAnim) {
-			Change_Animation(BOSS::ANIM::SPELL);
+		if (VERSE3 == m_nowVerse) {
+			if (BOSS::TAKE_DAMAGED == m_eCurAnim) {
+				Change_Animation(BOSS::ANIM::SPELL);
+			}
+			else if (BOSS::SPELL == m_eCurAnim) {
+				Change_Animation(BOSS::ANIM::ATTACK3);
+			}
 		}
 		else
 			Change_Animation(BOSS::ANIM::IDLE);
@@ -75,6 +80,7 @@ void CBossMonster::Update(float fTimeElapsed)
 			}
 			else {
 				Change_Animation(BOSS::ANIM::ATTACK2);
+				
 				m_ePreAttack = BOSS::ATTACK2;
 			}
 			m_targetId = 1 - m_targetId;
@@ -83,7 +89,23 @@ void CBossMonster::Update(float fTimeElapsed)
 		m_xmf3Target = playerPos;
 	}
 	else if (m_nowVerse == VERSE3) {
+		m_fAttackCoolTime += fTimeElapsed;
+		if (m_fAttackCoolTime > DASHTIME) {
+			m_fAttackCoolTime = 0.f;
+			Change_Animation(BOSS::ANIM::SPELL);
+			m_targetId = 1 - m_targetId;
+			return;
+		}
+		if (BOSS::ANIM::ATTACK3 == m_eCurAnim) {
+			XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
+			m_xmf3Target = playerPos;
+			XMFLOAT3 subVectorNormal = Vector3::Subtract(m_xmf3Target, GetPosition(), true, true);
+			XMVECTOR xmVecNormal = { subVectorNormal.x,subVectorNormal.y, subVectorNormal.z };
 
+			xmVecNormal *= fTimeElapsed * BOSS_SPEED;
+			Move(Vector3::XMVectorToFloat3(xmVecNormal));
+			
+		}
 	}
 }
 
@@ -117,27 +139,38 @@ void CBossMonster::CheckCollision(int c_id)
 	if (m_eCurAnim == BOSS::ANIM::TAKE_DAMAGED)
 		return;
 
+	bool bCol = BoundingBox_Intersect(c_id);
 
-	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
-	{
-		m_hp -= 20.f;
-		m_fDamagedCoolTime = 0.f;
-		m_fAttackCoolTime = 0.f;
+	CGameObject* pPlayer = clients[c_id]._pObject;
+	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
+		if ( bCol && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
+		{
+			m_hp -= 20.f;
+			m_fDamagedCoolTime = 0.f;
+			m_fAttackCoolTime = 0.f;
 
-		if (m_hp < 50.f && m_nowVerse == VERSE2)
-		{
-			m_nowVerse = VERSE3;
-		}
-		if (m_hp <= 0.f)
-		{
-			Change_Animation(BOSS::ANIM::DIE);
-			return;
-		}
-		else
-		{
-			Change_Animation(BOSS::ANIM::TAKE_DAMAGED);
+			if (m_hp < 50.f && m_nowVerse == VERSE2)
+			{
+				m_nowVerse = VERSE3;
+
+			}
+			if (m_hp <= 0.f)
+			{
+				Change_Animation(BOSS::ANIM::DIE);
+				return;
+			}
+			else
+			{
+				Change_Animation(BOSS::ANIM::TAKE_DAMAGED);
+			}
 		}
 	}
+	else if (bCol) {
+		// boss와 플레이어 충돌 ATTACK패킷 보내고 클라에서 CoolTime 지났으면 충돌처리되도록! 
+		// 보스의 애니메이션 SPELL로 변경
+	}
+
 }
 
 void CBossMonster::Change_Animation(BOSS::ANIM eNewAnim)

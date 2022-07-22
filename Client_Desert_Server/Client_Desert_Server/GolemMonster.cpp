@@ -123,28 +123,33 @@ void CGolemMonster::CheckCollision(int c_id)
 		m_eCurAnim == GOLEM::ANIM::DAMAGED_RIGHT)
 		return;
 	
-	
-	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
-	{
-		m_hp -= 20.f;
-		m_fDamagedCoolTime = 0.f;
+	CGameObject* pPlayer = clients[c_id]._pObject;
+	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
 
-		if (m_hp <= 0.f)
+		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
 		{
-			Change_Animation(GOLEM::ANIM::DIE);
-			m_fRunCoolTime = 0.f;
+			m_hp -= 20.f;
+			m_fDamagedCoolTime = 0.f;
 
-			return;
-		}
-		else
-		{
-			Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
-			m_fRunCoolTime = 0.f;
+			if (m_hp <= 0.f)
+			{
+				Change_Animation(GOLEM::ANIM::DIE);
+				m_fRunCoolTime = 0.f;
 
-			// Å¸°Ù ·£´ýÇÏ°Ô ¹Ù²Ù±â
-			m_targetId = rand() % 2;
+				return;
+			}
+			else
+			{
+				Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
+				m_fRunCoolTime = 0.f;
+
+				// Å¸°Ù ·£´ýÇÏ°Ô ¹Ù²Ù±â
+				m_targetId = rand() % 2;
+			}
 		}
 	}
+	
 }
 
 void CGolemMonster::Change_Animation(GOLEM::ANIM eNewAnim)

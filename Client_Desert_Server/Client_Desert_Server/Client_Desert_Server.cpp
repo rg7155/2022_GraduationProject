@@ -138,19 +138,14 @@ void process_packet(int c_id)
 		clients[c_id]._pObject->m_eCurAnim = p->eCurAnim;
 		memcpy(clients[c_id]._pObject->m_eAnimInfo, p->animInfo, sizeof(p->animInfo));
 
-		// 객체들과 충돌체크
-		if ((p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
-			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2) && p->animInfo[p->eCurAnim].fPosition > 0.2f)
+		timer_lock.lock();
+
+		for (auto& object : objects[OBJECT_MONSTER])
 		{
-			timer_lock.lock();
-
-			for (auto& object : objects[OBJECT_MONSTER])
-			{
-				object->CheckCollision(c_id);
-			}
-			timer_lock.unlock();
-
+			object->CheckCollision(c_id);
 		}
+		timer_lock.unlock();
+
 		bool bFoot[2]{};
 		if (g_Scene == SCENE_2) {
 			// 발판 충돌체크

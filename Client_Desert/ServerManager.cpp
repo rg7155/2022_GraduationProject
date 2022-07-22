@@ -280,6 +280,11 @@ int CServerManager::ProcessPacket(char* packet)
 				pBoss->SetLookAt(p->xmf3Look);
 				pBoss->m_targetId = p->target_id;
 			}
+			if (p->verse == VERSE3) {
+				pBoss->m_targetId = p->target_id;
+				pBoss->SetLookAt(p->xmf3Look);
+				pBoss->SetPosition(p->xmf3Position);
+			}
 		}
 		
 		return p->size;
