@@ -90,6 +90,8 @@ public:
 public:
 	virtual void Animate(float fTimeElapsed) override;
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void SetLookAt(XMFLOAT3& xmf3Target, bool isYFix = false);
+
 	void Change_Animation(BOSS::ANIM eNewAnim);
 
 private:

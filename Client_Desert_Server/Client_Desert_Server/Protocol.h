@@ -73,7 +73,6 @@ struct CS_MOVE_PACKET
 	XMFLOAT4X4		xmf4x4World;
 	object_anim		animInfo[10];
 	int				eCurAnim;
-	unsigned int	client_time;
 };
 
 

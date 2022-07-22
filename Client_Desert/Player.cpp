@@ -793,8 +793,9 @@ void CPlayer::HitEffectOn()
 bool CPlayer::IsNowAttack()
 {
 	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 ||
-		m_eCurAnim == PLAYER::ANIM::SKILL1 || m_eCurAnim == PLAYER::ANIM::SKILL2)
-		return true;
+		m_eCurAnim == PLAYER::ANIM::SKILL1 || m_eCurAnim == PLAYER::ANIM::SKILL2) {
+			return true;
+	}
 
 	return false;
 }
