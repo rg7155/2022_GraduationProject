@@ -198,6 +198,7 @@ void CMonsterObject::SetHp(int hp)
 	{
 		MakeHitEffect();
 		MakeHitFont();
+
 	}
 
 	m_iHp = hp;
@@ -331,6 +332,22 @@ void CBossObject::Animate(float fTimeElapsed)
 	if (!m_isActive)
 		return;
 
+	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
+
+	if (m_eCurAnim == BOSS::ANIM::DIE && m_isEndTalk)
+	{
+		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
+		if (fAnimElapseTime >= fLength - EPSILON)
+		{
+			m_fDissolve += fTimeElapsed * 0.5f;
+			if (m_fDissolve > 1.f)
+			{
+				m_fDissolve = 1.f;
+				m_isActive = false;
+			}
+		}
+	}
+
 	CMonsterObject::Animate(fTimeElapsed);
 }
 
@@ -361,6 +378,10 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 {
 	if (m_eCurAnim == eNewAnim)
 		return;
+
+	if (BOSS::DIE == eNewAnim) {
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(BOSS_TEXT);
+	}
 
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
@@ -477,7 +498,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 	
 	// m_fDissolve 0 - 1
 	
-	if (m_eCurAnim == GOLEM::ANIM::DIE)
+	if (m_eCurAnim == GOLEM::ANIM::DIE && m_isEndTalk)
 	{
 		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
 		if (fAnimElapseTime >= fLength - EPSILON)
@@ -554,7 +575,9 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 	//}
 	if (m_eCurAnim == eNewAnim)
 		return;
-
+	if (GOLEM::DIE == eNewAnim) {
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(GOLEM_TEXT);
+	}
 	// 플레이어가 공격 중이면 공격하지 않음
 	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
 	int id = CServerManager::GetInstance()->m_myid;
@@ -1102,8 +1125,8 @@ void CCactusObject::Animate(float fTimeElapsed)
 
 	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
 
-	if (m_eCurAnim == CACTUS::ANIM::DIE)
-	{
+	if (m_eCurAnim == CACTUS::ANIM::DIE && m_isEndTalk)
+	{		
 		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
 		if (fAnimElapseTime >= fLength - EPSILON)
 		{
@@ -1129,6 +1152,11 @@ void CCactusObject::Change_Animation(CACTUS::ANIM eNewAnim)
 {
 	if (m_eCurAnim == eNewAnim)
 		return;
+
+
+	if (CACTUS::DIE == eNewAnim) {
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(CACTUS_TEXT);
+	}
 
 	// 애님에 따라 총알 생성
 	if (eNewAnim == CACTUS::ATTACK1 || eNewAnim == CACTUS::ATTACK2) {

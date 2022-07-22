@@ -233,6 +233,15 @@ void process_packet(int c_id)
 		}
 		break;
 	}
+	case CS_NPC:
+	{
+		// 상대플레이어에게 알림
+		for (auto& cl : clients)
+		{
+			if (cl.first == c_id) continue;
+			cl.second.send_npc_packet();
+		}
+	}
 	default:
 		break;
 	}

@@ -65,6 +65,9 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 		case CS_READY:
 			send_ready_packet();
 			break;
+		case CS_NPC:
+			send_npc_packet();
+			break;
 		default:
 			break;
 		}
@@ -138,6 +141,15 @@ void CServerManager::send_ready_packet()
 	p.type = CS_READY;
 	p.bReady = pPlayer->m_isReadyToggle;
 	send_packet(&p, p.size);
+}
+
+void CServerManager::send_npc_packet()
+{
+	CS_NPC_PACKET p;
+	p.size = sizeof(CS_NPC_PACKET);
+	p.type = CS_NPC;
+	send_packet(&p, p.size);
+
 }
 
 void CServerManager::Connect()
@@ -303,6 +315,13 @@ int CServerManager::ProcessPacket(char* packet)
 		SC_READY_PACKET* p = reinterpret_cast<SC_READY_PACKET*>(packet);
 		gameFramework->m_pScene->m_pDuoPlayer->m_isReadyToggle = p->bReady;
 		return p->size;
+	}
+	case SC_NPC:
+	{
+		SC_NPC_PACKET* p = reinterpret_cast<SC_NPC_PACKET*>(packet);
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(NPC_TEXT);
+		return p->size;
+
 	}
 	default:
 		break;

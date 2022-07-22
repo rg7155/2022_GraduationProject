@@ -85,3 +85,12 @@ void CSession::send_ready_packet(int c_id)
 	p.bReady = _isReady;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
+
+void CSession::send_npc_packet()
+{
+	SC_NPC_PACKET p;
+	p.size = sizeof(SC_NPC_PACKET);
+	p.type = SC_NPC;
+	do_send(p.size, reinterpret_cast<char*>(&p));
+
+}

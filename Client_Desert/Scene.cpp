@@ -457,6 +457,8 @@ void CScene::SetPointLightPos(XMFLOAT3& xmf3Pos)
 void CScene::AddTextToUILayer(int iIndex)
 {
 	CGameObject *pObj = m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
+	if (pObj->m_isActive)
+		return;
 	pObj->SetActiveState(true);
 
 	queue<wstring> queueStr;
