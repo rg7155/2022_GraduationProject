@@ -48,6 +48,7 @@
 #include <d2d1_3.h>
 #include <d3d11on12.h>
 #include <dwrite.h>
+#include <dwrite_3.h>
 
 #define DIRECTINPUT_VERSION 0x0800
 #include <dinput.h>

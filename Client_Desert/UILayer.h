@@ -48,14 +48,14 @@ private:
 
     ID3D11DeviceContext*            m_pd3d11DeviceContext = NULL;
     ID3D11On12Device*               m_pd3d11On12Device = NULL;
-    IDWriteFactory*                 m_pd2dWriteFactory = NULL;
+    IDWriteFactory5*                 m_pd2dWriteFactory = NULL;
     ID2D1Factory3*                  m_pd2dFactory = NULL;
     ID2D1Device2*                   m_pd2dDevice = NULL;
     ID2D1DeviceContext2*            m_pd2dDeviceContext = NULL;
     ID2D1SolidColorBrush*           m_pd2dTextBrush = NULL;
     IDWriteTextFormat*              m_pdwTextFormat = NULL;
     IDWriteTextFormat*              m_pdwDamageFontFormat = NULL;
-
+    IDWriteFontCollection1*         m_pdwFontCollection1 = NULL;
 
     std::vector<ID3D11Resource*>    m_vWrappedRenderTargets;
     std::vector<ID2D1Bitmap1*>      m_vd2dRenderTargets;
