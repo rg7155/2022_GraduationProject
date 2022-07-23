@@ -1,10 +1,10 @@
 #pragma once
 #include "GameObject.h"
 constexpr auto BOSS_POS_INIT = XMFLOAT3(53.759f, 0.f, 60.787f);
-constexpr auto BOSS_ATTACK_START_DISTANCE = 5.f;
+constexpr auto BOSS_ATTACK_START_DISTANCE = 15.f;
 constexpr auto ATTACK_COOLTIME = 3.f;
 constexpr auto DASHTIME = 3.f;
-constexpr auto IDLETIME = 2.f;
+constexpr auto IDLETIME = 1.f;
 constexpr auto BOSS_SPEED = 6.f;
 
 class CBossMonster : public CGameObject

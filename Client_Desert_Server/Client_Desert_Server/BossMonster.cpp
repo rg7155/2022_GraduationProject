@@ -8,7 +8,8 @@ CBossMonster::CBossMonster()
 	m_eCurAnim = BOSS::ANIM::IDLE;
 	m_fAnimMaxTime = animTimes["Boss"][m_eCurAnim];
 	
-	m_hp = 200;
+	m_hp = 2500;
+	m_hpmax = m_hp;
 	SetPosition(BOSS_POS_INIT.x, BOSS_POS_INIT.y, BOSS_POS_INIT.z);
 	SetScale(0.8f, 0.8f, 0.8f);
 
@@ -159,17 +160,19 @@ void CBossMonster::CheckCollision(int c_id)
 		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
 		if ( bCol && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
 		{
-			m_hp -= 20.f;
+			m_hp -= pPlayer->m_att;
+
 			m_fDamagedCoolTime = 0.f;
 			m_fAttackCoolTime = 0.f;
 
-			if (m_hp < 50.f && m_nowVerse == VERSE2)
+			if (m_hp < (m_hpmax/2) && m_nowVerse == VERSE2)
 			{
 				m_nowVerse = VERSE3;
 
 			}
 			if (m_hp <= 0.f)
 			{
+				m_hp = 0.f;
 				Change_Animation(BOSS::ANIM::DIE);
 				return;
 			}

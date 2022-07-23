@@ -6,7 +6,7 @@ CGameObject::CGameObject()
 	m_bActive = false;
 	m_race = RACE_PLAYER;
 	m_hp = 100, m_hpmax=100;
-
+	m_att = 50;
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_fDieCoolTime = 0.f;
 
@@ -104,8 +104,6 @@ bool CGameObject::BoundingBoxFront_Intersect(int c_id, float fDis)
 	XMFLOAT3 xmf3MulLook = Vector3::ScalarProduct(m_xmf3Look, fDis, true);
 	myOOBB.Center = Vector3::Add(myOOBB.Center, xmf3MulLook);
 	myOOBB.Center.y = 0.f;
-	cout << myOOBB.Center.x <<' ' << myOOBB.Center.y << ' ' << myOOBB.Center.z << endl;
-
 	clients[c_id]._pObject->UpdateBoundingBox();
 	BoundingOrientedBox targetOOBB = clients[c_id]._pObject->m_xmOOBB;
 

@@ -40,7 +40,7 @@ public:
 	void UpdateHpBar(float fTimeElapsed);
 	void SetHp(int iDamage);
 	void MakeHitEffect();	
-	void MakeHitFont();
+	void MakeHitFont(int _Att);
 
 	virtual void	CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line) override;
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);

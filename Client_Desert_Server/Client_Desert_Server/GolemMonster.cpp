@@ -17,7 +17,9 @@ CGolemMonster::CGolemMonster(int _targetId)
 	m_targetId = _targetId;
 	m_fRunCoolTime = 0.f;
 	m_fDamagedCoolTime = 0.f;
-	m_hp = 100.f;
+	m_hp = 1000;
+	m_hpmax = m_hp;
+
 	m_bFollowStart = false;
 }
 
@@ -129,23 +131,21 @@ void CGolemMonster::CheckCollision(int c_id)
 
 		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
 		{
-			m_hp -= 20.f;
+			m_hp -= pPlayer->m_att;
 			m_fDamagedCoolTime = 0.f;
 
 			if (m_hp <= 0.f)
 			{
 				Change_Animation(GOLEM::ANIM::DIE);
 				m_fRunCoolTime = 0.f;
-
+				m_hp = 0.f;
 				return;
 			}
 			else
 			{
 				Change_Animation(GOLEM::ANIM::DAMAGED_LEFT);
 				m_fRunCoolTime = 0.f;
-
-				// Å¸°Ù ·£´ýÇÏ°Ô ¹Ù²Ù±â
-				m_targetId = rand() % 2;
+				m_targetId = 1 - m_targetId;
 			}
 		}
 	}

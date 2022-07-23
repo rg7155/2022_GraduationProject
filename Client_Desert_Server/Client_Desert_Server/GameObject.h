@@ -38,6 +38,7 @@ public:
 public:
 	char			m_race;
 	int				m_hp, m_hpmax;
+	int				m_att;
 	XMFLOAT4X4		m_xmf4x4World;
 	XMFLOAT3		m_xmf3Target;
 	object_anim		m_eAnimInfo[10];

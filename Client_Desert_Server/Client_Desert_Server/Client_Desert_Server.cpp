@@ -138,6 +138,13 @@ void process_packet(int c_id)
 		clients[c_id]._pObject->m_eCurAnim = p->eCurAnim;
 		memcpy(clients[c_id]._pObject->m_eAnimInfo, p->animInfo, sizeof(p->animInfo));
 
+		// °ø°Ý·Â ¾÷µ«!
+		if (PLAYER::ATTACK1 == clients[c_id]._pObject->m_eCurAnim || PLAYER::ATTACK2 == clients[c_id]._pObject->m_eCurAnim) {
+			clients[c_id]._pObject->m_att = rand() % 51 + 50;
+		}
+		else if (PLAYER::SKILL1 == clients[c_id]._pObject->m_eCurAnim || PLAYER::SKILL2 == clients[c_id]._pObject->m_eCurAnim) {
+			clients[c_id]._pObject->m_att = rand() % 151 + 150;
+		}
 		timer_lock.lock();
 
 		for (auto& object : objects[OBJECT_MONSTER])

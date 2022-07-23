@@ -7,7 +7,9 @@ CCactusMonster::CCactusMonster()
 	m_bActive = true;
 	m_eCurAnim = CACTUS::ANIM::SPAWN;
 	m_fAnimMaxTime = animTimes["Cactus"][m_eCurAnim];
-	m_hp = 100;
+	m_hp = 1500;
+	m_hpmax = m_hp;
+
 	SetPosition(CACTUS_POS_INIT.x, CACTUS_POS_INIT.y, CACTUS_POS_INIT.z);
 	
 }
@@ -88,11 +90,12 @@ void CCactusMonster::CheckCollision(int c_id)
 		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
 		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
 		{
-			m_hp -= 20.f;
+			m_hp -= pPlayer->m_att;
 			m_fDamagedCoolTime = 0.f;
 
 			if (m_hp <= 0.f)
 			{
+				m_hp = 0.f;
 				Change_Animation(CACTUS::ANIM::DIE);
 				return;
 			}
