@@ -94,3 +94,11 @@ void CSession::send_npc_packet()
 	do_send(p.size, reinterpret_cast<char*>(&p));
 
 }
+
+void CSession::send_damaged_packet()
+{
+	SC_DAMAGED_PACKET p;
+	p.size = sizeof(SC_DAMAGED_PACKET);
+	p.type = SC_DAMAGED;
+	do_send(p.size, reinterpret_cast<char*>(&p));
+}

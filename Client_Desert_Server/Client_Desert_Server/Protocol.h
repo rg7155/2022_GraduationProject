@@ -25,7 +25,7 @@ constexpr char SC_MOVE_MONSTER = 7;
 constexpr char SC_FOOTHOLD = 8;
 constexpr char SC_READY = 9;
 constexpr char SC_NPC = 10;
-
+constexpr char SC_DAMAGED = 11;
 
 // dir
 constexpr char DIR_UPRIGHT = 1;
@@ -188,4 +188,9 @@ struct SC_FOOTHOLD_PACKET
 	bool flag2;
 };
 
+struct SC_DAMAGED_PACKET
+{
+	char type;
+	int size;
+};
 #pragma pack (pop)

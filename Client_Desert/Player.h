@@ -148,6 +148,7 @@ private:
 	bool	m_bSkill1EffectOn;
 	bool	m_bSkill2EffectOn;
 
+
 public:
 	CCollision* m_pComCollision = nullptr;
 	CTrail* m_pComTrail = nullptr;

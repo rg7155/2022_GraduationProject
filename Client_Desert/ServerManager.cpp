@@ -198,8 +198,6 @@ int CServerManager::ProcessPacket(char* packet)
 			ShowWindow(g_hWnd, m_isWindow);
 		}
 		// ¸ó½ºÅÍ
-		
-
 		return p->size;
 	}
 	case SC_MOVE_OBJECT:
@@ -325,6 +323,12 @@ int CServerManager::ProcessPacket(char* packet)
 	{
 		SC_NPC_PACKET* p = reinterpret_cast<SC_NPC_PACKET*>(packet);
 		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(NPC_TEXT);
+		return p->size;
+	}
+	case SC_DAMAGED:
+	{
+		SC_DAMAGED_PACKET* p = reinterpret_cast<SC_DAMAGED_PACKET*>(packet);
+		CGameMgr::GetInstance()->GetPlayer()->SetDamaged();
 		return p->size;
 
 	}

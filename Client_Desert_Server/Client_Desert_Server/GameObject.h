@@ -31,6 +31,8 @@ public:
 
 	virtual void CheckCollision(int c_id) {};
 	bool BoundingBox_Intersect(int c_id);
+	bool BoundingBoxFront_Intersect(int c_id, float fDis);
+
 	void UpdateBoundingBox();
 
 public:
@@ -40,6 +42,7 @@ public:
 	XMFLOAT3		m_xmf3Target;
 	object_anim		m_eAnimInfo[10];
 	int				m_eCurAnim;
+	XMFLOAT3		m_xmf3Look;
 
 
 public:

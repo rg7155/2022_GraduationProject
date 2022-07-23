@@ -4,7 +4,7 @@ constexpr auto BOSS_POS_INIT = XMFLOAT3(53.759f, 0.f, 60.787f);
 constexpr auto BOSS_ATTACK_START_DISTANCE = 5.f;
 constexpr auto ATTACK_COOLTIME = 3.f;
 constexpr auto DASHTIME = 3.f;
-constexpr auto IDLETIME = 1.f;
+constexpr auto IDLETIME = 2.f;
 constexpr auto BOSS_SPEED = 6.f;
 
 class CBossMonster : public CGameObject
@@ -30,8 +30,10 @@ private:
 	float		m_fAnimElapsedTime;		// 현재 애니메이션의 흐른 시간
 	float		m_fDamagedCoolTime;
 	float		m_fAttackCoolTime;
+	float		m_fIdleTime;
 	int			m_nowVerse;
 	BOSS::ANIM	m_ePreAttack;
+
 
 public:
 	int				m_targetId;

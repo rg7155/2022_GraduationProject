@@ -10,7 +10,7 @@ CBossMonster::CBossMonster()
 	
 	m_hp = 200;
 	SetPosition(BOSS_POS_INIT.x, BOSS_POS_INIT.y, BOSS_POS_INIT.z);
-	SetScale(1.2f, 1.2f, 1.2f);
+	SetScale(0.8f, 0.8f, 0.8f);
 
 	m_fAnimElapsedTime = 0.f;
 	m_fAttackCoolTime = 0.f;
@@ -48,7 +48,8 @@ void CBossMonster::Update(float fTimeElapsed)
 				Change_Animation(BOSS::ANIM::SPELL);
 			}
 			else if (BOSS::SPELL == m_eCurAnim) {
-				Change_Animation(BOSS::ANIM::ATTACK3);
+				Change_Animation(BOSS::ANIM::IDLE);
+				m_fIdleTime = 0.f;
 			}
 		}
 		else
@@ -89,23 +90,35 @@ void CBossMonster::Update(float fTimeElapsed)
 		m_xmf3Target = playerPos;
 	}
 	else if (m_nowVerse == VERSE3) {
+		if (BOSS::IDLE == m_eCurAnim) {
+			m_fIdleTime += fTimeElapsed;
+			if (m_fIdleTime > IDLETIME) {
+				Change_Animation(BOSS::ANIM::ATTACK3);
+				m_fAttackCoolTime = 0.f;
+				m_targetId = 1 - m_targetId;
+				XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
+				m_xmf3Target = playerPos;
+			}
+			return;
+		}
+
 		m_fAttackCoolTime += fTimeElapsed;
 		if (m_fAttackCoolTime > DASHTIME) {
 			m_fAttackCoolTime = 0.f;
-			Change_Animation(BOSS::ANIM::SPELL);
-			m_targetId = 1 - m_targetId;
+			if(BOSS::IDLE != m_eCurAnim)
+				Change_Animation(BOSS::ANIM::SPELL);
 			return;
 		}
 		if (BOSS::ANIM::ATTACK3 == m_eCurAnim) {
 			XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
 			m_xmf3Target = playerPos;
-			XMFLOAT3 subVectorNormal = Vector3::Subtract(m_xmf3Target, GetPosition(), true, true);
-			XMVECTOR xmVecNormal = { subVectorNormal.x,subVectorNormal.y, subVectorNormal.z };
-
+			m_xmf3Look = Vector3::Subtract(m_xmf3Target, GetPosition(), true, true);
+			XMVECTOR xmVecNormal = { m_xmf3Look.x,m_xmf3Look.y, m_xmf3Look.z };
 			xmVecNormal *= fTimeElapsed * BOSS_SPEED;
 			Move(Vector3::XMVectorToFloat3(xmVecNormal));
 			
 		}
+
 	}
 }
 
@@ -166,9 +179,17 @@ void CBossMonster::CheckCollision(int c_id)
 			}
 		}
 	}
-	else if (bCol) {
-		// boss와 플레이어 충돌 ATTACK패킷 보내고 클라에서 CoolTime 지났으면 충돌처리되도록! 
-		// 보스의 애니메이션 SPELL로 변경
+	else if(BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim || BOSS::ATTACK3 == m_eCurAnim){
+		if (BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim) {
+			bCol = BoundingBoxFront_Intersect(c_id, 2.f);
+		}
+
+		if (bCol) {
+			if(BOSS::ATTACK3 == m_eCurAnim)
+				Change_Animation(BOSS::ANIM::SPELL);
+			clients[c_id].send_damaged_packet();
+		}
+
 	}
 
 }
