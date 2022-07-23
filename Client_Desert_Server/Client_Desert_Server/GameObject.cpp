@@ -6,7 +6,7 @@ CGameObject::CGameObject()
 	m_bActive = false;
 	m_race = RACE_PLAYER;
 	m_hp = 100, m_hpmax=100;
-
+	m_att = 50;
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_fDieCoolTime = 0.f;
 
@@ -89,9 +89,26 @@ bool CGameObject::BoundingBox_Intersect(int c_id)
 	clients[c_id]._pObject->UpdateBoundingBox();
 
 	BoundingOrientedBox targetOOBB = clients[c_id]._pObject->m_xmOOBB;
+
 	if (m_xmOOBB.Intersects(targetOOBB))
 		return true;
 	
+	return false;
+}
+
+bool CGameObject::BoundingBoxFront_Intersect(int c_id, float fDis)
+{
+	// Look방향으로 fDis만큼 떨어진 바운딩 박스와 충돌체크
+	UpdateBoundingBox();
+	BoundingOrientedBox myOOBB = m_xmOOBB;
+	XMFLOAT3 xmf3MulLook = Vector3::ScalarProduct(m_xmf3Look, fDis, true);
+	myOOBB.Center = Vector3::Add(myOOBB.Center, xmf3MulLook);
+	myOOBB.Center.y = 0.f;
+	clients[c_id]._pObject->UpdateBoundingBox();
+	BoundingOrientedBox targetOOBB = clients[c_id]._pObject->m_xmOOBB;
+
+	if (myOOBB.Intersects(targetOOBB))
+		return true;
 	return false;
 }
 
@@ -100,5 +117,4 @@ void CGameObject::UpdateBoundingBox()
 {
 	m_xmLocalOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
 	XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
-
 }

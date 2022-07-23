@@ -28,5 +28,7 @@ public:
 	void send_add_object(int c_id);
 	void send_move_packet(int c_id);
 	void send_ready_packet(int c_id);
+	void send_npc_packet();
+	void send_damaged_packet();
 };
 

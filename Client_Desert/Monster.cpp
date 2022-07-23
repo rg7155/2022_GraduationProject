@@ -32,8 +32,7 @@ CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandLi
 	SetEffectsType(EFFECT_DISSOLVE, true);
 	SetEffectsType(EFFECT_FOG, true);
 
-	m_pHp = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
-	m_pHpFrame = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
+	
 	//m_pHp = static_cast<CTexturedObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Hp"));
 	//m_pHpFrame = static_cast<CTexturedObject*>(CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"HpFrame"));
 
@@ -197,15 +196,18 @@ void CMonsterObject::SetHp(int hp)
 	if (m_iHp != hp)
 	{
 		MakeHitEffect();
-		MakeHitFont();
+		MakeHitFont(m_iHp-hp);
+
 	}
 
 	m_iHp = hp;
 	if (m_iHp < 0)
 		m_iHp = 0;
 
-	float fRatio = (m_iHp / (float)m_iMaxHp);
-	m_pHp->SetScale(fRatio, 1.f, 1.f);
+	float fRatio = ((float)m_iHp / (float)m_iMaxHp);
+
+	if(m_pHp)
+		m_pHp->SetScale(fRatio, 1.f, 1.f);
 
 	
 }
@@ -223,16 +225,14 @@ void CMonsterObject::MakeHitEffect()
 	xmf3Pos.y += 1.f;
 	xmf3Pos.z += xmf3Look.z;
 	pObj->SetPosition(xmf3Pos);
-
-	cout << "MakeEff" << endl;
 }
 
-void CMonsterObject::MakeHitFont()
+void CMonsterObject::MakeHitFont(int _Att)
 {
 	CGameMgr* pGameMgr = CGameMgr::GetInstance();
-	XMFLOAT3 xmf3Pos = pGameMgr->GetPlayer()->GetPosition();
-	int iDamage = rand() % 999 + 1;
-	pGameMgr->GetScene()->m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += 2.f;
+	pGameMgr->GetScene()->m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(_Att));
 }
 
 void CMonsterObject::CollsionDetection(CGameObject* pObj, XMFLOAT3* xmf3Line)
@@ -304,6 +304,9 @@ CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[BOSS::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
 
+	m_pHp = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
+	m_pHpFrame = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
+
 	m_eCurAnim = BOSS::ANIM::IDLE;
 	m_ePrevAnim = BOSS::ANIM::IDLE;
 
@@ -311,10 +314,16 @@ CBossObject::CBossObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd
 	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
-	m_iMaxHp = 200.f;
+	m_iMaxHp = 2500.f;
+	m_iHp = 2500.f;
+	m_fHpOffsetY = 4.f;
+
 	Rotate(90.f, 220.f, 0.f);
 	SetPosition(BOSS_POS_INIT);
 	SetScale(1.2f, 1.2f, 1.2f);
+	m_iWindCount = 0;
+	m_isActive = false;
+	
 }
 
 CBossObject::~CBossObject()
@@ -326,6 +335,25 @@ void CBossObject::Animate(float fTimeElapsed)
 	if (!m_isActive)
 		return;
 
+	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
+
+	if (m_eCurAnim == BOSS::ANIM::DIE && m_isEndTalk)
+	{
+		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
+		if (fAnimElapseTime >= fLength - EPSILON)
+		{
+			m_fDissolve += fTimeElapsed * 0.5f;
+			if (m_fDissolve > 1.f)
+			{
+				m_fDissolve = 1.f;
+				m_isActive = false;
+			}
+		}
+	}
+
+	if (m_eCurAnim == BOSS::ATTACK1) {
+		CheckCreateWindEffect(fTimeElapsed);
+	}
 	CMonsterObject::Animate(fTimeElapsed);
 }
 
@@ -357,6 +385,12 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 	if (m_eCurAnim == eNewAnim)
 		return;
 
+	if (BOSS::ATTACK1 == m_eCurAnim)
+		m_iWindCount = 0;
+	else if (BOSS::DIE == eNewAnim) {
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(BOSS_TEXT);
+		cout << "AddBoss\n";
+	}
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
 
@@ -387,9 +421,10 @@ void CBossObject::CheckCreateWindEffect(float fTimeElapsed)
 	if (!pObj) return;
 
 	XMFLOAT3 xmf3Pos = GetPosition(), xmf3Look = GetLook();
+	xmf3Look.y = 0.f;
 	xmf3Look = Vector3::ScalarProduct(xmf3Look, -1.f);
 	XMFLOAT3 xmf3LookAt = Vector3::Add(xmf3Pos, xmf3Look);
-	xmf3Pos.y += 0.5f;
+	xmf3Pos.y += 2.f;
 
 	pObj->SetPosition(xmf3Pos);
 	pObj->SetLookAt(xmf3LookAt, true);
@@ -413,6 +448,12 @@ CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* 
 
 	}
 
+
+	m_iHp = 1000;
+	m_iMaxHp = 1000;
+
+	m_pHp = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
+	m_pHpFrame = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[GOLEM::ANIM:: DIE]->m_nType = ANIMATION_TYPE_ONCE;
 	m_eCurAnim = GOLEM::ANIM::IDLE;
@@ -472,7 +513,7 @@ void CGolemObject::Animate(float fTimeElapsed)
 	
 	// m_fDissolve 0 - 1
 	
-	if (m_eCurAnim == GOLEM::ANIM::DIE)
+	if (m_eCurAnim == GOLEM::ANIM::DIE && m_isEndTalk)
 	{
 		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
 		if (fAnimElapseTime >= fLength - EPSILON)
@@ -549,7 +590,9 @@ void CGolemObject::Change_Animation(GOLEM::ANIM eNewAnim)
 	//}
 	if (m_eCurAnim == eNewAnim)
 		return;
-
+	if (GOLEM::DIE == eNewAnim) {
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(GOLEM_TEXT);
+	}
 	// 플레이어가 공격 중이면 공격하지 않음
 	CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
 	int id = CServerManager::GetInstance()->m_myid;
@@ -1009,6 +1052,8 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 	}
 
+	m_pHp = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP);
+	m_pHpFrame = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_HP_FRAME);
 
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTUS::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
 	//m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[CACTUS::ANIM::SPAWN]->m_nType = ANIMATION_TYPE_ONCE;
@@ -1033,10 +1078,14 @@ CCactusObject::CCactusObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList
 
 	m_pCacti1 = pCacti1;
 	m_pCacti2 = pCacti2;
+	m_fHpOffsetY = 4.f;
 
 	m_nowVerse = VERSE1;
 	m_ePreAttack = CACTUS::IDLE;
 	m_fAttackCoolTime = 0.f;
+
+	m_iHp = 1500;
+	m_iMaxHp = m_iHp;
 
 	SetScale(2.f, 2.f, 2.f);
 	m_xmOOBB.Extents = Vector3::ScalarProduct(m_xmOOBB.Extents, 2.f, false);
@@ -1096,8 +1145,8 @@ void CCactusObject::Animate(float fTimeElapsed)
 
 	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
 
-	if (m_eCurAnim == CACTUS::ANIM::DIE)
-	{
+	if (m_eCurAnim == CACTUS::ANIM::DIE && m_isEndTalk)
+	{		
 		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
 		if (fAnimElapseTime >= fLength - EPSILON)
 		{
@@ -1123,6 +1172,11 @@ void CCactusObject::Change_Animation(CACTUS::ANIM eNewAnim)
 {
 	if (m_eCurAnim == eNewAnim)
 		return;
+
+
+	if (CACTUS::DIE == eNewAnim) {
+		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(CACTUS_TEXT);
+	}
 
 	// 애님에 따라 총알 생성
 	if (eNewAnim == CACTUS::ATTACK1 || eNewAnim == CACTUS::ATTACK2) {
