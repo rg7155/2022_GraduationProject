@@ -130,11 +130,18 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	m_pStandardObjectShader->AddObject(L"Portal", pObj);
 
 	//¸ó½ºÅÍ ¹Ù´Ú ÀÌÆåÆ®
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < 3; ++i)
 	{
 		pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_QUAKE);
 		pObj->SetActiveState(false);
 		m_pStandardObjectShader->AddObject(L"Quake", pObj);
+	}
+
+	for (int i = 0; i < 3; ++i)
+	{
+		pObj = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_CRACK);
+		pObj->SetActiveState(false);
+		m_pStandardObjectShader->AddObject(L"Crack", pObj);
 	}
 
 	//Ä¹Æ¼ ÃÑ¾Ë

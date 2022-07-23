@@ -338,7 +338,7 @@ float4 PSUIAlphaTextured(VS_TEXTURED_OUTPUT input) : SV_TARGET
         if (input.uv.x < 0.5f)
             angle = 360.f - angle;
         
-        cColor.a = angle > gf4UIINfo.y ? 0.1f : 1.f;
+        cColor.a *= angle > gf4UIINfo.y ? 0.1f : 1.f;
     }
     cColor.a *= gfDissolve;
     return (cColor);

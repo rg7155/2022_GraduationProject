@@ -494,20 +494,27 @@ void CPlayer::Check_CreateEffect()
 	{
 		//static_cast<CThirdPersonCamera*>(m_pCamera)->DoShaking(false);
 
+		//for (int i = 0; i < 10; ++i)
+		//{
+		//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Dust");
+		//	if (!pObj) return;
 
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"Wind");
-		if (pObj)
-		{
-			XMFLOAT3 xmf3Pos = GetPosition(), xmf3Look = GetLook();
-			xmf3Look = Vector3::ScalarProduct(xmf3Look, -1.f);
-			XMFLOAT3 xmf3LookAt = Vector3::Add(xmf3Pos, xmf3Look);
-			xmf3Pos.y += 0.5f;
+		//	pObj->SetActiveState(true);
 
-			pObj->SetPosition(xmf3Pos);
-			pObj->SetLookAt(xmf3LookAt, true);
+		//	//float fDis = RandomValue(0, 3.f);
+		//	XMFLOAT3 xmf3Pos = GetPosition();
+		//	XMFLOAT3 xmf3Dir = { RandomValue(-2.f, 2.f), 0.f, RandomValue(-2.f, 2.f) };
+		//	xmf3Pos = Vector3::Add(xmf3Pos, xmf3Dir);
+		//	xmf3Pos.y = 0.f;
+		//	pObj->SetPosition(xmf3Pos);
+		//}
 
-			static_cast<CMultiSpriteObject*>(pObj)->SetColor(true);
-		}
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
+		if (!pObj) return;
+		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+		xmf3Pos.y += 0.01f;
+		pObj->SetPosition(xmf3Pos);
+
 	}
 
 }

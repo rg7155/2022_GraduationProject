@@ -943,8 +943,13 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 	switch (eType)
 	{
 	case CTexturedObject::TEXTURE_QUAKE:
+	case CTexturedObject::TEXTURE_CRACK:
 		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.f, 1.f);
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Earthquake.dds", 0);
+		if(eType == TEXTURE_QUAKE)
+			pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Earthquake.dds", 0);
+		else
+			pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/huge-crack.dds", 0);
+
 		//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/vfx_ImpactCrack_A.dds", 0);
 
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
@@ -1008,6 +1013,7 @@ void CTexturedObject::Animate(float fTimeElapsed)
 	switch (m_eTextureType)
 	{
 	case TEXTURE_TYPE::TEXTURE_QUAKE:
+	case TEXTURE_TYPE::TEXTURE_CRACK:
 		CGameMgr::GetInstance()->GetScene()->AddAlphaObjectToList(this);
 
 		//2초동안 생성, 1초는 서서히 사라짐
