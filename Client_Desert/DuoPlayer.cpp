@@ -48,6 +48,8 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	m_bSkill1EffectOn = false;
 	m_isActive = false;
 	CGameMgr::GetInstance()->SetDuoPlayer(this);
+
+	Rotate(0.f, 180.f, 0.f);
 }
 
 CDuoPlayer::~CDuoPlayer()

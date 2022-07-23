@@ -128,7 +128,7 @@ public:
 public:
 	//map<const wchar_t*, list<CGameObject*>>		m_mapObject;
 	unordered_map<const wchar_t*, list<CGameObject*>>		m_mapObject;
-	
+	vector<const wchar_t*> m_vecKey; //삽입 순서를 유지하기 위한 컨테이너
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////

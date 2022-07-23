@@ -746,6 +746,7 @@ void CUIObject::Animate(float fTimeElapsed)
 
 void CUIObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
 {
+	//cout << m_eUIType << endl;
 	if (!m_isOnceRender) m_isOnceRender = true;
 
 	UpdateShaderVariables(pd3dCommandList);

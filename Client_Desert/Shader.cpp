@@ -450,9 +450,22 @@ void CStandardObjectsShader::AnimateObjects(float fTimeElapsed)
 {
 	m_fElapsedTime = fTimeElapsed;
 
-	for (auto& iter : m_mapObject)
+	//for (auto& iter : m_mapObject)
+	//{
+	//	for (auto& iterSec : iter.second)
+	//	{
+	//		if (!iterSec->m_isActive)
+	//			continue;
+	//		iterSec->Animate(m_fElapsedTime);
+	//		iterSec->UpdateTransform(NULL);
+	//	}
+	//}
+	if (m_mapObject.size() != m_vecKey.size())
+		cout << "WTF" << endl;
+
+	for (auto& iter : m_vecKey)
 	{
-		for (auto& iterSec : iter.second)
+		for (auto& iterSec : m_mapObject[iter])
 		{
 			if (!iterSec->m_isActive)
 				continue;
@@ -460,6 +473,7 @@ void CStandardObjectsShader::AnimateObjects(float fTimeElapsed)
 			iterSec->UpdateTransform(NULL);
 		}
 	}
+
 
 	//auto& mapiter_begin = m_mapObject.begin();//¸Ê ÀÌÅÍ
 	//auto& mapiter_end = m_mapObject.end();
@@ -497,12 +511,23 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 	if(isChangePipeline)
 		CStandardShader::Render(pd3dCommandList, pCamera, nPipelineState);
 
-	for (auto & iter : m_mapObject)
+	//for (auto & iter : m_mapObject)
+	//{
+	//	for (auto& iterSec : iter.second)
+	//	{
+	//		if (!iterSec->m_isActive)
+	//			continue; 
+	//		iterSec->UpdateTransform(NULL);
+	//		iterSec->Render(pd3dCommandList, pCamera, isChangePipeline);
+	//	}
+	//}
+
+	for (auto& iter : m_vecKey)
 	{
-		for (auto& iterSec : iter.second)
+		for (auto& iterSec : m_mapObject[iter])
 		{
 			if (!iterSec->m_isActive)
-				continue; 
+				continue;
 			iterSec->UpdateTransform(NULL);
 			iterSec->Render(pd3dCommandList, pCamera, isChangePipeline);
 		}
@@ -512,12 +537,23 @@ void CStandardObjectsShader::Render(ID3D12GraphicsCommandList *pd3dCommandList, 
 
 void CStandardObjectsShader::ShadowRender(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, CShader* pShader)
 {
-	for (auto& iter : m_mapObject)
+	//for (auto& iter : m_mapObject)
+	//{
+	//	for (auto& iterSec : iter.second)
+	//	{
+	//		if (!iterSec->m_isActive)
+	//			continue; 
+	//		iterSec->UpdateTransform(NULL);
+	//		iterSec->ShadowRender(pd3dCommandList, pCamera, pShader);
+	//	}
+	//}
+
+	for (auto& iter : m_vecKey)
 	{
-		for (auto& iterSec : iter.second)
+		for (auto& iterSec : m_mapObject[iter])
 		{
 			if (!iterSec->m_isActive)
-				continue; 
+				continue;
 			iterSec->UpdateTransform(NULL);
 			iterSec->ShadowRender(pd3dCommandList, pCamera, pShader);
 		}
@@ -535,6 +571,8 @@ HRESULT CStandardObjectsShader::AddObject(const wchar_t* pObjTag, CGameObject* p
 		list<CGameObject*> ListObj;
 		ListObj.emplace_back(pGameObject);
 		m_mapObject.emplace(pObjTag, ListObj);
+
+		m_vecKey.emplace_back(pObjTag);
 	}
 	else
 		iter->second.emplace_back(pGameObject);

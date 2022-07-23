@@ -159,10 +159,36 @@ void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHei
     if (m_pd2dTextBrush) m_pd2dTextBrush->Release();
     m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &m_pd2dTextBrush);
 
-    const float fFontSize = m_fHeight / 25.0f;
+    const float fFontSize = m_fHeight / 20.0f;
     const float fSmallFontSize = m_fHeight / 40.0f;
 
-    m_pd2dWriteFactory->CreateTextFormat(L"궁서체", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize, L"en-us", &m_pdwTextFormat);
+
+
+
+    //ComPtr<IDWriteFontFile> fontFileReference;
+
+    //m_pd2dWriteFactory->CreateFontFileReference(L"MyFont.ttf", nullptr, &fontFileReference);
+
+    //ComPtr<IDWriteFontSetBuilder1> fontSetBuilder;
+    //m_pd2dWriteFactory->CreateFontSetBuilder(&fontSetBuilder);
+
+    //fontSetBuilder->AddFontFile(fontFileReference.Get());
+
+    //ComPtr<IDWriteFontSet> customFontSet;
+    //fontSetBuilder->CreateFontSet(&customFontSet);
+
+    //m_pd2dWriteFactory->CreateFontCollectionFromFontSet(customFontSet.Get(), &m_pdwFontCollection);
+
+
+
+
+
+
+    //if (AddFontResourceExA("netmarble Medium", FR_PRIVATE, 0) == 0)
+    //AddFontResourceExA("netmarble Medium", FR_PRIVATE, 0);
+    //m_pd2dWriteFactory->CreateTextFormat(L"netmarble Medium", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize, L"en-us", &m_pdwTextFormat);
+    m_pd2dWriteFactory->CreateTextFormat(L"문체부 쓰기 정체", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize, L"en-us", &m_pdwTextFormat);
+
 
     m_pdwTextFormat->SetTextAlignment(/*DWRITE_TEXT_ALIGNMENT_CENTER*/DWRITE_TEXT_ALIGNMENT_LEADING);
     m_pdwTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
