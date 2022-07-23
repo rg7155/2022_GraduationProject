@@ -31,15 +31,19 @@ public:
 
 	virtual void CheckCollision(int c_id) {};
 	bool BoundingBox_Intersect(int c_id);
+	bool BoundingBoxFront_Intersect(int c_id, float fDis);
+
 	void UpdateBoundingBox();
 
 public:
 	char			m_race;
 	int				m_hp, m_hpmax;
+	int				m_att;
 	XMFLOAT4X4		m_xmf4x4World;
 	XMFLOAT3		m_xmf3Target;
 	object_anim		m_eAnimInfo[10];
 	int				m_eCurAnim;
+	XMFLOAT3		m_xmf3Look;
 
 
 public:

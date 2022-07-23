@@ -10,7 +10,7 @@ unordered_map<int, CSession>				clients;
 list<CGameObject*>							objects[OBJECT_END]; // monsters & objects
 unordered_map<string, BoundingOrientedBox>	oobbs;
 unordered_map<string, vector<float>>		animTimes;
-int											g_Scene = 0;
+int											g_Scene = SCENE_0;
 
 unordered_map<WSAOVERLAPPED*, int>		over_to_session;
 CGameTimer	m_GameTimer;
@@ -138,19 +138,21 @@ void process_packet(int c_id)
 		clients[c_id]._pObject->m_eCurAnim = p->eCurAnim;
 		memcpy(clients[c_id]._pObject->m_eAnimInfo, p->animInfo, sizeof(p->animInfo));
 
-		// 객체들과 충돌체크
-		if ((p->eCurAnim == PLAYER::ATTACK1 || p->eCurAnim == PLAYER::ATTACK2 ||
-			p->eCurAnim == PLAYER::SKILL1 || p->eCurAnim == PLAYER::SKILL2) && p->animInfo[p->eCurAnim].fPosition > 0.2f)
-		{
-			timer_lock.lock();
-
-			for (auto& object : objects[OBJECT_MONSTER])
-			{
-				object->CheckCollision(c_id);
-			}
-			timer_lock.unlock();
-
+		// 공격력 업뎃!
+		if (PLAYER::ATTACK1 == clients[c_id]._pObject->m_eCurAnim || PLAYER::ATTACK2 == clients[c_id]._pObject->m_eCurAnim) {
+			clients[c_id]._pObject->m_att = rand() % 51 + 50;
 		}
+		else if (PLAYER::SKILL1 == clients[c_id]._pObject->m_eCurAnim || PLAYER::SKILL2 == clients[c_id]._pObject->m_eCurAnim) {
+			clients[c_id]._pObject->m_att = rand() % 151 + 150;
+		}
+		timer_lock.lock();
+
+		for (auto& object : objects[OBJECT_MONSTER])
+		{
+			object->CheckCollision(c_id);
+		}
+		timer_lock.unlock();
+
 		bool bFoot[2]{};
 		if (g_Scene == SCENE_2) {
 			// 발판 충돌체크
@@ -232,6 +234,15 @@ void process_packet(int c_id)
 				g_Scene = SCENE_1;
 		}
 		break;
+	}
+	case CS_NPC:
+	{
+		// 상대플레이어에게 알림
+		for (auto& cl : clients)
+		{
+			if (cl.first == c_id) continue;
+			cl.second.send_npc_packet();
+		}
 	}
 	default:
 		break;

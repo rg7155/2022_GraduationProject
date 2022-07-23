@@ -14,6 +14,7 @@ constexpr char CS_LOGIN = 1;
 constexpr char CS_MOVE = 2;
 constexpr char CS_ATTACK = 3;
 constexpr char CS_READY = 4;
+constexpr char CS_NPC = 5;
 
 constexpr char SC_LOGIN_INFO = 2;
 constexpr char SC_ADD_OBJECT = 3;
@@ -23,7 +24,8 @@ constexpr char SC_STAT_CHANGE = 6;
 constexpr char SC_MOVE_MONSTER = 7; 
 constexpr char SC_FOOTHOLD = 8;
 constexpr char SC_READY = 9;
-
+constexpr char SC_NPC = 10;
+constexpr char SC_DAMAGED = 11;
 
 // dir
 constexpr char DIR_UPRIGHT = 1;
@@ -88,6 +90,16 @@ struct CS_READY_PACKET {
 	bool bReady;
 };
 
+struct CS_NPC_PACKET {
+	char type;
+	int size;
+};
+
+struct SC_NPC_PACKET {
+	char type;
+	int size;
+};
+
 struct SC_READY_PACKET {
 	char type;
 	int size;
@@ -136,7 +148,7 @@ struct SC_MOVE_OBJECT_PACKET
 
 struct SC_STAT_CHANGE_PACKET {
 	char	type;
-	int size;
+	int		size;
 	short	race;		// 몬스터 판별용
 	int		id;
 	int		hp, hpmax;
@@ -176,5 +188,9 @@ struct SC_FOOTHOLD_PACKET
 	bool flag2;
 };
 
-
+struct SC_DAMAGED_PACKET
+{
+	char type;
+	int size;
+};
 #pragma pack (pop)

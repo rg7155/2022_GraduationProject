@@ -140,13 +140,19 @@ void CCactiMonster::CheckCollision(int c_id) // 플레이어가 공격할때 호출
 	if (m_fDamagedCoolTime < DAMAGE_COOLTIME || m_hp <= 0)
 		return;
 
-	if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0) {
-		//m_hp -= 20.f;
-		m_fDamagedCoolTime = 0.f;
-		if (m_nowVerse == VERSE1) {
-			Change_Animation(CACTI::ANIM::BITE);
+	CGameObject* pPlayer = clients[c_id]._pObject;
+
+	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
+		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0) {
+			//m_hp -= 20.f;
+			m_fDamagedCoolTime = 0.f;
+			if (m_nowVerse == VERSE1) {
+				Change_Animation(CACTI::ANIM::BITE);
+			}
 		}
 	}
+	
 
 }
 
