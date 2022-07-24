@@ -980,7 +980,7 @@ CTexturedObject::CTexturedObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommand
 		SetActiveState(true);
 		break;
 	case CTexturedObject::TEXTURE_READY:
-		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.33f, 0.f, 0.f, 0.f, 0.f, true);
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 0.3f, 0.f, 0.f, 0.f, 0.f, true);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Ready3D.dds", 0);
 		pMaterial->SetShader(CGameMgr::GetInstance()->GetScene()->GetPipelineShader(CScene::PIPE_TEXTURE));
 		SetActiveState(true);
