@@ -390,7 +390,7 @@ void CNPCTextBlock::Update(const float& fTimeElapsed)
 				CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
 				pObj->SetActiveState(false);
 
-                CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->SetEndTalk();
+                CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->SetEndTalk(true);
             }
         }
     }

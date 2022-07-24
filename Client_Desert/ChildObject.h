@@ -158,7 +158,7 @@ class CUIObject : public CGameObject
 {
 public:
 	enum UI_TYPE { UI_FADE, UI_PLAYER, UI_PROFILE, UI_READY_BTN, UI_READY_BTN_CLK, UI_QUEST, UI_CURSOR, UI_HIT_EFFECT,
-		UI_SKILL1, UI_SKILL2, UI_END };
+		UI_SKILL1, UI_SKILL2, UI_LOGO, UI_END };
 
 	CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType);
 	virtual ~CUIObject();
@@ -261,3 +261,18 @@ private:
 	
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class CStoneEffectObject : public CGameObject
+{
+public:
+	CStoneEffectObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel);
+	virtual ~CStoneEffectObject();
+
+public:
+	virtual void Animate(float fTimeElapsed) override;
+	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
+	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
+
+private:
+	float	m_fDissolve = 0.f;
+};

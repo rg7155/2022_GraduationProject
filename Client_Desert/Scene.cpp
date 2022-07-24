@@ -54,7 +54,7 @@ void CScene::BuildObjects(ID3D12Device *pd3dDevice, ID3D12GraphicsCommandList *p
 	CreateShaderVariables(pd3dDevice, pd3dCommandList);
 
 	CSoundMgr::GetInstance()->Initialize();
-	//CSoundMgr::GetInstance()->PlayBGM(L"Boss_DemonLord.ogg");
+	CSoundMgr::GetInstance()->PlayBGM(L"Scene0.mp3");
 }
 
 void CScene::CreateShaders(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList)
@@ -162,11 +162,22 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 		//pObj->SetPosition(xmf3Pos);
 		m_pStandardObjectShader->AddObject(L"Dust", pObj);
 	}
+
+	//돌 이펙트
+	//CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map/SM_bush_01.bin", nullptr);
+	//for (int i = 0; i < 1; ++i)
+	//{
+	//	pObj = new CStoneEffectObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+	//	pObj->SetPosition(Scene1_SpawnPos);
+	//	pObj->SetActiveState(true);
+	//	m_pStandardObjectShader->AddObject(L"StoneEffect", pObj);
+	//}
 }
 
 
 ID3D12RootSignature *CScene::CreateGraphicsRootSignature(ID3D12Device *pd3dDevice)
 {
+	
 	ID3D12RootSignature *pd3dGraphicsRootSignature = NULL;
 	D3D12_DESCRIPTOR_RANGE pd3dDescriptorRanges[10];
 	SetDescriptorRange(pd3dDescriptorRanges, 0, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 6, 0);//t6: gtxtAlbedoTexture
@@ -432,6 +443,8 @@ void CScene::ChangeScene()
 
 		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
 		
+		CSoundMgr::GetInstance()->StopAll();
+		CSoundMgr::GetInstance()->PlayBGM(L"Scene1.mp3");
 		break;
 	case SCENE_2:
 		//m_pPlayer->SetPosition(Scene2_SpawnPos);
@@ -445,6 +458,9 @@ void CScene::ChangeScene()
 		m_pNPCObjectShader->SetInactiveAllObject();
 		m_pStandardObjectShader->SetInactiveAllObject();
 		m_pParticleObjectShader->SetInactiveAllObject();
+
+		CSoundMgr::GetInstance()->StopAll();
+		CSoundMgr::GetInstance()->PlayBGM(L"Scene2.mp3");
 		break;
 	}
 }
@@ -478,17 +494,20 @@ void CScene::AddTextToUILayer(int iIndex)
 	{
 		queueStr.emplace(L"전리품? 나한텐 그런거 없다..");
 		queueStr.emplace(L"선인장에게 힌트를 얻을수도...");
+		m_pMonsterObjectShader->SetEndTalk(false);
 	}
 	else if (iIndex == CACTUS_TEXT) //선인장 죽을때
 	{
 		queueStr.emplace(L"너가 나보다 강해도 과연 우리 아빠보다 강할까?!");
 		queueStr.emplace(L"넌 이제 죽은 목숨이라고!!!");
+		m_pMonsterObjectShader->SetEndTalk(false);
 	}
 	else if (iIndex == BOSS_TEXT) //보스 죽을때
 	{
 		queueStr.emplace(L"강하구나 용사여...");
 		queueStr.emplace(L"강자는 전리품을 얻을수 있는 자격이 있다..");
 		queueStr.emplace(L"받고 떠나라");
+		m_pMonsterObjectShader->SetEndTalk(false);
 	}
 	m_pUILayer->AddTextFont(queueStr);
 }

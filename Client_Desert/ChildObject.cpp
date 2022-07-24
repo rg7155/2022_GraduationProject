@@ -630,12 +630,15 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
 		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05f, FRAME_BUFFER_HEIGHT * 0.3f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
-
 		break;
 	case CUIObject::UI_SKILL2:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
 		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05, FRAME_BUFFER_HEIGHT * 0.4f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
+		break;
+	case CUIObject::UI_LOGO:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Logo.dds", 0);
+		SetOrthoWorld(950 * 0.5, 478 * 0.5, FRAME_BUFFER_WIDTH * 0.25f, FRAME_BUFFER_HEIGHT * 0.2f);
 		break;
 	}
 
@@ -1111,4 +1114,61 @@ void CTexturedObject::SetActiveState(bool isActve)
 
 }
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+CStoneEffectObject::CStoneEffectObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
+	: CGameObject(1)
+{
+	SetChild(pModel->m_pModelRootObject, true);
+
+	//XMFLOAT3 xmf3Pos = { 18.f, 0.f, 15.f };
+	//SetPosition(xmf3Pos);
+	//xmf3Pos = Vector3::Add(xmf3Pos, Vector3::ScalarProduct(GetUp(), 2.f));
+
+	//CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	//pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Dissolve.dds", 0);
+	//CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
+
+	//CTexture* pTexture2 = new CTexture(1, RESOURCE_TEXTURE2D, 0);
+	//pTexture2->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/burn_dissolve.dds", 0);
+	//CScene::CreateShaderResourceViews(pd3dDevice, pTexture2, RP_TEXTURE2, false);
+
+	//CMaterial* pMaterial = new CMaterial(2);
+	//pMaterial->SetTexture(pTexture);
+	//pMaterial->SetTexture(pTexture2, 1);
+
+	//SetMaterial(0, pMaterial);
+
+
+	SetEffectsType(EFFECT_DISSOLVE, true);
+}
+
+CStoneEffectObject::~CStoneEffectObject()
+{
+}
+
+void CStoneEffectObject::Animate(float fTimeElapsed)
+{
+	if (!m_isActive) 
+		return;
+
+	//m_fDissolve = 0.17f;
+
+	CGameObject::Animate(fTimeElapsed);
+}
+
+void CStoneEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera, bool isChangePipeline)
+{
+	if (!m_isActive) return;
+
+	//UpdateShaderVariables(pd3dCommandList);
+
+	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
+}
+
+void CStoneEffectObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList)
+{
+	pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_nEffectsType, 33);
+	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fDissolve, 34);
+
+}

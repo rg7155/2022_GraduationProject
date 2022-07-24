@@ -885,7 +885,7 @@ void CMonsterObjectsShader::Render(ID3D12GraphicsCommandList* pd3dCommandList, C
 	CStandardObjectsShader::Render(pd3dCommandList, pCamera, nPipelineState, isChangePipeline);
 }
 
-void CMonsterObjectsShader::SetEndTalk()
+void CMonsterObjectsShader::SetEndTalk(bool isEnd)
 {
 	for (auto& iter : m_mapObject)
 	{
@@ -893,7 +893,7 @@ void CMonsterObjectsShader::SetEndTalk()
 		{
 			if (!iterSec->m_isActive)
 				continue;
-			static_cast<CMonsterObject*>(iterSec)->m_isEndTalk = true;
+			static_cast<CMonsterObject*>(iterSec)->m_isEndTalk = isEnd;
 		}
 	}
 }
@@ -1380,8 +1380,13 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	AddObject(L"UI_ICON", pObject);
 	pObject->SetActiveState(false);
 
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_LOGO);
+	AddObject(L"UI_Logo", pObject);
+	pObject->SetActiveState(true);
+
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_HIT_EFFECT);
 	AddObject(L"UI_Hit_Effect", pObject);
+
 
 	//Á© ¸¶Áö¸·¿¡ »ðÀÔ
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);
@@ -1405,6 +1410,7 @@ void CUIObjectsShader::ActiveObjectByChangeScene(SCENE eScene)
 	case SCENE_1:
 	{
 		SetActiveStateObjects(L"UI_Button", false);
+		SetActiveStateObjects(L"UI_Logo", false);
 		SetActiveStateObjects(L"UI_Info", true);
 		SetActiveStateObjects(L"UI_ICON", true);
 	}

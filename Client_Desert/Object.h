@@ -281,6 +281,7 @@ public:
 	void SetPosition(XMFLOAT3 xmf3Position);
 	void SetScale(float x, float y, float z);
 	void SetScale(XMFLOAT3& xmf3Scale);
+	void SetScaleToWorld(XMFLOAT3& xmf3Scale);
 
 	void MoveStrafe(float fDistance = 1.0f);
 	void MoveUp(float fDistance = 1.0f);

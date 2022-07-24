@@ -648,6 +648,14 @@ void CGameObject::SetScale(XMFLOAT3& xmf3Scale)
 	UpdateTransform(NULL);
 }
 
+void CGameObject::SetScaleToWorld(XMFLOAT3& xmf3Scale)
+{
+	//m_xmf3Scale = xmf3Scale;
+	//XMMATRIX mtxScale = XMMatrixScaling(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+	//m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+
+}
+
 XMFLOAT3 CGameObject::GetPosition()
 {
 	return(XMFLOAT3(m_xmf4x4World._41, m_xmf4x4World._42, m_xmf4x4World._43));
