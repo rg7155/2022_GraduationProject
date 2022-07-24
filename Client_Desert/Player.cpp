@@ -818,6 +818,7 @@ bool CPlayer::IsNowAttack()
 void CPlayer::SetDamaged()
 {
 	Change_Animation(PLAYER::TAKE_DAMAGED);
+	HitEffectOn();
 }
 
 void CPlayer::Set_object_anim(object_anim* _object_anim)

@@ -33,7 +33,7 @@ private:
 	float		m_fIdleTime;
 	int			m_nowVerse;
 	BOSS::ANIM	m_ePreAttack;
-
+	bool		m_bBoss;
 
 public:
 	int				m_targetId;

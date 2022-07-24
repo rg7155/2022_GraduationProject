@@ -196,10 +196,9 @@ void process_packet(int c_id)
 				for (auto iter = objects[i].begin(); iter != objects[i].end();)
 				{
 					if (!(*iter)->m_bActive) {
-						for (auto& cl : clients) {
-							(*iter)->Send_Remove_Packet_To_Clients(cl.first);
-						}
 						
+						(*iter)->Send_Remove_Packet_To_Clients(cl.first);
+
 						iter = objects[i].erase(iter);
 
 					}

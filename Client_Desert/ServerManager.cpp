@@ -34,14 +34,15 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	while (true)
 	{
 		int msg_size = static_cast<int>(m_start[1]);
-
 		msg_size = ProcessPacket(m_start);
 		if (cbTransferred < msg_size) {
 
 			cout << cbTransferred << ' ' << msg_size << endl;
 			// 33 204
+			// 31 41
 			break;
 		}
+
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
 		m_start += msg_size;
@@ -303,6 +304,12 @@ int CServerManager::ProcessPacket(char* packet)
 			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Cactus").front();
 			CCactusObject* pCactus = reinterpret_cast<CCactusObject*>(pObj);
 			pCactus->Change_Animation(CACTUS::ANIM::DIE);
+		}
+		else if (p->race == RACE_BOSS) {
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->m_pMonsterObjectShader->GetObjectList(L"Boss").front();
+			CBossObject* pBoss = reinterpret_cast<CBossObject*>(pObj);
+			pBoss->SetHp(0);
+			pBoss->Change_Animation(BOSS::ANIM::DIE);
 		}
 		return p->size;
 	}

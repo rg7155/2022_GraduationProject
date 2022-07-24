@@ -387,6 +387,13 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 
 	if (BOSS::ATTACK1 == m_eCurAnim)
 		m_iWindCount = 0;
+	else if (BOSS::ATTACK2 == m_eCurAnim) {
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
+		if (!pObj) return;
+		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+		xmf3Pos.y += 0.01f;
+		pObj->SetPosition(xmf3Pos);
+	}
 	else if (BOSS::DIE == eNewAnim) {
 		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(BOSS_TEXT);
 		cout << "AddBoss\n";
