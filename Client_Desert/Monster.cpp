@@ -219,6 +219,7 @@ void CMonsterObject::MakeHitEffect()
 	if (!pObj)
 		return;
 
+	cout << "Make Hit Effect" << endl;
 	XMFLOAT3 xmf3Pos = GetPosition();
 	XMFLOAT3 xmf3Look = GetLook();
 	xmf3Pos.x += xmf3Look.x;
@@ -390,7 +391,7 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 	else if (BOSS::ATTACK2 == m_eCurAnim) {
 		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
 		if (!pObj) return;
-		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+		XMFLOAT3 xmf3Pos = GetPosition();
 		xmf3Pos.y += 0.01f;
 		pObj->SetPosition(xmf3Pos);
 	}
