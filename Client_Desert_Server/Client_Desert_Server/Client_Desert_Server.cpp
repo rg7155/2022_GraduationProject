@@ -176,7 +176,9 @@ void process_packet(int c_id)
 		{
 			
 			if (cl.first == c_id) continue;
+
 			cl.second.send_move_packet(c_id);
+
 			if(g_Scene == SCENE_2)
 			{
 				SC_FOOTHOLD_PACKET foot_packet;
@@ -194,7 +196,10 @@ void process_packet(int c_id)
 				for (auto iter = objects[i].begin(); iter != objects[i].end();)
 				{
 					if (!(*iter)->m_bActive) {
-						(*iter)->Send_Remove_Packet_To_Clients(cl.first);
+						for (auto& cl : clients) {
+							(*iter)->Send_Remove_Packet_To_Clients(cl.first);
+						}
+						
 						iter = objects[i].erase(iter);
 
 					}

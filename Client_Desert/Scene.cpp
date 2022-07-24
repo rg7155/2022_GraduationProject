@@ -420,7 +420,8 @@ void CScene::ChangeSceneByFadeInOut()
 	m_eGoalScene = eScene;
 
 	pFade->SetFadeState(false);
-	CServerManager::GetInstance()->m_queue_send_packet.push(CS_READY);
+	if(SCENE_2 == eScene)
+		CServerManager::GetInstance()->m_queue_send_packet.push(CS_READY);
 }
 
 //실제로 씬이 바뀔때 Fade오브젝트에서 불리는 함수(화면 어두울때)

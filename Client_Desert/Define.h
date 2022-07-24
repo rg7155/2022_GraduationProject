@@ -10,7 +10,7 @@
 
 #define EPSILON					1.0e-10f
 
-//#define USE_SERVER 1
+#define USE_SERVER 1
 
 #define PLAYER_SPEED					10.f
 #define BLENDING_TIME					0.3f
@@ -59,8 +59,8 @@
 #define _PLANE_HEIGHT			300
 
 // Ä«¸Þ¶ó
-#define CAM_OFFSET_Y			4.f
-#define CAM_OFFSET_Z			-5.f
+#define CAM_OFFSET_Y			6.f
+#define CAM_OFFSET_Z			-6.f
 #define DPI						20.f
 
 
