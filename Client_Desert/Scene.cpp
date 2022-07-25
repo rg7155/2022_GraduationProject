@@ -490,6 +490,12 @@ void CScene::AddTextToUILayer(int iIndex)
 	{
 		queueStr.emplace(L"용사여..드디어 왔구나..");
 		queueStr.emplace(L"잡아줘....선인장 보스...그리고..가져와...전리품...");
+
+		//서버로 보내기
+		CServerManager::GetInstance()->m_queue_send_packet.push(CS_NPC);
+		CSoundMgr::GetInstance()->StopSound(CSoundMgr::BUTTON);
+		CSoundMgr::GetInstance()->PlaySoundW(L"DM-CGS-21.wav", CSoundMgr::BUTTON);
+
 	}
 	else if (iIndex == GOLEM_TEXT) //돌덩이 죽을때
 	{

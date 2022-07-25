@@ -113,6 +113,7 @@ private:
 public:
 	void Change_Animation(PLAYER::ANIM eNewAnim);
 
+
 private:
 	virtual void	CreateComponent(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature);
 	virtual void	UpdateComponent(float fTimeElapsed);
@@ -149,6 +150,8 @@ private:
 	bool	m_bSkill1EffectOn;
 	bool	m_bSkill2EffectOn;
 
+private:
+	float	m_fFootStepSoundCoolTime = 0.f;
 
 public:
 	CCollision* m_pComCollision = nullptr;

@@ -10,6 +10,7 @@
 #include "Scene.h"
 #include "ServerManager.h"
 #include "ChildObject.h"
+#include "SoundMgr.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
@@ -266,6 +267,19 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 		return;
 	}
 
+	//////////////////////////////////////////////////////
+	m_fFootStepSoundCoolTime += fDistance / PLAYER_SPEED;
+	if (m_fFootStepSoundCoolTime > 0.4f) {
+		m_fFootStepSoundCoolTime = 0.f;
+		int soundRand = rand() % 5 + 1;
+		TCHAR fileName[64]{};
+		wsprintf(fileName, L"Footsteps_Sand_Jump_Land_0%d.wav", soundRand);
+		CSoundMgr::GetInstance()->StopSound(CSoundMgr::PLAYER);
+		CSoundMgr::GetInstance()->PlaySoundW(fileName, CSoundMgr::PLAYER);
+	}
+
+	//////////////////////////////////////////////////////
+
 	m_xmVecNewRotate = XMVector3Normalize(xmDstVec);
 
 	// 180도 확인
@@ -380,6 +394,7 @@ void CPlayer::Update(float fTimeElapsed)
 		SetPosition(Scene1_SpawnPos);
 		cout << "Position is Nan!" << endl;
 	}
+
 
 	Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
 
@@ -834,6 +849,14 @@ void CPlayer::Set_object_anim(object_anim* _object_anim)
 void CPlayer::ClickedReadyButton()
 {
 	m_isReadyToggle = !m_isReadyToggle;
+	if (m_isReadyToggle) {
+		CSoundMgr::GetInstance()->StopSound(CSoundMgr::BUTTON);
+		CSoundMgr::GetInstance()->PlaySoundW(L"DM-CGS-48.wav", CSoundMgr::BUTTON);
+	}
+	else {
+		CSoundMgr::GetInstance()->StopSound(CSoundMgr::BUTTON);
+		CSoundMgr::GetInstance()->PlaySoundW(L"DM-CGS-49.wav", CSoundMgr::BUTTON);
+	}
 	CServerManager::GetInstance()->m_queue_send_packet.push(CS_READY);
 }
 
@@ -946,11 +969,17 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 	}
 	if (CInputDev::GetInstance()->LButtonDown())
 	{
+		CSoundMgr::GetInstance()->StopSound(CSoundMgr::PLAYER);
+		CSoundMgr::GetInstance()->PlaySoundW(L"JustWhoosh3_Swoosh_Rod_Pole_007.wav", CSoundMgr::PLAYER);
+
 		Change_Animation(PLAYER::ANIM::ATTACK1);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->RButtonDown())
 	{
+		CSoundMgr::GetInstance()->StopSound(CSoundMgr::PLAYER);
+		CSoundMgr::GetInstance()->PlaySoundW(L"JustWhoosh3_Whoosh_Cloth_Leather_Fight_007.wav", CSoundMgr::PLAYER);
+
 		Change_Animation(PLAYER::ANIM::ATTACK2);
 		return true;
 	}
@@ -960,6 +989,8 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 		{
 			if (!m_pSkillICon[0]->m_isCool)
 			{
+				CSoundMgr::GetInstance()->StopSound(CSoundMgr::PLAYER);
+				CSoundMgr::GetInstance()->PlaySoundW(L"skill1.wav", CSoundMgr::PLAYER);
 				Change_Animation(PLAYER::ANIM::SKILL1);
 				m_pSkillICon[0]->m_isCool = true;
 			}
@@ -972,6 +1003,8 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 		{
 			if (!m_pSkillICon[1]->m_isCool)
 			{
+				CSoundMgr::GetInstance()->StopSound(CSoundMgr::PLAYER);
+				CSoundMgr::GetInstance()->PlaySoundW(L"Dark_magic_03.wav", CSoundMgr::PLAYER);
 				Change_Animation(PLAYER::ANIM::SKILL2);
 				m_pSkillICon[1]->m_isCool = true;
 			}
@@ -1064,6 +1097,7 @@ void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 	}
 	// 이전 애니메이션의 가중치가 1보다 작으면 1로 바꾸지말고 그때부터 보간해야함
 }
+
 
 void CPlayer::Blending_Animation(float fTimeElapsed)
 {

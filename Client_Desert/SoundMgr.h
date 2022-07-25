@@ -14,6 +14,7 @@ public:
 	{
 		BGM,
 		PLAYER,
+		BUTTON,
 		MAXCHANNEL
 	};
 private:

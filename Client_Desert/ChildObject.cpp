@@ -529,9 +529,9 @@ void CNPCObject::Animate(float fTimeElapsed)
 	//if (!m_pUIQuest)
 	//	m_pUIQuest = CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Quest").front();
 	if (m_isAbleInteraction && CInputDev::GetInstance()->KeyDown(DIKEYBOARD_R)) {
+
 		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(NPC_TEXT);
-		//서버로 보내기
-		CServerManager::GetInstance()->m_queue_send_packet.push(CS_NPC);
+
 	}
 
 	CGameObject::Animate(fTimeElapsed);
