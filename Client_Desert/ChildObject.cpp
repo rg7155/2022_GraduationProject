@@ -603,6 +603,12 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
 		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f); 
 		break;
+	case CUIObject::UI_PLAYER_HP:
+		pMesh = new CPlayerHpMesh(pd3dDevice, pd3dCommandList);
+		SetMesh(pMesh);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/PlayerHp.dds", 0);
+		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f);
+		break;
 	case CUIObject::UI_READY_BTN:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ReadyButton.dds", 0);
 		SetOrthoWorld(300, 100, FRAME_BUFFER_WIDTH - 300.f, FRAME_BUFFER_HEIGHT - 100.f);
@@ -745,7 +751,19 @@ void CUIObject::Animate(float fTimeElapsed)
 			}
 		}
 		break;
+	case CUIObject::UI_PLAYER_HP:
+	{
+		static int hp = 100;
+		if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+		{
+			hp -= 10;
+			float fRatio = ((float)hp / (float)100);
+			SetScale(fRatio, 1.f, 1.f);
+		}
 	}
+		break;
+	}
+
 
 	CGameObject::Animate(fTimeElapsed);
 }
