@@ -650,9 +650,11 @@ void CGameObject::SetScale(XMFLOAT3& xmf3Scale)
 
 void CGameObject::SetScaleToWorld(XMFLOAT3& xmf3Scale)
 {
-	//m_xmf3Scale = xmf3Scale;
-	//XMMATRIX mtxScale = XMMatrixScaling(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
-	//m_xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+	m_xmf3Scale = xmf3Scale;
+	XMMATRIX mtxScale = XMMatrixScaling(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
+	//XMFLOAT4X4 xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+
+	UpdateTransform(&Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent));
 
 }
 

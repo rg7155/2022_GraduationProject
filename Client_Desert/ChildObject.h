@@ -273,6 +273,8 @@ public:
 	virtual void Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera* pCamera = NULL, bool isChangePipeline = true) override;
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
+	virtual void SetActiveState(bool isActive) override;
 private:
 	float	m_fDissolve = 0.f;
+
 };

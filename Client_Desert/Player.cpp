@@ -509,12 +509,16 @@ void CPlayer::Check_CreateEffect()
 		//	pObj->SetPosition(xmf3Pos);
 		//}
 
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
-		if (!pObj) return;
-		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
-		xmf3Pos.y += 0.01f;
-		pObj->SetPosition(xmf3Pos);
+		//CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
+		//if (!pObj) return;
+		//XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+		//xmf3Pos.y += 0.01f;
+		//pObj->SetPosition(xmf3Pos);
 
+
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"StoneEffect");
+		if (!pObj) return;
+		pObj->SetPosition(GetPosition());
 	}
 
 }
