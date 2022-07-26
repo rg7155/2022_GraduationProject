@@ -9,6 +9,7 @@ CGameObject::CGameObject()
 	m_att = 50;
 	m_xmf4x4World = Matrix4x4::Identity();
 	m_fDieCoolTime = 0.f;
+	m_ePreColAnim = PLAYER::IDLE;
 
 	//SetPosition(PLAYER_INIT_POSITION_X, PLAYER_INIT_POSITION_Z);
 	//for (int i = 0; i < PLAYER::ANIM::END; i++)

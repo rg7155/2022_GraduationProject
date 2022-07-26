@@ -16,7 +16,6 @@ CGolemMonster::CGolemMonster(int _targetId)
 	m_fAttackAnimTime = 0.f;
 	m_targetId = _targetId;
 	m_fRunCoolTime = 0.f;
-	m_fDamagedCoolTime = 0.f;
 	m_hp = 1000;
 	m_hpmax = m_hp;
 
@@ -36,7 +35,6 @@ void CGolemMonster::Update(float fTimeElapsed)
 	}
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fRunCoolTime += fTimeElapsed;
-	m_fDamagedCoolTime += fTimeElapsed;
 
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
@@ -129,11 +127,10 @@ void CGolemMonster::CheckCollision(int c_id)
 	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
 		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
 
-		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
+		if (BoundingBox_Intersect(c_id) && m_bColOn && m_hp > 0)
 		{
 			m_hp -= pPlayer->m_att;
-			m_fDamagedCoolTime = 0.f;
-
+			m_bColOn = false;
 			if (m_hp <= 0.f)
 			{
 				Change_Animation(GOLEM::ANIM::DIE);
@@ -149,6 +146,8 @@ void CGolemMonster::CheckCollision(int c_id)
 			}
 		}
 	}
+	else
+		m_bColOn = true;
 	
 }
 

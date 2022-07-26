@@ -45,6 +45,8 @@ public:
 	int				m_eCurAnim;
 	XMFLOAT3		m_xmf3Look;
 
+public:
+	int				m_ePreColAnim;
 
 public:
 	bool					m_bActive;
