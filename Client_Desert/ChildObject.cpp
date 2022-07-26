@@ -1172,6 +1172,17 @@ void CStoneEffectObject::Animate(float fTimeElapsed)
 
 	//m_fDissolve = 0.17f;
 
+	//SetScaleToWorld(XMFLOAT3(0.1f, 0.1f, 0.1f));
+
+	XMFLOAT3 xmf3Value = { 1,1,1 };
+	xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.01f, false);
+	m_xmf3Scale = Vector3::Add(m_xmf3Scale, xmf3Value);
+	if (m_xmf3Scale.x <= 0.f)
+	{
+		m_isActive = false;
+		return;
+	}
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -1180,6 +1191,7 @@ void CStoneEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	if (!m_isActive) return;
 
 	//UpdateShaderVariables(pd3dCommandList);
+	SetScaleToWorld(m_xmf3Scale);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
@@ -1190,3 +1202,17 @@ void CStoneEffectObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCo
 	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fDissolve, 34);
 
 }
+
+void CStoneEffectObject::SetActiveState(bool isActive)
+{
+	CGameObject::SetActiveState(isActive);
+
+	if (!isActive)
+		return;
+
+	//√ ±‚»≠
+	m_xmf3Scale = { 0.1f, 0.1f, 0.1f };
+
+
+}
+
