@@ -574,9 +574,6 @@ void CNPCObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType)
 	: CGameObject(1)
 {
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
-	SetMesh(pMesh);
-
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 
 	m_eUIType = eType;
@@ -601,8 +598,6 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_PROFILE:
 	{
-		pMesh = new CPlayerHpMesh(pd3dDevice, pd3dCommandList);
-		SetMesh(pMesh);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile1.dds", 0);
 		float fRatio = 0.7f;
 		SetOrthoWorld(496 * fRatio, 151 * fRatio, 150.f, FRAME_BUFFER_HEIGHT * 0.1f);
@@ -610,8 +605,6 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_PLAYER_HP:
 	{
-		pMesh = new CPlayerHpMesh(pd3dDevice, pd3dCommandList);
-		SetMesh(pMesh);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/PlayerHp.dds", 0);
 		float fRatio = 0.7f;
 		SetOrthoWorld(424 * fRatio, 87 * fRatio, 190.f, FRAME_BUFFER_HEIGHT * 0.08f);
@@ -656,6 +649,14 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 
 	}
+
+	CMesh* pMesh = nullptr;
+	if(m_eUIType == UI_PROFILE || m_eUIType == UI_PLAYER_HP)
+		pMesh = new CPlayerHpMesh(pd3dDevice, pd3dCommandList);
+	else
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	SetMesh(pMesh);
+
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
