@@ -276,6 +276,9 @@ public:
 	virtual void UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandList) override;
 
 	virtual void SetActiveState(bool isActive) override;
+
+
+	XMFLOAT3	m_xmf3Dir;
 private:
 	float	m_fDissolve = 0.f;
 

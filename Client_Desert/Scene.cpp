@@ -164,14 +164,14 @@ void CScene::CreateStandardObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComma
 	}
 
 	//µπ ¿Ã∆Â∆Æ
-	//CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map/SM_bush_01.bin", nullptr);
-	//for (int i = 0; i < 10; ++i)
-	//{
-	//	pObj = new CStoneEffectObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
-	//	pObj->SetPosition(Scene1_SpawnPos);
-	//	pObj->SetActiveState(true);
-	//	m_pStandardObjectShader->AddObject(L"StoneEffect", pObj);
-	//}
+	CLoadedModelInfo* pModel = CGameObject::LoadGeometryAndAnimationFromFile(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, "Model/Map/SM_bush_01.bin", nullptr);
+	for (int i = 0; i < 10; ++i)
+	{
+		pObj = new CStoneEffectObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel);
+		pObj->SetPosition(Scene1_SpawnPos);
+		pObj->SetActiveState(false);
+		m_pStandardObjectShader->AddObject(L"StoneEffect", pObj);
+	}
 }
 
 

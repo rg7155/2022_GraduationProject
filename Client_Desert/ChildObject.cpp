@@ -1186,7 +1186,7 @@ CStoneEffectObject::CStoneEffectObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//pMaterial->SetTexture(pTexture2, 1);
 
 	//SetMaterial(0, pMaterial);
-
+	SetScale(0.1, 0.1, 0.1);
 
 	SetEffectsType(EFFECT_DISSOLVE, true);
 }
@@ -1203,15 +1203,20 @@ void CStoneEffectObject::Animate(float fTimeElapsed)
 	//m_fDissolve = 0.17f;
 
 	//SetScaleToWorld(XMFLOAT3(0.1f, 0.1f, 0.1f));
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Look = m_xmf3Dir;
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fTimeElapsed * 0.01f);
+	CGameObject::SetPosition(xmf3Position);
+	 
 
-	XMFLOAT3 xmf3Value = { 1,1,1 };
-	xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.01f, false);
-	m_xmf3Scale = Vector3::Add(m_xmf3Scale, xmf3Value);
-	if (m_xmf3Scale.x <= 0.f)
-	{
-		m_isActive = false;
-		return;
-	}
+	//XMFLOAT3 xmf3Value = { 1,1,1 };
+	//xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.01f, false);
+	//m_xmf3Scale = Vector3::Add(m_xmf3Scale, xmf3Value);
+	//if (m_xmf3Scale.x <= 0.f)
+	//{
+	//	m_isActive = false;
+	//	return;
+	//}
 
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -1221,7 +1226,7 @@ void CStoneEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 	if (!m_isActive) return;
 
 	//UpdateShaderVariables(pd3dCommandList);
-	SetScaleToWorld(m_xmf3Scale);
+	//SetScaleToWorld(m_xmf3Scale);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }

@@ -514,11 +514,20 @@ void CPlayer::Check_CreateEffect()
 		//XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
 		//xmf3Pos.y += 0.01f;
 		//pObj->SetPosition(xmf3Pos);
+		
+		for (int i = 0; i < 10; ++i)
+		{
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"StoneEffect");
+			if (!pObj) return;
+			pObj->SetPosition(GetPosition());
+
+			XMFLOAT3 xmf3Dir = { RandomValue(-1.f, 1.f), RandomValue(0.f, 1.f), RandomValue(-1.f, 1.f) };
+			xmf3Dir = Vector3::Normalize(xmf3Dir);
+			static_cast<CStoneEffectObject*>(pObj)->m_xmf3Dir = xmf3Dir;
+		}
 
 
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"StoneEffect");
-		if (!pObj) return;
-		pObj->SetPosition(GetPosition());
+
 	}
 
 }
