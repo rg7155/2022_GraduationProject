@@ -15,6 +15,9 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
+constexpr int PLAYER_MAXHP = 500;
+constexpr int REVIVETIME = 5.f;
+
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
 {
 	//ShowCursor(false);
@@ -82,6 +85,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	}
 	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE_RELAXED, true);
+	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[PLAYER::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
 #ifdef _WITH_SOUND_RESOURCE
@@ -135,6 +139,9 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 	m_dir = DIR_UP;
 	m_isActive = true;
+
+	m_iHp = PLAYER_MAXHP;
+	m_iMaxHp = m_iHp;
 
 }
 
@@ -395,6 +402,8 @@ void CPlayer::Update(float fTimeElapsed)
 		cout << "Position is Nan!" << endl;
 	}
 
+	CheckRevive(fTimeElapsed);
+	
 
 	Move(0, /*12.25f*/PLAYER_SPEED * fTimeElapsed, true);
 
@@ -456,7 +465,7 @@ void CPlayer::Update(float fTimeElapsed)
 		if (!Check_MoveInput())
 		{   
 			// IDLE 애니메이션이 실행되도록 하기 위해
-			if (m_eCurAnim == PLAYER::ANIM::IDLE || m_eCurAnim == PLAYER::ANIM::IDLE_RELAXED)
+			if (m_eCurAnim == PLAYER::ANIM::IDLE || m_eCurAnim == PLAYER::ANIM::IDLE_RELAXED || m_eCurAnim == PLAYER::DIE)
 				return;
 
 			if (m_bBattleOn)
@@ -832,8 +841,33 @@ bool CPlayer::IsNowAttack()
 
 void CPlayer::SetDamaged()
 {
-	Change_Animation(PLAYER::TAKE_DAMAGED);
+	if (m_eCurAnim == PLAYER::DIE)
+		return;
+
+	m_iHp -= 50;
+	if (m_iHp <= 0) {
+		m_iHp = 0;
+		m_fDieCoolTime = 0.f;
+		Change_Animation(PLAYER::DIE);
+	}
+	else
+		Change_Animation(PLAYER::TAKE_DAMAGED);
+
 	HitEffectOn();
+}
+
+void CPlayer::CheckRevive(float fTimeElapsed)
+{
+	if (PLAYER::DIE != m_eCurAnim)
+		return;
+
+	m_fDieCoolTime += fTimeElapsed;
+
+	if (m_fDieCoolTime > REVIVETIME)
+	{
+		Change_Animation(PLAYER::IDLE_RELAXED);
+		m_iHp = m_iMaxHp;
+	}
 }
 
 void CPlayer::Set_object_anim(object_anim* _object_anim)
@@ -951,7 +985,7 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 
 		// attack1
 	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 || m_eCurAnim == PLAYER::ANIM::SKILL1 
-		|| m_eCurAnim == PLAYER::ANIM::SKILL2 || m_eCurAnim == PLAYER::ANIM::DIE || m_eCurAnim == PLAYER::ANIM::GET_RESOURCE || m_eCurAnim == PLAYER::ANIM::TAKE_DAMAGED)
+		|| m_eCurAnim == PLAYER::ANIM::SKILL2 || m_eCurAnim == PLAYER::ANIM::GET_RESOURCE || m_eCurAnim == PLAYER::ANIM::TAKE_DAMAGED)
 	{
 		m_fAnimElapsedTime += fTimeElapsed;
 		if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -1019,7 +1053,7 @@ bool CPlayer::Check_Input(float fTimeElapsed)
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_E))
 	{
-		Change_Animation(PLAYER::ANIM::GET_RESOURCE);
+		//Change_Animation(PLAYER::ANIM::GET_RESOURCE);
 		return true;
 	}
 	else if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_9))

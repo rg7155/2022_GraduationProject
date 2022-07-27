@@ -124,6 +124,7 @@ public:
 public:
 	bool IsNowAttack();
 	void SetDamaged();
+	void CheckRevive(float fTimeElapsed);
 
 private:
 	XMVECTOR m_xmVecNowRotate;
@@ -135,6 +136,7 @@ private:
 public:
 	PLAYER::ANIM GetCurAnim() { return m_eCurAnim; }
 	void Set_object_anim(object_anim* _object_anim);
+
 protected:
 	PLAYER::ANIM	m_ePrevAnim;			// 이전 애니메이션
 	PLAYER::ANIM	m_eCurAnim;				// 현재 애니메이션
@@ -149,6 +151,10 @@ private:
 	bool	m_bBlendingOn;
 	bool	m_bSkill1EffectOn;
 	bool	m_bSkill2EffectOn;
+
+private:
+	int		m_iHp, m_iMaxHp;
+	float	m_fDieCoolTime;
 
 private:
 	float	m_fFootStepSoundCoolTime = 0.f;
