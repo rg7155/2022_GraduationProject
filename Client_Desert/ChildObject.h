@@ -187,6 +187,8 @@ private:
 
 	XMFLOAT2	m_xmf2Size = { 0.f, 0.f };
 	XMFLOAT2	m_xmf2Pos = { 0.f, 0.f };
+	XMFLOAT2	m_xmf2LocalSize = { 0.f, 0.f };
+	XMFLOAT2	m_xmf2LocalPos = { 0.f, 0.f };
 
 	bool		m_isOnceRender = false;
 
@@ -276,5 +278,7 @@ public:
 	virtual void SetActiveState(bool isActive) override;
 private:
 	float	m_fDissolve = 0.f;
+
+
 
 };

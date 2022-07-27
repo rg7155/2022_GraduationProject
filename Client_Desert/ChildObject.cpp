@@ -600,14 +600,22 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.15f);
 		break;
 	case CUIObject::UI_PROFILE:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
-		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f); 
+	{
+		pMesh = new CPlayerHpMesh(pd3dDevice, pd3dCommandList);
+		SetMesh(pMesh);
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile1.dds", 0);
+		float fRatio = 0.7f;
+		SetOrthoWorld(496 * fRatio, 151 * fRatio, 150.f, FRAME_BUFFER_HEIGHT * 0.1f);
+	}
 		break;
 	case CUIObject::UI_PLAYER_HP:
+	{
 		pMesh = new CPlayerHpMesh(pd3dDevice, pd3dCommandList);
 		SetMesh(pMesh);
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/PlayerHp.dds", 0);
-		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f);
+		float fRatio = 0.7f;
+		SetOrthoWorld(424 * fRatio, 87 * fRatio, 190.f, FRAME_BUFFER_HEIGHT * 0.08f);
+	}
 		break;
 	case CUIObject::UI_READY_BTN:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ReadyButton.dds", 0);
@@ -646,6 +654,7 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Logo.dds", 0);
 		SetOrthoWorld(950 * 0.5, 478 * 0.5, FRAME_BUFFER_WIDTH * 0.25f, FRAME_BUFFER_HEIGHT * 0.2f);
 		break;
+
 	}
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
@@ -742,7 +751,7 @@ void CUIObject::Animate(float fTimeElapsed)
 		{
 			m_xmf4ShaderInfo.y = (m_fCoolTime * 360.f) / SKILL_COOLTIME;
 
-			if(m_fCoolTime < SKILL_COOLTIME)
+			if (m_fCoolTime < SKILL_COOLTIME)
 				m_fCoolTime += fTimeElapsed; // 0~5
 			else
 			{
@@ -753,15 +762,28 @@ void CUIObject::Animate(float fTimeElapsed)
 		break;
 	case CUIObject::UI_PLAYER_HP:
 	{
-		static int hp = 100;
+		//TCHAR szTest[32] = L"";
+		//float f = 0.f;
+		//XMFLOAT3 xmf3Dir;
+		//GetPrivateProfileString(L"HpPos", L"PosX", nullptr, szTest, 32, L"Ini/TestIni.ini");
+		//f = _ttof(szTest);
+		//xmf3Dir.x = f;
+
+		//GetPrivateProfileString(L"HpPos", L"PosY", nullptr, szTest, 32, L"Ini/TestIni.ini");
+		//f = _ttof(szTest);
+		//xmf3Dir.y = f;
+
+		static int maxhp = 130;
+		static int hp = maxhp;
+
 		if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
 		{
 			hp -= 10;
-			float fRatio = ((float)hp / (float)100);
-			SetScale(fRatio, 1.f, 1.f);
+			m_xmf2Size.x = hp * (m_xmf2LocalSize.x / maxhp);
+			SetOrthoWorld(m_xmf2Size.x, m_xmf2Size.y, m_xmf2Pos.x, m_xmf2Pos.y);
 		}
-	}
 		break;
+	}
 	}
 
 
@@ -805,6 +827,13 @@ void CUIObject::SetFadeState(bool isIn)
 
 void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY)
 {
+	if (!m_isOnceInit)
+	{
+		m_xmf2LocalSize.x = fSizeX, m_xmf2LocalSize.y = fSizeY;
+		m_xmf2LocalPos.x = fPosX, m_xmf2LocalPos.y = fPosY;
+		m_isOnceInit = true;
+	}
+
 	m_xmf2Size.x = fSizeX, m_xmf2Size.y = fSizeY;
 	m_xmf2Pos.x = fPosX, m_xmf2Pos.y = fPosY;
 
