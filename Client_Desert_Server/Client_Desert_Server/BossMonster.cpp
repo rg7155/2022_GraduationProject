@@ -18,7 +18,7 @@ CBossMonster::CBossMonster()
 	m_fDamagedCoolTime = 0.f;
 	m_nowVerse = VERSE1;
 	m_ePreAttack = BOSS::ATTACK2;
-	m_targetId = 0;
+	m_targetId = -1;
 	XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
 	m_xmf3Target = playerPos;
 }
@@ -66,9 +66,9 @@ void CBossMonster::Update(float fTimeElapsed)
 				return;
 			}
 		}
+		// 처음 타겟 설정
+		m_targetId = 0;
 		m_nowVerse = VERSE2;
-		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
-		m_xmf3Target = playerPos;
 	}
 	else if (m_nowVerse == VERSE2)
 	{
@@ -85,10 +85,8 @@ void CBossMonster::Update(float fTimeElapsed)
 				
 				m_ePreAttack = BOSS::ATTACK2;
 			}
-			m_targetId = 1 - m_targetId;
+			ChangeTarget();
 		}
-		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
-		m_xmf3Target = playerPos;
 	}
 	else if (m_nowVerse == VERSE3) {
 		if (BOSS::IDLE == m_eCurAnim) {
@@ -96,9 +94,7 @@ void CBossMonster::Update(float fTimeElapsed)
 			if (m_fIdleTime > IDLETIME) {
 				Change_Animation(BOSS::ANIM::ATTACK3);
 				m_fAttackCoolTime = 0.f;
-				m_targetId = 1 - m_targetId;
-				XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
-				m_xmf3Target = playerPos;
+				ChangeTarget();
 			}
 			return;
 		}
@@ -111,16 +107,19 @@ void CBossMonster::Update(float fTimeElapsed)
 			return;
 		}
 		if (BOSS::ANIM::ATTACK3 == m_eCurAnim) {
-			XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
-			m_xmf3Target = playerPos;
 			m_xmf3Look = Vector3::Subtract(m_xmf3Target, GetPosition(), true, true);
 			XMVECTOR xmVecNormal = { m_xmf3Look.x,m_xmf3Look.y, m_xmf3Look.z };
 			xmVecNormal *= fTimeElapsed * BOSS_SPEED;
-			Move(Vector3::XMVectorToFloat3(xmVecNormal));
-			
+			Move(Vector3::XMVectorToFloat3(xmVecNormal));	
 		}
 
 	}
+	if (-1 != m_targetId) {
+		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
+		m_xmf3Target = playerPos;
+	}
+
+	
 }
 
 void CBossMonster::Send_Packet_To_Clients(int c_id)

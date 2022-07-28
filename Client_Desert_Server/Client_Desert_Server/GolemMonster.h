@@ -16,8 +16,6 @@ public:
 public:
 	void Change_Animation(GOLEM::ANIM eNewAnim);
 
-public:
-	int				m_targetId;
 private:
 	float			m_fAttackAnimTime;
 	bool			m_bFollowStart;

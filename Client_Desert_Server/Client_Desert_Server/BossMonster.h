@@ -35,8 +35,7 @@ private:
 	BOSS::ANIM	m_ePreAttack;
 	bool		m_bBoss;
 
-public:
-	int				m_targetId;
+
 
 };
 

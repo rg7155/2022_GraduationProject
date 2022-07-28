@@ -119,3 +119,11 @@ void CGameObject::UpdateBoundingBox()
 	m_xmLocalOOBB.Transform(m_xmOOBB, XMLoadFloat4x4(&m_xmf4x4World));
 	XMStoreFloat4(&m_xmOOBB.Orientation, XMQuaternionNormalize(XMLoadFloat4(&m_xmOOBB.Orientation)));
 }
+
+void CGameObject::ChangeTarget()
+{
+	if (PLAYER::DIE != clients[1 - m_targetId]._pObject->m_eCurAnim) {
+		m_targetId = 1 - m_targetId;
+	}
+}
+

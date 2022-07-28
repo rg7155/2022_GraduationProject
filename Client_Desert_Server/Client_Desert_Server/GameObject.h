@@ -34,6 +34,7 @@ public:
 	bool BoundingBoxFront_Intersect(int c_id, float fDis);
 
 	void UpdateBoundingBox();
+	void ChangeTarget();
 
 public:
 	char			m_race;
@@ -51,7 +52,8 @@ public:
 public:
 	bool					m_bActive;
 	float					m_fDieCoolTime;
-
+public:
+	int				m_targetId;
 public:
 	BoundingOrientedBox		m_xmLocalOOBB;
 	BoundingOrientedBox		m_xmOOBB;
