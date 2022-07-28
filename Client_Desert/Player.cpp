@@ -15,7 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
 
-constexpr int PLAYER_MAXHP = 500;
+constexpr int PLAYER_MAXHP = 1000;
 constexpr int REVIVETIME = 5.f;
 
 CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, void* pContext)
@@ -857,10 +857,11 @@ bool CPlayer::IsNowAttack()
 
 void CPlayer::SetDamaged()
 {
-	if (m_eCurAnim == PLAYER::DIE)
+	if (m_eCurAnim == PLAYER::DIE || m_eCurAnim == PLAYER::TAKE_DAMAGED)
 		return;
+	int ran = rand() % 200 + 50;
 
-	m_iHp -= 50;
+	m_iHp -= ran;
 	if (m_iHp <= 0) {
 		m_iHp = 0;
 		m_fDieCoolTime = 0.f;
