@@ -533,11 +533,27 @@ void CPlayer::Check_CreateEffect()
 		//	pObj->SetPosition(xmf3Pos);
 		//}
 
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
-		if (!pObj) return;
-		XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
-		xmf3Pos.y += 0.01f;
-		pObj->SetPosition(xmf3Pos);
+		//CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
+		//if (!pObj) return;
+		//XMFLOAT3 xmf3Pos = CGameMgr::GetInstance()->GetPlayer()->GetPosition();
+		//xmf3Pos.y += 0.01f;
+		//pObj->SetPosition(xmf3Pos);
+		
+		for (int i = 0; i < 10; ++i)
+		{
+			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"StoneEffect");
+			if (!pObj) return;
+			XMFLOAT3 xmf3RanPos = { RandomValue(-1.f, 1.f), 0.f, RandomValue(-1.f, 1.f) };
+			XMFLOAT3 xmf3Pos = GetPosition();
+			xmf3Pos = Vector3::Add(xmf3Pos, xmf3RanPos);
+			pObj->SetPosition(xmf3Pos);
+
+			//XMFLOAT3 xmf3Dir = { RandomValue(-1.f, 1.f), RandomValue(0.f, 1.f), RandomValue(-1.f, 1.f) };
+			XMFLOAT3 xmf3Dir = xmf3RanPos;
+			xmf3Dir.y = RandomValue(0.7f, 1.f);
+			xmf3Dir = Vector3::Normalize(xmf3Dir);
+			static_cast<CStoneEffectObject*>(pObj)->m_xmf3Dir = xmf3Dir;
+		}
 
 	}
 

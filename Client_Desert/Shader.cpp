@@ -1335,7 +1335,7 @@ D3D12_DEPTH_STENCIL_DESC CUIObjectsShader::CreateDepthStencilState(int nPipeline
 	//d3dDepthStencilDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 	//d3dDepthStencilDesc.BackFace.StencilFailOp = D3D12_STENCIL_OP_KEEP;
 	//d3dDepthStencilDesc.BackFace.StencilDepthFailOp = D3D12_STENCIL_OP_KEEP;
-	//d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;
+	//d3dDepthStencilDesc.BackFace.StencilPassOp = D3D12_STENCIL_OP_KEEP;`
 	//d3dDepthStencilDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NEVER;
 
 }
@@ -1348,9 +1348,14 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	//pObject->SetPosition(25.0f, 0, 25.0f);
 	//AddObject(L"DamageFont", pObject);
 
-	//pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PROFILE);
-	//AddObject(L"UI_Info", pObject); 
-	//pObject->SetActiveState(false);
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PLAYER_HP);
+	AddObject(L"UI_Info", pObject);
+	pObject->SetActiveState(false);
+
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PROFILE);
+	AddObject(L"UI_Info", pObject);
+	pObject->SetActiveState(false);
+
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_PLAYER);
 	AddObject(L"UI_Info", pObject);
 	pObject->SetActiveState(false);
@@ -1380,6 +1385,14 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	AddObject(L"UI_ICON", pObject);
 	pObject->SetActiveState(false);
 
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_KEY1);
+	AddObject(L"UI_ICON", pObject);
+	pObject->SetActiveState(false);
+
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_KEY2);
+	AddObject(L"UI_ICON", pObject);
+	pObject->SetActiveState(false);
+
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_LOGO);
 	AddObject(L"UI_Logo", pObject);
 	pObject->SetActiveState(true);
@@ -1391,8 +1404,6 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	//Á© ¸¶Áö¸·¿¡ »ðÀÔ
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_FADE);
 	AddObject(L"UI_Fade", pObject);
-
-	
 
 }
 

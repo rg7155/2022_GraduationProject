@@ -574,9 +574,6 @@ void CNPCObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCommandLis
 CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, UI_TYPE eType)
 	: CGameObject(1)
 {
-	CMesh* pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
-	SetMesh(pMesh);
-
 	CTexture* pTexture = new CTexture(1, RESOURCE_TEXTURE2D, 0);
 
 	m_eUIType = eType;
@@ -600,8 +597,18 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		SetOrthoWorld(150, 150, 100.f, FRAME_BUFFER_HEIGHT * 0.15f);
 		break;
 	case CUIObject::UI_PROFILE:
-		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile.dds", 0);
-		SetOrthoWorld(300, 50, 300.f, FRAME_BUFFER_HEIGHT * 0.1f); 
+	{
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile1.dds", 0);
+		float fRatio = 0.7f;
+		SetOrthoWorld(496 * fRatio, 151 * fRatio, 150.f, FRAME_BUFFER_HEIGHT * 0.1f);
+	}
+		break;
+	case CUIObject::UI_PLAYER_HP:
+	{
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/PlayerHp.dds", 0);
+		float fRatio = 0.7f;
+		SetOrthoWorld(424 * fRatio, 87 * fRatio, 190.f, FRAME_BUFFER_HEIGHT * 0.08f);
+	}
 		break;
 	case CUIObject::UI_READY_BTN:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/ReadyButton.dds", 0);
@@ -628,19 +635,35 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_SKILL1:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
-		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05f, FRAME_BUFFER_HEIGHT * 0.3f);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05f, FRAME_BUFFER_HEIGHT * 0.4f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
 		break;
 	case CUIObject::UI_SKILL2:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
-		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05, FRAME_BUFFER_HEIGHT * 0.4f);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05, FRAME_BUFFER_HEIGHT * 0.5f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
 		break;
 	case CUIObject::UI_LOGO:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Logo.dds", 0);
 		SetOrthoWorld(950 * 0.5, 478 * 0.5, FRAME_BUFFER_WIDTH * 0.25f, FRAME_BUFFER_HEIGHT * 0.2f);
 		break;
+	case CUIObject::UI_KEY1:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_1.dds", 0);
+		SetOrthoWorld(30.f, 30.f, FRAME_BUFFER_WIDTH * 0.02f, FRAME_BUFFER_HEIGHT * 0.35f);
+		break;
+	case CUIObject::UI_KEY2:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_2.dds", 0);
+		SetOrthoWorld(30.f, 30.f, FRAME_BUFFER_WIDTH * 0.02, FRAME_BUFFER_HEIGHT * 0.45f);
+		break;
 	}
+
+	CMesh* pMesh = nullptr;
+	if(m_eUIType == UI_PROFILE || m_eUIType == UI_PLAYER_HP)
+		pMesh = new CPlayerHpMesh(pd3dDevice, pd3dCommandList);
+	else
+		pMesh = new CTexturedRectMesh(pd3dDevice, pd3dCommandList, 1.f, 1.f, 0.f);
+	SetMesh(pMesh);
+
 
 	CScene::CreateShaderResourceViews(pd3dDevice, pTexture, RP_TEXTURE, false);
 
@@ -726,17 +749,17 @@ void CUIObject::Animate(float fTimeElapsed)
 		break;
 	case CUIObject::UI_SKILL1:
 	case CUIObject::UI_SKILL2:
-		if (!m_isOnceInit)
+		if (!m_isOnceInit1)
 		{
 			CGameMgr::GetInstance()->GetPlayer()->m_pSkillICon[m_eUIType - UI_SKILL1] = this;
-			m_isOnceInit = true;
+			m_isOnceInit1 = true;
 		}
 
 		if (m_isCool)
 		{
 			m_xmf4ShaderInfo.y = (m_fCoolTime * 360.f) / SKILL_COOLTIME;
 
-			if(m_fCoolTime < SKILL_COOLTIME)
+			if (m_fCoolTime < SKILL_COOLTIME)
 				m_fCoolTime += fTimeElapsed; // 0~5
 			else
 			{
@@ -745,7 +768,32 @@ void CUIObject::Animate(float fTimeElapsed)
 			}
 		}
 		break;
+	case CUIObject::UI_PLAYER_HP:
+	{
+		//TCHAR szTest[32] = L"";
+		//float f = 0.f;
+		//XMFLOAT3 xmf3Dir;
+		//GetPrivateProfileString(L"HpPos", L"PosX", nullptr, szTest, 32, L"Ini/TestIni.ini");
+		//f = _ttof(szTest);
+		//xmf3Dir.x = f;
+
+		//GetPrivateProfileString(L"HpPos", L"PosY", nullptr, szTest, 32, L"Ini/TestIni.ini");
+		//f = _ttof(szTest);
+		//xmf3Dir.y = f;
+
+		static int maxhp = 130;
+		static int hp = maxhp;
+
+		if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+		{
+			hp -= 10;
+			m_xmf2Size.x = hp * (m_xmf2LocalSize.x / maxhp);
+			SetOrthoWorld(m_xmf2Size.x, m_xmf2Size.y, m_xmf2Pos.x, m_xmf2Pos.y);
+		}
+		break;
 	}
+	}
+
 
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -787,6 +835,13 @@ void CUIObject::SetFadeState(bool isIn)
 
 void CUIObject::SetOrthoWorld(float fSizeX, float fSizeY, float fPosX, float fPosY)
 {
+	if (!m_isOnceInit)
+	{
+		m_xmf2LocalSize.x = fSizeX, m_xmf2LocalSize.y = fSizeY;
+		m_xmf2LocalPos.x = fPosX, m_xmf2LocalPos.y = fPosY;
+		m_isOnceInit = true;
+	}
+
 	m_xmf2Size.x = fSizeX, m_xmf2Size.y = fSizeY;
 	m_xmf2Pos.x = fPosX, m_xmf2Pos.y = fPosY;
 
@@ -1138,9 +1193,9 @@ CStoneEffectObject::CStoneEffectObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//pMaterial->SetTexture(pTexture2, 1);
 
 	//SetMaterial(0, pMaterial);
-
-
-	SetEffectsType(EFFECT_DISSOLVE, true);
+	//SetScale(0.1, 0.1, 0.1);
+	//m_xmf3Scale = { 0.1, 0.1, 0.1 };
+	//SetEffectsType(EFFECT_DISSOLVE, true);
 }
 
 CStoneEffectObject::~CStoneEffectObject()
@@ -1154,6 +1209,26 @@ void CStoneEffectObject::Animate(float fTimeElapsed)
 
 	//m_fDissolve = 0.17f;
 
+	//SetScaleToWorld(XMFLOAT3(0.1f, 0.1f, 0.1f));
+	// 
+
+	XMFLOAT3 xmf3Position = GetPosition();
+	XMFLOAT3 xmf3Look = m_xmf3Dir;
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fTimeElapsed * 5.1f);
+	CGameObject::SetPosition(xmf3Position);
+	 
+	m_xmf3Dir.y -= fTimeElapsed * 3.f;
+	m_xmf3Dir = Vector3::Normalize(m_xmf3Dir);
+
+	XMFLOAT3 xmf3Value = { 1,1,1 };
+	xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.1f, false);
+	m_xmf3Scale = Vector3::Add(m_xmf3Scale, xmf3Value);
+	if (m_xmf3Scale.x <= 0.f)
+	{
+		m_isActive = false;
+		return;
+	}
+
 	CGameObject::Animate(fTimeElapsed);
 }
 
@@ -1161,7 +1236,9 @@ void CStoneEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 {
 	if (!m_isActive) return;
 
-	//UpdateShaderVariables(pd3dCommandList);
+	UpdateShaderVariables(pd3dCommandList);
+
+	SetScaleToWorld(m_xmf3Scale);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
@@ -1172,3 +1249,20 @@ void CStoneEffectObject::UpdateShaderVariables(ID3D12GraphicsCommandList* pd3dCo
 	//pd3dCommandList->SetGraphicsRoot32BitConstants(1, 1, &m_fDissolve, 34);
 
 }
+
+void CStoneEffectObject::SetActiveState(bool isActive)
+{
+	CGameObject::SetActiveState(isActive);
+
+	if (!isActive)
+		return;
+
+	//√ ±‚»≠
+	//m_xmf3Scale = { 0.1, 0.1, 0.1 };
+	//m_xmf3Scale = { RandomValue(0.03f, 0.1f), RandomValue(0.03f, 0.1f), RandomValue(0.03f, 0.1f) };
+	float val = RandomValue(0.02f, 0.05f);
+	m_xmf3Scale = { val, val, val };
+
+	Rotate(RandomValue(0.f, 360.f), RandomValue(0.f, 360.f), RandomValue(0.f, 360.f));
+}
+

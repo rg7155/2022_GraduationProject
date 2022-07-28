@@ -249,6 +249,13 @@ public:
 		float fxPosition = 0.0f, float fyPosition = 0.0f, float fzPosition = 0.0f, bool isFlip = false);
 	virtual ~CTexturedRectMesh();
 };
+
+class CPlayerHpMesh : public CMesh
+{
+public:
+	CPlayerHpMesh(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList);
+	virtual ~CPlayerHpMesh();
+};
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 class CTrailMesh : public CMesh

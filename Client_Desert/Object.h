@@ -295,6 +295,8 @@ public:
 
 	CGameObject *GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent=NULL);
+	void UpdateTransformNew(XMFLOAT4X4* pxmf4x4Parent = NULL, XMFLOAT4X4* pxmf4x4TempParent = NULL);
+
 	CGameObject *FindFrame(char *pstrFrameName);
 
 	CTexture *FindReplicatedTexture(_TCHAR *pstrTextureName);
