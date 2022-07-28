@@ -1385,6 +1385,14 @@ void CUIObjectsShader::BuildObjects(ID3D12Device* pd3dDevice, ID3D12GraphicsComm
 	AddObject(L"UI_ICON", pObject);
 	pObject->SetActiveState(false);
 
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_KEY1);
+	AddObject(L"UI_ICON", pObject);
+	pObject->SetActiveState(false);
+
+	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_KEY2);
+	AddObject(L"UI_ICON", pObject);
+	pObject->SetActiveState(false);
+
 	pObject = new CUIObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CUIObject::UI_TYPE::UI_LOGO);
 	AddObject(L"UI_Logo", pObject);
 	pObject->SetActiveState(true);

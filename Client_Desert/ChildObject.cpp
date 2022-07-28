@@ -635,19 +635,26 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		break;
 	case CUIObject::UI_SKILL1:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill1.dds", 0);
-		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05f, FRAME_BUFFER_HEIGHT * 0.3f);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05f, FRAME_BUFFER_HEIGHT * 0.4f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
 		break;
 	case CUIObject::UI_SKILL2:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Skill2.dds", 0);
-		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05, FRAME_BUFFER_HEIGHT * 0.4f);
+		SetOrthoWorld(60.f, 60.f, FRAME_BUFFER_WIDTH * 0.05, FRAME_BUFFER_HEIGHT * 0.5f);
 		m_xmf4ShaderInfo = { 1.f,360.f,0.f,0.f };
 		break;
 	case CUIObject::UI_LOGO:
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Logo.dds", 0);
 		SetOrthoWorld(950 * 0.5, 478 * 0.5, FRAME_BUFFER_WIDTH * 0.25f, FRAME_BUFFER_HEIGHT * 0.2f);
 		break;
-
+	case CUIObject::UI_KEY1:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_1.dds", 0);
+		SetOrthoWorld(30.f, 30.f, FRAME_BUFFER_WIDTH * 0.02f, FRAME_BUFFER_HEIGHT * 0.35f);
+		break;
+	case CUIObject::UI_KEY2:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_2.dds", 0);
+		SetOrthoWorld(30.f, 30.f, FRAME_BUFFER_WIDTH * 0.02, FRAME_BUFFER_HEIGHT * 0.45f);
+		break;
 	}
 
 	CMesh* pMesh = nullptr;
@@ -742,10 +749,10 @@ void CUIObject::Animate(float fTimeElapsed)
 		break;
 	case CUIObject::UI_SKILL1:
 	case CUIObject::UI_SKILL2:
-		if (!m_isOnceInit)
+		if (!m_isOnceInit1)
 		{
 			CGameMgr::GetInstance()->GetPlayer()->m_pSkillICon[m_eUIType - UI_SKILL1] = this;
-			m_isOnceInit = true;
+			m_isOnceInit1 = true;
 		}
 
 		if (m_isCool)
@@ -1186,9 +1193,9 @@ CStoneEffectObject::CStoneEffectObject(ID3D12Device* pd3dDevice, ID3D12GraphicsC
 	//pMaterial->SetTexture(pTexture2, 1);
 
 	//SetMaterial(0, pMaterial);
-	SetScale(0.1, 0.1, 0.1);
-
-	SetEffectsType(EFFECT_DISSOLVE, true);
+	//SetScale(0.1, 0.1, 0.1);
+	//m_xmf3Scale = { 0.1, 0.1, 0.1 };
+	//SetEffectsType(EFFECT_DISSOLVE, true);
 }
 
 CStoneEffectObject::~CStoneEffectObject()
@@ -1203,20 +1210,24 @@ void CStoneEffectObject::Animate(float fTimeElapsed)
 	//m_fDissolve = 0.17f;
 
 	//SetScaleToWorld(XMFLOAT3(0.1f, 0.1f, 0.1f));
+	// 
+
 	XMFLOAT3 xmf3Position = GetPosition();
 	XMFLOAT3 xmf3Look = m_xmf3Dir;
-	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fTimeElapsed * 0.01f);
+	xmf3Position = Vector3::Add(xmf3Position, xmf3Look, fTimeElapsed * 5.1f);
 	CGameObject::SetPosition(xmf3Position);
 	 
+	m_xmf3Dir.y -= fTimeElapsed * 3.f;
+	m_xmf3Dir = Vector3::Normalize(m_xmf3Dir);
 
-	//XMFLOAT3 xmf3Value = { 1,1,1 };
-	//xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.01f, false);
-	//m_xmf3Scale = Vector3::Add(m_xmf3Scale, xmf3Value);
-	//if (m_xmf3Scale.x <= 0.f)
-	//{
-	//	m_isActive = false;
-	//	return;
-	//}
+	XMFLOAT3 xmf3Value = { 1,1,1 };
+	xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.1f, false);
+	m_xmf3Scale = Vector3::Add(m_xmf3Scale, xmf3Value);
+	if (m_xmf3Scale.x <= 0.f)
+	{
+		m_isActive = false;
+		return;
+	}
 
 	CGameObject::Animate(fTimeElapsed);
 }
@@ -1225,8 +1236,9 @@ void CStoneEffectObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCam
 {
 	if (!m_isActive) return;
 
-	//UpdateShaderVariables(pd3dCommandList);
-	//SetScaleToWorld(m_xmf3Scale);
+	UpdateShaderVariables(pd3dCommandList);
+
+	SetScaleToWorld(m_xmf3Scale);
 
 	CGameObject::Render(pd3dCommandList, pCamera, isChangePipeline);
 }
@@ -1246,8 +1258,11 @@ void CStoneEffectObject::SetActiveState(bool isActive)
 		return;
 
 	//ÃÊ±âÈ­
-	m_xmf3Scale = { 0.1f, 0.1f, 0.1f };
+	//m_xmf3Scale = { 0.1, 0.1, 0.1 };
+	//m_xmf3Scale = { RandomValue(0.03f, 0.1f), RandomValue(0.03f, 0.1f), RandomValue(0.03f, 0.1f) };
+	float val = RandomValue(0.02f, 0.05f);
+	m_xmf3Scale = { val, val, val };
 
-
+	Rotate(RandomValue(0.f, 360.f), RandomValue(0.f, 360.f), RandomValue(0.f, 360.f));
 }
 

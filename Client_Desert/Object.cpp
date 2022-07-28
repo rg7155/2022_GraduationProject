@@ -436,6 +436,14 @@ void CGameObject::UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent)
 	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
 }
 
+void CGameObject::UpdateTransformNew(XMFLOAT4X4* pxmf4x4Parent, XMFLOAT4X4* pxmf4x4TempParent)
+{
+	m_xmf4x4World = (pxmf4x4Parent) ? Matrix4x4::Multiply(m_xmf4x4ToParent, *pxmf4x4Parent) : *pxmf4x4TempParent;
+
+	if (m_pSibling) m_pSibling->UpdateTransform(pxmf4x4Parent);
+	if (m_pChild) m_pChild->UpdateTransform(&m_xmf4x4World);
+}
+
 void CGameObject::SetTrackAnimationSet(int nAnimationTrack, int nAnimationSet)
 {
 	if (m_pSkinnedAnimationController) m_pSkinnedAnimationController->SetTrackAnimationSet(nAnimationTrack, nAnimationSet);
@@ -652,9 +660,11 @@ void CGameObject::SetScaleToWorld(XMFLOAT3& xmf3Scale)
 {
 	m_xmf3Scale = xmf3Scale;
 	XMMATRIX mtxScale = XMMatrixScaling(xmf3Scale.x, xmf3Scale.y, xmf3Scale.z);
-	//XMFLOAT4X4 xmf4x4World = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
+	XMFLOAT4X4 xmf4x4TempWorld = Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent);
 
-	UpdateTransform(&Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent));
+	UpdateTransformNew(NULL, &xmf4x4TempWorld);
+	//UpdateTransform(&Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent));
+	//UpdateTransformNew(&Matrix4x4::Multiply(mtxScale, m_xmf4x4ToParent));
 
 }
 

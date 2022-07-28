@@ -105,7 +105,7 @@ public:
 
 private:
 	void	CheckCreateWindEffect(float fTimeElapsed);
-
+	void	CreateStoneEffect();
 	int		m_iWindCount = 0;
 	float	m_fWindTime = 0.f;
 };

@@ -444,6 +444,26 @@ void CBossObject::CheckCreateWindEffect(float fTimeElapsed)
 	++m_iWindCount; //바람 패턴 시작 시 0 초기화 필요
 }
 
+void CBossObject::CreateStoneEffect()
+{
+	for (int i = 0; i < 10; ++i)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"StoneEffect");
+		if (!pObj) return;
+
+		XMFLOAT3 xmf3Pos = GetPosition(); //TODO-선인장이 내려치는 바닥 위치로 변경할 것
+
+		XMFLOAT3 xmf3RanPos = { RandomValue(-1.f, 1.f), 0.f, RandomValue(-1.f, 1.f) };
+		xmf3Pos = Vector3::Add(xmf3Pos, xmf3RanPos);
+		pObj->SetPosition(xmf3Pos);
+
+		XMFLOAT3 xmf3Dir = xmf3RanPos;
+		xmf3Dir.y = RandomValue(0.7f, 1.f);
+		xmf3Dir = Vector3::Normalize(xmf3Dir);
+		static_cast<CStoneEffectObject*>(pObj)->m_xmf3Dir = xmf3Dir;
+	}
+}
+
 
 CGolemObject::CGolemObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CMonsterObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, pModel)
