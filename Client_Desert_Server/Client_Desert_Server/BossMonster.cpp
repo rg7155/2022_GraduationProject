@@ -118,6 +118,9 @@ void CBossMonster::Update(float fTimeElapsed)
 		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
 		m_xmf3Target = playerPos;
 	}
+	else
+		Change_Animation(BOSS::ANIM::IDLE);
+
 
 	
 }
