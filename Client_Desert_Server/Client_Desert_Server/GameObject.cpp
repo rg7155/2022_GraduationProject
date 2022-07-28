@@ -122,11 +122,23 @@ void CGameObject::UpdateBoundingBox()
 
 void CGameObject::ChangeTarget()
 {
-	// 둘다 죽어있으면 target == -1
-	if (PLAYER::DIE == clients[1 - m_targetId]._pObject->m_eCurAnim &&
-		PLAYER::DIE == clients[1 - m_targetId]._pObject->m_eCurAnim) {
-		m_targetId = -1;
+	if (clients.size() != 2)
 		return;
+
+	// 둘다 죽어있으면 target == -1
+	for (auto& client : clients) {
+		if (PLAYER::DIE == client.second._pObject->m_eCurAnim)
+		{
+			if (client.first == clients.size()-1)
+			{
+				m_targetId = -1;
+				return;
+			}
+		}
+		else {
+			m_targetId = client.first;
+			break;
+		}
 	}
 
 	// 둘 중 하나만 살아있으면 target 산 애로 
@@ -137,5 +149,14 @@ void CGameObject::ChangeTarget()
 
 	// 둘다 살아있으면 타겟 change
 	m_targetId = 1 - m_targetId;
+}
+
+bool CGameObject::CheckAttackAnimation(int c_id)
+{
+	CGameObject* pPlayer = clients[c_id]._pObject;
+	if (pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.6f &&
+		pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition < 1.f)
+		return true;
+	return false;
 }
 

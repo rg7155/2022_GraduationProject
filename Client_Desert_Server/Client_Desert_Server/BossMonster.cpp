@@ -19,8 +19,7 @@ CBossMonster::CBossMonster()
 	m_nowVerse = VERSE1;
 	m_ePreAttack = BOSS::ATTACK2;
 	m_targetId = -1;
-	XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
-	m_xmf3Target = playerPos;
+
 }
 
 CBossMonster::~CBossMonster()
@@ -115,8 +114,14 @@ void CBossMonster::Update(float fTimeElapsed)
 
 	}
 	if (-1 != m_targetId) {
-		XMFLOAT3 playerPos = clients[m_targetId]._pObject->GetPosition();
-		m_xmf3Target = playerPos;
+		for (auto& client : clients)
+		{
+			if (client.first == m_targetId) {
+				XMFLOAT3 playerPos = client.second._pObject->GetPosition();
+				m_xmf3Target = playerPos;
+			}
+		}
+
 	}
 	else
 		Change_Animation(BOSS::ANIM::IDLE);

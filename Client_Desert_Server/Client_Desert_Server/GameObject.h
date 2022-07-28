@@ -35,6 +35,7 @@ public:
 
 	void UpdateBoundingBox();
 	void ChangeTarget();
+	bool CheckAttackAnimation(int c_id);
 
 public:
 	char			m_race;

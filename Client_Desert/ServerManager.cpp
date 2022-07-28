@@ -33,16 +33,15 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	char* m_start = m_recv_buf;
 	while (true)
 	{
-		int msg_size = ProcessPacket(m_start);
+		int* size = reinterpret_cast<int*>(&m_start[1]);
 
-		if (cbTransferred < msg_size || !msg_size) {
+		if (cbTransferred < *size || !*size) {
 
 			cout << "받은 데이터가 더 작음!" << endl;
-			cout << cbTransferred << ' ' << msg_size << endl;
-			// 33 204
-			// 31 41
+			cout << cbTransferred << ' ' << *size << endl;
 			break;
 		}
+		int msg_size = ProcessPacket(m_start);
 
 		cbTransferred -= msg_size;
 		if (0 >= cbTransferred) break;
