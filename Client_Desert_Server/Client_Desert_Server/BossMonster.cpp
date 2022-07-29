@@ -15,7 +15,6 @@ CBossMonster::CBossMonster()
 
 	m_fAnimElapsedTime = 0.f;
 	m_fAttackCoolTime = 0.f;
-	m_fDamagedCoolTime = 0.f;
 	m_nowVerse = VERSE1;
 	m_ePreAttack = BOSS::ATTACK2;
 	m_targetId = -1;
@@ -37,7 +36,6 @@ void CBossMonster::Update(float fTimeElapsed)
 	}
 
 	m_fAnimElapsedTime += fTimeElapsed;
-	m_fDamagedCoolTime += fTimeElapsed;
 
 	// verse3는 피격 시 SPELL도 함
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -163,14 +161,14 @@ void CBossMonster::CheckCollision(int c_id)
 	bool bCol = BoundingBox_Intersect(c_id);
 
 	CGameObject* pPlayer = clients[c_id]._pObject;
+
+	// 플레이어가 공격
 	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
-		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
-		if ( bCol && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && CheckAttackAnimation(c_id)) {
+		if (bCol && m_bColOn && m_hp > 0)
 		{
 			m_hp -= pPlayer->m_att;
-
-			m_fDamagedCoolTime = 0.f;
-
+			m_bColOn = false;
 			if (m_hp < (m_hpmax/2) && m_nowVerse == VERSE2)
 			{
 				m_nowVerse = VERSE3;
@@ -188,7 +186,7 @@ void CBossMonster::CheckCollision(int c_id)
 			}
 		}
 	}
-	else if(BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim || BOSS::ATTACK3 == m_eCurAnim){
+	else if(BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim || BOSS::ATTACK3 == m_eCurAnim){ // 보스가 공격
 		if (BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim) {
 			bCol = BoundingBoxFront_Intersect(c_id, 2.f);
 		}
@@ -198,8 +196,11 @@ void CBossMonster::CheckCollision(int c_id)
 				Change_Animation(BOSS::ANIM::SPELL);
 			clients[c_id].send_damaged_packet();
 		}
-
+		m_bColOn = true;
 	}
+	else
+		m_bColOn = true;
+
 
 }
 

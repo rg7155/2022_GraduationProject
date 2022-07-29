@@ -87,7 +87,7 @@ void CCactusMonster::CheckCollision(int c_id)
 	CGameObject* pPlayer = clients[c_id]._pObject;
 	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
 		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && CheckAttackAnimation(c_id)) {
-		if (BoundingBox_Intersect(c_id) && m_bColOn && m_hp > 0)
+		if (m_bColOn && m_hp > 0 && BoundingBox_Intersect(c_id))
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;

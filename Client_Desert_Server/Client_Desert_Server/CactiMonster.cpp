@@ -21,7 +21,6 @@ CCactiMonster::CCactiMonster(int _index)
 		m_fAfterPos = CACTI_POS_AFTER2;
 	}
 	m_fAnimElapsedTime = 0.f;
-	m_fDamagedCoolTime = 0.f;
 	m_eCurAnim = CACTI::IDLE;
 	m_fAnimMaxTime = animTimes["Cacti"][m_eCurAnim];
 
@@ -30,7 +29,7 @@ CCactiMonster::CCactiMonster(int _index)
 	SetScale(2.f, 2.f, 2.f);
 
 	m_bActive = true;
-
+	m_bColOn = true;
 
 }
 
@@ -40,7 +39,6 @@ void CCactiMonster::Update(float fTimeElapsed)
 		return;
 
 	m_fAnimElapsedTime += fTimeElapsed;
-	m_fDamagedCoolTime += fTimeElapsed;
 	m_fRunCoolTime += fTimeElapsed;
 
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -137,23 +135,20 @@ void CCactiMonster::Send_Remove_Packet_To_Clients(int c_id)
 
 void CCactiMonster::CheckCollision(int c_id) // 플레이어가 공격할때 호출
 {
-	if (m_fDamagedCoolTime < DAMAGE_COOLTIME || m_hp <= 0)
+	if (m_hp <= 0)
 		return;
 
 	CGameObject* pPlayer = clients[c_id]._pObject;
 
 	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
-		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
-		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0) {
-			//m_hp -= 20.f;
-			m_fDamagedCoolTime = 0.f;
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && CheckAttackAnimation(c_id)) {
+		if (m_bColOn && m_hp > 0 && BoundingBox_Intersect(c_id)) {
+			m_bColOn = false;
 			if (m_nowVerse == VERSE1) {
 				Change_Animation(CACTI::ANIM::BITE);
 			}
 		}
 	}
-	
-
 }
 
 void CCactiMonster::Change_Animation(CACTI::ANIM eNewAnim)
