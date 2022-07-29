@@ -436,6 +436,7 @@ void CScene::ChangeScene()
 		(CGameMgr::GetInstance()->GetId() == 0) ? m_pPlayer->SetPosition(Scene1_SpawnPos) : m_pPlayer->SetPosition(Scene1_SpawnPos_Duo);
 
 		XMFLOAT3 xmf3Offset = XMFLOAT3(0.0f, CAM_OFFSET_Y, CAM_OFFSET_Z);
+		m_pPlayer->Change_Animation(PLAYER::IDLE_RELAXED);
 		m_pPlayer->GetCamera()->SetOffset(xmf3Offset);
 		m_pPlayer->GetCamera()->SetPosition(Vector3::Add(m_pPlayer->GetPosition(), xmf3Offset));
 

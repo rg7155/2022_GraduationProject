@@ -84,7 +84,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE_RELAXED, true);
+	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::TALK, true);
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[PLAYER::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
@@ -110,8 +110,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 
 	m_bBattleOn = false;
-	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
-	m_ePrevAnim = PLAYER::ANIM::IDLE_RELAXED;
+	m_eCurAnim = PLAYER::ANIM::TALK;
+	m_ePrevAnim = PLAYER::ANIM::TALK;
 	m_bBlendingOn = false;
 	m_bSkill1EffectOn = false;
 
@@ -465,7 +465,8 @@ void CPlayer::Update(float fTimeElapsed)
 		if (!Check_MoveInput())
 		{   
 			// IDLE 애니메이션이 실행되도록 하기 위해
-			if (m_eCurAnim == PLAYER::ANIM::IDLE || m_eCurAnim == PLAYER::ANIM::IDLE_RELAXED || m_eCurAnim == PLAYER::DIE)
+			if (m_eCurAnim == PLAYER::ANIM::IDLE || m_eCurAnim == PLAYER::ANIM::IDLE_RELAXED || m_eCurAnim == PLAYER::DIE ||
+				m_eCurAnim == PLAYER::ANIM::TALK)
 				return;
 
 			if (m_bBattleOn)

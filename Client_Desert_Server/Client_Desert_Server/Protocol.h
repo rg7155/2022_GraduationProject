@@ -73,7 +73,7 @@ struct CS_MOVE_PACKET
 	char			type;
 	int				size;
 	XMFLOAT4X4		xmf4x4World;
-	object_anim		animInfo[10];
+	object_anim		animInfo[PLAYER::END];
 	int				eCurAnim;
 };
 
@@ -120,7 +120,7 @@ struct SC_ADD_OBJECT_PACKET
 	int	size;
 	char			id;
 	XMFLOAT4X4		xmf4x4World;
-	object_anim		animInfo[10];
+	object_anim		animInfo[PLAYER::ANIM::END];
 	int				eCurAnim;
 	short			race;		// 몬스터 판별용
 	int				hp, hpmax;
@@ -141,7 +141,7 @@ struct SC_MOVE_OBJECT_PACKET
 	short			id;
 	short			race;		// 몬스터 판별용
 	XMFLOAT4X4		xmf4x4World;
-	object_anim		animInfo[10];
+	object_anim		animInfo[PLAYER::ANIM::END];
 	int				eCurAnim;
 	unsigned int	client_time;
 };
