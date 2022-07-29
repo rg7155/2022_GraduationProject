@@ -51,8 +51,9 @@ public:
 	int				m_ePreColAnim;
 
 public:
-	bool					m_bActive;
-	float					m_fDieCoolTime;
+	bool			m_bActive;
+	float			m_fDieCoolTime;
+	bool			m_bColOn;
 public:
 	int				m_targetId;
 public:

@@ -25,6 +25,6 @@ private:
 
 private:
 	float		m_fRunCoolTime;
-	bool		m_bColOn;
+
 };
 

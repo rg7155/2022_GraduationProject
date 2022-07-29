@@ -336,11 +336,19 @@ void CBossObject::Animate(float fTimeElapsed)
 	if (!m_isActive)
 		return;
 
+	float fPosition = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->m_fPosition;
+
+	if (m_eCurAnim == BOSS::ATTACK2 && fPosition > 0.7f && m_bAttack2EffectOn)
+	{
+		CreateStoneEffect();
+		m_bAttack2EffectOn = false;
+	}
 	float fAnimElapseTime = m_pSkinnedAnimationController->m_fPosition[m_eCurAnim];
 
 	if (m_eCurAnim == BOSS::ANIM::DIE && m_isEndTalk)
 	{
 		float fLength = m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[m_eCurAnim]->GetLength();
+
 		if (fAnimElapseTime >= fLength - EPSILON)
 		{
 			m_fDissolve += fTimeElapsed * 0.5f;
@@ -388,13 +396,9 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 
 	if (BOSS::ATTACK1 == m_eCurAnim)
 		m_iWindCount = 0;
-	else if (BOSS::ATTACK2 == m_eCurAnim) {
-		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"Crack");
-		if (!pObj) return;
-		XMFLOAT3 xmf3Pos = GetPosition();
-		xmf3Pos.y += 0.01f;
-		pObj->SetPosition(xmf3Pos);
-	}
+	if (BOSS::ATTACK2 == eNewAnim)
+		m_bAttack2EffectOn = true;
+
 	else if (BOSS::DIE == eNewAnim) {
 		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(BOSS_TEXT);
 		cout << "AddBoss\n";
@@ -452,7 +456,10 @@ void CBossObject::CreateStoneEffect()
 		if (!pObj) return;
 
 		XMFLOAT3 xmf3Pos = GetPosition(); //TODO-선인장이 내려치는 바닥 위치로 변경할 것
-
+		XMFLOAT3 moveSize = GetLook();
+		moveSize.y = 0.f;
+		moveSize = Vector3::ScalarProduct(moveSize, 2.f);
+		xmf3Pos = Vector3::Add(xmf3Pos, moveSize);
 		XMFLOAT3 xmf3RanPos = { RandomValue(-1.f, 1.f), 0.f, RandomValue(-1.f, 1.f) };
 		xmf3Pos = Vector3::Add(xmf3Pos, xmf3RanPos);
 		pObj->SetPosition(xmf3Pos);

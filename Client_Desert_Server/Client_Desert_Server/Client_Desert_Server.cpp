@@ -195,17 +195,20 @@ void process_packet(int c_id)
 
 				for (auto iter = objects[i].begin(); iter != objects[i].end();)
 				{
-					if (!(*iter)->m_bActive) {
-						
-						(*iter)->Send_Remove_Packet_To_Clients(cl.first);
+					//if (!(*iter)->m_bActive) {
+					//	
+					//	(*iter)->Send_Remove_Packet_To_Clients(cl.first);
 
-						iter = objects[i].erase(iter);
+					//	iter = objects[i].erase(iter);
 
-					}
-					else {
-						(*iter)->Send_Packet_To_Clients(cl.first);
-						iter++;
-					}
+					//}
+					//else {
+					//	(*iter)->Send_Packet_To_Clients(cl.first);
+					//	iter++;
+					//}
+
+					(*iter)->Send_Packet_To_Clients(cl.first);
+					iter++;
 				}
 			}
 			timer_lock.unlock();
