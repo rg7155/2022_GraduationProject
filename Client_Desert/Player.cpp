@@ -85,7 +85,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE_RELAXED, true);
+	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE, true);
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[PLAYER::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
@@ -111,8 +111,8 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 
 
 	m_bBattleOn = false;
-	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
-	m_ePrevAnim = PLAYER::ANIM::IDLE_RELAXED;
+	m_eCurAnim = PLAYER::ANIM::IDLE;
+	m_ePrevAnim = PLAYER::ANIM::IDLE;
 	m_bBlendingOn = false;
 	m_bSkill1EffectOn = false;
 

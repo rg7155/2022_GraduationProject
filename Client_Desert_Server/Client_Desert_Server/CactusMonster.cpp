@@ -30,7 +30,6 @@ void CCactusMonster::Update(float fTimeElapsed)
 		return;
 	}
 	m_fAnimElapsedTime += fTimeElapsed;
-	m_fDamagedCoolTime += fTimeElapsed;
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
@@ -87,11 +86,11 @@ void CCactusMonster::CheckCollision(int c_id)
 
 	CGameObject* pPlayer = clients[c_id]._pObject;
 	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
-		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && pPlayer->m_eAnimInfo[pPlayer->m_eCurAnim].fPosition > 0.2f) {
-		if (BoundingBox_Intersect(c_id) && m_fDamagedCoolTime > DAMAGE_COOLTIME && m_hp > 0)
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && CheckAttackAnimation(c_id)) {
+		if (m_bColOn && m_hp > 0 && BoundingBox_Intersect(c_id))
 		{
 			m_hp -= pPlayer->m_att;
-			m_fDamagedCoolTime = 0.f;
+			m_bColOn = false;
 
 			if (m_hp <= 0.f)
 			{
@@ -105,6 +104,8 @@ void CCactusMonster::CheckCollision(int c_id)
 			}
 		}
 	}
+	else
+		m_bColOn = true;
 	
 }
 

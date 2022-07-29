@@ -26,7 +26,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 		m_pSkinnedAnimationController->SetTrackEnable(i, false);
 
 	}
-	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE_RELAXED, true);
+	m_pSkinnedAnimationController->SetTrackEnable(PLAYER::ANIM::IDLE, true);
 	m_pSkinnedAnimationController->m_pAnimationSets->m_pAnimationSets[PLAYER::ANIM::DIE]->m_nType = ANIMATION_TYPE_ONCE;
 
 	m_pSkinnedAnimationController->SetCallbackKeys(1, 2);
@@ -43,7 +43,7 @@ CDuoPlayer::CDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3d
 	m_pComTrail->SetRenderingTrail(false);
 	m_pReadyTex = new CTexturedObject(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature, CTexturedObject::TEXTURE_READY);
 
-	m_eCurAnim = PLAYER::ANIM::IDLE_RELAXED;
+	m_eCurAnim = PLAYER::ANIM::IDLE;
 
 	SetEffectsType(EFFECT_FOG, true);
 	m_bSkill1EffectOn = false;
