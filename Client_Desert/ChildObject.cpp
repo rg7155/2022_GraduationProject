@@ -368,13 +368,17 @@ void CMultiSpriteObject::Animate(float fTimeElapsed)
 		SetLookAt(xmf3Target);
 	}
 
-	Rotate(0.f, 0.f, m_fRandRot);
 
 	switch (m_eType)
 	{
 	case CMultiSpriteObject::SPRITE_SKILL1:
 		break;
 	case CMultiSpriteObject::SPRITE_HIT:
+	{
+		Rotate(0.f, 0.f, m_fRandRot);
+		XMFLOAT3 xmf3Pos = GetPosition();
+		xmf3Pos = xmf3Pos;
+	}
 		break;
 	case CMultiSpriteObject::SPRITE_SKILL2:
 		break;
@@ -416,11 +420,12 @@ void CMultiSpriteObject::SetActiveState(bool isActive)
 		m_fSpeed = 0.001f;
 		break;
 	case CMultiSpriteObject::SPRITE_HIT:
-		m_fSpeed = 0.02f;
+		m_fSpeed = 0.01f;
 		m_isBiliboard = true;
 		//m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
+		m_xmf4Color = { 0.f, 0.f, 0.f, 0.f };
 		m_fRandRot = RandomValue(0.f, 360.f);
-		SetScale(RandomValue(2.f, 3.f), RandomValue(2.f, 3.f), RandomValue(2.f, 3.f));
+		//SetScale(RandomValue(2.f, 3.f), RandomValue(2.f, 3.f), RandomValue(2.f, 3.f));
 		break;
 	case CMultiSpriteObject::SPRITE_SKILL2:
 		m_fSpeed = 0.05f;
@@ -738,7 +743,7 @@ void CUIObject::Animate(float fTimeElapsed)
 		if (m_isHit)
 		{
 			m_fValue += fTimeElapsed * 2.f; //0~1 -> 0~180
-			m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.3f;
+			m_fAlpha = sin(XMConvertToRadians(m_fValue * 180.f)) * 0.5f;
 
 			if (m_fValue >= 1.f)
 			{
@@ -781,12 +786,21 @@ void CUIObject::Animate(float fTimeElapsed)
 		//f = _ttof(szTest);
 		//xmf3Dir.y = f;
 
-		static int maxhp = 130;
-		static int hp = maxhp;
+		//static int maxhp = 130;
+		//static int hp = maxhp;
 
-		if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+		//if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_H))
+		//{
+		//	hp -= 10;
+		//	m_xmf2Size.x = hp * (m_xmf2LocalSize.x / maxhp);
+		//	SetOrthoWorld(m_xmf2Size.x, m_xmf2Size.y, m_xmf2Pos.x, m_xmf2Pos.y);
+		//}
+
+		CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+		if (pPlayer)
 		{
-			hp -= 10;
+			int maxhp = pPlayer->GetMaxHp();
+			int hp = pPlayer->GetHp();
 			m_xmf2Size.x = hp * (m_xmf2LocalSize.x / maxhp);
 			SetOrthoWorld(m_xmf2Size.x, m_xmf2Size.y, m_xmf2Pos.x, m_xmf2Pos.y);
 		}

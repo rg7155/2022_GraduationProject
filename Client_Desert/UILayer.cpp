@@ -3,6 +3,8 @@
 #include "GameMgr.h"
 #include "Camera.h"
 #include "Scene.h"
+#include "Player.h"
+
 using namespace std;
 
 UILayer::UILayer(UINT nFrame, ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue)
@@ -72,7 +74,9 @@ void UILayer::Initialize(ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dComma
     m_pd2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, (ID2D1DeviceContext2 **)&m_pd2dDeviceContext);
 
     m_pd2dDeviceContext->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
-    m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), (ID2D1SolidColorBrush **)&m_pd2dTextBrush);
+    m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), (ID2D1SolidColorBrush **)&m_pd2dTextBrush[TEXT_WHITE]);
+    m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), (ID2D1SolidColorBrush**)&m_pd2dTextBrush[TEXT_RED]);
+
 
     DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(IDWriteFactory), (IUnknown **)&m_pd2dWriteFactory);
     pdxgiDevice->Release();
@@ -100,7 +104,8 @@ void UILayer::Render(UINT nFrame)
     for (int j = 0; j < TEXT_TYPE::TEXT_END; ++j)
     {
         for (auto i : m_vecTextBlocks[j])
-            m_pd2dDeviceContext->DrawText(i->m_strText.c_str(), static_cast<UINT>(i->m_strText.length()), i->m_pdwFormat, i->m_d2dLayoutRect, m_pd2dTextBrush);
+            if(i->m_isRender)
+                m_pd2dDeviceContext->DrawText(i->m_strText.c_str(), static_cast<UINT>(i->m_strText.length()), i->m_pdwFormat, i->m_d2dLayoutRect, m_pd2dTextBrush[int(i->m_eColor)]);
     }
     
     m_pd2dDeviceContext->EndDraw();
@@ -123,10 +128,14 @@ void UILayer::ReleaseResources()
         m_vd2dRenderTargets[i]->Release();
         m_vWrappedRenderTargets[i]->Release();
     }
-    m_pd2dTextBrush->Release();
+    for (UINT i = 0; i < TEXT_COLOR_END; i++)
+        m_pd2dTextBrush[i]->Release();
+
     m_pd2dDeviceContext->Release();
     m_pdwTextFormat->Release();
     m_pdwDamageFontFormat->Release();
+    m_pdwPlayerDamageFontFormat->Release();
+    m_pdwRespawnFontFormat->Release();
     m_pd2dWriteFactory->Release();
     m_pd2dDevice->Release();
     m_pd2dFactory->Release();
@@ -156,8 +165,12 @@ void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHei
     if (m_pd2dDeviceContext) m_pd2dDeviceContext->Release();
     m_pd2dDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &m_pd2dDeviceContext);
     m_pd2dDeviceContext->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
-    if (m_pd2dTextBrush) m_pd2dTextBrush->Release();
-    m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &m_pd2dTextBrush);
+    if (m_pd2dTextBrush) 
+        for (UINT i = 0; i < TEXT_COLOR_END; i++)
+            m_pd2dTextBrush[i]->Release();
+
+    m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::White), &m_pd2dTextBrush[TEXT_WHITE]);
+    m_pd2dDeviceContext->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Red), (ID2D1SolidColorBrush**)&m_pd2dTextBrush[TEXT_RED]);
 
     const float fFontSize = m_fHeight / 30.0f;
     const float fSmallFontSize = m_fHeight / 30.0f;
@@ -190,22 +203,31 @@ void UILayer::Resize(ID3D12Resource** ppd3dRenderTargets, UINT nWidth, UINT nHei
     //////////////////////////////////////////////////////////////////////
 
     m_pd2dWriteFactory->CreateTextFormat(c_styleFontName, m_pdwFontCollection1, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize, L"ko", &m_pdwTextFormat);
-
     m_pdwTextFormat->SetTextAlignment(/*DWRITE_TEXT_ALIGNMENT_CENTER*/DWRITE_TEXT_ALIGNMENT_LEADING);
     m_pdwTextFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 
     
     m_pd2dWriteFactory->CreateTextFormat(c_styleFontName, m_pdwFontCollection1, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"ko", &m_pdwDamageFontFormat);
-
     m_pdwDamageFontFormat->SetTextAlignment(/*DWRITE_TEXT_ALIGNMENT_CENTER*/DWRITE_TEXT_ALIGNMENT_LEADING);
     m_pdwDamageFontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 //    m_pd2dWriteFactory->CreateTextFormat(L"Arial", nullptr, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"en-us", &m_pdwTextFormat);
 
+    m_pd2dWriteFactory->CreateTextFormat(c_styleFontName, m_pdwFontCollection1, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fSmallFontSize, L"ko", &m_pdwPlayerDamageFontFormat);
+    m_pdwPlayerDamageFontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_LEADING);
+    m_pdwPlayerDamageFontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_NEAR);
 
+    m_pd2dWriteFactory->CreateTextFormat(c_styleFontName, m_pdwFontCollection1, DWRITE_FONT_WEIGHT_NORMAL, DWRITE_FONT_STYLE_NORMAL, DWRITE_FONT_STRETCH_NORMAL, fFontSize * 5.f, L"ko", &m_pdwRespawnFontFormat);
+    m_pdwRespawnFontFormat->SetTextAlignment(DWRITE_TEXT_ALIGNMENT_CENTER);
+    m_pdwRespawnFontFormat->SetParagraphAlignment(DWRITE_PARAGRAPH_ALIGNMENT_CENTER);
+
+    
     /////////////
     //wstring str = L"";
     //CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, (float)FRAME_BUFFER_WIDTH, (float)FRAME_BUFFER_HEIGHT), str);
     //m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
+
+    CTextBlock* pTb = new CRespawnTextBlock(m_pdwRespawnFontFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight));
+    m_vecTextBlocks[TEXT_RESPAWN].emplace_back(pTb);
 }
 
 void UILayer::Update(const float& fTimeElapsed)
@@ -231,8 +253,15 @@ void UILayer::Update(const float& fTimeElapsed)
 void UILayer::AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText)
 {
     CTextBlock* pTb = new CDamageTextBlock(m_pdwDamageFontFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
+    pTb->m_eColor = TEXT_WHITE;
     m_vecTextBlocks[TEXT_DAMAGE].emplace_back(pTb);
+}
 
+void UILayer::AddPlayerDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText)
+{
+    CTextBlock* pTb = new CDamageTextBlock(m_pdwDamageFontFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), strText, xmf3WorldPos);
+    pTb->m_eColor = TEXT_RED;
+    m_vecTextBlocks[TEXT_DAMAGE].emplace_back(pTb);
 }
 
 void UILayer::AddTextFont(queue<wstring>& queueStr)
@@ -241,6 +270,7 @@ void UILayer::AddTextFont(queue<wstring>& queueStr)
         m_vecTextBlocks[TEXT_NPC].front()->m_isDead = true;
 
     CTextBlock* pTb = new CNPCTextBlock(m_pdwTextFormat, D2D1::RectF(0.f, 0.f, m_fWidth, m_fHeight), queueStr);
+    pTb->m_eColor = TEXT_WHITE;
     m_vecTextBlocks[TEXT_NPC].emplace_back(pTb);
 }
 
@@ -286,11 +316,12 @@ CTextBlock::CTextBlock()
 {
 }
 
-CTextBlock::CTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText)
+CTextBlock::CTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, const  wstring& strText)
 {
     m_pdwFormat = pdwFormat;
     m_d2dLayoutRect = d2dLayoutRect;
     m_strText = strText;
+    m_eColor = UILayer::TEXT_WHITE;
 }
 
 CTextBlock::~CTextBlock()
@@ -395,4 +426,34 @@ void CNPCTextBlock::Update(const float& fTimeElapsed)
         }
     }
 
+}
+
+CRespawnTextBlock::CRespawnTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect)
+    :CTextBlock(pdwFormat, d2dLayoutRect, L"")
+{
+    m_pdwFormat = pdwFormat;
+    m_d2dLayoutRect = d2dLayoutRect;
+    m_d2dLayoutRect.left = FRAME_BUFFER_WIDTH * 0.5f;
+    m_d2dLayoutRect.top = FRAME_BUFFER_HEIGHT * 0.5f;
+    m_strText = L"초";
+}
+
+
+CRespawnTextBlock::~CRespawnTextBlock()
+{
+}
+
+void CRespawnTextBlock::Update(const float& fTimeElapsed)
+{
+    CPlayer* pPlayer = CGameMgr::GetInstance()->GetPlayer();
+    if (pPlayer->GetCurAnim() == PLAYER::ANIM::DIE)
+        m_isRender = true;
+    else
+        m_isRender = false;
+    if (!pPlayer) return;
+
+    int iTime = /*REVIVETIME*/5.f - (int)pPlayer->GetDieCoolTime();
+    //m_strText = L"리스폰 : ";
+    m_strText = to_wstring(iTime);
+    m_strText += L"초";
 }

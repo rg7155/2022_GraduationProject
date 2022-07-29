@@ -22,8 +22,13 @@ class UILayer
 public:
     enum TEXT_TYPE
     {
-        TEXT_DAMAGE, TEXT_NPC, TEXT_END
+        TEXT_DAMAGE, TEXT_NPC, TEXT_RESPAWN,TEXT_END
     };
+    enum TEXT_COLOR
+    {
+        TEXT_WHITE, TEXT_RED, TEXT_COLOR_END
+    };
+
 public:
     UILayer(UINT nFrame, ID3D12Device* pd3dDevice, ID3D12CommandQueue* pd3dCommandQueue);
     ~UILayer();
@@ -36,6 +41,8 @@ public:
     void Update(const float& fTimeElapsed);
 
     void AddDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText);
+    void AddPlayerDamageFont(XMFLOAT3 xmf3WorldPos, wstring strText);
+
     void AddTextFont(queue<wstring>& queueStr);
 
     static XMFLOAT3 WorldToScreen(XMFLOAT3& xmf3WorldPos);
@@ -52,9 +59,12 @@ private:
     ID2D1Factory3*                  m_pd2dFactory = NULL;
     ID2D1Device2*                   m_pd2dDevice = NULL;
     ID2D1DeviceContext2*            m_pd2dDeviceContext = NULL;
-    ID2D1SolidColorBrush*           m_pd2dTextBrush = NULL;
+    ID2D1SolidColorBrush*           m_pd2dTextBrush[TEXT_COLOR_END] = { NULL };
     IDWriteTextFormat*              m_pdwTextFormat = NULL;
     IDWriteTextFormat*              m_pdwDamageFontFormat = NULL;
+    IDWriteTextFormat*              m_pdwPlayerDamageFontFormat = NULL;
+    IDWriteTextFormat*              m_pdwRespawnFontFormat = NULL;
+
     IDWriteFontCollection1*         m_pdwFontCollection1 = NULL;
 
     std::vector<ID3D11Resource*>    m_vWrappedRenderTargets;
@@ -69,7 +79,7 @@ class CTextBlock
 {
 public:
     CTextBlock();
-    CTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, wstring& strText);
+    CTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect, const wstring& strText = L"");
     virtual ~CTextBlock();
 
 public:
@@ -80,7 +90,8 @@ public:
     D2D1_RECT_F         m_d2dLayoutRect;
     wstring             m_strText;
     bool                m_isDead = false;
-
+    bool                m_isRender = true;
+    UILayer::TEXT_COLOR  m_eColor;
 };
 
 
@@ -120,4 +131,16 @@ public:
     bool                m_isSentenceEnd = false;
 
 
+};
+
+class CRespawnTextBlock : public CTextBlock
+{
+public:
+    CRespawnTextBlock(IDWriteTextFormat* pdwFormat, D2D1_RECT_F& d2dLayoutRect);
+    virtual ~CRespawnTextBlock();
+
+public:
+    virtual void Update(const float& fTimeElapsed) override;
+
+public:
 };

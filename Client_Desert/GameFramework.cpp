@@ -403,6 +403,8 @@ void CGameFramework::CreateImgui()
 		m_pd3dRtvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 }
 
+
+
 void CGameFramework::OnDestroy()
 {
     ReleaseObjects();
@@ -451,7 +453,8 @@ void CGameFramework::BuildObjects()
 	CGameMgr::GetInstance()->SetScene(m_pScene);
 	m_pScene->BuildObjects(m_pd3dDevice, m_pd3dCommandList);
 	m_pScene->m_pUILayer = m_pUILayer;
-	
+	m_pScene->m_pFramework = this;
+
 #ifdef _WITH_TERRAIN_PLAYER
 	int id = CServerManager::GetInstance()->m_myid;
 	cout << id << endl;
@@ -509,8 +512,7 @@ void CGameFramework::ProcessInput()
 	//마우스 커서 고정
 	if (CInputDev::GetInstance()->KeyDown(DIKEYBOARD_M))
 	{
-		m_isCursorFix = !m_isCursorFix;
-		ShowCursor(!m_isCursorFix);
+		SetCursorToggle();
 	}
 
 	if (m_isCursorFix)
@@ -526,6 +528,12 @@ void CGameFramework::ProcessInput()
 	CGameMgr::GetInstance()->m_xmf2CursorPos = XMFLOAT2(pt.x, pt.y);
 }
 
+void CGameFramework::SetCursorToggle()
+{
+	m_isCursorFix = !m_isCursorFix;
+	ShowCursor(!m_isCursorFix);
+}
+
 void CGameFramework::AnimateObjects()
 {
 	float fTimeElapsed = m_GameTimer.GetTimeElapsed();
@@ -538,14 +546,6 @@ void CGameFramework::AnimateObjects()
 	m_pPlayer->Animate(fTimeElapsed);
 
 	if (m_pScene) m_pScene->AnimateObjects(fTimeElapsed);
-
-
-	//if(CInputDev::GetInstance()->KeyDown(DIKEYBOARD_Z))
-	//{
-	//	XMFLOAT3 xmf3Pos = m_pPlayer->GetPosition();
-	//	int iDamage = rand() % 999 + 1;
-	//	m_pUILayer->AddDamageFont(xmf3Pos, to_wstring(iDamage));
-	//}
 
 	m_pUILayer->Update(fTimeElapsed);
 }

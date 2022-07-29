@@ -95,6 +95,7 @@ public:
 	CScene						*m_pScene = NULL;
 	CPlayer						*m_pPlayer = NULL;
 	CCamera						*m_pCamera = NULL;
+	void SetCursorToggle();
 private:
 	POINT						m_ptOldCursorPos;
 

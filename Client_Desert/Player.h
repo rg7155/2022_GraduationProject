@@ -152,6 +152,11 @@ private:
 	bool	m_bSkill1EffectOn;
 	bool	m_bSkill2EffectOn;
 
+public:
+	int		GetHp() const { return m_iHp; }
+	int		GetMaxHp() const { return m_iMaxHp; }
+	float	GetDieCoolTime() const { return m_fDieCoolTime; }
+
 private:
 	int		m_iHp, m_iMaxHp;
 	float	m_fDieCoolTime;
@@ -173,6 +178,7 @@ private:
 	void UpdateReadyTexture(float fTimeElapsed);
 	void MovePosByCollision();
 	void HitEffectOn();
+	void MakeHitFont(int _Att);
 
 	CGameObject*	m_pReadyTex = nullptr;
 

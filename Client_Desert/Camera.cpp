@@ -363,7 +363,7 @@ void CThirdPersonCamera::SetLookAt(XMFLOAT3& xmf3LookAt)
 
 void CThirdPersonCamera::RotateByMouse(XMFLOAT3& xmf3LookAt)
 {
-	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0)
+	if (SCENE::SCENE_0 == CGameMgr::GetInstance()->GetScene()->m_eCurScene)
 		return;
 
 	// 마우스 회전 
