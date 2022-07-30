@@ -217,24 +217,27 @@ void CMonsterObject::SetHp(int hp)
 
 void CMonsterObject::MakeHitEffect()
 {
-	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"HitEffect");
-	if (!pObj)
-		return;
+	for (int i = 0; i < 2; ++i)
+	{
+		CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"HitEffect");
+		if (!pObj)
+			return;
+
+		CGameObject* pPlayer = nullptr;
+		CGameMgr* pGameMgr = CGameMgr::GetInstance();
+		if (m_iAttackPlayer == pGameMgr->GetId())
+			pPlayer = pGameMgr->GetPlayer();
+		else
+			pPlayer = pGameMgr->GetDuoPlayer();
+
+		XMFLOAT3 xmf3PlayerPos = pPlayer->GetPosition();
+		XMFLOAT3 xmf3PlayerLook = pPlayer->GetLook();
+		XMFLOAT3 xmf3NewPos = Vector3::Add(xmf3PlayerPos, xmf3PlayerLook);
+		xmf3NewPos = Vector3::ScalarProduct(xmf3NewPos, 0.5f);
+		xmf3PlayerPos.y = 1.5f;
+		pObj->SetPosition(xmf3PlayerPos);
+	}
 	cout << "Make Hit Effect" << endl;
-
-	CGameObject* pPlayer = nullptr;
-	CGameMgr* pGameMgr = CGameMgr::GetInstance();
-	if (m_iAttackPlayer == pGameMgr->GetId())
-		pPlayer = pGameMgr->GetPlayer();
-	else
-		pPlayer = pGameMgr->GetDuoPlayer();
-
-	XMFLOAT3 xmf3PlayerPos = pPlayer->GetPosition();
-	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLook();
-	XMFLOAT3 xmf3NewPos = Vector3::Add(xmf3PlayerPos, xmf3PlayerLook);
-	xmf3NewPos = Vector3::ScalarProduct(xmf3NewPos, 0.5f);
-	xmf3PlayerPos.y = 1.5f;
-	pObj->SetPosition(xmf3PlayerPos);
 }
 
 void CMonsterObject::MakeHitFont(int _Att)
