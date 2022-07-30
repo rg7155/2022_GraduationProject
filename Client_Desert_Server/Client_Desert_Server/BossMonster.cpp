@@ -36,6 +36,7 @@ void CBossMonster::Update(float fTimeElapsed)
 	}
 
 	m_fAnimElapsedTime += fTimeElapsed;
+	m_fDamagedCoolTime += fTimeElapsed;
 
 	// verse3는 피격 시 SPELL도 함
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -140,6 +141,7 @@ void CBossMonster::Send_Packet_To_Clients(int c_id)
 	p.hp = m_hp;
 	p.race = RACE_BOSS;
 	p.verse = m_nowVerse;
+	p.attack_id = m_attackId;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
@@ -169,6 +171,13 @@ void CBossMonster::CheckCollision(int c_id)
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;
+			m_attackId = c_id;
+
+			if (CheckDamagedCoolTime())
+				return;
+
+			m_fDamagedCoolTime = 0.f;
+
 			if (m_hp < (m_hpmax/2) && m_nowVerse == VERSE2)
 			{
 				m_nowVerse = VERSE3;

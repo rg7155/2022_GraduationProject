@@ -1007,7 +1007,7 @@ void CPlayer::OnCameraUpdateCallback(float fTimeElapsed)
 
 bool CPlayer::Check_Input(float fTimeElapsed)
 {
-	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0)
+	if (CGameMgr::GetInstance()->GetScene()->m_eCurScene == SCENE::SCENE_0 || PLAYER::DIE == m_eCurAnim)
 		return false;
 
 	// 공격 4가지 처리

@@ -33,8 +33,10 @@ void CGolemMonster::Update(float fTimeElapsed)
 			m_bActive = false;
 		return;
 	}
+
 	m_fAnimElapsedTime += fTimeElapsed;
 	m_fRunCoolTime += fTimeElapsed;
+	m_fDamagedCoolTime += fTimeElapsed;
 
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
@@ -114,6 +116,7 @@ void CGolemMonster::Send_Packet_To_Clients(int c_id)
 	p.target_id = m_targetId;
 	p.hp = m_hp;
 	p.race = RACE_GOLEM;
+	p.attack_id = m_attackId;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
@@ -130,6 +133,12 @@ void CGolemMonster::CheckCollision(int c_id)
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;
+			m_attackId = c_id;
+
+			if (CheckDamagedCoolTime())
+				return;
+
+			m_fDamagedCoolTime = 0.f;
 			if (m_hp <= 0.f)
 			{
 				Change_Animation(GOLEM::ANIM::DIE);

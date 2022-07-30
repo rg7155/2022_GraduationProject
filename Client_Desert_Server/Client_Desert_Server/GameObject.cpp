@@ -160,3 +160,11 @@ bool CGameObject::CheckAttackAnimation(int c_id)
 	return false;
 }
 
+bool CGameObject::CheckDamagedCoolTime()
+{
+	if (m_fDamagedCoolTime < 2.f)
+		return true;
+
+	return false;
+}
+
