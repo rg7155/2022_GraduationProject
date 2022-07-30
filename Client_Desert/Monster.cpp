@@ -206,8 +206,9 @@ void CMonsterObject::SetHp(int hp)
 
 	float fRatio = ((float)m_iHp / (float)m_iMaxHp);
 
-	if(m_pHp)
-		m_pHp->SetScale(fRatio, 1.f, 1.f);
+	if (m_pHp)
+		m_pHp->m_fHpRatio = fRatio;
+		//m_pHp->SetScale(fRatio, 1.f, 1.f);
 
 	
 }

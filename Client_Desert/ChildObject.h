@@ -255,6 +255,7 @@ public:
 
 public:
 	TEXTURE_TYPE		m_eTextureType = TEXTURE_END;
+	float				m_fHpRatio = 1.f;
 private:
 	float	m_fAlpha = 0.f;
 	bool	m_isAlphaObject = false;

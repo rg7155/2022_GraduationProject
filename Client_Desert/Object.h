@@ -291,7 +291,7 @@ public:
 	void Rotate(XMFLOAT3 *pxmf3Axis, float fAngle);
 	void Rotate(XMFLOAT4 *pxmf4Quaternion);
 
-	virtual void SetLookAt(XMFLOAT3& xmf3Target, bool isYFix = false);
+	virtual void SetLookAt(XMFLOAT3& xmf3Target, bool isYFix = false, bool isScaling = true);
 
 	CGameObject *GetParent() { return(m_pParent); }
 	void UpdateTransform(XMFLOAT4X4 *pxmf4x4Parent=NULL);

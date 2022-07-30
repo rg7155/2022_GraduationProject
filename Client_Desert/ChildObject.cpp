@@ -420,7 +420,7 @@ void CMultiSpriteObject::SetActiveState(bool isActive)
 		m_fSpeed = 0.001f;
 		break;
 	case CMultiSpriteObject::SPRITE_HIT:
-		m_fSpeed = 0.01f;
+		m_fSpeed = 0.02f;
 		m_isBiliboard = true;
 		//m_xmf4Color = { BLUE_COLOR4 }; //컬러 안해주면 안나옴?
 		m_xmf4Color = { 0.f, 0.f, 0.f, 0.f };
@@ -605,14 +605,14 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 	{
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Profile1.dds", 0);
 		float fRatio = 0.7f;
-		SetOrthoWorld(496 * fRatio, 151 * fRatio, 150.f, FRAME_BUFFER_HEIGHT * 0.1f);
+		SetOrthoWorld(496 * fRatio, 151 * fRatio * 0.8, 150.f, FRAME_BUFFER_HEIGHT * 0.1f);
 	}
 		break;
 	case CUIObject::UI_PLAYER_HP:
 	{
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/PlayerHp.dds", 0);
 		float fRatio = 0.7f;
-		SetOrthoWorld(424 * fRatio, 87 * fRatio, 190.f, FRAME_BUFFER_HEIGHT * 0.08f);
+		SetOrthoWorld(424 * fRatio, 87 * fRatio * 0.8, 190.f, FRAME_BUFFER_HEIGHT * 0.08f);
 	}
 		break;
 	case CUIObject::UI_READY_BTN:
@@ -1102,7 +1102,7 @@ void CTexturedObject::Animate(float fTimeElapsed)
 
 	case CTexturedObject::TEXTURE_HP:
 	case CTexturedObject::TEXTURE_HP_FRAME:
-		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition());
+		SetLookAt(CGameMgr::GetInstance()->GetCamera()->GetPosition(), false, false);
 		UpdateTransform(NULL);
 		break;
 	case CTexturedObject::TEXTURE_READY:
@@ -1139,6 +1139,8 @@ void CTexturedObject::Render(ID3D12GraphicsCommandList* pd3dCommandList, CCamera
 	if (!m_isActive || m_isAlphaObject)
 		return;
 
+
+
 	UpdateShaderVariables(pd3dCommandList);
 
 	// CTexturedShader의 2번째 파이프라인 쓰겠다. PSAlphaTextured, 알파가 변하는
@@ -1149,6 +1151,13 @@ void CTexturedObject::AlphaRender(ID3D12GraphicsCommandList* pd3dCommandList, CC
 {
 	if (!m_isActive)
 		return;
+
+	if (m_eTextureType == TEXTURE_HP)
+	{
+		UpdateTransform(NULL);
+		SetScaleToWorld(XMFLOAT3(m_fHpRatio, 1.f, 1.f));
+		//cout << m_fHpRatio << endl;
+	}
 
 	UpdateShaderVariables(pd3dCommandList);
 
@@ -1235,7 +1244,7 @@ void CStoneEffectObject::Animate(float fTimeElapsed)
 	m_xmf3Dir = Vector3::Normalize(m_xmf3Dir);
 
 	XMFLOAT3 xmf3Value = { 1,1,1 };
-	xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.1f, false);
+	xmf3Value = Vector3::ScalarProduct(xmf3Value, fTimeElapsed * -0.06f, false);
 	m_xmf3Scale = Vector3::Add(m_xmf3Scale, xmf3Value);
 	if (m_xmf3Scale.x <= 0.f)
 	{
@@ -1274,7 +1283,7 @@ void CStoneEffectObject::SetActiveState(bool isActive)
 	//초기화
 	//m_xmf3Scale = { 0.1, 0.1, 0.1 };
 	//m_xmf3Scale = { RandomValue(0.03f, 0.1f), RandomValue(0.03f, 0.1f), RandomValue(0.03f, 0.1f) };
-	float val = RandomValue(0.02f, 0.05f);
+	float val = RandomValue(0.04f, 0.08f);
 	m_xmf3Scale = { val, val, val };
 
 	Rotate(RandomValue(0.f, 360.f), RandomValue(0.f, 360.f), RandomValue(0.f, 360.f));

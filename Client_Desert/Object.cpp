@@ -736,7 +736,7 @@ void CGameObject::Rotate(XMFLOAT4 *pxmf4Quaternion)
 	UpdateTransform(NULL);
 }
 
-void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, bool isYFix /*= false*/)
+void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, bool isYFix /*= false*/, bool isScaling /*= true*/)
 {
 	XMFLOAT3 xmf3Pos = GetPosition(), xmf3Up = {0.f, 1.f, 0.f};
 	if (isYFix) xmf3Target.y = xmf3Pos.y;
@@ -747,7 +747,8 @@ void CGameObject::SetLookAt(XMFLOAT3& xmf3Target, bool isYFix /*= false*/)
 	m_xmf4x4ToParent._21 = xmf3Up.x; m_xmf4x4ToParent._22 = xmf3Up.y; m_xmf4x4ToParent._23 = xmf3Up.z;
 	m_xmf4x4ToParent._31 = xmf3Look.x; m_xmf4x4ToParent._32 = xmf3Look.y; m_xmf4x4ToParent._33 = xmf3Look.z;
 
-	SetScale(m_xmf3Scale);
+	if(isScaling)
+		SetScale(m_xmf3Scale);
 	//SetPosition(GetPosition());
 }
 
