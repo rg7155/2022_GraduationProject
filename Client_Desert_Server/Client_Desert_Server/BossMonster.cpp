@@ -157,7 +157,7 @@ void CBossMonster::Send_Remove_Packet_To_Clients(int c_id)
 
 void CBossMonster::CheckCollision(int c_id)
 {
-	if (m_eCurAnim == BOSS::ANIM::TAKE_DAMAGED)
+	if (m_eCurAnim == BOSS::ANIM::TAKE_DAMAGED || m_eCurAnim == BOSS::ANIM::SPELL)
 		return;
 
 	bool bCol = BoundingBox_Intersect(c_id);
