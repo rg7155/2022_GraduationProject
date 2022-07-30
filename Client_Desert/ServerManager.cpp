@@ -270,6 +270,7 @@ int CServerManager::ProcessPacket(char* packet)
 			if (!pCactus->m_isActive)
 				pCactus->SetActiveState(true);
 			pCactus->Change_Animation((CACTUS::ANIM)p->eCurAnim);
+			pCactus->m_iAttackPlayer = p->attack_id;
 			pCactus->SetHp(static_cast<int>(p->hp));
 
 		}

@@ -174,7 +174,14 @@ void CBossMonster::CheckCollision(int c_id)
 			m_attackId = c_id;
 
 			if (CheckDamagedCoolTime())
-				return;
+			{
+				if (m_hp <= 0)
+				{
+					m_hp = 0.f;
+					Change_Animation(BOSS::ANIM::DIE);
+					return;
+				}
+			}
 
 			m_fDamagedCoolTime = 0.f;
 
