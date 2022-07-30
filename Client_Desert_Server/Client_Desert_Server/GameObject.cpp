@@ -125,7 +125,6 @@ void CGameObject::ChangeTarget()
 	if (clients.size() != 2)
 		return;
 
-	// 둘다 죽어있으면 target == -1
 	for (auto& client : clients) {
 		if (PLAYER::DIE == client.second._pObject->m_eCurAnim)
 		{
@@ -135,20 +134,11 @@ void CGameObject::ChangeTarget()
 				return;
 			}
 		}
-		else {
+		else if(client.first != m_targetId){
 			m_targetId = client.first;
-			break;
+			return;
 		}
 	}
-
-	// 둘 중 하나만 살아있으면 target 산 애로 
-	if (PLAYER::DIE != clients[1 - m_targetId]._pObject->m_eCurAnim) {
-		m_targetId = 1 - m_targetId;
-		return;
-	}
-
-	// 둘다 살아있으면 타겟 change
-	m_targetId = 1 - m_targetId;
 }
 
 bool CGameObject::CheckAttackAnimation(int c_id)

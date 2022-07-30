@@ -84,6 +84,7 @@ void CBossMonster::Update(float fTimeElapsed)
 				m_ePreAttack = BOSS::ATTACK2;
 			}
 			ChangeTarget();
+
 		}
 	}
 	else if (m_nowVerse == VERSE3) {
@@ -203,7 +204,8 @@ void CBossMonster::CheckCollision(int c_id)
 			}
 		}
 	}
-	else if(BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim || BOSS::ATTACK3 == m_eCurAnim){ // 보스가 공격
+	else if(BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim || BOSS::ATTACK3 == m_eCurAnim
+		&& (PLAYER::ANIM::DIE != pPlayer->m_eCurAnim && PLAYER::ANIM::TAKE_DAMAGED != pPlayer->m_eCurAnim)){ // 보스가 공격
 		if (BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim) {
 			bCol = BoundingBoxFront_Intersect(c_id, 2.f);
 		}
@@ -212,7 +214,6 @@ void CBossMonster::CheckCollision(int c_id)
 			if(BOSS::ATTACK3 == m_eCurAnim)
 				Change_Animation(BOSS::ANIM::SPELL);
 			clients[c_id].send_damaged_packet();
-			m_targetId = 1 - m_targetId;
 
 		}
 		m_bColOn = true;
