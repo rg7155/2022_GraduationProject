@@ -18,7 +18,7 @@ CBossMonster::CBossMonster()
 	m_nowVerse = VERSE1;
 	m_ePreAttack = BOSS::ATTACK2;
 	m_targetId = -1;
-
+	m_bColOn = true;
 }
 
 CBossMonster::~CBossMonster()
@@ -167,8 +167,9 @@ void CBossMonster::CheckCollision(int c_id)
 
 	// 플레이어가 공격
 	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
-		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && CheckAttackAnimation(c_id)) {
-		if (bCol && m_bColOn && m_hp > 0)
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2)) {
+
+		if (CheckAttackAnimation(c_id) && bCol && m_bColOn && m_hp > 0)
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;
