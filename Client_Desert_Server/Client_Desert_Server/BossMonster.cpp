@@ -199,6 +199,7 @@ void CBossMonster::CheckCollision(int c_id)
 			else
 			{
 				Change_Animation(BOSS::ANIM::TAKE_DAMAGED);
+
 			}
 		}
 	}
@@ -211,6 +212,8 @@ void CBossMonster::CheckCollision(int c_id)
 			if(BOSS::ATTACK3 == m_eCurAnim)
 				Change_Animation(BOSS::ANIM::SPELL);
 			clients[c_id].send_damaged_packet();
+			m_targetId = 1 - m_targetId;
+
 		}
 		m_bColOn = true;
 	}
