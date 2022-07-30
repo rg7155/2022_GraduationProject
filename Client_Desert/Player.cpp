@@ -557,7 +557,8 @@ void CPlayer::Check_CreateEffect()
 		//	static_cast<CStoneEffectObject*>(pObj)->m_xmf3Dir = xmf3Dir;
 		//}
 
-		SetDamaged();
+		//SetDamaged();
+
 	}
 
 }

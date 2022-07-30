@@ -660,6 +660,11 @@ CUIObject::CUIObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCo
 		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/Keyboard_2.dds", 0);
 		SetOrthoWorld(30.f, 30.f, FRAME_BUFFER_WIDTH * 0.02, FRAME_BUFFER_HEIGHT * 0.45f);
 		break;
+	case CUIObject::UI_ENDING:
+		pTexture->LoadTextureFromFile(pd3dDevice, pd3dCommandList, L"Images/theEnd.dds", 0);
+		SetOrthoWorld(FRAME_BUFFER_WIDTH, FRAME_BUFFER_HEIGHT, FRAME_BUFFER_WIDTH * 0.5f, FRAME_BUFFER_HEIGHT * 0.5f);
+		m_fAlpha = 0.f;
+		break;
 	}
 
 	CMesh* pMesh = nullptr;
@@ -806,6 +811,13 @@ void CUIObject::Animate(float fTimeElapsed)
 		}
 		break;
 	}
+	case CUIObject::UI_ENDING:
+		if (m_isHit && m_fAlpha < 1.f)
+		{
+			m_fAlpha += fTimeElapsed * 0.5f;
+		}
+		break;
+
 	}
 
 

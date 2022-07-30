@@ -3,6 +3,7 @@
 #include "ChildObject.h"
 #include "ServerManager.h"
 #include "UILayer.h"
+#include "SoundMgr.h"
 
 CMonsterObject::CMonsterObject(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, CLoadedModelInfo* pModel)
 	: CGameObject(1)
@@ -367,6 +368,11 @@ void CBossObject::Animate(float fTimeElapsed)
 			{
 				m_fDissolve = 1.f;
 				m_isActive = false;
+
+				CUIObject* pFade = static_cast<CUIObject*>(CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Ending").front());
+				pFade->m_isHit = true;
+				CSoundMgr::GetInstance()->StopAll();
+				CSoundMgr::GetInstance()->PlayBGM(L"Ending.wav");
 			}
 		}
 	}
