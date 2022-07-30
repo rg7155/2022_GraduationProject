@@ -110,6 +110,7 @@ private:
 	void	CreateStoneEffect();
 	int		m_iWindCount = 0;
 	float	m_fWindTime = 0.f;
+	bool	m_isOnce = false;
 };
 
 

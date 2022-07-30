@@ -369,10 +369,15 @@ void CBossObject::Animate(float fTimeElapsed)
 				m_fDissolve = 1.f;
 				m_isActive = false;
 
-				CUIObject* pFade = static_cast<CUIObject*>(CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Ending").front());
-				pFade->m_isHit = true;
-				CSoundMgr::GetInstance()->StopAll();
-				CSoundMgr::GetInstance()->PlayBGM(L"Ending.wav");
+				if (!m_isOnce)
+				{
+					CUIObject* pFade = static_cast<CUIObject*>(CGameMgr::GetInstance()->GetScene()->m_pUIObjectShader->GetObjectList(L"UI_Ending").front());
+					pFade->m_isHit = true;
+					CSoundMgr::GetInstance()->StopAll();
+					CSoundMgr::GetInstance()->PlaySoundW(L"Ending.wav", CSoundMgr::CHANNELID::BUTTON);
+					//cout << "sound" << endl;
+					m_isOnce = true;
+				}
 			}
 		}
 	}
@@ -418,7 +423,7 @@ void CBossObject::Change_Animation(BOSS::ANIM eNewAnim)
 
 	else if (BOSS::DIE == eNewAnim) {
 		CGameMgr::GetInstance()->GetScene()->AddTextToUILayer(BOSS_TEXT);
-		cout << "AddBoss\n";
+		//cout << "AddBoss\n";
 	}
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
