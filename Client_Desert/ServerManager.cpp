@@ -270,6 +270,7 @@ int CServerManager::ProcessPacket(char* packet)
 			if (!pCactus->m_isActive)
 				pCactus->SetActiveState(true);
 			pCactus->Change_Animation((CACTUS::ANIM)p->eCurAnim);
+			pCactus->m_iAttackPlayer = p->attack_id;
 			pCactus->SetHp(static_cast<int>(p->hp));
 
 		}
@@ -279,6 +280,7 @@ int CServerManager::ProcessPacket(char* packet)
 			if (!pBoss->m_isActive)
 				pBoss->SetActiveState(true);
 			pBoss->Change_Animation((BOSS::ANIM)p->eCurAnim);
+			pBoss->m_iAttackPlayer = p->attack_id;
 			pBoss->SetHp(static_cast<int>(p->hp));
 
 			if (p->verse == VERSE2) {

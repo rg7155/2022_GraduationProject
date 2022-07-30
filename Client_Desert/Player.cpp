@@ -911,6 +911,11 @@ void CPlayer::Set_object_anim(object_anim* _object_anim)
 
 void CPlayer::ClickedReadyButton()
 {
+	bool bDuoToggle = static_cast<CDuoPlayer*>(CGameMgr::GetInstance()->GetDuoPlayer())->m_isReadyToggle;
+
+	if (bDuoToggle && m_isReadyToggle)
+		return;
+
 	m_isReadyToggle = !m_isReadyToggle;
 	if (m_isReadyToggle) {
 		CSoundMgr::GetInstance()->StopSound(CSoundMgr::BUTTON);

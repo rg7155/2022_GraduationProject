@@ -18,7 +18,7 @@ CBossMonster::CBossMonster()
 	m_nowVerse = VERSE1;
 	m_ePreAttack = BOSS::ATTACK2;
 	m_targetId = -1;
-
+	m_bColOn = true;
 }
 
 CBossMonster::~CBossMonster()
@@ -84,6 +84,7 @@ void CBossMonster::Update(float fTimeElapsed)
 				m_ePreAttack = BOSS::ATTACK2;
 			}
 			ChangeTarget();
+
 		}
 	}
 	else if (m_nowVerse == VERSE3) {
@@ -157,7 +158,7 @@ void CBossMonster::Send_Remove_Packet_To_Clients(int c_id)
 
 void CBossMonster::CheckCollision(int c_id)
 {
-	if (m_eCurAnim == BOSS::ANIM::TAKE_DAMAGED)
+	if (m_eCurAnim == BOSS::ANIM::TAKE_DAMAGED || m_eCurAnim == BOSS::ANIM::SPELL)
 		return;
 
 	bool bCol = BoundingBox_Intersect(c_id);
@@ -166,19 +167,27 @@ void CBossMonster::CheckCollision(int c_id)
 
 	// 플레이어가 공격
 	if ((pPlayer->m_eCurAnim == PLAYER::ATTACK1 || pPlayer->m_eCurAnim == PLAYER::ATTACK2 ||
-		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2) && CheckAttackAnimation(c_id)) {
-		if (bCol && m_bColOn && m_hp > 0)
+		pPlayer->m_eCurAnim == PLAYER::SKILL1 || pPlayer->m_eCurAnim == PLAYER::SKILL2)) {
+
+		if (CheckAttackAnimation(c_id) && bCol && m_bColOn && m_hp > 0)
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;
 			m_attackId = c_id;
 
 			if (CheckDamagedCoolTime())
-				return;
+			{
+				if (m_hp <= 0)
+				{
+					m_hp = 0.f;
+					Change_Animation(BOSS::ANIM::DIE);
+					return;
+				}
+			}
 
 			m_fDamagedCoolTime = 0.f;
 
-			if (m_hp < (m_hpmax/2) && m_nowVerse == VERSE2)
+			if (m_hp < (m_hpmax/3) && m_nowVerse == VERSE2)
 			{
 				m_nowVerse = VERSE3;
 
@@ -192,10 +201,12 @@ void CBossMonster::CheckCollision(int c_id)
 			else
 			{
 				Change_Animation(BOSS::ANIM::TAKE_DAMAGED);
+
 			}
 		}
 	}
-	else if(BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim || BOSS::ATTACK3 == m_eCurAnim){ // 보스가 공격
+	else if(BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim || BOSS::ATTACK3 == m_eCurAnim
+		&& (PLAYER::ANIM::DIE != pPlayer->m_eCurAnim && PLAYER::ANIM::TAKE_DAMAGED != pPlayer->m_eCurAnim)){ // 보스가 공격
 		if (BOSS::ATTACK1 == m_eCurAnim || BOSS::ATTACK2 == m_eCurAnim) {
 			bCol = BoundingBoxFront_Intersect(c_id, 2.f);
 		}
@@ -204,6 +215,7 @@ void CBossMonster::CheckCollision(int c_id)
 			if(BOSS::ATTACK3 == m_eCurAnim)
 				Change_Animation(BOSS::ANIM::SPELL);
 			clients[c_id].send_damaged_packet();
+
 		}
 		m_bColOn = true;
 	}

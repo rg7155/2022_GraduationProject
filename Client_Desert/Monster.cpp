@@ -198,7 +198,6 @@ void CMonsterObject::SetHp(int hp)
 		// m_attackplayer !
 		MakeHitEffect();
 		MakeHitFont(m_iHp-hp);
-
 	}
 
 	m_iHp = hp;
