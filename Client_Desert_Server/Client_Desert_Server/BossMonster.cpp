@@ -141,6 +141,7 @@ void CBossMonster::Send_Packet_To_Clients(int c_id)
 	p.hp = m_hp;
 	p.race = RACE_BOSS;
 	p.verse = m_nowVerse;
+	p.attack_id = m_attackId;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
@@ -170,6 +171,7 @@ void CBossMonster::CheckCollision(int c_id)
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;
+			m_attackId = c_id;
 
 			if (CheckDamagedCoolTime())
 				return;

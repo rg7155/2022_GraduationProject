@@ -58,6 +58,8 @@ public:
 	float			m_fDamagedCoolTime = 0.f;
 public:
 	int				m_targetId;
+	int				m_attackId;
+
 public:
 	BoundingOrientedBox		m_xmLocalOOBB;
 	BoundingOrientedBox		m_xmOOBB;

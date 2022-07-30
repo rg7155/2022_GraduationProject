@@ -239,6 +239,7 @@ int CServerManager::ProcessPacket(char* packet)
 			pGolem->SetLookAt(p->xmf3Look);
 			pGolem->SetPosition(p->xmf3Position);
 			pGolem->m_targetId = p->target_id;
+			pGolem->m_iAttackPlayer = p->attack_id;
 			pGolem->SetHp(static_cast<int>(p->hp));
 			//cout << static_cast<int>(p->hp) << endl;
 		}
@@ -279,6 +280,7 @@ int CServerManager::ProcessPacket(char* packet)
 				pBoss->SetActiveState(true);
 			pBoss->Change_Animation((BOSS::ANIM)p->eCurAnim);
 			pBoss->SetHp(static_cast<int>(p->hp));
+
 			if (p->verse == VERSE2) {
 				pBoss->SetLookAt(p->xmf3Look);
 				pBoss->m_targetId = p->target_id;
