@@ -232,8 +232,9 @@ void CMonsterObject::MakeHitEffect()
 	XMFLOAT3 xmf3PlayerPos = pPlayer->GetPosition();
 	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLook();
 	XMFLOAT3 xmf3NewPos = Vector3::Add(xmf3PlayerPos, xmf3PlayerLook);
-	xmf3NewPos.y = 1.f;
-	pObj->SetPosition(xmf3NewPos);
+	xmf3NewPos = Vector3::ScalarProduct(xmf3NewPos, 0.5f);
+	xmf3PlayerPos.y = 1.5f;
+	pObj->SetPosition(xmf3PlayerPos);
 }
 
 void CMonsterObject::MakeHitFont(int _Att)
