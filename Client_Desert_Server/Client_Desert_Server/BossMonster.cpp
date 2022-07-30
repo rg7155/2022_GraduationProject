@@ -36,6 +36,7 @@ void CBossMonster::Update(float fTimeElapsed)
 	}
 
 	m_fAnimElapsedTime += fTimeElapsed;
+	m_fDamagedCoolTime += fTimeElapsed;
 
 	// verse3는 피격 시 SPELL도 함
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
@@ -169,6 +170,12 @@ void CBossMonster::CheckCollision(int c_id)
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;
+
+			if (CheckDamagedCoolTime())
+				return;
+
+			m_fDamagedCoolTime = 0.f;
+
 			if (m_hp < (m_hpmax/2) && m_nowVerse == VERSE2)
 			{
 				m_nowVerse = VERSE3;

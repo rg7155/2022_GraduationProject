@@ -30,6 +30,7 @@ void CCactusMonster::Update(float fTimeElapsed)
 		return;
 	}
 	m_fAnimElapsedTime += fTimeElapsed;
+
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
