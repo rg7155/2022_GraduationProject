@@ -11,6 +11,7 @@
 #include "ServerManager.h"
 #include "ChildObject.h"
 #include "SoundMgr.h"
+#include "UILayer.h"
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // CPlayer
@@ -118,6 +119,7 @@ CPlayer::CPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dComman
 	m_fAnimElapsedTime = 0.f;
 	m_fAnimMaxTime = 0.f;
 	m_fBlendingTime = 0.f;
+	m_fDieCoolTime = 0.f;
 	///////////////////////////////////////////////
 	//컴포넌트, 텍스쳐
 	CreateComponent(pd3dDevice, pd3dCommandList, pd3dGraphicsRootSignature);
@@ -539,22 +541,23 @@ void CPlayer::Check_CreateEffect()
 		//xmf3Pos.y += 0.01f;
 		//pObj->SetPosition(xmf3Pos);
 		
-		for (int i = 0; i < 10; ++i)
-		{
-			CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"StoneEffect");
-			if (!pObj) return;
-			XMFLOAT3 xmf3RanPos = { RandomValue(-1.f, 1.f), 0.f, RandomValue(-1.f, 1.f) };
-			XMFLOAT3 xmf3Pos = GetPosition();
-			xmf3Pos = Vector3::Add(xmf3Pos, xmf3RanPos);
-			pObj->SetPosition(xmf3Pos);
+		//for (int i = 0; i < 10; ++i)
+		//{
+		//	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"StandardObject", L"StoneEffect");
+		//	if (!pObj) return;
+		//	XMFLOAT3 xmf3RanPos = { RandomValue(-1.f, 1.f), 0.f, RandomValue(-1.f, 1.f) };
+		//	XMFLOAT3 xmf3Pos = GetPosition();
+		//	xmf3Pos = Vector3::Add(xmf3Pos, xmf3RanPos);
+		//	pObj->SetPosition(xmf3Pos);
 
-			//XMFLOAT3 xmf3Dir = { RandomValue(-1.f, 1.f), RandomValue(0.f, 1.f), RandomValue(-1.f, 1.f) };
-			XMFLOAT3 xmf3Dir = xmf3RanPos;
-			xmf3Dir.y = RandomValue(0.7f, 1.f);
-			xmf3Dir = Vector3::Normalize(xmf3Dir);
-			static_cast<CStoneEffectObject*>(pObj)->m_xmf3Dir = xmf3Dir;
-		}
+		//	//XMFLOAT3 xmf3Dir = { RandomValue(-1.f, 1.f), RandomValue(0.f, 1.f), RandomValue(-1.f, 1.f) };
+		//	XMFLOAT3 xmf3Dir = xmf3RanPos;
+		//	xmf3Dir.y = RandomValue(0.7f, 1.f);
+		//	xmf3Dir = Vector3::Normalize(xmf3Dir);
+		//	static_cast<CStoneEffectObject*>(pObj)->m_xmf3Dir = xmf3Dir;
+		//}
 
+		SetDamaged();
 	}
 
 }
@@ -845,6 +848,14 @@ void CPlayer::HitEffectOn()
 	pEffect->m_isHit = true;
 }
 
+void CPlayer::MakeHitFont(int _Att)
+{
+	CGameMgr* pGameMgr = CGameMgr::GetInstance();
+	XMFLOAT3 xmf3Pos = GetPosition();
+	xmf3Pos.y += 2.f;
+	pGameMgr->GetScene()->m_pUILayer->AddPlayerDamageFont(xmf3Pos, to_wstring(_Att));
+}
+
 bool CPlayer::IsNowAttack()
 {
 	if (m_eCurAnim == PLAYER::ANIM::ATTACK1 || m_eCurAnim == PLAYER::ANIM::ATTACK2 ||
@@ -871,6 +882,7 @@ void CPlayer::SetDamaged()
 		Change_Animation(PLAYER::TAKE_DAMAGED);
 
 	HitEffectOn();
+	MakeHitFont(ran);
 }
 
 void CPlayer::CheckRevive(float fTimeElapsed)

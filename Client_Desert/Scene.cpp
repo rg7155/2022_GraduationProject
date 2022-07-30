@@ -9,6 +9,7 @@
 #include "UILayer.h"
 #include "ServerManager.h"
 #include "SoundMgr.h"
+#include "GameFramework.h"
 
 ID3D12DescriptorHeap *CScene::m_pd3dCbvSrvDescriptorHeap = NULL;
 
@@ -321,7 +322,7 @@ void CScene::AnimateObjects(float fTimeElapsed)
 #endif // USE_SERVER
 
 		
-
+		break;
 	case SCENE_1:
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pMapObjectShader->GetObjectList(L"Map"));
 		CCollsionMgr::GetInstance()->CheckCollsion(m_pPlayer, m_pStandardObjectShader->GetObjectList(L"CactiBullet"), 1.5f);
@@ -444,9 +445,12 @@ void CScene::ChangeScene()
 		m_pUIObjectShader->ActiveObjectByChangeScene(m_eCurScene);
 
 		m_pDepthRenderShader->m_isStaticRender = false; //정적 맵 다시 그려라
-		
+
+		if (m_pFramework) m_pFramework->SetCursorToggle();
+
 		CSoundMgr::GetInstance()->StopAll();
 		CSoundMgr::GetInstance()->PlayBGM(L"Scene1.mp3");
+
 		break;
 	case SCENE_2:
 		//m_pPlayer->SetPosition(Scene2_SpawnPos);

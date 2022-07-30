@@ -38,6 +38,7 @@ struct LIGHTS
 class CDepthRenderShader;
 class CTextureToViewportShader;
 class UILayer;
+class CGameFramework;
 class CScene
 {
 public:
@@ -84,6 +85,7 @@ public:
 	void SetRootParameterConstants(D3D12_ROOT_PARAMETER pd3dRootParameter[], int iIndex, UINT Num32BitValues, UINT ShaderRegister, UINT RegisterSpace, D3D12_SHADER_VISIBILITY ShaderVisibility);
 
 public:
+	CGameFramework						*m_pFramework = nullptr;
 	void CreateDuoPlayer(ID3D12Device* pd3dDevice, ID3D12GraphicsCommandList* pd3dCommandList, ID3D12RootSignature* pd3dGraphicsRootSignature, int id);
 	CPlayer								*m_pPlayer = NULL;
 	CDuoPlayer							*m_pDuoPlayer = NULL;
