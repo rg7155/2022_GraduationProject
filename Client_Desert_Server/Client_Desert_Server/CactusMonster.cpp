@@ -30,6 +30,7 @@ void CCactusMonster::Update(float fTimeElapsed)
 		return;
 	}
 	m_fAnimElapsedTime += fTimeElapsed;
+
 	if (m_fAnimElapsedTime >= m_fAnimMaxTime)
 	{
 		m_fAnimElapsedTime = 0.f;
@@ -66,6 +67,7 @@ void CCactusMonster::Send_Packet_To_Clients(int c_id)
 	p.hp = m_hp;
 	p.race = RACE_CACTUS;
 	p.verse = m_nowVerse;
+	p.attack_id = m_attackId;
 	clients[c_id].do_send(p.size, reinterpret_cast<char*>(&p));
 }
 
@@ -91,6 +93,7 @@ void CCactusMonster::CheckCollision(int c_id)
 		{
 			m_hp -= pPlayer->m_att;
 			m_bColOn = false;
+			m_attackId = c_id;
 
 			if (m_hp <= 0.f)
 			{

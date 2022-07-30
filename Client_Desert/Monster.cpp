@@ -195,6 +195,7 @@ void CMonsterObject::SetHp(int hp)
 	//피격 상태
 	if (m_iHp != hp)
 	{
+		// m_attackplayer !
 		MakeHitEffect();
 		MakeHitFont(m_iHp-hp);
 
@@ -219,14 +220,20 @@ void CMonsterObject::MakeHitEffect()
 	CGameObject* pObj = CGameMgr::GetInstance()->GetScene()->SetActiveObjectFromShader(L"MultiSprite", L"HitEffect");
 	if (!pObj)
 		return;
-
 	cout << "Make Hit Effect" << endl;
-	XMFLOAT3 xmf3Pos = GetPosition();
-	XMFLOAT3 xmf3Look = GetLook();
-	xmf3Pos.x += xmf3Look.x;
-	xmf3Pos.y += 1.f;
-	xmf3Pos.z += xmf3Look.z;
-	pObj->SetPosition(xmf3Pos);
+
+	CGameObject* pPlayer = nullptr;
+	CGameMgr* pGameMgr = CGameMgr::GetInstance();
+	if (m_iAttackPlayer == pGameMgr->GetId())
+		pPlayer = pGameMgr->GetPlayer();
+	else
+		pPlayer = pGameMgr->GetDuoPlayer();
+
+	XMFLOAT3 xmf3PlayerPos = pPlayer->GetPosition();
+	XMFLOAT3 xmf3PlayerLook = pPlayer->GetLook();
+	XMFLOAT3 xmf3NewPos = Vector3::Add(xmf3PlayerPos, xmf3PlayerLook);
+	xmf3NewPos.y = 1.f;
+	pObj->SetPosition(xmf3NewPos);
 }
 
 void CMonsterObject::MakeHitFont(int _Att)

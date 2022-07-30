@@ -166,6 +166,7 @@ struct SC_MOVE_MONSTER_PACKET
 	XMFLOAT3 xmf3Position;
 	int eCurAnim;
 	short target_id;
+	short attack_id;
 	short hp;
 	char verse;
 	//float	fElapsedTime;

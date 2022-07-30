@@ -36,6 +36,7 @@ public:
 	void UpdateBoundingBox();
 	void ChangeTarget();
 	bool CheckAttackAnimation(int c_id);
+	bool CheckDamagedCoolTime();
 
 public:
 	char			m_race;
@@ -54,8 +55,11 @@ public:
 	bool			m_bActive;
 	float			m_fDieCoolTime;
 	bool			m_bColOn;
+	float			m_fDamagedCoolTime = 0.f;
 public:
 	int				m_targetId;
+	int				m_attackId;
+
 public:
 	BoundingOrientedBox		m_xmLocalOOBB;
 	BoundingOrientedBox		m_xmOOBB;
