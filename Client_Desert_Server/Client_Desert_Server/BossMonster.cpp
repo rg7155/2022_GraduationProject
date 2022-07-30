@@ -187,7 +187,7 @@ void CBossMonster::CheckCollision(int c_id)
 
 			m_fDamagedCoolTime = 0.f;
 
-			if (m_hp < (m_hpmax/2) && m_nowVerse == VERSE2)
+			if (m_hp < (m_hpmax/3) && m_nowVerse == VERSE2)
 			{
 				m_nowVerse = VERSE3;
 
