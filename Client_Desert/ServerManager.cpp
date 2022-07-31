@@ -35,17 +35,41 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 	{
 		int* size = reinterpret_cast<int*>(&m_start[1]);
 
-		if (cbTransferred < *size || !*size) {
+		if (cbTransferred < *size || *size <= 0 || cbTransferred <= 0) {
 
 			cout << "받은 데이터가 더 작음!" << endl;
 			cout << cbTransferred << ' ' << *size << endl;
-			break;
-		}
-		int msg_size = ProcessPacket(m_start);
+			delete lpOverlapped;
+			char dir = CGameMgr::GetInstance()->GetPlayer()->m_dir;
+			CServerManager::GetInstance()->send_move_packet(dir);
 
-		cbTransferred -= msg_size;
+			// 큐에 있는거 send
+			while (!m_queue_send_packet.empty())
+			{
+				char type = m_queue_send_packet.front();
+				switch (type)
+				{
+				case CS_READY:
+					send_ready_packet();
+					break;
+				case CS_NPC:
+					send_npc_packet();
+					break;
+				default:
+					break;
+				}
+				m_queue_send_packet.pop();
+
+			}
+
+			recv_packet();
+			return;
+		}
+		ProcessPacket(m_start);
+
+		cbTransferred -= *size;
 		if (0 >= cbTransferred) break;
-		m_start += msg_size;
+		m_start += *size;
 		// 30 171
 	}
 	delete lpOverlapped;
@@ -71,6 +95,7 @@ void CServerManager::recv_callback(DWORD dwError, DWORD cbTransferred, LPWSAOVER
 			break;
 		}
 		m_queue_send_packet.pop();
+
 	}
 
 	recv_packet();

@@ -217,7 +217,7 @@ void CBossMonster::CheckCollision(int c_id)
 			clients[c_id].send_damaged_packet();
 
 		}
-		m_bColOn = true;
+		m_bColOn = false;
 	}
 	else
 		m_bColOn = true;
