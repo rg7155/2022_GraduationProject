@@ -46,17 +46,12 @@ void CAnimationSet::SetPosition(float fElapsedPosition)
 	{
 		m_fPosition += fElapsedPosition;
 		if (m_fPosition >= m_fLength) m_fPosition = 0.0f;
-		//			m_fPosition = fmod(fTrackPosition, m_pfKeyFrameTimes[m_nKeyFrames-1]); // m_fPosition = fTrackPosition - int(fTrackPosition / m_pfKeyFrameTimes[m_nKeyFrames-1]) * m_pfKeyFrameTimes[m_nKeyFrames-1];
-		//			m_fPosition = fmod(fTrackPosition, m_fLength); //if (m_fPosition < 0) m_fPosition += m_fLength;
-		//			m_fPosition = fTrackPosition - int(fTrackPosition / m_fLength) * m_fLength;
 		break;
 	}
 	case ANIMATION_TYPE_ONCE:
 		m_fPosition += fElapsedPosition;
 		if (m_fPosition >= m_fLength)
 			m_fPosition = m_fLength;
-		break;
-	case ANIMATION_TYPE_PINGPONG:
 		break;
 	}
 }
@@ -167,11 +162,13 @@ CAnimationController::CAnimationController(ID3D12Device* pd3dDevice, ID3D12Graph
 {
 	m_nAnimationTracks = nAnimationTracks;
 	m_pAnimationTracks = new CAnimationTrack[nAnimationTracks];
+
 	m_fPosition = new float[nAnimationTracks];
 	for (int i = 0; i < nAnimationTracks; i++)
 	{
 		m_fPosition[i] = 0.f;
 	}
+
 	// Sets도 각자 갖도록?!
 	//int nAnimationSets = pModel->m_pAnimationSets->m_nAnimationSets;
 	

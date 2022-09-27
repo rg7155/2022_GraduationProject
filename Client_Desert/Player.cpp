@@ -294,8 +294,9 @@ void CPlayer::Move(DWORD dwDirection, float fDistance, bool bUpdateVelocity)
 	// 180도 확인
 	XMVECTOR xmVecAngle =  XMVector3AngleBetweenNormals(m_xmVecNowRotate, m_xmVecNewRotate);
 	float fAngle = XMVectorGetX(xmVecAngle);
+	const float fLargeAngle = 170.f;
 
-	if (XMConvertToDegrees(fAngle) >= 170)
+	if (XMConvertToDegrees(fAngle) >= fLargeAngle)
 	{
 		m_xmVecNowRotate = XMVector3Normalize(m_xmVecNowRotate);
 		m_xmVecTmpRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, 0.5f);
@@ -650,9 +651,6 @@ void CPlayer::LerpRotate(float fTimeElapsed)
 		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 10.f);
 	else
 		m_xmVecNowRotate = XMVectorLerp(m_xmVecNowRotate, m_xmVecTmpRotate, fTimeElapsed * 10.f);
-
-
-	//m_xmVecNowRotate = XMQuaternionSlerp(m_xmVecNowRotate, m_xmVecNewRotate, fTimeElapsed * 5.f);
 
 	XMStoreFloat3(&m_xmf3Look, m_xmVecNowRotate);
 
@@ -1120,7 +1118,6 @@ void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 	m_ePrevAnim = m_eCurAnim;
 	m_eCurAnim = eNewAnim;
 
-
 	if (m_eCurAnim != PLAYER::SKILL1)
 		m_bSkill1EffectOn = false;
 	if (m_eCurAnim != PLAYER::SKILL2)
@@ -1130,8 +1127,7 @@ void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 	m_fBlendingTime = 0.f;
 	m_bBlendingOn = true;
 
-	// Prev, Cur 빼고 Enable
-	for (int i = 0; i < PLAYER::ANIM::END; i++)
+	for (int i = 0; i < PLAYER::ANIM::END; ++i)
 	{
 		if (i == m_ePrevAnim || i == m_eCurAnim)
 			continue;
@@ -1146,8 +1142,9 @@ void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 	m_pSkinnedAnimationController->SetTrackPosition(m_eCurAnim, 0.f);
 	m_pSkinnedAnimationController->SetTrackEnable(m_eCurAnim, true);	// 다음 애니메이션 true로, 이전도 아직 true
 
-	////	// 1 2 3 순으로 애니메이션 진행된다하면. 1,2 블렌딩 중에 3으로 바뀌면 2의 블렌딩값과 3의 1-2의블렌딩값으로 세팅되어야 함
-	if (m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim) < 0.8f)
+	const float fBlendingWeight = 0.8f;
+
+	if (m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim) < fBlendingWeight)
 	{
 		m_fBlendingTime = m_pSkinnedAnimationController->GetTrackWeight(m_ePrevAnim);
 
@@ -1164,6 +1161,11 @@ void CPlayer::Change_Animation(PLAYER::ANIM eNewAnim)
 		m_pSkinnedAnimationController->SetTrackWeight(m_ePrevAnim, 1.f);	// 애니메이션 3개중첩 방지
 		m_pSkinnedAnimationController->SetTrackWeight(m_eCurAnim, 0.f);
 	}
+
+
+
+
+
 	// 이전 애니메이션의 가중치가 1보다 작으면 1로 바꾸지말고 그때부터 보간해야함
 }
 
